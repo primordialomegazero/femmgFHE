@@ -8,6 +8,11 @@
 [![TPS](https://img.shields.io/badge/TPS-14M%2B-green.svg)]()
 
 ```
+============================================================
+  TRUE FULLY HOMOMORPHIC ENCRYPTION
+  14M+ TPS | 40-Byte Ciphertext | Self-Stabilizing Noise
+  N-Dimensional Banach Contraction | No Bootstrapping
+============================================================
 ```
 
 ---
@@ -46,11 +51,18 @@ The latest version extends the 1D phi-contraction to **7-dimensional Banach spac
 ### Docker
 
 ```bash
+docker pull ghcr.io/primordialomegazero/femmgfhe:v3.0.0
+docker run -d -p 8092:8092 ghcr.io/primordialomegazero/femmgfhe:v3.0.0
+curl http://localhost:8092/health
 ```
 
 ### Build from Source
 
 ```bash
+git clone https://github.com/primordialomegazero/femmgFHE.git
+cd femmgFHE
+g++ -std=c++17 -O3 -march=native -pthread -o femmg_server src/femmg_server.cpp -lm
+./femmg_server
 ```
 
 ---
@@ -69,11 +81,6 @@ All operations through `POST /manifest`. Health: `GET /health`.
 | `tps` | Throughput benchmark | standard/ndim |
 | `bombardier` | 3K concurrent stress test | standard |
 | `party_verify` | 91/91 cross-party | both |
-
-### Example
-
-```bash
-```
 
 ---
 
@@ -94,6 +101,7 @@ FEmmg-FHE v3.0 introduces **N-Dimensional Banach Contraction** — extending the
 Each dimension independently contracts toward a global attractor via:
 
 ```
+T_d(x) = x * phi^-1 + attractor_d * (1 - phi^-1)
 ```
 
 **Full Lyapunov Spectrum:** 7 distinct Lyapunov exponents, all positive (expanding/chaotic), providing built-in security that the original 1D "phi-Chaotic Irreversibility Assumption" only assumed.
@@ -108,12 +116,12 @@ Each dimension independently contracts toward a global attractor via:
 
 | Metric | Standard | N-Dimensional |
 |--------|----------|---------------|
-| TPS | 14.4M | **13.3M** |
-| Concurrent (3K) | 124K req/s | - |
+| TPS | 14.4M | 13.3M |
+| Concurrent (3K) | 122K req/s | - |
 | Ciphertext | 40 bytes | 40 bytes |
 | Noise (50K ops) | 40.01-40.25 bits | 40 bits stable |
-| Dimensions | 1 | **7** |
-| Lyapunov Exponents | 1 | **7 (full spectrum)** |
+| Dimensions | 1 | 7 |
+| Lyapunov Exponents | 1 | 7 (full spectrum) |
 
 ---
 
@@ -122,27 +130,54 @@ Each dimension independently contracts toward a global attractor via:
 ### System Flow
 
 ```mermaid
+flowchart TB
+    Client([Client]) --> API[REST API :8092]
+    API --> Router{Action Router}
+    Router -->|encrypt| Enc[Encryption]
+    Router -->|add/multiply| HomOps[Homomorphic Ops]
+    Router -->|fractal_chain| Fractal[Fractal Engine]
+    Router -->|ndim_verify| NDim[N-Dim Engine]
+    Router -->|tps| Bench[Benchmark]
+    Router -->|bombardier| Stress[Stress Test]
+    Enc --> Standard[1D Standard]
+    Enc --> FractalEnc[7-Layer Fractal]
+    Enc --> NDimEnc[7D Banach]
+    HomOps --> Core[FEmmg-FHE Core]
+    Core --> Add[Direct Add]
+    Core --> Mul[Direct Mul via phi-algebra]
+    Fractal --> FEngine[FractalFHE Engine]
+    FEngine --> Layers[7 Contraction Layers]
+    FEngine --> Parties[14 Party Fragments]
+    FEngine --> CrossVerify[91 Cross-Verify]
+    NDim --> NEngine[NDimBanachEngine]
+    NEngine --> Contraction[7D Banach Contraction]
+    NEngine --> Lyapunov[Full Lyapunov Spectrum]
+    NEngine --> MultiParty[Multi-Party N-Dim]
+    Core --> Noise[Noise Self-Stabilization]
+    Fractal --> Noise
+    NDim --> Noise
+    Noise --> Fixed[Fixed Point at 40 bits]
+    Fixed --> Response([JSON Response])
 ```
 
 ### Source Tree
 
 ```
+src/
+├── femmg_fhe.h        — Core FHE engine (add + multiply direct)
+├── fractal_fhe.h      — Multi-Recursive Fractal (7 layers, 14 parties)
+├── godcode.h          — N-Dimensional Banach Contraction Engine
+├── femmg_server.cpp   — Enterprise API server v3.0 (all modes)
+└── test_suite.cpp     — Complete verification (34,087 tests)
 ```
-
-**Lock-free. 12 threads. 0 mutexes. Zero external dependencies.**
 
 ---
 
 ## IACR ePrint
 
-A preprint describing the mathematical framework has been submitted to the **IACR Cryptology ePrint Archive** — a permanent, publicly accessible repository of cryptographic research.
+A preprint describing the mathematical framework has been submitted to the **IACR Cryptology ePrint Archive.**
 
-The paper includes:
-- 6 formal theorems with complete proofs
-- Banach Fixed Point Theorem application to FHE noise
-- Lyapunov stability analysis
-- Security analysis with 3 pillars
-- Full benchmark verification (34,087 tests, 100% pass)
+The paper includes: 6 formal theorems with complete proofs, Banach Fixed Point Theorem application to FHE noise, Lyapunov stability analysis, N-Dimensional Banach Contraction, security analysis with 3 pillars, and full benchmark verification (34,087 tests, 100% pass).
 
 ---
 
