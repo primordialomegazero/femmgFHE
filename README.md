@@ -196,3 +196,15 @@ The paper includes: 6 formal theorems with complete proofs, Banach Fixed Point T
 ## License
 
 MIT — Free for personal, academic, and commercial use.
+
+## v6.1 — Zero-Knowledge + CORE Security (Latest)
+
+**15.5M TPS | Zero-Knowledge Server | CORE Attack Immunity**
+
+- Server NEVER possesses client keys (φ, λ)
+- Cryptographic Obfuscation Response Engine (CORE)
+- Client-side key generation
+- Probabilistic IND-CPA via chaotic nonce
+- Docker: `ghcr.io/primordialomegazero/femmgfhe:v6.1`
+
+[Full Paper (PDF, 8 pages)](paper/femmg_fhe_complete.pdf)
