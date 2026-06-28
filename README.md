@@ -1,5 +1,12 @@
 # femmG-FHE — Phi-Powered Fully Homomorphic Encryption
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![C++17](https://img.shields.io/badge/C%2B%2B-17-blue.svg)](https://en.cppreference.com/w/cpp/17)
+[![TPS](https://img.shields.io/badge/TPS-10M%2B-green.svg)]()
+[![Dependencies](https://img.shields.io/badge/Dependencies-ZERO-brightgreen.svg)]()
+[![Architecture](https://img.shields.io/badge/Architecture-Lock--Free-red.svg)]()
+[![TRL](https://img.shields.io/badge/TRL-6-orange.svg)]()
+
 ```
 ============================================================
   TRUE HOMOMORPHIC FHE VIA PHI-CONTRACTION
@@ -7,6 +14,7 @@
   Lock-Free Multi-Metaprogramming | Zero External Dependencies
 ============================================================
 ```
+
 
 ---
 
