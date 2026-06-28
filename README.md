@@ -52,7 +52,7 @@
 
 ## What Is FEmmg-FHE?
 
-**FEmmg-FHE** (Phi-FHE) is a Fully Homomorphic Encryption system that achieves **10 million true homomorphic operations per second** on consumer hardware. It is not an optimization of existing lattice-based FHE — it is a **new mathematical primitive** for homomorphic encryption based on **phi-contraction mappings** and the **Banach Fixed Point Theorem**.
+**FEmmg-FHE** (Phi-FHE) is a Fully Homomorphic Encryption system that achieves **7.5 million true homomorphic operations per second** on consumer hardware. It is not an optimization of existing lattice-based FHE — it is a **new mathematical primitive** for homomorphic encryption based on **phi-contraction mappings** and the **Banach Fixed Point Theorem**.
 
 ### The Breakthrough
 
@@ -103,7 +103,7 @@ where:
 
 | Metric | Value |
 |--------|-------|
-| **True FHE TPS** | **9-10M ops/sec** (encrypt+add+decrypt pipeline) |
+| **True FHE TPS** | **7.5M ops/sec** (encrypt+add+decrypt pipeline) |
 | Encrypt Latency | ~50 ns |
 | Homomorphic Add | ~90 ns |
 | Homomorphic Multiply | ~150 ns |

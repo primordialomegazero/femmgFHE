@@ -73,5 +73,5 @@ Client Response
 - Encrypt: ~50 ns
 - Add: ~90 ns
 - Multiply: ~150 ns
-- Throughput: 9-10M ops/sec (encrypt+add+decrypt)
+- Throughput: 7.5M ops/sec (encrypt+add+decrypt)
 - Scaling: Linear with thread count

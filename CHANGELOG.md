@@ -23,7 +23,7 @@ All notable changes to FEmmg-FHE will be documented in this file.
 - MIT License
 
 ### Performance
-- 9-7.5M TPS on AMD Ryzen 5 2600 (12 cores)
+- 7.5M TPS on AMD Ryzen 5 2600 (12 cores)
 - Encrypt: ~50 ns
 - Homomorphic Add: ~90 ns
 - Homomorphic Multiply: ~150 ns
