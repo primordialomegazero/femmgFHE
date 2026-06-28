@@ -20,7 +20,7 @@ via Golden Ratio Self-Reference}
 \maketitle
 
 \begin{abstract}
-We present FEmmg-FHE v12.0, a Fully Homomorphic Encryption scheme achieving \textbf{perfect accuracy} across 30/30 Dark Abyss Gauntlet tests. The key insight---``golden ratio is simply the weakness of infinity''---reveals that the golden ratio $\varphi = 1.6180339887498948482$ is inherently self-stabilizing through its self-referential property $\varphi = 1 + 1/\varphi$. By eliminating nonce accumulation (zero nonce for computational operations while preserving IND-CPA at encryption time), the scheme achieves drift-free chained operations without external stabilizers. The Lyapunov exponent $\lambda = \ln(\varphi) \approx 0.4812 > 0$ guarantees exponential stability of the noise floor at 40 bits via the Banach Fixed Point Theorem. Both addition and multiplication operate \textbf{fully blind} on ciphertexts with no intermediate decryption. Empirical results: 15M+ TPS, 40-byte ciphertexts, 30/30 Dark Abyss Gauntlet (including binomial theorem, power tower, Fibonacci, associativity, and distributivity), zero compiler warnings, zero external dependencies. Reference implementation: C++17, Docker container, NPM client library.
+We present FEmmg-FHE v12.0, a Fully Homomorphic Encryption scheme achieving \textbf{perfect accuracy} across 30/30 Dark Abyss Gauntlet tests. The key insight---``golden ratio is simply the weakness of infinity''---reveals that the golden ratio $$\varphi$ = 1.6180339887498948482$ is inherently self-stabilizing through its self-referential property $$\varphi$ = 1 + 1/$\varphi$$. By eliminating nonce accumulation (zero nonce for computational operations while preserving IND-CPA at encryption time), the scheme achieves drift-free chained operations without external stabilizers. The Lyapunov exponent $\lambda = \ln($\varphi$) \approx 0.4812 > 0$ guarantees exponential stability of the noise floor at 40 bits via the Banach Fixed Point Theorem. Both addition and multiplication operate \textbf{fully blind} on ciphertexts with no intermediate decryption. Empirical results: 15M+ TPS, 40-byte ciphertexts, 30/30 Dark Abyss Gauntlet (including binomial theorem, power tower, Fibonacci, associativity, and distributivity), zero compiler warnings, zero external dependencies. Reference implementation: C++17, Docker container, NPM client library.
 \end{abstract}
 
 \section{Introduction}
@@ -31,24 +31,24 @@ FEmmg-FHE v12.0 addresses all three while achieving \textbf{perfect computationa
 
 \subsection{The Key Insight}
 
-The breakthrough came from recognizing that \textbf{the golden ratio is inherently self-stabilizing.} The self-referential property $\varphi = 1 + 1/\varphi$ means that any computation anchored in $\varphi$ naturally converges to a fixed point without external intervention. Nonce accumulation---the primary source of drift in chained homomorphic operations---is eliminated by using zero nonce for computational operations while preserving IND-CPA security at the initial encryption stage.
+The breakthrough came from recognizing that \textbf{the golden ratio is inherently self-stabilizing.} The self-referential property $$\varphi$ = 1 + 1/$\varphi$$ means that any computation anchored in $$\varphi$$ naturally converges to a fixed point without external intervention. Nonce accumulation---the primary source of drift in chained homomorphic operations---is eliminated by using zero nonce for computational operations while preserving IND-CPA security at the initial encryption stage.
 
 \section{Mathematical Framework}
 
-\subsection{\varphi-Contraction and Banach Fixed Point}
+\subsection{Phi-Contraction and Banach Fixed Point}
 
-\begin{definition}[\varphi-Contraction Mapping]
-$T(x) = x \cdot \varphi^{-1} + N_0 \cdot (1 - \varphi^{-1})$, where $N_0 = 40$ bits.
+\begin{definition}[Phi-Contraction Mapping]
+$T(x) = x \cdot $\varphi$^{-1} + N_0 \cdot (1 - $\varphi$^{-1})$, where $N_0 = 40$ bits.
 \end{definition}
 
 \begin{theorem}[Banach Fixed Point]
-$T$ is a contraction mapping with unique fixed point $x^* = N_0$. Noise converges exponentially: $|x_n - N_0| \leq \varphi^{-n} \cdot |x_0 - N_0|$.
+$T$ is a contraction mapping with unique fixed point $x^* = N_0$. Noise converges exponentially: $|x_n - N_0| \leq $\varphi$^{-n} \cdot |x_0 - N_0|$.
 \end{theorem}
 
 \subsection{Fully Blind Homomorphic Operations}
 
 \begin{definition}[Fully Blind Multiplication]
-$e_{mul} = (e_1 \cdot e_2 - \lambda \cdot (e_1 + e_2) + \lambda^2) / \varphi + \lambda$
+$e_{mul} = (e_1 \cdot e_2 - \lambda \cdot (e_1 + e_2) + \lambda^2) / $\varphi$ + \lambda$
 
 This formula operates directly on ciphertexts. No intermediate decryption occurs---the server never reconstructs plaintext, even momentarily.
 \end{definition}
@@ -59,7 +59,7 @@ For any messages $m_1, m_2$: $D(E(m_1) \oplus E(m_2)) = m_1 + m_2$ and $D(E(m_1)
 
 \subsection{Lyapunov Stability}
 
-The Lyapunov exponent $\lambda_L = \ln(\varphi) \approx 0.4812 > 0$ establishes exponential stability of the noise floor. A 7-dimensional coupled map lattice with \varphi-scaled interactions provides additional entropy for IND-CPA at encryption time while the computational layer operates deterministically.
+The Lyapunov exponent $\lambda_L = \ln($\varphi$) \approx 0.4812 > 0$ establishes exponential stability of the noise floor. A 7-dimensional coupled map lattice with $\varphi$-scaled interactions provides additional entropy for IND-CPA at encryption time while the computational layer operates deterministically.
 
 \section{Implementation and Benchmarks}
 
