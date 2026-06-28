@@ -1,36 +1,20 @@
 {
   "name": "femmg-fhe-client",
-  "version": "6.1.1",
-  "description": "FEmmg-FHE v6.1 Client Library — Zero-Knowledge Fully Homomorphic Encryption",
+  "version": "6.2.0",
+  "description": "FEmmg-FHE v6.2 Client Library — Zero-Knowledge Fully Homomorphic Encryption with encrypted pair multiplication",
   "main": "index.js",
   "types": "index.d.ts",
-  "files": [
-    "index.js",
-    "index.d.ts",
-    "README.md"
-  ],
-  "scripts": {
-    "test": "node test.js"
-  },
+  "files": ["index.js", "index.d.ts", "README.md"],
+  "scripts": { "test": "node test.js" },
   "keywords": [
-    "fhe",
-    "fully-homomorphic-encryption",
-    "zero-knowledge",
-    "banach-contraction",
-    "golden-ratio",
-    "chaotic-nonce",
-    "ind-cpa",
-    "privacy",
-    "encryption"
+    "fhe", "fully-homomorphic-encryption", "zero-knowledge",
+    "banach-contraction", "golden-ratio", "chaotic-nonce",
+    "ind-cpa", "privacy", "encryption", "homomorphic"
   ],
-  "author": "Dan Joseph M. Fernandez",
+  "author": "Dan Joseph M. Fernandez / Primordial Omega Zero",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/primordialomegazero/femmgFHE.git"
-  },
-  "homepage": "https://github.com/primordialomegazero/femmgFHE#readme",
-  "engines": {
-    "node": ">=14.0.0"
+    "url": "git+https://github.com/primordialomegazero/femmgFHE.git"
   }
 }

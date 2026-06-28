@@ -51,7 +51,7 @@ FEmmg-FHE is a true Fully Homomorphic Encryption scheme achieving **15.5M+ TPS**
 
 Both addition and multiplication operate directly on ciphertexts. **No bootstrapping.** Noise self-stabilizes at 40 bits via the Banach Fixed Point Theorem.
 
-### v6.1 Features
+### v6.2 Features
 
 | Feature | Description |
 |---------|-------------|
@@ -72,8 +72,8 @@ Both addition and multiplication operate directly on ciphertexts. **No bootstrap
 ### Docker
 
 ```bash
-docker pull ghcr.io/primordialomegazero/femmgfhe:v6.1
-docker run -d -p 8092:8092 ghcr.io/primordialomegazero/femmgfhe:v6.1
+docker pull ghcr.io/primordialomegazero/femmgfhe:v6.2
+docker run -d -p 8092:8092 ghcr.io/primordialomegazero/femmgfhe:v6.2
 curl http://localhost:8092/health
 ```
 
@@ -321,7 +321,7 @@ Negligible in the security parameter κ.
 
 ### Performance
 
-| Metric | FEmmg-FHE v6.1 | TFHE | CKKS | BFV | BGV |
+| Metric | FEmmg-FHE v6.2 | TFHE | CKKS | BFV | BGV |
 |--------|---------------|------|------|-----|-----|
 | **TPS** | **15,572,231** | ~100 | ~1,000 | ~100 | ~100 |
 | **Ciphertext** | **40 bytes** | ~1 KB | ~100 KB | ~100 KB | ~100 KB |
@@ -350,7 +350,7 @@ femmgFHE/
 │   ├── femmg_fhe.h           — Core FHE engine (add + multiply direct)
 │   ├── fractal_fhe.h         — Multi-Recursive Fractal (7 layers, 14 parties)
 │   ├── godcode.h             — N-Dimensional Banach Contraction Engine
-│   ├── femmg_server.cpp      — v6.1 Enterprise API server (Zero-Knowledge + CORE)
+│   ├── femmg_server.cpp      — v6.2 Enterprise API server (Zero-Knowledge + CORE)
 │   └── test_suite.cpp        — Complete verification (34,087 tests)
 ├── paper/
 │   ├── femmg_fhe_complete.pdf — 8-page IACR paper
