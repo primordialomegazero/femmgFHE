@@ -111,22 +111,22 @@ All operations: `POST /`. Health: `GET /health`.
 graph TB
     subgraph CLIENT["PHASE 1: CLIENT-SIDE"]
         A[Plaintext m] --> B[Chaotic Nonce Generator<br/>crypto.randomBytes + 7D CML]
-        B --> C[Encrypt: e = m·φ + λ + ν]
+        B --> C[Encrypt: e = m phi plus lambda plus nu]
         C --> D[IND-CPA SECURE]
     end
     
     subgraph SERVER["PHASE 2: SERVER-SIDE (BLIND)"]
         E[Encrypted e1, e2] --> F[Blind Add: e1 + e2 - λ]
-        E --> G[Blind Mul: (e1·e2 - λ·Σ + λ²)/φ + λ]
+        E --> G[Blind Mul: e1e2 minus lambda sigma plus lambda sq over phi plus lambda]
         F --> H[Phi-Zeta Stabilization<br/>φ^n Riemann Zero Spacing]
         G --> H
         H --> I[Encrypted Result]
     end
     
     subgraph STABILIZE["STABILIZATION LAYERS"]
-        J[Banach Contraction<br/>T(x) = x·φ⁻¹ + N₀·(1-φ⁻¹)]
+        J[Banach Contraction<br/>Tx = x phi inv plus N0 times 1 minus phi inv]
         K[Lyapunov Chaos<br/>7D Coupled Map Lattice]
-        L[Phi-Zeta Attraction<br/>ζ(0.5 + i·t) → zeros]
+        L[Phi-Zeta Attraction<br/>zeta 0.5 plus it maps to zeros]
         J --> M[Noise Floor: 40 bits]
         K --> M
         L --> M
@@ -167,7 +167,7 @@ sequenceDiagram
     participant Zeta as Riemann Zeta
     
     Note over Alice: Phase 1: Generate<br/>chaotic nonce ν
-    Alice->>Alice: e = m·φ + λ + ν
+    Alice->>Alice: e = m phi plus lambda plus nu
     Alice->>Server: register {client_id}
     Server-->>Alice: {status: registered}
     
@@ -177,11 +177,11 @@ sequenceDiagram
     Note over Server: Phi-Zeta stabilize
     Server-->>Alice: {encrypted_result, computation_blind: true}
     
-    Alice->>Alice: Decrypt: m = round((e-λ)/φ)
+    Alice->>Alice: Decrypt: m = round e minus lambda over phi
     Note over Alice: Result: 42
     
     Alice->>Server: fhe_multiply {e1, e2}
-    Note over Server: Blind multiply<br/>(e1·e2 - λΣ + λ²)/φ + λ
+    Note over Server: Blind multiply<br/>e1e2 minus lambda sigma plus lambda sq over phi plus lambda
     Server-->>Alice: {encrypted_result, phi_zeta: true}
     
     Note over Alice,Zeta: φ = 1.618... binds everything
@@ -192,7 +192,7 @@ sequenceDiagram
 ## Mathematical Framework
 
 ### Banach Fixed Point Theorem
-Noise stabilizes via: `T(x) = x·φ⁻¹ + N₀·(1-φ⁻¹)` where N₀ = 40 bits. Exponential convergence: `|x_n - N₀| ≤ φ⁻ⁿ·|x₀ - N₀|`.
+Noise stabilizes via: `Tx = x phi inv plus N0 times 1 minus phi inv` where N₀ = 40 bits. Exponential convergence: `|x_n - N₀| ≤ φ⁻ⁿ·|x₀ - N₀|`.
 
 ### Lyapunov Stability
 7D Coupled Map Lattice with λ = ln(φ) ≈ 0.4812 > 0. Exponential sensitivity to initial conditions provides IND-CPA entropy.
