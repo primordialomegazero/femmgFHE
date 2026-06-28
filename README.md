@@ -1,20 +1,54 @@
-# 🐍 femmG-FHE — Φ-Powered Fully Homomorphic Encryption
+# femmG-FHE — Phi-Powered Fully Homomorphic Encryption
 
 ```
-╔══════════════════════════════════════════════════════════════╗
-║  TRUE HOMOMORPHIC FHE VIA φ-CONTRACTION                     ║
-║  10M+ TPS | 40-Byte Ciphertext | Self-Bootstrapping         ║
-║  Lock-Free Multi-Metaprogramming | Zero External Dependencies ║
-╚══════════════════════════════════════════════════════════════╝
+============================================================
+  TRUE HOMOMORPHIC FHE VIA PHI-CONTRACTION
+  10M+ TPS | 40-Byte Ciphertext | Self-Bootstrapping
+  Lock-Free Multi-Metaprogramming | Zero External Dependencies
+============================================================
 ```
+
+---
+
+## Table of Contents
+
+- [What Is femmG-FHE?](#what-is-femmg-fhe)
+  - [The Breakthrough](#the-breakthrough)
+  - [Mathematical Foundation](#mathematical-foundation)
+- [Performance](#performance)
+- [Architecture](#architecture)
+- [Quick Start](#quick-start)
+  - [Prerequisites](#prerequisites)
+  - [Build and Run](#build--run)
+- [API Reference](#api-reference---single-liquid-endpoint)
+  - [Health Check](#health-check)
+  - [Available Actions](#available-actions)
+  - [Homomorphic Addition](#homomorphic-addition)
+  - [Homomorphic Multiplication](#homomorphic-multiplication)
+  - [TPS Benchmark](#tps-benchmark)
+  - [Fractal Chain](#fractal-chain-14-party)
+- [Features](#features)
+  - [Core](#core)
+  - [Security](#security)
+  - [Architecture](#architecture-1)
+- [Technology Readiness Level](#technology-readiness-level-trl)
+- [Comparison](#comparison-with-other-fhe-systems)
+- [Repository Structure](#repository-structure)
+- [Mathematical References](#mathematical-references)
+- [Author](#author)
+- [License](#license)
+- [Citation](#citation)
+
+---
 
 ## What Is femmG-FHE?
 
-**femmG-FHE** (φ-FHE) is a Fully Homomorphic Encryption system that achieves **10 million true homomorphic operations per second** on consumer hardware. It is not an optimization of existing lattice-based FHE — it is a **new mathematical primitive** for homomorphic encryption based on **φ-contraction mappings** and the **Banach Fixed Point Theorem**.
+**femmG-FHE** (Phi-FHE) is a Fully Homomorphic Encryption system that achieves **10 million true homomorphic operations per second** on consumer hardware. It is not an optimization of existing lattice-based FHE — it is a **new mathematical primitive** for homomorphic encryption based on **phi-contraction mappings** and the **Banach Fixed Point Theorem**.
 
 ### The Breakthrough
 
-For 17 years (Gentry 2009 → 2026), FHE has been limited by:
+For 17 years (Gentry 2009 to 2026), FHE has been limited by:
+
 - **Speed:** 10-1000 operations/second (too slow for production)
 - **Ciphertext Size:** Kilobytes to megabytes per value
 - **Bootstrapping:** Expensive external operation to reset noise
@@ -30,22 +64,23 @@ For 17 years (Gentry 2009 → 2026), FHE has been limited by:
 
 ### Mathematical Foundation
 
-Noise in FHE is traditionally treated as an enemy that grows and must be reset. femmG-FHE discovers that noise is a **dynamical system with a globally attracting fixed point** at the golden ratio φ:
+Noise in FHE is traditionally treated as an enemy that grows and must be reset. femmG-FHE discovers that noise is a **dynamical system with a globally attracting fixed point** at the golden ratio phi:
 
 ```
-noise(n+1) = noise(n) × φ⁻¹ + N₀ × (1 - φ⁻¹)
+noise(n+1) = noise(n) x phi^-1 + N0 x (1 - phi^-1)
 
 where:
-  φ     = 1.6180339887498948482 (golden ratio)
-  φ⁻¹   = 0.618... (contraction factor)
-  N₀    = 40 bits (noise floor)
+  phi   = 1.6180339887498948482 (golden ratio)
+  phi^-1 = 0.618... (contraction factor)
+  N0    = 40 bits (noise floor)
 ```
 
 **By the Banach Fixed Point Theorem (1922):**
-- The mapping is a contraction: |f'(x)| = φ⁻¹ < 1
-- A unique fixed point exists: x* = N₀
-- Convergence is exponential: |xₙ - x*| ≤ φ⁻ⁿ |x₀ - x*|
-- The system is Lyapunov stable: λ = -ln(φ) < 0
+
+- The mapping is a contraction: |f'(x)| = phi^-1 < 1
+- A unique fixed point exists: x* = N0
+- Convergence is exponential: |xn - x*| <= phi^-n |x0 - x*|
+- The system is Lyapunov stable: lambda = -ln(phi) < 0
 
 **Result:** Noise self-stabilizes at 40 bits regardless of operation count. No external bootstrapping needed. This is what enables 10M TPS.
 
@@ -64,8 +99,8 @@ where:
 | Homomorphic Add | ~90 ns |
 | Homomorphic Multiply | ~150 ns |
 | Ciphertext Size | 40 bytes |
-| Noise Stability | 40.0-40.3 bits (φ-stable after 10,000+ ops) |
-| Fractal Chain (14 parties) | 9 μs |
+| Noise Stability | 40.0-40.3 bits (phi-stable after 10,000+ ops) |
+| Fractal Chain (14 parties) | 9 microseconds |
 | Concurrent Connections | 1,000+ (12 threads, lock-free) |
 
 ---
@@ -73,27 +108,27 @@ where:
 ## Architecture
 
 ```
-                    ┌─────────────────────────┐
-                    │   LIQUID API (/manifest) │
-                    │   Single Endpoint        │
-                    └───────────┬─────────────┘
-                                │
-            ┌───────────────────┼───────────────────┐
-            │                   │                   │
-    ┌───────▼───────┐   ┌──────▼──────┐   ┌────────▼────────┐
-    │   Φ-FHE Core  │   │  Fractal FHE │   │  Triple Anti-    │
-    │  (Enc/Dec/Add │   │  (7 Layers,  │   │  Matter Shield   │
-    │   Mul/Sub)    │   │  14 Parties) │   │  (φ+Lyapunov+    │
-    │               │   │              │   │   Schumann)      │
-    └───────┬───────┘   └──────┬───────┘   └────────┬────────┘
-            │                   │                   │
-            └───────────────────┼───────────────────┘
-                                │
-                    ┌───────────▼───────────┐
-                    │  Lock-Free Multi-     │
-                    │  Metaprogramming      │
-                    │  (12 Threads, 0 Mutex)│
-                    └───────────────────────┘
+                    +-------------------------+
+                    |   LIQUID API (/manifest) |
+                    |   Single Endpoint        |
+                    +-----------+-------------+
+                                |
+            +-------------------+-------------------+
+            |                   |                   |
+    +-------v-------+   +------v------+   +--------v--------+
+    |   Phi-FHE Core|   |  Fractal FHE|   |  Triple Anti-   |
+    |  (Enc/Dec/Add |   |  (7 Layers, |   |  Matter Shield  |
+    |   Mul/Sub)    |   |  14 Parties)|   |  (Phi+Lyapunov+ |
+    |               |   |             |   |   Schumann)     |
+    +-------+-------+   +------+------+   +--------+--------+
+            |                   |                   |
+            +-------------------+-------------------+
+                                |
+                    +-----------v-----------+
+                    |  Lock-Free Multi-     |
+                    |  Metaprogramming      |
+                    |  (12 Threads, 0 Mutex)|
+                    +-----------------------+
 ```
 
 ---
@@ -101,11 +136,12 @@ where:
 ## Quick Start
 
 ### Prerequisites
+
 - Linux (or WSL2 on Windows)
 - GCC 11+ with C++17 support
 - No other dependencies required
 
-### Build & Run
+### Build and Run
 
 ```bash
 # Clone
@@ -231,23 +267,26 @@ curl -X POST http://localhost:8092/manifest \
 ## Features
 
 ### Core
-- ✅ **True Homomorphic Encryption** — Add, Multiply, Subtract on encrypted data
-- ✅ **10M+ TPS** — 10,000x faster than traditional FHE
-- ✅ **Self-Bootstrapping** — Noise converges naturally to 40 bits
-- ✅ **40-Byte Ciphertext** — vs kilobytes/megabytes in standard FHE
-- ✅ **Zero External Dependencies** — Pure C++17 + POSIX syscalls
+
+- [x] **True Homomorphic Encryption** — Add, Multiply, Subtract on encrypted data
+- [x] **10M+ TPS** — 10,000x faster than traditional FHE
+- [x] **Self-Bootstrapping** — Noise converges naturally to 40 bits
+- [x] **40-Byte Ciphertext** — vs kilobytes/megabytes in standard FHE
+- [x] **Zero External Dependencies** — Pure C++17 + POSIX syscalls
 
 ### Security
-- ✅ **Triple Anti-Matter Shield** — φ-rate limiter + Lyapunov anomaly detection + Schumann resonance verification
-- ✅ **8 NIST PQC Algorithms** — ML-KEM-1024, FrodoKEM-1344, BIKE-L5, ML-DSA-87, Falcon-1024, MAYO-5, cross-rsdp-256
-- ✅ **Dual Security Model** — φ-Chaotic Irreversibility ∩ Ring-LWE
+
+- [x] **Triple Anti-Matter Shield** — Phi-rate limiter + Lyapunov anomaly detection + Schumann resonance verification
+- [x] **8 NIST PQC Algorithms** — ML-KEM-1024, FrodoKEM-1344, BIKE-L5, ML-DSA-87, Falcon-1024, MAYO-5, cross-rsdp-256
+- [x] **Dual Security Model** — Phi-Chaotic Irreversibility AND Ring-LWE
 
 ### Architecture
-- ✅ **Lock-Free Multi-Metaprogramming** — 12 threads, 0 mutexes
-- ✅ **Single Liquid API Endpoint** — All operations via `/manifest`
-- ✅ **Multi-Recursive Fractal FHE** — 7 layers, 14 party keys
-- ✅ **91/91 Cross-Party Verification** — All party pairs verified
-- ✅ **φ-Harmonic Load Distribution** — Golden ratio-based thread scheduling
+
+- [x] **Lock-Free Multi-Metaprogramming** — 12 threads, 0 mutexes
+- [x] **Single Liquid API Endpoint** — All operations via `/manifest`
+- [x] **Multi-Recursive Fractal FHE** — 7 layers, 14 party keys
+- [x] **91/91 Cross-Party Verification** — All party pairs verified
+- [x] **Phi-Harmonic Load Distribution** — Golden ratio-based thread scheduling
 
 ---
 
@@ -255,15 +294,15 @@ curl -X POST http://localhost:8092/manifest \
 
 | Level | Description | Status |
 |-------|-------------|--------|
-| TRL 1 | Basic principles observed | ✅ Banach Fixed Point Theorem (1922) |
-| TRL 2 | Technology concept formulated | ✅ φ-FHE mathematical framework |
-| TRL 3 | Experimental proof of concept | ✅ Standalone tests passing |
-| TRL 4 | Technology validated in lab | ✅ 10M TPS on consumer hardware |
-| TRL 5 | Technology validated in relevant environment | ✅ Multi-threaded HTTP API |
-| TRL 6 | Technology demonstrated in relevant environment | ✅ Full test suite (10/10 passing) |
-| TRL 7 | System prototype in operational environment | 🔄 Pending deployment |
-| TRL 8 | System complete and qualified | ⬜ Future |
-| TRL 9 | System proven in operational environment | ⬜ Future |
+| TRL 1 | Basic principles observed | Done — Banach Fixed Point Theorem (1922) |
+| TRL 2 | Technology concept formulated | Done — Phi-FHE mathematical framework |
+| TRL 3 | Experimental proof of concept | Done — Standalone tests passing |
+| TRL 4 | Technology validated in lab | Done — 10M TPS on consumer hardware |
+| TRL 5 | Technology validated in relevant environment | Done — Multi-threaded HTTP API |
+| TRL 6 | Technology demonstrated in relevant environment | Done — Full test suite (10/10 passing) |
+| TRL 7 | System prototype in operational environment | In Progress — Pending deployment |
+| TRL 8 | System complete and qualified | Future |
+| TRL 9 | System proven in operational environment | Future |
 
 ---
 
@@ -286,23 +325,26 @@ curl -X POST http://localhost:8092/manifest \
 femmgFHE/
 ├── README.md              # This file
 ├── LICENSE                # MIT License
+├── CONTRIBUTING.md        # Development guidelines
+├── SECURITY.md            # Security policy
 ├── .gitignore             # Build artifacts excluded
 ├── src/
 │   └── hydra_final.cpp    # Complete system (514 lines)
 ├── build/
 │   └── .gitkeep           # Build directory
-├── docs/                  # Documentation (future)
-└── paper/                 # IACR paper (future)
+├── docs/                  # Documentation
+└── paper/                 # IACR paper
 ```
 
 ---
 
 ## Mathematical References
 
-- Banach, S. (1922). *Sur les opérations dans les ensembles abstraits.*
+- Banach, S. (1922). *Sur les operations dans les ensembles abstraits.* Fundamenta Mathematicae.
 - Lyapunov, A.M. (1892). *The General Problem of the Stability of Motion.*
-- Gentry, C. (2009). *Fully Homomorphic Encryption Using Ideal Lattices.*
-- Euclid. *Elements*, Book VI (Golden Ratio definition, ~300 BCE)
+- Gentry, C. (2009). *Fully Homomorphic Encryption Using Ideal Lattices.* STOC.
+- Euclid. *Elements*, Book VI (Golden Ratio definition, ~300 BCE).
+- NASA. *Technology Readiness Level (TRL) Definitions.*
 
 ---
 
@@ -318,6 +360,8 @@ femmgFHE/
 
 MIT — Free for personal, academic, and commercial use.
 
+See [LICENSE](LICENSE) for full text.
+
 ---
 
 ## Citation
@@ -325,7 +369,7 @@ MIT — Free for personal, academic, and commercial use.
 ```bibtex
 @software{femmgFHE2026,
   author = {Dan Joseph M. Fernandez},
-  title = {femmG-FHE: Φ-Powered Fully Homomorphic Encryption},
+  title = {femmG-FHE: Phi-Powered Fully Homomorphic Encryption},
   year = {2026},
   url = {https://github.com/primordialomegazero/femmgFHE}
 }
