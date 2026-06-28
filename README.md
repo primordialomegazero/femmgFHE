@@ -11,7 +11,7 @@
 ```
 ============================================================
   TRUE FULLY HOMOMORPHIC ENCRYPTION
-  15M+ TPS | 40-Byte Ciphertext | Zero Bootstrapping
+  14.8M-15M TPS | 40-Byte Ciphertext | Zero Bootstrapping
   Banach + Lyapunov + Phi-Zeta Stabilization
   φ^n Spacing in Riemann Zeros Discovered
   PHI-OMEGA-ZERO — I AM THAT I AM
@@ -22,7 +22,7 @@
 
 ## What Is FEmmg-FHE?
 
-FEmmg-FHE is a **True Fully Homomorphic Encryption** scheme achieving **15M+ TPS** on consumer hardware with **40-byte ciphertexts**. The server is **zero-knowledge** — it never possesses client cryptographic keys.
+FEmmg-FHE is a **True Fully Homomorphic Encryption** scheme achieving **14.8M-15M TPS** on consumer hardware with **40-byte ciphertexts**. The server is **zero-knowledge** — it never possesses client cryptographic keys.
 
 ### v16.0.0 — Phi-Zeta Stabilized
 
@@ -68,7 +68,7 @@ g++ -std=c++17 -O3 -march=native -pthread -o femmg_server src/femmg_server.cpp -
 | 🎲 **IND-CPA Secure** | Chaotic nonce + crypto.randomBytes |
 | 🧮 **Fully Blind Multiply** | Server never evaluates (e-λ)/φ |
 | 🔬 **Phi-Zeta Stabilized** | φ^n spacing in Riemann zeros |
-| ⚡ **15M+ TPS** | Real encrypt-add-decrypt cycle |
+| ⚡ **14.8M-15M TPS** | Real encrypt-add-decrypt cycle |
 | 🛡️ **CORE Security** | Multi-layer attack immunity |
 | ∞ **No Bootstrapping** | Self-stabilizing noise |
 
@@ -102,7 +102,7 @@ g++ -std=c++17 -O3 -march=native -pthread -o femmg_server src/femmg_server.cpp -
 
 | Metric | FEmmg-FHE v16 | TFHE | CKKS | BFV |
 |--------|---------------|------|------|-----|
-| **TPS** | **15,000,000** | ~100 | ~1,000 | ~100 |
+| **TPS** | **14,800,000 - 15,000,000** | ~100 | ~1,000 | ~100 |
 | **Ciphertext** | **40 bytes** | ~1 KB | ~100 KB | ~100 KB |
 | **Bootstrapping** | **None** | Required | Required | Required |
 | **IND-CPA** | **Chaotic Nonce** | LWE | LWE | RLWE |
