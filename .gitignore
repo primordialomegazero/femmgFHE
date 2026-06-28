@@ -1,0 +1,35 @@
+# Build outputs
+build/*
+!build/.gitkeep
+
+# Object files
+*.o
+*.obj
+*.exe
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Dependencies (zero deps, but just in case)
+node_modules/
+vendor/
+
+# Binary
+femmg_fhe
+hydra_final
+*.out
+
+# Test outputs
+test_results/
+*.tmp
