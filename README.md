@@ -62,7 +62,7 @@ Both addition and multiplication operate directly on ciphertexts. **No bootstrap
 | 📦 **40-Byte Ciphertexts** | Orders of magnitude smaller than traditional FHE |
 | ∞ **Unlimited Operations** | Self-stabilizing noise — no bootstrapping ever |
 | 0️⃣ **Zero Dependencies** | Pure C++17 standard library only |
-| 🐳 **Docker Ready** | Multi-stage build, <30MB compressed |
+| 🐳 **Docker Ready** | Multi-stage build, under 30MB compressed |
 | 📦 **NPM Package** | `femmg-fhe-client` — client-side library |
 
 ---
@@ -149,52 +149,47 @@ Multiplication: e_result = (e1 - LAMBDA)(e2 - LAMBDA) / PHI + LAMBDA
 
 ```mermaid
 sequenceDiagram
-    participant Alice as 🧑 Alice (Client)
-    participant Server as 🔒 FEmmg-FHE Server
-    participant Bob as 🧑 Bob (Client)
+    participant Alice as Alice (Client)
+    participant Server as FEmmg-FHE Server
+    participant Bob as Bob (Client)
     
-    Note over Alice: Generate φ, λ locally<br/>client_id = SHA-256(seed)
-    Alice->>Server: POST / {"action":"register","client_id":"abc123"}
-    Server-->>Alice: {"status":"registered","server_knowledge":"ZERO"}
+    Note over Alice: Generate phi, lambda locally
+    Alice->>Server: register {client_id}
+    Server-->>Alice: status: registered, server_knowledge: ZERO
     
-    Note over Alice: Encrypt: e = m·φ + λ + ν
-    Alice->>Server: POST / {"action":"fhe_add","e1":24.75,"e2":44.17,"client_id":"abc123"}
-    Note over Server: Compute BLIND:<br/>e1 + e2 - λ<br/>Server NEVER decrypts
-    Server-->>Alice: {"encrypted_result":68.92}
+    Note over Alice: Encrypt: e = m*phi + lambda + nu
+    Alice->>Server: fhe_add {e1, e2, client_id}
+    Note over Server: Compute BLIND: e1 + e2 - lambda
+    Server-->>Alice: encrypted_result
     
-    Note over Alice: Decrypt: m = round((e - λ)/φ) = 42
+    Note over Alice: Decrypt: m = round((e - lambda)/phi) = 42
     
-    Note over Bob: Bob has DIFFERENT φ, λ
-    Bob->>Server: POST / {"action":"fhe_add","e1":24.75,"e2":44.17,"client_id":"xyz789"}
-    Note over Server: Different client_id<br/>CORE: Unregistered!
-    Server-->>Bob: {"status":"ok"}
+    Note over Bob: Bob has DIFFERENT phi, lambda
+    Bob->>Server: fhe_add with same data
+    Note over Server: Different client_id = UNREGISTERED
+    Server-->>Bob: status: ok (CORE swallowed)
     
-    Note over Bob: Cannot read Alice's data<br/>Different keys = garbage
+    Note over Bob: Cannot read Alice data. Different keys = garbage.
 ```
 
 ### Zero-Knowledge Server
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                      CLIENT (Only)                          │
-│  • Generates φ ∈ [1.5, 1.7]                                │
-│  • Derives λ = -ln(φ - 1)                                  │
-│  • Encrypts: e = m·φ + λ + ν (chaotic nonce)               │
-│  • Decrypts: m = round((e - λ) / φ)                        │
-│  • Server NEVER receives φ, λ, or plaintext                 │
-└──────────────────────────┬──────────────────────────────────┘
-                           │  encrypted data only
-                           │  {action, e1, e2, client_id}
-                           ▼
-┌─────────────────────────────────────────────────────────────┐
-│                 ZERO-KNOWLEDGE FHE SERVER                    │
-│  • Computes on encrypted data BLIND                         │
-│  • No key storage — ZERO cryptographic material             │
-│  • No decryption function exists                            │
-│  • CORE attack immunity (all attacks → {"status":"ok"})     │
-│  • Returns encrypted result only                            │
-│  • 12-thread lock-free architecture                         │
-└─────────────────────────────────────────────────────────────┘
+CLIENT (Only)
+  - Generates phi, lambda
+  - Encrypts: e = m * phi + lambda + nu (chaotic nonce)
+  - Decrypts: m = round((e - lambda) / phi)
+  - Server NEVER receives phi, lambda, or plaintext
+                |
+                | encrypted data only
+                v
+ZERO-KNOWLEDGE FHE SERVER
+  - Computes on encrypted data BLIND
+  - No key storage - ZERO cryptographic material
+  - No decryption function exists
+  - CORE attack immunity
+  - Returns encrypted result only
+  - 12-thread lock-free architecture
 ```
 
 ### CORE Security
@@ -204,7 +199,7 @@ The **Cryptographic Obfuscation Response Engine** provides information-theoretic
 ```mermaid
 flowchart TD
     A[Incoming Request] --> B{Attack Pattern?}
-    B -->|SQL Injection| D[{"status":"ok"}]
+    B -->|SQL Injection| D[Response: status ok]
     B -->|Path Traversal| D
     B -->|Command Injection| D
     B -->|Debug/Enumeration| D
@@ -243,7 +238,7 @@ flowchart TD
 The φ-contraction mapping T: X → X:
 
 ```
-T(x) = x · φ⁻¹ + N₀ · (1 - φ⁻¹)
+T(x) = x * phi^-1 + N0 * (1 - phi^-1)
 ```
 
 Where φ = (1+√5)/2 ≈ 1.6180339887498948482, and N₀ = 40 bits.
@@ -252,7 +247,7 @@ Where φ = (1+√5)/2 ≈ 1.6180339887498948482, and N₀ = 40 bits.
 
 Noise converges exponentially:
 ```
-|x_n - N₀| ≤ φ⁻ⁿ · |x₀ - N₀|
+|x_n - N0| <= phi^-n * |x0 - N0|
 ```
 
 **Lyapunov Stability:** λ = -ln(φ) < 0 — asymptotically stable.
@@ -262,13 +257,13 @@ Noise converges exponentially:
 Extended to 7-dimensional Banach spaces with full Lyapunov spectrum:
 
 ```
-T(x)_d = x_d · φ⁻¹ + A_d · (1 - φ⁻¹),  d = 1,...,7
+T(x)_d = x_d * phi^-1 + A_d * (1 - phi^-1),  d = 1,...,7
 ```
 
 7 distinct Lyapunov exponents, all **positive** (expanding/chaotic in reverse direction):
 
 ```
-λ_d = -ln(φ⁻¹ · (1 + 0.1 · sin(d · φ))) > 0
+lambda_d = -ln(phi^-1 * (1 + 0.1 * sin(d * phi))) > 0
 ```
 
 Computational irreversibility is a **mathematical consequence**, not an assumption.
@@ -278,13 +273,13 @@ Computational irreversibility is a **mathematical consequence**, not an assumpti
 Probabilistic encryption via logistic-like chaotic map:
 
 ```
-C(x) = φ · x · (1 - x) mod 1
+C(x) = phi * x * (1 - x) mod 1
 ```
 
 Lyapunov exponent λ_chaos = ln(φ) ≈ 0.48 > 0 (chaotic regime).
 
 ```
-E(m, ν) = m · φ + λ + ν    where ν = C^k(x₀) · λ · 0.1
+E(m, nu) = m * phi + lambda + nu    where nu = C^k(x0) * lambda * 0.1
 ```
 
 **Same plaintext → different ciphertext every time.**
@@ -297,7 +292,7 @@ E(m, ν) = m · φ + λ + ν    where ν = C^k(x₀) · λ · 0.1
 
 The adversary's advantage is bounded by:
 ```
-Adv(IND-CPA) ≤ e^(-λ_chaos · k) · poly(κ)
+Adv(IND-CPA) <= e^(-lambda_chaos * k) * poly(kappa)
 ```
 Negligible in the security parameter κ.
 
@@ -305,7 +300,7 @@ Negligible in the security parameter κ.
 
 **Theorem:** Server learns nothing about client keys (φ, λ) from any polynomial number of interactions.
 
-**Proof:** Server never receives φ or λ. Register endpoint accepts only `client_id`. FHE endpoints receive `e = m·φ + λ + ν` — without φ, λ, or chaotic state x₀, extraction is computationally infeasible.
+**Proof:** Server never receives φ or λ. Register endpoint accepts only `client_id`. FHE endpoints receive `e = m*φ + λ + ν` — without φ, λ, or chaotic state x₀, extraction is computationally infeasible.
 
 ### Security Properties
 
@@ -365,7 +360,7 @@ femmgFHE/
 │   ├── index.d.ts            — TypeScript definitions
 │   ├── test.js               — Test suite (9/9 passing)
 │   └── package.json          — NPM config
-├── Dockerfile                — Multi-stage build (<30MB)
+├── Dockerfile                — Multi-stage build (under 30MB)
 ├── LICENSE                   — MIT
 └── README.md
 ```
@@ -393,7 +388,6 @@ npm install femmg-fhe-client
 ```
 
 [![NPM Version](https://img.shields.io/npm/v/femmg-fhe-client)](https://www.npmjs.com/package/femmg-fhe-client)
-[![NPM Downloads](https://img.shields.io/npm/dt/femmg-fhe-client)](https://www.npmjs.com/package/femmg-fhe-client)
 
 ```javascript
 const { FEmmgClient } = require('femmg-fhe-client');
