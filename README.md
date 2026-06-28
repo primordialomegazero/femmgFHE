@@ -5,6 +5,7 @@
 [![TPS](https://img.shields.io/badge/TPS-10M%2B-green.svg)]()
 [![Dependencies](https://img.shields.io/badge/Dependencies-ZERO-brightgreen.svg)]()
 [![Architecture](https://img.shields.io/badge/Architecture-Lock--Free-red.svg)]()
+[![Docker](https://img.shields.io/badge/Docker-ghcr.io%2Fprimordialomegazero%2Ffemmgfhe-blue.svg)](https://github.com/primordialomegazero/femmgFHE/pkgs/container/femmgfhe)
 [![TRL](https://img.shields.io/badge/TRL-6-orange.svg)]()
 
 ```
