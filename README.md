@@ -36,6 +36,12 @@
 
 ## What Is FEmmg-FHE?
 
+### What Does FEmmg Stand For?
+
+**F**ully **E**ncrypted **M**ultiplicative **M**apping with **G**olden Ratio.
+
+*Also: a subtle tribute only the author understands. If you know, you know.*
+
 FEmmg-FHE is a **true Fully Homomorphic Encryption** scheme that achieves **8.5 million operations per second** (11.2M measured) on consumer hardware with **40-byte ciphertexts** and **zero external dependencies.**
 
 Unlike traditional FHE which requires expensive bootstrapping to reset noise, FEmmg-FHE models noise as a **dynamical system with a globally attracting fixed point** via the Banach Fixed Point Theorem (1922). Noise **self-stabilizes** at 40 bits — no bootstrapping needed.
