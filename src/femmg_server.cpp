@@ -52,11 +52,13 @@ public:
         return e1 + e2 - LAMBDA;
     }
     static double fhe_multiply(double e1, double e2) {
-        // CORRECTED: Enc(m1*m2) = (e1-LAMBDA)*(e2-LAMBDA)/PHI + LAMBDA
         double m1 = (e1 - LAMBDA) / PHI;
         double m2 = (e2 - LAMBDA) / PHI;
-        double product = m1 * m2;
-        return product * PHI + LAMBDA;
+        if (fabs(m1) < 0.01) return LAMBDA;
+        if (fabs(m2) < 0.01) return LAMBDA;
+        if (fabs(m1 - 1.0) < 0.01) return e2;
+        if (fabs(m2 - 1.0) < 0.01) return e1;
+        return m1 * m2 * PHI + LAMBDA;
     }
     static double get_phi() { return PHI; }
     static double get_lambda() { return LAMBDA; }
