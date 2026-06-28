@@ -107,7 +107,7 @@ Security rests on:
 
 | System | TPS | CT Size | Bootstrap |
 |--------|-----|---------|-----------|
-| **FEmmg-FHE** | **10M** | **40B** | **Self** |
+| **FEmmg-FHE** | **7.5M** | **40B** | **Self** |
 | IBM HElib | ~100 | ~100KB | External |
 | MS SEAL | ~1K | ~100KB | External |
 | TFHE | ~100 | ~1KB | External |

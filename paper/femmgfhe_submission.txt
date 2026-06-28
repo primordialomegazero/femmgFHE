@@ -108,7 +108,7 @@ Compiler: GCC 11+, -O3 -march=native
 
 METRIC                    VALUE
 ------                    -----
-True FHE Throughput       9-10M ops/sec
+True FHE Throughput       7.5M ops/sec
 Encrypt Latency           ~50 ns
 Homomorphic Add           ~90 ns
 Homomorphic Multiply      ~150 ns
@@ -120,7 +120,7 @@ External Dependencies     0
 
 COMPARISON WITH EXISTING FHE:
 System          TPS         CT Size     Bootstrap
-FEmmg-FHE       10,000,000  40 bytes    Self (built-in)
+FEmmg-FHE       7,500,000  40 bytes    Self (built-in)
 IBM HElib       ~100        ~100KB      External
 Microsoft SEAL  ~1,000      ~100KB      External
 TFHE (Zama)     ~100        ~1KB        External (gate)
@@ -155,7 +155,7 @@ self-stabilizing dynamical system rather than an adversary. By leveraging the
 Banach Fixed Point Theorem (1922) with the golden ratio phi as the contraction 
 factor, we achieve:
 
-- 10,000,000 true homomorphic operations per second
+- 7,500,000 true homomorphic operations per second
 - 40-byte ciphertexts (vs kilobytes/megabytes)
 - Self-bootstrapping (no external noise reset)
 - Zero external dependencies (pure C++17 + POSIX)
