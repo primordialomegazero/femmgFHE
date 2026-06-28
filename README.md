@@ -155,8 +155,8 @@ flowchart TB
     Enc --> NDimEnc[7D Banach]
     
     HomOps --> Core[FEmmg-FHE Core]
-    Core --> Add[Direct Add: e1+e2-lambda]
-    Core --> Mul[Direct Mul: (e1e2-lambda(e1+e2)+lambda^2)/phi+lambda]
+    Core --> Add[Direct Add: e1 + e2 - lambda]
+    Core --> Mul[Direct Mul via phi-algebraic identity]
     
     Fractal --> FEngine[FractalFHE Engine]
     FEngine --> Layers[7 Contraction Layers]
@@ -172,7 +172,7 @@ flowchart TB
     Fractal --> Noise
     NDim --> Noise
     
-    Noise --> Fixed[Fixed Point: 40 bits]
+    Noise --> Fixed[Fixed Point at 40 bits]
     Fixed --> Response([JSON Response])
 ```
 
