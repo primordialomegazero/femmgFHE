@@ -28,3 +28,4 @@ paper/*.out
 .DS_Store
 Thumbs.db
 paper/*.pdf
+build/femmg_server
