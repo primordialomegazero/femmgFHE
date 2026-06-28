@@ -1,15 +1,28 @@
 {
   "name": "femmg-fhe-client",
-  "version": "12.0.1",
+  "version": "13.0.2",
   "description": "FEmmg-FHE v6.2 Client Library — Zero-Knowledge Fully Homomorphic Encryption with encrypted pair multiplication",
   "main": "index.js",
   "types": "index.d.ts",
-  "files": ["index.js", "index.d.ts", "README.md"],
-  "scripts": { "test": "node test.js" },
+  "files": [
+    "index.js",
+    "index.d.ts",
+    "README.md"
+  ],
+  "scripts": {
+    "test": "node test.js"
+  },
   "keywords": [
-    "fhe", "fully-homomorphic-encryption", "zero-knowledge",
-    "banach-contraction", "golden-ratio", "chaotic-nonce",
-    "ind-cpa", "privacy", "encryption", "homomorphic"
+    "fhe",
+    "fully-homomorphic-encryption",
+    "zero-knowledge",
+    "banach-contraction",
+    "golden-ratio",
+    "chaotic-nonce",
+    "ind-cpa",
+    "privacy",
+    "encryption",
+    "homomorphic"
   ],
   "author": "Dan Joseph M. Fernandez / Primordial Omega Zero",
   "license": "MIT",
