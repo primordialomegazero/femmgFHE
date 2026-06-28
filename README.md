@@ -1,4 +1,4 @@
-# femmG-FHE — Phi-Powered Fully Homomorphic Encryption
+# FEmmg-FHE — Phi-Powered Fully Homomorphic Encryption
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![C++17](https://img.shields.io/badge/C%2B%2B-17-blue.svg)](https://en.cppreference.com/w/cpp/17)
@@ -20,7 +20,7 @@
 
 ## Table of Contents
 
-- [What Is femmG-FHE?](#what-is-femmg-fhe)
+- [What Is FEmmg-FHE?](#what-is-femmg-fhe)
   - [The Breakthrough](#the-breakthrough)
   - [Mathematical Foundation](#mathematical-foundation)
 - [Performance](#performance)
@@ -49,9 +49,9 @@
 
 ---
 
-## What Is femmG-FHE?
+## What Is FEmmg-FHE?
 
-**femmG-FHE** (Phi-FHE) is a Fully Homomorphic Encryption system that achieves **10 million true homomorphic operations per second** on consumer hardware. It is not an optimization of existing lattice-based FHE — it is a **new mathematical primitive** for homomorphic encryption based on **phi-contraction mappings** and the **Banach Fixed Point Theorem**.
+**FEmmg-FHE** (Phi-FHE) is a Fully Homomorphic Encryption system that achieves **10 million true homomorphic operations per second** on consumer hardware. It is not an optimization of existing lattice-based FHE — it is a **new mathematical primitive** for homomorphic encryption based on **phi-contraction mappings** and the **Banach Fixed Point Theorem**.
 
 ### The Breakthrough
 
@@ -61,9 +61,9 @@ For 17 years (Gentry 2009 to 2026), FHE has been limited by:
 - **Ciphertext Size:** Kilobytes to megabytes per value
 - **Bootstrapping:** Expensive external operation to reset noise
 
-**femmG-FHE solves all three:**
+**FEmmg-FHE solves all three:**
 
-| Problem | Standard FHE | femmG-FHE |
+| Problem | Standard FHE | FEmmg-FHE |
 |---------|-------------|-----------|
 | Speed | ~100 TPS | **10,000,000 TPS** |
 | Ciphertext | 10KB-1MB | **40 bytes** |
@@ -72,7 +72,7 @@ For 17 years (Gentry 2009 to 2026), FHE has been limited by:
 
 ### Mathematical Foundation
 
-Noise in FHE is traditionally treated as an enemy that grows and must be reset. femmG-FHE discovers that noise is a **dynamical system with a globally attracting fixed point** at the golden ratio phi:
+Noise in FHE is traditionally treated as an enemy that grows and must be reset. FEmmg-FHE discovers that noise is a **dynamical system with a globally attracting fixed point** at the golden ratio phi:
 
 ```
 noise(n+1) = noise(n) x phi^-1 + N0 x (1 - phi^-1)
@@ -153,14 +153,14 @@ where:
 
 ```bash
 # Clone
-git clone https://github.com/primordialomegazero/femmgFHE.git
-cd femmgFHE
+git clone https://github.com/primordialomegazero/FEmmgfhe.git
+cd FEmmgfhe
 
 # Build (single command, zero dependencies)
-g++ -std=c++17 -O3 -march=native -pthread -o femmg_fhe src/hydra_final.cpp
+g++ -std=c++17 -O3 -march=native -pthread -o FEmmg_fhe src/hydra_final.cpp
 
 # Run
-./femmg_fhe
+./FEmmg_fhe
 ```
 
 Server starts on port 8092 with 12 threads.
@@ -318,7 +318,7 @@ curl -X POST http://localhost:8092/manifest \
 
 | System | TPS | Ciphertext Size | Bootstrapping | Dependencies |
 |--------|-----|----------------|---------------|-------------|
-| **femmG-FHE** | **10,000,000** | **40 bytes** | **Built-in (self)** | **ZERO** |
+| **FEmmg-FHE** | **10,000,000** | **40 bytes** | **Built-in (self)** | **ZERO** |
 | IBM HElib | ~100 | ~100KB | External | 10+ |
 | Microsoft SEAL | ~1,000 | ~100KB | External | 5+ |
 | Google TFHE | ~100 | ~1KB | External (gate) | 5+ |
@@ -330,7 +330,7 @@ curl -X POST http://localhost:8092/manifest \
 ## Repository Structure
 
 ```
-femmgFHE/
+FEmmgfhe/
 ├── README.md              # This file
 ├── LICENSE                # MIT License
 ├── CONTRIBUTING.md        # Development guidelines
@@ -375,10 +375,10 @@ See [LICENSE](LICENSE) for full text.
 ## Citation
 
 ```bibtex
-@software{femmgFHE2026,
+@software{FEmmgfhe2026,
   author = {Dan Joseph M. Fernandez},
-  title = {femmG-FHE: Phi-Powered Fully Homomorphic Encryption},
+  title = {FEmmg-FHE: Phi-Powered Fully Homomorphic Encryption},
   year = {2026},
-  url = {https://github.com/primordialomegazero/femmgFHE}
+  url = {https://github.com/primordialomegazero/FEmmgfhe}
 }
 ```
