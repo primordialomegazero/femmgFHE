@@ -27,3 +27,4 @@ paper/*.out
 # OS
 .DS_Store
 Thumbs.db
+paper/*.pdf
