@@ -35,7 +35,7 @@ class FEmmgClient {
   getRegistrationPayload() { return { action: 'register', client_id: this.clientId }; }
   getAddPayload(e1, e2) { return { action: 'fhe_add', e1, e2, client_id: this.clientId }; }
   getMultiplyPayload(e1, e2) { return { action: 'fhe_multiply', e1, e2, client_id: this.clientId }; }
-  getPublicInfo() { return { client_id: this.clientId, version: '12.0.0', protocol: 'FEmmg-FHE' }; }
+  getPublicInfo() { return { client_id: this.clientId, version: '12.0.1', protocol: 'FEmmg-FHE' }; }
   getSecretKeys() { return { seed: this.seed, client_id: this.clientId }; }
   static fromKeys(keys) { const c = new FEmmgClient(keys.seed); c.clientId = keys.client_id; return c; }
 }
