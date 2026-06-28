@@ -208,7 +208,7 @@ flowchart TD
     B -->|No Attack| C{Valid Action?}
     C -->|register| E[Register Client<br/>Store client_id only]
     C -->|fhe_add| F[Compute Blind<br/>e1 + e2 - LAMBDA]
-    C -->|fhe_multiply| G[Compute Blind<br/>(e1-L)(e2-L)/PHI + L]
+    C -->|fhe_multiply| G[Compute Blind<br/>e1 minus L times e2 minus L over PHI plus L]
     C -->|health| H[Return Stats<br/>ZERO secrets]
     C -->|tps| I[Benchmark<br/>14M+ TPS]
     C -->|Unknown| D
