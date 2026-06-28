@@ -5,12 +5,12 @@
 [![Dependencies](https://img.shields.io/badge/Dependencies-ZERO-brightgreen.svg)]()
 [![Architecture](https://img.shields.io/badge/Architecture-Lock--Free-red.svg)]()
 [![Docker](https://img.shields.io/badge/Docker-ghcr.io%2Fprimordialomegazero%2Ffemmgfhe-blue.svg)](https://github.com/primordialomegazero/femmgFHE/pkgs/container/femmgfhe)
-[![TPS](https://img.shields.io/badge/TPS-13M%2B-green.svg)]()
+[![TPS](https://img.shields.io/badge/TPS-14M%2B-green.svg)]()
 
 ```
 ============================================================
   TRUE FULLY HOMOMORPHIC ENCRYPTION
-  13M+ TPS | 40-Byte Ciphertext | Self-Stabilizing Noise
+  14M+ TPS | 40-Byte Ciphertext | Self-Stabilizing Noise
   N-Dimensional Banach Contraction | No Bootstrapping
 ============================================================
 ```
@@ -36,7 +36,7 @@
 
 **F**ully **E**ncrypted **M**ultiplicative **M**apping with **G**olden Ratio.
 
-FEmmg-FHE is a **true Fully Homomorphic Encryption** scheme that achieves **13M+ operations per second** on consumer hardware with **40-byte ciphertexts** and **zero external dependencies.**
+FEmmg-FHE is a **true Fully Homomorphic Encryption** scheme that achieves **14M+ operations per second** on consumer hardware with **40-byte ciphertexts** and **zero external dependencies.**
 
 Both addition and multiplication operate **directly on ciphertexts.** No internal decryption. No bootstrapping. Noise self-stabilizes at 40 bits via the Banach Fixed Point Theorem.
 
@@ -125,7 +125,7 @@ T_d(x) = x * phi^-1 + attractor_d * (1 - phi^-1)
 
 | Metric | Standard | N-Dimensional |
 |--------|----------|---------------|
-| TPS | 11.2M | **13.4M** |
+| TPS | 14.4M | **13.3M** |
 | Concurrent (3K) | 124K req/s | - |
 | Ciphertext | 40 bytes | 40 bytes |
 | Noise (50K ops) | 40.01-40.25 bits | 40 bits stable |
