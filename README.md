@@ -26,13 +26,15 @@
 - [N-Dimensional Banach Contraction](#n-dimensional-banach-contraction)
 - [Benchmarks](#benchmarks)
 - [Architecture](#architecture)
-- [IACR Paper](#iacr-paper)
+- [IACR ePrint](#iacr-eprint)
 - [Author](#author)
 - [License](#license)
 
 ---
 
 ## What Is FEmmg-FHE?
+
+**F**ully **E**ncrypted **M**ultiplicative **M**apping with **G**olden Ratio.
 
 FEmmg-FHE is a **true Fully Homomorphic Encryption** scheme that achieves **13M+ operations per second** on consumer hardware with **40-byte ciphertexts** and **zero external dependencies.**
 
@@ -80,6 +82,15 @@ All operations through `POST /manifest`. Health: `GET /health`.
 | `bombardier` | 3K concurrent stress test | standard |
 | `party_verify` | 91/91 cross-party | both |
 
+### Example
+
+```bash
+curl -X POST http://localhost:8092/manifest \
+  -H "Content-Type: application/json" \
+  -d '{"action":"add","a":"5","b":"3"}'
+# {"result":8,"correct":true,"true_fhe":true}
+```
+
 ---
 
 ## Encryption Modes
@@ -97,6 +108,7 @@ All operations through `POST /manifest`. Health: `GET /health`.
 FEmmg-FHE v3.0 introduces **N-Dimensional Banach Contraction** — extending the phi-contraction from R^1 to R^7.
 
 Each dimension independently contracts toward a global attractor via:
+
 ```
 T_d(x) = x * phi^-1 + attractor_d * (1 - phi^-1)
 ```
@@ -124,6 +136,48 @@ T_d(x) = x * phi^-1 + attractor_d * (1 - phi^-1)
 
 ## Architecture
 
+### System Flow
+
+```mermaid
+flowchart TB
+    Client([Client]) --> API[REST API :8092]
+    API --> Router{Action Router}
+    
+    Router -->|encrypt| Enc[Encryption]
+    Router -->|add/multiply| HomOps[Homomorphic Ops]
+    Router -->|fractal_chain| Fractal[Fractal Engine]
+    Router -->|ndim_verify| NDim[N-Dim Engine]
+    Router -->|tps| Bench[Benchmark]
+    Router -->|bombardier| Stress[Stress Test]
+    
+    Enc --> Standard[1D Standard]
+    Enc --> FractalEnc[7-Layer Fractal]
+    Enc --> NDimEnc[7D Banach]
+    
+    HomOps --> Core[FEmmg-FHE Core]
+    Core --> Add[Direct Add: e1+e2-lambda]
+    Core --> Mul[Direct Mul: (e1e2-lambda(e1+e2)+lambda^2)/phi+lambda]
+    
+    Fractal --> FEngine[FractalFHE Engine]
+    FEngine --> Layers[7 Contraction Layers]
+    FEngine --> Parties[14 Party Fragments]
+    FEngine --> CrossVerify[91/91 Cross-Verify]
+    
+    NDim --> NEngine[NDimBanachEngine]
+    NEngine --> Contraction[7D Banach Contraction]
+    NEngine --> Lyapunov[Full Lyapunov Spectrum]
+    NEngine --> MultiParty[Multi-Party N-Dim]
+    
+    Core --> Noise[Noise Self-Stabilization]
+    Fractal --> Noise
+    NDim --> Noise
+    
+    Noise --> Fixed[Fixed Point: 40 bits]
+    Fixed --> Response([JSON Response])
+```
+
+### Source Tree
+
 ```
 src/
 ├── femmg_fhe.h        — Core FHE engine (add + multiply direct)
@@ -133,11 +187,20 @@ src/
 └── test_suite.cpp     — Complete verification (34,087 tests)
 ```
 
+**Lock-free. 12 threads. 0 mutexes. Zero external dependencies.**
+
 ---
 
-## IACR Paper
+## IACR ePrint
 
-Submitted to IACR Cryptology ePrint Archive. Complete mathematical framework with 6 formal theorems, security analysis, and benchmark verification.
+A preprint describing the mathematical framework has been submitted to the **IACR Cryptology ePrint Archive** — a permanent, publicly accessible repository of cryptographic research.
+
+The paper includes:
+- 6 formal theorems with complete proofs
+- Banach Fixed Point Theorem application to FHE noise
+- Lyapunov stability analysis
+- Security analysis with 3 pillars
+- Full benchmark verification (34,087 tests, 100% pass)
 
 ---
 
