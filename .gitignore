@@ -39,3 +39,6 @@ paper/*.aux
 paper/*.log
 paper/*.out
 paper/*.pdf
+paper/*.aux
+paper/*.log
+paper/*.out
