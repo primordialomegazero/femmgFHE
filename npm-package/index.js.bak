@@ -3,14 +3,17 @@ const crypto = require('crypto');
 const PHI = 1.6180339887498948482;
 const LAMBDA = 0.4812;
 const FLOAT_SCALE = 1000000000000;
-const VERSION = '13.1.2';
+const VERSION = '13.1.0';
 
 class FEmmgClient {
   constructor(seed = null, mode = 'ind-cpa') {
-    if (typeof seed === 'object' && seed !== null) {
+    // Support both: new Client('accurate') and new Client({mode:'accurate'})
+    if (typeof seed === 'object' && seed !== null && !Buffer.isBuffer(seed)) {
       if (seed.mode) mode = seed.mode;
-      seed = seed.seed || null;
+      if (seed.seed) seed = seed.seed;
+      else seed = null;
     }
+    
     this.phi = PHI;
     this.lambda = LAMBDA;
     this.mode = mode || 'ind-cpa';
@@ -23,15 +26,11 @@ class FEmmgClient {
 
   _chaoticNonce() {
     this.nonceCounter++;
-    // True randomness from crypto.randomInt (0 to 999999)
-    const trueRandom = crypto.randomInt(0, 1000000) / 1000000.0;
-    // Mix with seed and counter for extra entropy
-    const mixed = (trueRandom + (this.seed % 1000) / 1000.0 + this.nonceCounter * 0.0001) / 3.0;
-    // 7-iteration chaotic map
-    let x = mixed;
+    const randBytes = crypto.randomBytes(8);
+    const randFloat = (randBytes.readUInt32BE(0) ^ randBytes.readUInt32BE(4)) / 0xFFFFFFFF;
+    let x = ((this.seed ^ this.nonceCounter) % 10000) / 10000.0 + randFloat * 0.5;
     for (let i = 0; i < 7; i++) x = this.phi * x * (1.0 - x);
-    // Small perturbation — preserves decrypt accuracy
-    return x * this.lambda * 0.001;
+    return x * this.lambda * 0.01;
   }
 
   encrypt(message) {
