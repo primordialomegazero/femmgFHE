@@ -33,3 +33,9 @@ hydra_final
 # Test outputs
 test_results/
 *.tmp
+
+# LaTeX artifacts
+paper/*.aux
+paper/*.log
+paper/*.out
+paper/*.pdf

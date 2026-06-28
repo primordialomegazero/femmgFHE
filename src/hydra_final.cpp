@@ -464,7 +464,7 @@ void handle_request(int fd, PhiFHE& fhe, FractalFHE& fractal, AntiMatter& shield
         }));
     }
     
-    write(fd, response.c_str(), response.size());
+    (void)!write(fd, response.c_str(), response.size());
     close(fd);
 }
 
