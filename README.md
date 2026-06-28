@@ -147,17 +147,30 @@ where:
 ### Prerequisites
 
 - Linux (or WSL2 on Windows)
-- GCC 11+ with C++17 support
-- No other dependencies required
+- GCC 11+ with C++17 support (for building from source)
+- Docker (optional, for pre-built image)
 
-### Build and Run
+### Option 1: Docker (Recommended — No Build Required)
+
+```bash
+# Pull and run instantly
+docker pull ghcr.io/primordialomegazero/femmgfhe:latest
+docker run -d -p 8092:8092 ghcr.io/primordialomegazero/femmgfhe:latest
+
+# Test
+curl http://localhost:8092/health
+```
+
+Pre-built image available at: [ghcr.io/primordialomegazero/femmgfhe](https://github.com/primordialomegazero/femmgFHE/pkgs/container/femmgfhe)
+
+### Option 2: Build from Source (Zero Dependencies)
 
 ```bash
 # Clone
-git clone https://github.com/primordialomegazero/FEmmgfhe.git
-cd FEmmgfhe
+git clone https://github.com/primordialomegazero/femmgFHE.git
+cd femmgFHE
 
-# Build (single command, zero dependencies)
+# Build (single command)
 g++ -std=c++17 -O3 -march=native -pthread -o FEmmg_fhe src/hydra_final.cpp
 
 # Run
