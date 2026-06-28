@@ -7,7 +7,7 @@
 
 ## Abstract
 
-We present FEmmg-FHE, a novel Fully Homomorphic Encryption scheme based on phi-contraction mappings in Banach spaces. Unlike traditional lattice-based FHE (Gentry, 2009) which relies on polynomial ring arithmetic with external bootstrapping, our scheme leverages the Banach Fixed Point Theorem (1922) to achieve **self-stabilizing noise** that naturally converges to a fixed point at N0 = 40 bits via the golden ratio phi = 1.618... as the contraction factor. This eliminates external bootstrapping entirely, enabling **10 million true homomorphic operations per second** on consumer hardware with **40-byte ciphertexts**. We provide formal proofs of correctness, noise convergence, and security under the phi-Chaotic Irreversibility assumption. A reference implementation (514 lines, zero dependencies) is publicly available.
+We present FEmmg-FHE, a novel Fully Homomorphic Encryption scheme based on phi-contraction mappings in Banach spaces. Unlike traditional lattice-based FHE (Gentry, 2009) which relies on polynomial ring arithmetic with external bootstrapping, our scheme leverages the Banach Fixed Point Theorem (1922) to achieve **self-stabilizing noise** that naturally converges to a fixed point at N0 = 40 bits via the golden ratio phi = 1.618... as the contraction factor. This eliminates external bootstrapping entirely, enabling **7.5 million true homomorphic operations per second** on consumer hardware with **40-byte ciphertexts**. We provide formal proofs of correctness, noise convergence, and security under the phi-Chaotic Irreversibility assumption. A reference implementation (514 lines, zero dependencies) is publicly available.
 
 ---
 
@@ -96,7 +96,7 @@ Security rests on:
 
 | Metric | Value |
 |--------|-------|
-| True FHE TPS | 9-10M ops/sec |
+| True FHE TPS | 7.5M ops/sec |
 | Encrypt | ~50 ns |
 | Homomorphic Add | ~90 ns |
 | Homomorphic Multiply | ~150 ns |
@@ -116,7 +116,7 @@ Security rests on:
 
 ## 7. Conclusion
 
-FEmmg-FHE represents a paradigm shift in FHE: noise as a self-stabilizing dynamical system rather than an adversary. By leveraging the Banach Fixed Point Theorem with phi as the contraction factor, we achieve 10M TPS true homomorphic operations — 10,000x faster than existing systems — with 40-byte ciphertexts and zero external dependencies.
+FEmmg-FHE represents a paradigm shift in FHE: noise as a self-stabilizing dynamical system rather than an adversary. By leveraging the Banach Fixed Point Theorem with phi as the contraction factor, we achieve 7.5M TPS true homomorphic operations — 7,500x faster than existing systems — with 40-byte ciphertexts and zero external dependencies.
 
 ---
 

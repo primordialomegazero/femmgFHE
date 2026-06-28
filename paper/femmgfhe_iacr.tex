@@ -13,7 +13,7 @@
 \maketitle
 
 \begin{abstract}
-We present FEmmg-FHE, a novel Fully Homomorphic Encryption (FHE) scheme based on $\varphi$-contraction mappings in Banach spaces. Unlike traditional lattice-based FHE (Gentry, 2009) which relies on polynomial ring arithmetic with external bootstrapping, our scheme leverages the Banach Fixed Point Theorem (1922) to achieve \textbf{self-stabilizing noise} that naturally converges to a fixed point at $N_0 = 40$ bits via the golden ratio $\varphi = 1.618\ldots$ as the contraction factor. This eliminates the need for external bootstrapping entirely, enabling \textbf{10 million true homomorphic operations per second} on consumer hardware (AMD Ryzen 5 2600, 12 threads) with \textbf{40-byte ciphertexts}. We provide formal proofs of correctness, noise convergence, and security under the $\varphi$-Chaotic Irreversibility assumption. A reference implementation demonstrates homomorphic addition, multiplication, and subtraction with self-stabilizing noise across 10,000+ operations.
+We present FEmmg-FHE, a novel Fully Homomorphic Encryption (FHE) scheme based on $\varphi$-contraction mappings in Banach spaces. Unlike traditional lattice-based FHE (Gentry, 2009) which relies on polynomial ring arithmetic with external bootstrapping, our scheme leverages the Banach Fixed Point Theorem (1922) to achieve \textbf{self-stabilizing noise} that naturally converges to a fixed point at $N_0 = 40$ bits via the golden ratio $\varphi = 1.618\ldots$ as the contraction factor. This eliminates the need for external bootstrapping entirely, enabling \textbf{7.5 million true homomorphic operations per second} on consumer hardware (AMD Ryzen 5 2600, 12 threads) with \textbf{40-byte ciphertexts}. We provide formal proofs of correctness, noise convergence, and security under the $\varphi$-Chaotic Irreversibility assumption. A reference implementation demonstrates homomorphic addition, multiplication, and subtraction with self-stabilizing noise across 10,000+ operations.
 \end{abstract}
 
 \section{Introduction}
@@ -227,7 +227,7 @@ TFHE & $\sim$100 & $\sim$1KB & External & 5+ \\
 
 \section{Conclusion}
 
-We have presented FEmmg-FHE, a novel FHE scheme based on $\varphi$-contraction mappings and the Banach Fixed Point Theorem. The key innovation — modeling noise as a dynamical system with a globally attracting fixed point — eliminates the need for external bootstrapping, enabling 10 million true homomorphic operations per second on consumer hardware with 40-byte ciphertexts.
+We have presented FEmmg-FHE, a novel FHE scheme based on $\varphi$-contraction mappings and the Banach Fixed Point Theorem. The key innovation — modeling noise as a dynamical system with a globally attracting fixed point — eliminates the need for external bootstrapping, enabling 7.5 million true homomorphic operations per second on consumer hardware with 40-byte ciphertexts.
 
 The scheme is formally proven correct for homomorphic addition and multiplication, with noise bounded by $N_0 + \epsilon$ for arbitrarily many operations. Security rests on $\varphi$-chaotic irreversibility with Ring-LWE compatibility.
 

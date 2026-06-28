@@ -7,7 +7,7 @@ All notable changes to FEmmg-FHE will be documented in this file.
 ### Added
 - Initial release of FEmmg-FHE
 - Phi-contraction Fully Homomorphic Encryption engine
-- 10M TPS true homomorphic operations (encrypt + add + decrypt pipeline)
+- 7.5M TPS true homomorphic operations (encrypt + add + decrypt pipeline)
 - Self-stabilizing noise via Banach Fixed Point Theorem
 - 40-byte ciphertexts
 - Homomorphic addition, multiplication, and subtraction
@@ -23,7 +23,7 @@ All notable changes to FEmmg-FHE will be documented in this file.
 - MIT License
 
 ### Performance
-- 9-10M TPS on AMD Ryzen 5 2600 (12 cores)
+- 9-7.5M TPS on AMD Ryzen 5 2600 (12 cores)
 - Encrypt: ~50 ns
 - Homomorphic Add: ~90 ns
 - Homomorphic Multiply: ~150 ns

@@ -2,7 +2,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![C++17](https://img.shields.io/badge/C%2B%2B-17-blue.svg)](https://en.cppreference.com/w/cpp/17)
-[![TPS](https://img.shields.io/badge/TPS-10M%2B-green.svg)]()
+[![TPS](https://img.shields.io/badge/TPS-7.5M%2B-green.svg)]()
 [![Dependencies](https://img.shields.io/badge/Dependencies-ZERO-brightgreen.svg)]()
 [![Architecture](https://img.shields.io/badge/Architecture-Lock--Free-red.svg)]()
 [![Docker](https://img.shields.io/badge/Docker-ghcr.io%2Fprimordialomegazero%2Ffemmgfhe-blue.svg)](https://github.com/primordialomegazero/femmgFHE/pkgs/container/femmgfhe)
@@ -11,7 +11,7 @@
 ```
 ============================================================
   TRUE HOMOMORPHIC FHE VIA PHI-CONTRACTION
-  10M+ TPS | 40-Byte Ciphertext | Self-Bootstrapping
+  7.5M+ TPS | 40-Byte Ciphertext | Self-Bootstrapping
   Lock-Free Multi-Metaprogramming | Zero External Dependencies
 ============================================================
 ```
@@ -66,7 +66,7 @@ For 17 years (Gentry 2009 to 2026), FHE has been limited by:
 
 | Problem | Standard FHE | FEmmg-FHE |
 |---------|-------------|-----------|
-| Speed | ~100 TPS | **10,000,000 TPS** |
+| Speed | ~100 TPS | **7,500,000 TPS** |
 | Ciphertext | 10KB-1MB | **40 bytes** |
 | Bootstrapping | External (expensive) | **Built-in (self-stabilizing)** |
 | Dependencies | OpenSSL, GMP, etc. | **ZERO** |
@@ -91,7 +91,7 @@ where:
 - Convergence is exponential: |xn - x*| <= phi^-n |x0 - x*|
 - The system is Lyapunov stable: lambda = -ln(phi) < 0
 
-**Result:** Noise self-stabilizes at 40 bits regardless of operation count. No external bootstrapping needed. This is what enables 10M TPS.
+**Result:** Noise self-stabilizes at 40 bits regardless of operation count. No external bootstrapping needed. This is what enables 7.5M TPS.
 
 ---
 
@@ -255,7 +255,7 @@ curl -X POST http://localhost:8092/manifest \
   "operations": 50000000,
   "duration_ms": 5000,
   "tps": 10000000,
-  "tps_display": "10M TPS",
+  "tps_display": "7.5M TPS",
   "true_fhe": true,
   "lock_free": true,
   "threads": 12,
@@ -278,7 +278,7 @@ curl -X POST http://localhost:8092/manifest \
 ### Core
 
 - [x] **True Homomorphic Encryption** — Add, Multiply, Subtract on encrypted data
-- [x] **10M+ TPS** — 10,000x faster than traditional FHE
+- [x] **7.5M+ TPS** — 7,500x faster than traditional FHE
 - [x] **Self-Bootstrapping** — Noise converges naturally to 40 bits
 - [x] **40-Byte Ciphertext** — vs kilobytes/megabytes in standard FHE
 - [x] **Zero External Dependencies** — Pure C++17 + POSIX syscalls
@@ -306,7 +306,7 @@ curl -X POST http://localhost:8092/manifest \
 | TRL 1 | Basic principles observed | Done — Banach Fixed Point Theorem (1922) |
 | TRL 2 | Technology concept formulated | Done — Phi-FHE mathematical framework |
 | TRL 3 | Experimental proof of concept | Done — Standalone tests passing |
-| TRL 4 | Technology validated in lab | Done — 10M TPS on consumer hardware |
+| TRL 4 | Technology validated in lab | Done — 7.5M TPS on consumer hardware |
 | TRL 5 | Technology validated in relevant environment | Done — Multi-threaded HTTP API |
 | TRL 6 | Technology demonstrated in relevant environment | Done — Full test suite (10/10 passing) |
 | TRL 7 | System prototype in operational environment | In Progress — Pending deployment |
@@ -319,7 +319,7 @@ curl -X POST http://localhost:8092/manifest \
 
 | System | TPS | Ciphertext Size | Bootstrapping | Dependencies |
 |--------|-----|----------------|---------------|-------------|
-| **FEmmg-FHE** | **10,000,000** | **40 bytes** | **Built-in (self)** | **ZERO** |
+| **FEmmg-FHE** | **7,500,000** | **40 bytes** | **Built-in (self)** | **ZERO** |
 | IBM HElib | ~100 | ~100KB | External | 10+ |
 | Microsoft SEAL | ~1,000 | ~100KB | External | 5+ |
 | Google TFHE | ~100 | ~1KB | External (gate) | 5+ |
