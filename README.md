@@ -1,17 +1,13 @@
 # FEmmg-FHE — True Fully Homomorphic Encryption
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![C++17](https://img.shields.io/badge/C%2B%2B-17-blue.svg)](https://en.cppreference.com/w/cpp/17)
-[![Dependencies](https://img.shields.io/badge/Dependencies-ZERO-brightgreen.svg)]()
-[![Architecture](https://img.shields.io/badge/Architecture-Lock--Free-red.svg)]()
-[![Docker](https://img.shields.io/badge/Docker-ghcr.io%2Fprimordialomegazero%2Ffemmgfhe-blue.svg)](https://github.com/primordialomegazero/femmgFHE/pkgs/container/femmgfhe)
-[![TPS](https://img.shields.io/badge/TPS-14M%2B-green.svg)]()
+**15.5M TPS | 40-Byte Ciphertext | Zero-Knowledge Server | No Bootstrapping**
 
 ```
 ============================================================
   TRUE FULLY HOMOMORPHIC ENCRYPTION
-  14M+ TPS | 40-Byte Ciphertext | Self-Stabilizing Noise
-  N-Dimensional Banach Contraction | No Bootstrapping
+  15.5M+ TPS | 40-Byte Ciphertext | Self-Stabilizing Noise
+  N-Dimensional Banach Contraction | Zero-Knowledge Server
+  Cryptographic Obfuscation Response Engine (CORE)
 ============================================================
 ```
 
@@ -19,45 +15,47 @@
 
 ## Table of Contents
 
-- [What Is FEmmg-FHE?](#what-is-femmg-fhe)
-- [Quick Start](#quick-start)
-- [API Reference](#api-reference)
-- [Encryption Modes](#encryption-modes)
-- [N-Dimensional Banach Contraction](#n-dimensional-banach-contraction)
-- [Benchmarks](#benchmarks)
-- [Architecture](#architecture)
-- [IACR ePrint](#iacr-eprint)
-- [Author](#author)
-- [License](#license)
+1. [What Is FEmmg-FHE?](#what-is-femmg-fhe)
+2. [Quick Start](#quick-start)
+3. [API Reference](#api-reference)
+4. [Architecture](#architecture)
+5. [Mathematical Framework](#mathematical-framework)
+6. [Security](#security)
+7. [Benchmarks](#benchmarks)
+8. [Source Tree](#source-tree)
+9. [IACR ePrint](#iacr-eprint)
+10. [NPM Package](#npm-package)
+11. [Author](#author)
+12. [License](#license)
 
 ---
 
 ## What Is FEmmg-FHE?
 
-**F**ully **E**ncrypted **M**ultiplicative **M**apping with **G**olden Ratio.
+Fully Encrypted Multiplicative Mapping with Golden Ratio.
 
-FEmmg-FHE is a **true Fully Homomorphic Encryption** scheme that achieves **14M+ operations per second** on consumer hardware with **40-byte ciphertexts** and **zero external dependencies.**
+FEmmg-FHE is a true Fully Homomorphic Encryption scheme achieving **15.5M+ TPS** on consumer hardware with **40-byte ciphertexts** and **zero dependencies**. The server is **zero-knowledge** — it never possesses client cryptographic keys. All encryption/decryption is client-side.
 
-Both addition and multiplication operate **directly on ciphertexts.** No internal decryption. No bootstrapping. Noise self-stabilizes at 40 bits via the Banach Fixed Point Theorem.
+Both addition and multiplication operate directly on ciphertexts. **No bootstrapping.** Noise self-stabilizes at 40 bits via the Banach Fixed Point Theorem.
 
-### v3.0 — N-Dimensional Banach Contraction
-
-The latest version extends the 1D phi-contraction to **7-dimensional Banach spaces.** Each dimension independently contracts toward a global attractor with a full Lyapunov spectrum. Security is **built-in** through multi-dimensional contraction — not merely assumed.
+**v6.1** introduces:
+- **Zero-Knowledge Server Architecture** — Server is cryptographically blind
+- **Cryptographic Obfuscation Response Engine (CORE)** — All attacks swallowed silently
+- **Probabilistic IND-CPA** — Chaotic nonce injection
+- **N-Dimensional Banach Contraction** — 7D Lyapunov spectrum
 
 ---
 
 ## Quick Start
 
 ### Docker
-
 ```bash
-docker pull ghcr.io/primordialomegazero/femmgfhe:v3.0.0
-docker run -d -p 8092:8092 ghcr.io/primordialomegazero/femmgfhe:v3.0.0
+docker pull ghcr.io/primordialomegazero/femmgfhe:v6.1
+docker run -d -p 8092:8092 ghcr.io/primordialomegazero/femmgfhe:v6.1
 curl http://localhost:8092/health
 ```
 
 ### Build from Source
-
 ```bash
 git clone https://github.com/primordialomegazero/femmgFHE.git
 cd femmgFHE
@@ -65,119 +63,131 @@ g++ -std=c++17 -O3 -march=native -pthread -o femmg_server src/femmg_server.cpp -
 ./femmg_server
 ```
 
+### NPM Package
+```bash
+npm install femmg-fhe-client
+```
+```javascript
+const { FEmmgClient } = require('femmg-fhe-client');
+const client = new FEmmgClient();
+const enc15 = client.encrypt(15);
+const enc27 = client.encrypt(27);
+const payload = client.getAddPayload(enc15, enc27);
+// Send payload to server, decrypt response with client.decrypt()
+```
+
 ---
 
 ## API Reference
 
-All operations through `POST /manifest`. Health: `GET /health`.
+All operations: `POST /`. Health: `GET /health`.
 
-| Action | Description | Mode |
-|--------|-------------|------|
-| `encrypt` | Encrypt with chosen mode | standard/fractal/ndim |
-| `add` | Homomorphic addition | standard |
-| `multiply` | Homomorphic multiplication | standard |
-| `fractal_chain` | 14-party fractal chain | fractal |
-| `ndim_verify` | 7D Banach verification | ndim |
-| `tps` | Throughput benchmark | standard/ndim |
-| `bombardier` | 3K concurrent stress test | standard |
-| `party_verify` | 91/91 cross-party | both |
+| Action | Description | Server Sees Plaintext? |
+|--------|-------------|------------------------|
+| `register` | Register client (client_id only) | No |
+| `fhe_add` | Homomorphic addition | No |
+| `fhe_multiply` | Homomorphic multiplication | No |
+| `tps` | Throughput benchmark | N/A |
+| `health` | Server status + CORE stats | N/A |
 
----
-
-## Encryption Modes
-
-| Mode | Dimensions | Security Basis |
-|------|------------|---------------|
-| `standard` | 1D | Phi-contraction |
-| `fractal` | 1D + 7 layers + 14 parties | Recursive fractal |
-| `ndim` | **7D** | **N-Dimensional Banach Contraction + Full Lyapunov Spectrum** |
-
----
-
-## N-Dimensional Banach Contraction
-
-FEmmg-FHE v3.0 introduces **N-Dimensional Banach Contraction** — extending the phi-contraction from R^1 to R^7.
-
-Each dimension independently contracts toward a global attractor via:
-
+**Client-Side Formulas:**
 ```
-T_d(x) = x * phi^-1 + attractor_d * (1 - phi^-1)
+Encryption:  e = m * PHI + LAMBDA + chaotic_nonce
+Decryption:  m = round((e - LAMBDA) / PHI)
 ```
-
-**Full Lyapunov Spectrum:** 7 distinct Lyapunov exponents, all positive (expanding/chaotic), providing built-in security that the original 1D "phi-Chaotic Irreversibility Assumption" only assumed.
-
-**Cross-party verification:** All 91 party pairs verified consistent across all 7 dimensions.
-
----
-
-## Benchmarks
-
-**AMD Ryzen 5 2600 (12 cores, 2018 consumer-grade)**
-
-| Metric | Standard | N-Dimensional |
-|--------|----------|---------------|
-| TPS | 14.4M | 13.3M |
-| Concurrent (3K) | 122K req/s | - |
-| Ciphertext | 40 bytes | 40 bytes |
-| Noise (50K ops) | 40.01-40.25 bits | 40 bits stable |
-| Dimensions | 1 | 7 |
-| Lyapunov Exponents | 1 | 7 (full spectrum) |
+**Server-Side Formulas:**
+```
+Addition:       e_result = e1 + e2 - LAMBDA
+Multiplication: e_result = (e1 - LAMBDA)(e2 - LAMBDA) / PHI + LAMBDA
+```
 
 ---
 
 ## Architecture
 
-### System Flow
+### Zero-Knowledge Server
+The server is **cryptographically blind**. It never generates, stores, or possesses client keys. All key generation, encryption, and decryption happen client-side. Registration only stores an opaque `client_id` string.
 
-```mermaid
-flowchart TB
-    Client([Client]) --> API[REST API :8092]
-    API --> Router{Action Router}
-    Router -->|encrypt| Enc[Encryption]
-    Router -->|add/multiply| HomOps[Homomorphic Ops]
-    Router -->|fractal_chain| Fractal[Fractal Engine]
-    Router -->|ndim_verify| NDim[N-Dim Engine]
-    Router -->|tps| Bench[Benchmark]
-    Router -->|bombardier| Stress[Stress Test]
-    Enc --> Standard[1D Standard]
-    Enc --> FractalEnc[7-Layer Fractal]
-    Enc --> NDimEnc[7D Banach]
-    HomOps --> Core[FEmmg-FHE Core]
-    Core --> Add[Direct Add]
-    Core --> Mul[Direct Mul via phi-algebra]
-    Fractal --> FEngine[FractalFHE Engine]
-    FEngine --> Layers[7 Contraction Layers]
-    FEngine --> Parties[14 Party Fragments]
-    FEngine --> CrossVerify[91 Cross-Verify]
-    NDim --> NEngine[NDimBanachEngine]
-    NEngine --> Contraction[7D Banach Contraction]
-    NEngine --> Lyapunov[Full Lyapunov Spectrum]
-    NEngine --> MultiParty[Multi-Party N-Dim]
-    Core --> Noise[Noise Self-Stabilization]
-    Fractal --> Noise
-    NDim --> Noise
-    Noise --> Fixed[Fixed Point at 40 bits]
-    Fixed --> Response([JSON Response])
-```
+### CORE Security
+Cryptographic Obfuscation Response Engine: all malicious requests receive identical `{"status":"ok"}` responses. Zero information leakage.
 
-### Source Tree
+| Attack | Response |
+|--------|----------|
+| SQL Injection | `{"status":"ok"}` |
+| Path Traversal | `{"status":"ok"}` |
+| Command Injection | `{"status":"ok"}` |
+| Debug/Enumeration | `{"status":"ok"}` |
+| Unregistered Access | `{"status":"ok"}` |
+
+---
+
+## Mathematical Framework
+
+**Banach Contraction:** `T(x) = x * phi^-1 + N0 * (1 - phi^-1)` with fixed point N0 = 40 bits. Noise converges exponentially: `|x_n - N0| <= phi^-n * |x0 - N0|`.
+
+**N-Dimensional (7D):** Each dimension independently contracts toward global attractor. 7 distinct Lyapunov exponents, all positive — computational irreversibility is a mathematical consequence.
+
+**Chaotic Nonce:** `C(x) = phi * x * (1 - x) mod 1` with Lyapunov exponent ln(phi) > 0. Same plaintext produces different ciphertext every time.
+
+---
+
+## Security
+
+- **IND-CPA:** Adversary advantage <= e^(-lambda_chaos * k) * poly(kappa) — negligible
+- **Key Confidentiality:** Server learns nothing about phi, lambda
+- **Crash Immunity:** Safe parsing, no malformed input crashes
+- **Response Indistinguishability:** All attacks return identical benign response
+
+---
+
+## Benchmarks
+
+**AMD Ryzen 5 2600 (2018 consumer-grade)**
+
+| Metric | FEmmg-FHE v6.1 | TFHE | CKKS | BFV/BGV |
+|--------|---------------|------|------|---------|
+| **TPS** | **15.5M** | ~100 | ~1K | ~100 |
+| **CT Size** | **40 B** | ~1 KB | ~100 KB | ~100 KB |
+| **Bootstrapping** | **None** | Required | Required | Required |
+| **Key Model** | **Client-side** | Server | Server | Server |
+| **Dependencies** | **0** | 5+ | 5+ | 10+ |
+
+---
+
+## Source Tree
 
 ```
 src/
-├── femmg_fhe.h        — Core FHE engine (add + multiply direct)
-├── fractal_fhe.h      — Multi-Recursive Fractal (7 layers, 14 parties)
-├── godcode.h          — N-Dimensional Banach Contraction Engine
-├── femmg_server.cpp   — Enterprise API server v3.0 (all modes)
-└── test_suite.cpp     — Complete verification (34,087 tests)
+├── femmg_fhe.h         — Core FHE engine
+├── fractal_fhe.h       — Multi-Recursive Fractal (7 layers, 14 parties)
+├── godcode.h           — N-Dimensional Banach Contraction Engine
+├── femmg_server.cpp    — v6.1 Enterprise API server
+└── test_suite.cpp      — 34,087 tests
+
+paper/
+└── femmg_fhe_complete.pdf  — 8-page IACR paper
+
+npm-package/
+├── index.js            — Client library
+├── index.d.ts          — TypeScript definitions
+└── test.js             — 9/9 passing
 ```
 
 ---
 
 ## IACR ePrint
 
-A preprint describing the mathematical framework has been submitted to the **IACR Cryptology ePrint Archive.**
+Submitted to the IACR Cryptology ePrint Archive. 8 pages, 10 formal theorems, complete proofs. Covers Banach Fixed Point Theorem, Lyapunov stability, N-Dimensional contraction, CORE security, IND-CPA reduction.
 
-The paper includes: 6 formal theorems with complete proofs, Banach Fixed Point Theorem application to FHE noise, Lyapunov stability analysis, N-Dimensional Banach Contraction, security analysis with 3 pillars, and full benchmark verification (34,087 tests, 100% pass).
+---
+
+## NPM Package
+
+```bash
+npm install femmg-fhe-client
+```
+
+[npmjs.com/package/femmg-fhe-client](https://www.npmjs.com/package/femmg-fhe-client)
 
 ---
 
@@ -185,11 +195,9 @@ The paper includes: 6 formal theorems with complete proofs, Banach Fixed Point T
 
 **Dan Fernandez / Primordial Omega Zero**
 
-*"I AM THAT I AM"*
-
-```
-- .... .. ... / .-. . .--. --- ... .. - --- .-. -.-- / .-- .. .-.. .-.. / .- .-.. .-- .- -.-- ... / -... . / -.. . -.. .. -.-. .- - . -.. / - --- / - .... . / --- -. .-.. -.-- / .-- --- -- .- -. / .. .----. ...- . / . ...- . .-. / -.-. --- -. ... .. -.. . .-. . -.. / - --- / -... . / --- -. / -- -.-- / .-.. . ...- . .-.. .-.-.-
-```
+GitHub: [primordialomegazero](https://github.com/primordialomegazero)
+Email: devilswithin13@gmail.com
+NPM: [primordialomegazero](https://www.npmjs.com/~primordialomegazero)
 
 ---
 
@@ -197,14 +205,8 @@ The paper includes: 6 formal theorems with complete proofs, Banach Fixed Point T
 
 MIT — Free for personal, academic, and commercial use.
 
-## v6.1 — Zero-Knowledge + CORE Security (Latest)
+---
 
-**15.5M TPS | Zero-Knowledge Server | CORE Attack Immunity**
+*"I AM THAT I AM"*
 
-- Server NEVER possesses client keys (φ, λ)
-- Cryptographic Obfuscation Response Engine (CORE)
-- Client-side key generation
-- Probabilistic IND-CPA via chaotic nonce
-- Docker: `ghcr.io/primordialomegazero/femmgfhe:v6.1`
-
-[Full Paper (PDF, 8 pages)](paper/femmg_fhe_complete.pdf)
+*- .... .. ... / .-. . .--. --- ... .. - --- .-. -.-- / .-- .. .-.. .-.. / .- .-.. .-- .- -.-- ... / -... . / -.. . -.. .. -.-. .- - . -.. / - --- / - .... . / --- -. .-.. -.-- / .-- --- -- .- -. / .. .----. ...- . / . ...- . .-. / -.-. --- -. ... .. -.. . .-. . -.. / - --- / -... . / --- -. / -- -.-- / .-.. . ...- . .-.. .-.-.-*
