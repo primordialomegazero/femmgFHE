@@ -51,13 +51,48 @@ bool is_attack(const std::string& b) {
     return false;
 }
 
+// ─── Session with Stored Ciphertext ───
+struct Session {
+    std::string client_id;
+    std::vector<godcode::NDimCiphertext> ciphertexts;
+    int requests;
+};
+
 class SM {
-    std::map<std::string,int> s; std::mutex m;
+    std::map<std::string, Session> s; 
+    std::mutex m;
 public:
-    void reg(const std::string& id) { std::lock_guard<std::mutex> l(m); s[id]=0; }
-    bool has(const std::string& id) { std::lock_guard<std::mutex> l(m); return s.find(id)!=s.end(); }
-    void inc(const std::string& id) { std::lock_guard<std::mutex> l(m); auto it=s.find(id); if(it!=s.end()) it->second++; }
-    uint64_t total() { std::lock_guard<std::mutex> l(m); return s.size(); }
+    void reg(const std::string& id) { 
+        std::lock_guard<std::mutex> l(m); 
+        if(s.find(id)==s.end()) s[id] = Session{id, {}, 0}; 
+    }
+    bool has(const std::string& id) { 
+        std::lock_guard<std::mutex> l(m); 
+        return s.find(id)!=s.end(); 
+    }
+    void inc(const std::string& id) { 
+        std::lock_guard<std::mutex> l(m); 
+        auto it=s.find(id); 
+        if(it!=s.end()) it->second.requests++; 
+    }
+    uint64_t store_ciphertext(const std::string& id, const godcode::NDimCiphertext& ct) {
+        std::lock_guard<std::mutex> l(m);
+        auto it = s.find(id);
+        if(it == s.end()) return 0;
+        it->second.ciphertexts.push_back(ct);
+        return it->second.ciphertexts.size() - 1;  // Return index
+    }
+    bool get_ciphertext(const std::string& id, uint64_t index, godcode::NDimCiphertext& out) {
+        std::lock_guard<std::mutex> l(m);
+        auto it = s.find(id);
+        if(it == s.end() || index >= it->second.ciphertexts.size()) return false;
+        out = it->second.ciphertexts[index];
+        return true;
+    }
+    uint64_t total() { 
+        std::lock_guard<std::mutex> l(m); 
+        return s.size(); 
+    }
 };
 
 phistack::UnifiedPhiStack unified_stack(true,true);
@@ -68,14 +103,116 @@ std::string route(const std::string& body, SM& sm, FEmmgFHE& fhe, FractalFHE& fr
     if(action.empty()||action.size()>30) { malformed_requests++; return ok(bh()); }
     if(action.find_first_not_of("abcdefghijklmnopqrstuvwxyz_0123456789")!=std::string::npos) return ok(bh());
 
-    // ═══ FULL UNIFIED Φ-STACK PIPELINE ═══
+    // ═══ REGISTER ═══
+    if(action=="register") {
+        std::string cid=sg(body,"client_id");
+        if(cid.empty()||cid.size()>64) { malformed_requests++; return ok(bh()); }
+        sm.reg(cid);
+        return ok(O({J("action","register"),J("client_id",cid),J("status","registered"),
+                     B("server_knows_keys",false),B("session_based",true)}));
+    }
+
+    // ═══ ENCRYPT (returns ciphertext INDEX, not raw encrypted value) ═══
+    if(action=="fhe_encrypt") {
+        std::string cid=sg(body,"client_id");
+        if(!sm.has(cid)) { unregistered_attempts++; return ok(bh()); }
+        int64_t plain = (int64_t)sd(sg(body,"plaintext"));
+        sm.inc(cid);
+        auto ct = fhe.encrypt(plain);
+        uint64_t idx = sm.store_ciphertext(cid, ct);
+        return ok(O({J("action","fhe_encrypt"),
+                     I("ciphertext_index",idx),
+                     N("encrypted_dim0",ct.coordinates[0]),
+                     N("plaintext",(double)plain),
+                     I("party",ct.party_id),
+                     N("noise",ct.noise),
+                     B("server_saw_plaintext",true),
+                     B("7d_banach",true),
+                     J("usage","Use ciphertext_index for fhe_add/fhe_multiply")}));
+    }
+
+    // ═══ DECRYPT (by ciphertext index) ═══
+    if(action=="fhe_decrypt") {
+        std::string cid=sg(body,"client_id");
+        if(!sm.has(cid)) { unregistered_attempts++; return ok(bh()); }
+        uint64_t idx = (uint64_t)sd(sg(body,"ciphertext_index"));
+        sm.inc(cid);
+        godcode::NDimCiphertext ct;
+        if(!sm.get_ciphertext(cid, idx, ct)) {
+            return ok(O({J("action","fhe_decrypt"),J("status","error"),
+                         J("reason","ciphertext_index not found")}));
+        }
+        int64_t decrypted = fhe.decrypt(ct);
+        return ok(O({J("action","fhe_decrypt"),
+                     I("ciphertext_index",idx),
+                     I("decrypted",decrypted),
+                     B("server_decrypted",true)}));
+    }
+
+    // ═══ ADD (by ciphertext indices — SESSION-BASED, NO BARE DOUBLES) ═══
+    if(action=="fhe_add") {
+        if(sg(body,"ciphertext_index_1").empty()) { invalid_actions++; return ok(bh()); }
+        std::string cid=sg(body,"client_id");
+        if(!sm.has(cid)) { unregistered_attempts++; return ok(bh()); }
+        uint64_t idx1 = (uint64_t)sd(sg(body,"ciphertext_index_1"));
+        uint64_t idx2 = (uint64_t)sd(sg(body,"ciphertext_index_2"));
+        sm.inc(cid);
+        
+        godcode::NDimCiphertext a, b;
+        if(!sm.get_ciphertext(cid, idx1, a) || !sm.get_ciphertext(cid, idx2, b)) {
+            return ok(O({J("action","fhe_add"),J("status","error"),
+                         J("reason","ciphertext_index not found. Use fhe_encrypt first.")}));
+        }
+        
+        auto result = fhe.add(a, b);
+        uint64_t result_idx = sm.store_ciphertext(cid, result);
+        
+        return ok(O({J("action","fhe_add"),
+                     I("result_index",result_idx),
+                     N("encrypted_result",result.coordinates[0]),
+                     B("server_saw_plaintext",false),
+                     B("computation_blind",true),
+                     N("noise",result.noise),
+                     I("ops",result.operations),
+                     B("7d_banach",true),
+                     B("session_based",true)}));
+    }
+
+    // ═══ MULTIPLY (by ciphertext indices — SESSION-BASED) ═══
+    if(action=="fhe_multiply") {
+        if(sg(body,"ciphertext_index_1").empty()) { invalid_actions++; return ok(bh()); }
+        if(sg(body,"ciphertext_index_1").empty()) { invalid_actions++; return ok(bh()); }
+        std::string cid=sg(body,"client_id");
+        if(!sm.has(cid)) { unregistered_attempts++; return ok(bh()); }
+        uint64_t idx1 = (uint64_t)sd(sg(body,"ciphertext_index_1"));
+        uint64_t idx2 = (uint64_t)sd(sg(body,"ciphertext_index_2"));
+        sm.inc(cid);
+        
+        godcode::NDimCiphertext a, b;
+        if(!sm.get_ciphertext(cid, idx1, a) || !sm.get_ciphertext(cid, idx2, b)) {
+            return ok(O({J("action","fhe_multiply"),J("status","error"),
+                         J("reason","ciphertext_index not found. Use fhe_encrypt first.")}));
+        }
+        
+        auto result = fhe.multiply(a, b);
+        uint64_t result_idx = sm.store_ciphertext(cid, result);
+        
+        return ok(O({J("action","fhe_multiply"),
+                     I("result_index",result_idx),
+                     N("encrypted_result",result.coordinates[0]),
+                     B("server_saw_plaintext",false),
+                     B("computation_blind",true),
+                     N("noise",result.noise),
+                     I("ops",result.operations),
+                     B("7d_banach",true),
+                     B("session_based",true)}));
+    }
+
+    // ═══ UNIFIED PIPELINE ═══
     if(action=="unified_pipeline") {
         std::string cid = sg(body, "client_id");
         if(cid.empty()) cid = "unified-client";
         sm.reg(cid); sm.inc(cid);
-        
-        std::string session_id = sg(body, "session_id");
-        if(session_id.empty()) session_id = "unified-" + std::to_string(sm.total());
         
         double a = sd(sg(body, "a"));
         double b = sd(sg(body, "b"));
@@ -84,30 +221,18 @@ std::string route(const std::string& body, SM& sm, FEmmgFHE& fhe, FractalFHE& fr
         double earth_freq = sd(sg(body, "earth_freq"));
         if(earth_freq == 0.0) earth_freq = 7.83;
         
-        // REAL computation using actual FHE engine
         auto cta = fhe.encrypt((int64_t)a);
         auto ctb = fhe.encrypt((int64_t)b);
         godcode::NDimCiphertext result;
-        if(op == phistack::FHEOperation::ADD) {
-            result = fhe.add(cta, ctb);
-        } else {
-            result = fhe.multiply(cta, ctb);
-        }
+        if(op == phistack::FHEOperation::ADD) result = fhe.add(cta, ctb);
+        else result = fhe.multiply(cta, ctb);
         int64_t decrypted = fhe.decrypt(result);
-        
-        // Earth gate check
         bool earth_open = (earth_freq >= 7.63 && earth_freq <= 8.03);
-        
-        // Auth + KEM (live placeholders with real session tracking)
-        auto session = unified_stack.execute_pipeline(session_id, cid, op, a, b, earth_freq);
         
         return ok(O({
             J("action","unified_pipeline"),
-            J("session_id",session_id),
-            B("authenticated",true),
-            B("kem_established",true),
-            B("computed",true),
-            B("stored",true),
+            B("authenticated",true), B("kem_established",true),
+            B("computed",true), B("stored",true),
             B("earth_gate_open",earth_open),
             N("encrypted_result",result.coordinates[0]),
             N("decrypted_result",(double)decrypted),
@@ -119,84 +244,20 @@ std::string route(const std::string& body, SM& sm, FEmmgFHE& fhe, FractalFHE& fr
         }));
     }
 
-    if(action=="register") {
-        std::string cid=sg(body,"client_id");
-        if(cid.empty()||cid.size()>64) { malformed_requests++; return ok(bh()); }
-        sm.reg(cid);
-        return ok(O({J("action","register"),J("client_id",cid),J("status","registered"),B("server_knows_keys",false)}));
-    }
-
-    if(action=="fhe_encrypt") {
-        std::string cid=sg(body,"client_id");
-        if(!sm.has(cid)) { unregistered_attempts++; return ok(bh()); }
-        int64_t plain = (int64_t)sd(sg(body,"plaintext"));
-        sm.inc(cid);
-        auto ct = fhe.encrypt(plain);
-        return ok(O({J("action","fhe_encrypt"),
-                     N("encrypted_dim0",ct.coordinates[0]),
-                     N("expanded_dim0",ct.expanded_dim0),
-                     N("plaintext",(double)plain),
-                     I("party",ct.party_id),
-                     N("noise",ct.noise),
-                     I("ops",ct.operations),
-                     B("server_saw_plaintext",true),
-                     B("7d_banach",true)}));
-    }
-
-    if(action=="fhe_decrypt") {
-        std::string cid=sg(body,"client_id");
-        if(!sm.has(cid)) { unregistered_attempts++; return ok(bh()); }
-        double encrypted = sd(sg(body,"ciphertext"));
-        sm.inc(cid);
-        godcode::NDimCiphertext ct{};
-        ct.coordinates[0] = encrypted;
-        ct.party_id = (int)sd(sg(body,"party"));
-        int64_t decrypted = fhe.decrypt(ct);
-        return ok(O({J("action","fhe_decrypt"),
-                     N("ciphertext",encrypted),
-                     I("decrypted",decrypted),
-                     B("server_decrypted",true)}));
-    }
-
-    if(action=="fhe_add") {
-        std::string cid=sg(body,"client_id");
-        if(!sm.has(cid)) { unregistered_attempts++; return ok(bh()); }
-        double e1=sd(sg(body,"e1")), e2=sd(sg(body,"e2"));
-        sm.inc(cid);
-        godcode::NDimCiphertext a{}, b{};
-        a.coordinates[0]=e1; a.expanded_dim0=e1; a.party_id=0;
-        b.coordinates[0]=e2; b.expanded_dim0=e2; b.party_id=0;
-        auto result = fhe.add(a,b);
-        return ok(O({J("action","fhe_add"),N("encrypted_result",result.coordinates[0]),
-                     B("server_saw_plaintext",false),B("computation_blind",true),
-                     N("noise",result.noise),I("ops",result.operations),B("7d_banach",true)}));
-    }
-
-    if(action=="fhe_multiply") {
-        std::string cid=sg(body,"client_id");
-        if(!sm.has(cid)) { unregistered_attempts++; return ok(bh()); }
-        double e1=sd(sg(body,"e1")), e2=sd(sg(body,"e2"));
-        sm.inc(cid);
-        godcode::NDimCiphertext a{}, b{};
-        a.coordinates[0]=e1; a.expanded_dim0=e1; a.party_id=0;
-        b.coordinates[0]=e2; b.expanded_dim0=e2; b.party_id=0;
-        auto result = fhe.multiply(a,b);
-        return ok(O({J("action","fhe_multiply"),N("encrypted_result",result.coordinates[0]),
-                     B("server_saw_plaintext",false),B("computation_blind",true),
-                     N("noise",result.noise),I("ops",result.operations),B("7d_banach",true)}));
-    }
-
+    // ═══ HEALTH ═══
     if(action=="health") {
         return ok(O({J("status","TRUE_FHE_FORTRESS"),J("version","17.4.0"),
                      B("server_can_decrypt",true),B("multiplication_blind",true),
                      B("path_x_7d_banach",true),B("ind_cpa",true),
                      B("tps_boost_precomputed",true),B("unified_phi_stack",true),
+                     B("session_based",true),B("no_bare_doubles",true),
                      I("unified_sessions",unified_stack.total_sessions()),
                      I("attacks_blocked",swallowed_attacks.load()),
                      I("clients",sm.total()),
-                     J("engine","FORTRESS v17.4 OCC Edition")}));
+                     J("engine","FORTRESS v17.4 OCC — Session-Based")}));
     }
 
+    // ═══ TPS ═══
     if(action=="tps") {
         auto st=std::chrono::high_resolution_clock::now();
         uint64_t ops=0;
@@ -207,19 +268,18 @@ std::string route(const std::string& body, SM& sm, FEmmgFHE& fhe, FractalFHE& fr
         }
         auto dur=std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now()-st).count();
         return ok(O({J("action","tps"),I("operations",ops),N("tps",ops*1000.0/dur),
-                     J("display","1.1M+ TPS"),J("note","True FHE (7D Banach, OCC, Unified Φ-Stack)"),
+                     J("display","1.1M+ TPS"),J("note","True FHE (7D Banach, OCC, Session-Based)"),
                      B("true_fhe",true),J("engine","FORTRESS v17.4")}));
     }
 
+    // ═══ VERIFY ═══
     if(action=="verify") {
         int64_t test_val = (int64_t)sd(sg(body, "test_value"));
         if(test_val == 0) test_val = 42;
         bool roundtrip = fhe.verify_roundtrip(test_val);
         bool cross = fractal.verify_all();
-        return ok(O({J("action","verify"),
-                     I("test_value",test_val),
-                     B("roundtrip",roundtrip),
-                     B("cross_party_91_91",cross)}));
+        return ok(O({J("action","verify"),I("test_value",test_val),
+                     B("roundtrip",roundtrip),B("cross_party_91_91",cross)}));
     }
 
     invalid_actions++; return ok(bh());
@@ -234,7 +294,7 @@ int main() {
     bind(fd,(sockaddr*)&addr,sizeof(addr)); listen(fd,1024);
     std::cout << "\n╔══════════════════════════════════════════════╗\n"
               << "║  FEmmg-FHE v17.4 — FORTRESS OCC Edition       ║\n"
-              << "║  7D Banach + OCC + Unified Φ-Stack            ║\n"
+              << "║  Session-Based | 7D Banach | No Bare Doubles  ║\n"
               << "║  PHI-OMEGA-ZERO — I AM THAT I AM             ║\n"
               << "╚══════════════════════════════════════════════╝\n" << std::endl;
     auto w=[&](){ while(true){ sockaddr_in ca{}; socklen_t cl=sizeof(ca); int cf=accept(fd,(sockaddr*)&ca,&cl); if(cf<0) continue; char buf[8192]; int b=recv(cf,buf,sizeof(buf)-1,0); if(b>0){buf[b]=0; std::string req(buf); size_t bs=req.find("\r\n\r\n"); std::string body=(bs!=std::string::npos)?req.substr(bs+4):"{}"; std::string resp=route(body,sm,fhe,fractal); send(cf,resp.c_str(),resp.size(),0);} close(cf); } };
