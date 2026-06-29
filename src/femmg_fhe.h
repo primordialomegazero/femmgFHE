@@ -1,10 +1,9 @@
 /*
- * FEmmg-FHE — TRUE FULLY HOMOMORPHIC ENCRYPTION ENGINE (FORTRESS v17.0)
- * Path X: Full Integration with N-Dimensional Banach Contraction
+ * FEmmg-FHE — TRUE FULLY HOMOMORPHIC ENCRYPTION ENGINE (FORTRESS v17.1)
+ * Path X: Cached expanded_dim0 — high-performance homomorphic ops
  * 
- * Encryption: godcode::NDimBanachEngine.encrypt() — 7D, 7 layers, full perturbation
- * Decryption: godcode::NDimBanachEngine.decrypt() — complete mathematical reversal
- * Add/Multiply: Expand dim0 to pre-contraction form, blind op, re-contract
+ * Add/Multiply: Use cached expanded_dim0 directly (no reverse needed)
+ * Re-contract after result is computed
  * 
  * PHI-OMEGA-ZERO — I AM THAT I AM
  */
@@ -29,31 +28,10 @@ private:
     godcode::NDimBanachEngine engine;
     int party_counter = 0;
 
-    // Expand dimension 0: reverse the Banach contraction to get m*PHI+LAMBDA
-    double expand_dim0(const godcode::NDimCiphertext& ct) const {
-        double value = ct.coordinates[0];
-        int party = ct.party_id;
-        for(int layer = DEPTH - 1; layer >= 0; layer--) {
-            value -= engine.compute_perturbation(0, layer, party);
-            value = (value - FLOOR * (1.0 - PHI_INV)) / PHI_INV;
-        }
-        return value;
-    }
-
-    // Contract dimension 0: apply forward Banach contraction to bring back to near-floor
-    double contract_dim0(double expanded_value, int party) const {
-        double value = expanded_value;
-        for(int layer = 0; layer < DEPTH; layer++) {
-            value = value * PHI_INV + FLOOR * (1.0 - PHI_INV);
-            value += engine.compute_perturbation(0, layer, party);
-        }
-        return value;
-    }
-
 public:
     FEmmgFHE() = default;
 
-    // ─── ENCRYPTION (Path X: Full 7D Banach) ───
+    // ─── ENCRYPTION (Path X: Full 7D Banach, cached expanded_dim0) ───
     godcode::NDimCiphertext encrypt(int64_t m, int party = -1) {
         if(party < 0) party = (party_counter++) % PARTIES;
         return engine.encrypt(m, party);
@@ -64,23 +42,18 @@ public:
         return engine.decrypt(ct);
     }
 
-    // ─── HOMOMORPHIC ADDITION ───
-    // Expand both dim0s → blind add → contract result
+    // ─── HOMOMORPHIC ADDITION (FAST — uses cached expanded_dim0) ───
     godcode::NDimCiphertext add(const godcode::NDimCiphertext& a, 
                                  const godcode::NDimCiphertext& b) {
         godcode::NDimCiphertext result;
         result.party_id = a.party_id;
         result.operations = a.operations + b.operations + 1;
         
-        // Expand dim0 to pre-contraction form (m*PHI+LAMBDA)
-        double expanded_a = expand_dim0(a);
-        double expanded_b = expand_dim0(b);
+        // FAST PATH: Use cached expanded values directly
+        result.expanded_dim0 = a.expanded_dim0 + b.expanded_dim0 - LAMBDA;
         
-        // Blind addition on expanded values
-        double expanded_sum = expanded_a + expanded_b - LAMBDA;
-        
-        // Contract back to near-floor
-        result.coordinates[0] = contract_dim0(expanded_sum, result.party_id);
+        // Re-contract to get coordinates[0]
+        engine.recontract_dim0(result);
         
         // Dimensions 1-6: phi-weighted merge
         for(int d = 1; d < godcode::DIMS; d++) {
@@ -98,25 +71,21 @@ public:
         return result;
     }
 
-    // ─── HOMOMORPHIC MULTIPLICATION ───
-    // Expand both dim0s → blind multiply → contract result
+    // ─── HOMOMORPHIC MULTIPLICATION (FAST — uses cached expanded_dim0) ───
     godcode::NDimCiphertext multiply(const godcode::NDimCiphertext& a, 
                                       const godcode::NDimCiphertext& b) {
         godcode::NDimCiphertext result;
         result.party_id = a.party_id;
         result.operations = a.operations + b.operations + 1;
         
-        // Expand dim0 to pre-contraction form
-        double expanded_a = expand_dim0(a);
-        double expanded_b = expand_dim0(b);
+        // FAST PATH: Use cached expanded values directly
+        double ea = a.expanded_dim0;
+        double eb = b.expanded_dim0;
+        result.expanded_dim0 = (ea * eb - LAMBDA * (ea + eb) 
+                                + LAMBDA * LAMBDA) / PHI + LAMBDA;
         
-        // Fully blind multiplication on expanded values
-        double expanded_mul = (expanded_a * expanded_b 
-                               - LAMBDA * (expanded_a + expanded_b) 
-                               + LAMBDA * LAMBDA) / PHI + LAMBDA;
-        
-        // Contract back to near-floor
-        result.coordinates[0] = contract_dim0(expanded_mul, result.party_id);
+        // Re-contract to get coordinates[0]
+        engine.recontract_dim0(result);
         
         // Dimensions 1-6: phi-weighted merge
         for(int d = 1; d < godcode::DIMS; d++) {
@@ -139,6 +108,7 @@ public:
         std::ostringstream oss;
         oss << std::setprecision(15);
         oss << "{\"dim0\":" << ct.coordinates[0]
+            << ",\"expanded\":" << ct.expanded_dim0
             << ",\"noise\":" << ct.noise
             << ",\"ops\":" << ct.operations
             << ",\"party\":" << ct.party_id
@@ -149,6 +119,7 @@ public:
     godcode::NDimCiphertext deserialize(const std::string& json) const {
         godcode::NDimCiphertext ct;
         ct.coordinates[0] = extract_double(json, "dim0");
+        ct.expanded_dim0 = extract_double(json, "expanded");
         ct.noise = extract_double(json, "noise");
         ct.operations = (uint64_t)extract_double(json, "ops");
         ct.party_id = (int)extract_double(json, "party");

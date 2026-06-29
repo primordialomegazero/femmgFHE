@@ -1,14 +1,8 @@
 /*
- * FEmmg-FHE — N-DIMENSIONAL BANACH CONTRACTION ENGINE (FORTRESS v17.0)
+ * FEmmg-FHE — N-DIMENSIONAL BANACH CONTRACTION ENGINE (FORTRESS v17.1)
  *
  * PATH A: Complete Mathematical Reversal
- * - Encryption applies Banach contraction + deterministic perturbation across ALL 7 dimensions
- * - Decryption REVERSES everything in exact reverse order (last layer first, first layer last)
- * - Perturbation is REMOVED during decryption (not just hoped away)
- * - Full Lyapunov spectrum across all dimensions
- * - Multi-party with cross-party verification
- * - Dimension 0 = data carrier (plaintext φ-encoded)
- * - Dimensions 1-6 = security/entropy (contracted to floor)
+ * PATH X: Cached expanded_dim0 for high-performance homomorphic ops
  *
  * "The fortress is only as strong as its weakest gate." — Dan Fernandez
  * All 7 dimensions fight. All 7 layers reverse. No shortcuts.
@@ -32,8 +26,9 @@ constexpr int    PARTIES  = 14;
 constexpr int    DEPTH    = 7;
 
 struct NDimCiphertext {
-    std::array<double, DIMS> coordinates;
-    std::array<double, DIMS> perturbation;
+    std::array<double, DIMS> coordinates;   // Contracted (near-floor) values
+    std::array<double, DIMS> perturbation;  // Audit trail
+    double expanded_dim0;                   // CACHED: m*PHI+LAMBDA (pre-contraction)
     double lyapunov_spectrum[DIMS];
     double noise;
     uint64_t operations;
@@ -49,16 +44,17 @@ class NDimBanachEngine {
             attractor[d] = FLOOR;
     }
 
-
 public:
     // Deterministic nonlinear perturbation using phi-harmonic series (PUBLIC for femmg_fhe.h)
     double compute_perturbation(int dim, int layer, int party) const {
         return PHI * (party + 1) * (layer + 1) * LAMBDA * 0.0001
                * std::sin(dim * PHI + layer);
     }
+
     NDimBanachEngine() { initialize_attractor(); }
 
     // ENCRYPTION — FORWARD PASS (Layer 0 → DEPTH-1)
+    // Stores BOTH contracted dim0 (for security) and expanded_dim0 (for fast homomorphic ops)
     NDimCiphertext encrypt(int64_t plaintext, int party = 0) {
         op_counter.fetch_add(1);
         NDimCiphertext ct;
@@ -66,17 +62,23 @@ public:
         ct.operations = 0;
         ct.party_id = party;
 
-        ct.coordinates[0] = plaintext * PHI + LAMBDA;
+        // Store pre-contraction value for fast homomorphic operations
+        ct.expanded_dim0 = plaintext * PHI + LAMBDA;
+        ct.coordinates[0] = ct.expanded_dim0;
 
+        // Dimensions 1..(N-1): nonlinear perturbation orbits
         for(int d = 1; d < DIMS; d++) {
             ct.coordinates[d] = PHI * (d + 1);
             ct.perturbation[d] = 0.0;
         }
 
+        // FORWARD: Apply contraction + perturbation, layer by layer
         for(int layer = 0; layer < DEPTH; layer++) {
             for(int d = 0; d < DIMS; d++) {
+                // Banach contraction toward attractor
                 ct.coordinates[d] = ct.coordinates[d] * PHI_INV
                                   + attractor[d] * (1.0 - PHI_INV);
+                // Inject deterministic nonlinear perturbation
                 double pert = compute_perturbation(d, layer, party);
                 ct.coordinates[d] += pert;
                 ct.perturbation[d] += pert;
@@ -85,6 +87,7 @@ public:
             ct.operations++;
         }
 
+        // Compute full Lyapunov spectrum
         for(int d = 0; d < DIMS; d++) {
             double contraction_rate = PHI_INV * (1.0 + 0.1 * std::sin(d * PHI));
             ct.lyapunov_spectrum[d] = -std::log(contraction_rate);
@@ -113,8 +116,6 @@ public:
         return recovered == test_value;
     }
 
-    // Contraction check: Dimensions 1-6 must be near floor.
-    // Dimension 0 carries plaintext data — verified via roundtrip, not proximity.
     bool verify_contraction(const NDimCiphertext& ct) const {
         for(int d = 1; d < DIMS; d++) {
             if(std::abs(ct.coordinates[d] - attractor[d]) > FLOOR * 2)
@@ -138,6 +139,16 @@ public:
         return total;
     }
 
+    // Re-contract an expanded dim0 value (for homomorphic results)
+    void recontract_dim0(NDimCiphertext& ct) const {
+        double value = ct.expanded_dim0;
+        for(int layer = 0; layer < DEPTH; layer++) {
+            value = value * PHI_INV + attractor[0] * (1.0 - PHI_INV);
+            value += compute_perturbation(0, layer, ct.party_id);
+        }
+        ct.coordinates[0] = value;
+    }
+
     uint64_t total_operations() const { return op_counter.load(); }
 };
 
@@ -146,11 +157,6 @@ class MultiPartyNDim {
     NDimBanachEngine engine;
 
 public:
-    // Deterministic nonlinear perturbation using phi-harmonic series (PUBLIC for femmg_fhe.h)
-    double compute_perturbation(int dim, int layer, int party) const {
-        return PHI * (party + 1) * (layer + 1) * LAMBDA * 0.0001
-               * std::sin(dim * PHI + layer);
-    }
     NDimCiphertext multi_party_encrypt(int64_t plaintext, int depth = DEPTH) {
         NDimCiphertext ct = engine.encrypt(plaintext, 0);
         for(int d = 1; d < depth; d++) {

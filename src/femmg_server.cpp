@@ -157,10 +157,6 @@ std::string route(const std::string& body, SM& sm, FEmmgFHE& fhe, FractalFHE& fr
 
     invalid_actions++; return ok(bh()); 
 }
-
-}
-// ═══ MAIN ═══
-}
 int main() {
     SM sm; 
     FEmmgFHE fhe;
