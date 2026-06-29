@@ -49,13 +49,13 @@ class NDimBanachEngine {
             attractor[d] = FLOOR;
     }
 
-    // Deterministic nonlinear perturbation using phi-harmonic series
+
+public:
+    // Deterministic nonlinear perturbation using phi-harmonic series (PUBLIC for femmg_fhe.h)
     double compute_perturbation(int dim, int layer, int party) const {
         return PHI * (party + 1) * (layer + 1) * LAMBDA * 0.0001
                * std::sin(dim * PHI + layer);
     }
-
-public:
     NDimBanachEngine() { initialize_attractor(); }
 
     // ENCRYPTION — FORWARD PASS (Layer 0 → DEPTH-1)
@@ -146,6 +146,11 @@ class MultiPartyNDim {
     NDimBanachEngine engine;
 
 public:
+    // Deterministic nonlinear perturbation using phi-harmonic series (PUBLIC for femmg_fhe.h)
+    double compute_perturbation(int dim, int layer, int party) const {
+        return PHI * (party + 1) * (layer + 1) * LAMBDA * 0.0001
+               * std::sin(dim * PHI + layer);
+    }
     NDimCiphertext multi_party_encrypt(int64_t plaintext, int depth = DEPTH) {
         NDimCiphertext ct = engine.encrypt(plaintext, 0);
         for(int d = 1; d < depth; d++) {
