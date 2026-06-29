@@ -33,3 +33,14 @@ test_riemann_*
 test_source_frequency
 test_pozd
 debug_add
+
+# Compiled binaries
+femmg_server
+test_suite
+test_riemann_*
+test_source_frequency
+test_pozd
+debug_add
+src/test_phi_zeta
+src/test_phi_zeta2
+src/test_riemann_stabilizer
