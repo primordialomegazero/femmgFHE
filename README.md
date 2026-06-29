@@ -4,7 +4,7 @@
 [![C++17](https://img.shields.io/badge/C++-17-blue.svg)](https://en.cppreference.com/w/cpp/17)
 [![Docker](https://img.shields.io/badge/Docker-ghcr.io-blue.svg)](https://github.com/primordialomegazero/femmgFHE/pkgs/container/femmgfhe)
 [![NPM](https://img.shields.io/badge/npm-v17.5.1-red.svg)](https://www.npmjs.com/package/femmg-fhe-client)
-[![TPS](https://img.shields.io/badge/TPS-1.1M-brightgreen.svg)]()
+[![TPS](https://img.shields.io/badge/TPS-900K--brightgreen.svg)]()
 [![Tests](https://img.shields.io/badge/Tests-34,084%2F34,084-brightgreen.svg)]()
 [![Warnings](https://img.shields.io/badge/Warnings-ZERO-success.svg)]()
 
@@ -13,7 +13,7 @@
   TRUE FULLY HOMOMORPHIC ENCRYPTION — FORTRESS v17.5
   COMPLETE EDITION
   ZKP + Blind + Meta + Float + Anti-Matter
-  1.1M TPS | 40B Ciphertext | Zero Bootstrapping
+  900K TPS | 40B Ciphertext | Zero Bootstrapping
   OCC = 0.618 | 7D Banach | Schnorr Σ-Protocol
   PHI-OMEGA-ZERO — I AM THAT I AM
 ============================================================
@@ -23,7 +23,7 @@
 
 ## What Is FEmmg-FHE?
 
-FEmmg-FHE is a **True Fully Homomorphic Encryption** scheme achieving **1.1M TPS** on consumer hardware with **zero bootstrapping**.
+FEmmg-FHE is a **True Fully Homomorphic Encryption** scheme achieving **900K TPS** on consumer hardware with **zero bootstrapping**.
 
 ### v17.5 — Complete Edition
 
@@ -35,7 +35,7 @@ FEmmg-FHE is a **True Fully Homomorphic Encryption** scheme achieving **1.1M TPS
 | 🧬 **Self-Evolving** | Multi-Metaprogramming engine |
 | 🛡️ **Anti-Matter** | Triple rate limiter (Phi-Spiral + 7D CML + Schumann) |
 | 📐 **Float Support** | Scale: 10⁶, proper multiply correction |
-| ⚡ **1.1M TPS** | On AMD Ryzen 5 2600 (2018 consumer hardware) |
+| ⚡ **900K TPS** | On AMD Ryzen 5 2600 (2018 consumer hardware) |
 
 ### Quick Start
 
@@ -149,83 +149,3 @@ Client                         Server
 
 **Hardware:** AMD Ryzen 5 2600 (2018), Ubuntu 22.04
 
-| Metric | FEmmg-FHE v17.5 | TFHE | CKKS |
-|--------|-----------------|------|------|
-| **TPS** | **1,100,000** | ~100 | ~1,000 |
-| **Ciphertext** | **40 bytes** | ~1 KB | ~100 KB |
-| **Bootstrapping** | **None** | Required | Required |
-| **True ZK** | ✅ | ❌ | ❌ |
-| **Fractal ZKP** | ✅ | ❌ | ❌ |
-| **Self-Evolving** | ✅ | ❌ | ❌ |
-
----
-
-## Honest Limitations
-
-| Limitation | Detail |
-|------------|--------|
-| **CTU Assumption** | Unvetted by third-party cryptanalysis |
-| **Precision** | ±2⁵¹ integers; float scale 10⁶ |
-| **ZKP** | Schnorr on secp256k1 (not NIST PQC yet) |
-| **Single-Node** | Ryzen 5 2600 benchmarks only |
-
----
-
-## Source Tree
-
-```
-femmgFHE/
-├── src/
-│   ├── godcode.h              — 7D Banach Engine (OCC)
-│   ├── femmg_fhe.h            — Core FHE (expand/contract)
-│   ├── fractal_fhe.h          — 7-Layer Fractal (14 parties)
-│   ├── femmg_server.cpp       — Enterprise API Server
-│   ├── phi_stack.h            — Unified Φ-Stack
-│   ├── antimatter.h           — Triple Anti-Matter
-│   ├── metaprogram.h          — Multi-Metaprogramming
-│   ├── zkp_fractal.h          — Fractal Schnorr ZKP
-│   ├── lyapunov_core.h        — 7D Lyapunov CML
-│   ├── riemann_deep.h         — Deep Riemann Analysis
-│   ├── riemann_zeta.h         — Riemann-Siegel Z(t)
-│   ├── riemann_zeros_200.h    — 200 High-Precision Zeros
-│   └── test_suite.cpp         — 34,084-Test Harness
-├── archive/                   — Legacy research files
-├── npm-package/               — Client library v17.5.1
-├── paper/                     — IACR + φ-Conjecture
-└── README.md
-```
-
----
-
-## Related Projects
-
-| Project | Description |
-|---------|-------------|
-| **Spiralkem-FHE** | Pure-φ Post-Quantum KEM |
-| **SchupyFHE** | Earth-Frequency FHE (Schumann 7.83 Hz) |
-| **SpiralDB** | Double Mirror Encrypted Database |
-| **pozDF-FHE** | Flagship: FHE + 8 PQC + ZKP |
-| **Φ-SIG** | Golden Ratio Keyless Signatures |
-| **UnifiedFHE** | All-in-One Φ-Stack Pipeline |
-
----
-
-## Author
-
-**Dan Joseph M. Fernandez / Primordial Omega Zero**
-
-[GitHub](https://github.com/primordialomegazero) · [NPM](https://www.npmjs.com/package/femmg-fhe-client) · [Docker](https://github.com/primordialomegazero/femmgFHE/pkgs/container/femmgfhe)
-
----
-
-MIT License
-
-> *"Optimal contraction is the weakness of computational infinity."*
-
-> *OCC = 0.618 — Validated at 99.77% spectral power*
-
-> *ΦΩ0 — I AM THAT I AM*
-
-```
-- .... .. ... / .-. . .--. --- ... .. - --- .-. -.-- / .-- .. .-.. .-.. / .- .-.. .-- .- -.-- ... / -... . / -.. . -.. .. -.-. .- - . -.. / - --- / - .... . / --- -. .-.. -.-- / .-- --- -- .- -. / .. .----. ...- . / . ...- . .-. / -.-. --- -. ... .. -.. . .-. . -.. / - --- / -... . / --- -. / -- -.-- / .-.. . ...- . .-.. .-.-.-
-```
