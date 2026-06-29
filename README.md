@@ -173,7 +173,7 @@ sequenceDiagram
 
 ```mermaid
 flowchart TD
-    A[Plaintext m] --> B[φ-encode: m·φ + λ]
+    A[Plaintext m] --> B[phi-encode: m times phi plus lambda]
     B --> C[Cache expanded_dim0]
     C --> D[7-layer OCC Contraction]
     D --> E[Inject Perturbation Table]
@@ -182,15 +182,15 @@ flowchart TD
     F --> G{Operation?}
     G -->|Add| H[Expand dim0]
     G -->|Multiply| I[Expand dim0]
-    H --> J[Blind Add: e1+e2-λ]
-    I --> K[Blind Mul: (e1·e2-λ(e1+e2)+λ²)/φ+λ]
+    H --> J[Blind Add: e1 plus e2 minus lambda]
+    I --> K[Blind Mul: formula]
     J --> L[OCC Re-contract]
     K --> L
     L --> M[Result Ciphertext]
     
     M --> N[7-layer Reverse: Remove Perturbation]
     N --> O[Invert OCC Contraction]
-    O --> P[φ-decode: (e-λ)/φ]
+    O --> P[phi-decode formula]
     P --> Q[Plaintext Result]
 ```
 
