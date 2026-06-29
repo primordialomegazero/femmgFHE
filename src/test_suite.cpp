@@ -153,7 +153,7 @@ int main() {
             ops++;
         }
         auto dur = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now()-st).count();
-        std::cout << "  " << (ops * 1000 / dur / 1000000) << "M TPS (TRUE FHE)" << std::endl;
+        std::cout << "  " << (ops * 1000.0 / dur / 1000000.0) << "M TPS (TRUE FHE)" << std::endl;
     }
     
     int total_pass = enc_p + add_p + mul_p + sub_p + mix_p;
