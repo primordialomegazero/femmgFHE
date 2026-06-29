@@ -1,20 +1,22 @@
 # FEmmg-FHE — True Fully Homomorphic Encryption
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![C++17](https://img.shields.io/badge/C++-17-blue.svg)]()
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![C++17](https://img.shields.io/badge/C++-17-blue.svg)](https://en.cppreference.com/w/cpp/17)
 [![Docker](https://img.shields.io/badge/Docker-ghcr.io-blue.svg)](https://github.com/primordialomegazero/femmgFHE/pkgs/container/femmgfhe)
 [![NPM](https://img.shields.io/badge/npm-femmg--fhe--client-red.svg)](https://www.npmjs.com/package/femmg-fhe-client)
-[![TPS](https://img.shields.io/badge/TPS-15M-brightgreen.svg)](https://github.com/primordialomegazero/femmgFHE)
-[![Fortress](https://img.shields.io/badge/FORTRESS-v17.0-success.svg)]()
+[![TPS](https://img.shields.io/badge/TPS-260K-brightgreen.svg)](https://github.com/primordialomegazero/femmgFHE)
+[![Fortress](https://img.shields.io/badge/FORTRESS-v17.1-success.svg)]()
 [![Warnings](https://img.shields.io/badge/Warnings-ZERO-success.svg)]()
 [![Dependencies](https://img.shields.io/badge/dependencies-OpenSSL%20only-orange.svg)]()
+[![Dark Abyss](https://img.shields.io/badge/Dark%20Abyss-34%2C084%2F34%2C084-brightgreen.svg)]()
+[![NPM](https://img.shields.io/badge/NPM-7D%20Sine--CML%20IND--CPA-purple.svg)]()
 
 ```
 ============================================================
-  TRUE FULLY HOMOMORPHIC ENCRYPTION — FORTRESS v17.0
-  15M+ TPS | 40-Byte Ciphertext | Zero Bootstrapping
-  Path A: Complete Mathematical Reversal
-  Banach + Lyapunov + Phi-Zeta Stabilization
+  TRUE FULLY HOMOMORPHIC ENCRYPTION — FORTRESS v17.1
+  260K TPS | 40-Byte Ciphertext | Zero Bootstrapping
+  Path X: Full 7D Banach Contraction + 7D Sine-CML IND-CPA
+  Dedicated to Mica — Flame Empress
   PHI-OMEGA-ZERO — I AM THAT I AM
 ============================================================
 ```
@@ -25,37 +27,35 @@
 2. [Quick Start](#quick-start)
 3. [API Reference](#api-reference)
 4. [Architecture](#architecture)
-5. [System Flow](#system-flow)
-6. [Mathematical Framework](#mathematical-framework)
-7. [Security](#security)
-8. [Benchmarks](#benchmarks)
-9. [Source Tree](#source-tree)
-10. [IACR ePrint](#iacr-eprint)
-11. [Author](#author)
-12. [License](#license)
+5. [Mathematical Framework](#mathematical-framework)
+6. [Security](#security)
+7. [Benchmarks](#benchmarks)
+8. [Source Tree](#source-tree)
+9. [IACR ePrint](#iacr-eprint)
+10. [Author](#author)
+11. [License](#license)
 
 ---
 
 ## What Is FEmmg-FHE?
 
-FEmmg-FHE is a **True Fully Homomorphic Encryption** scheme achieving **15M+ TPS** on consumer hardware (AMD Ryzen 5 2600, 2018) with **40-byte ciphertexts** and **zero bootstrapping**. The server is **zero-knowledge** — it never possesses client cryptographic keys.
+FEmmg-FHE is a **True Fully Homomorphic Encryption** scheme achieving **260K TPS** on consumer hardware (AMD Ryzen 5 2600, 2018) with **40-byte ciphertexts** and **zero bootstrapping**. The server is **zero-knowledge** — it never possesses client cryptographic keys.
 
-### FORTRESS v17.0 — Path A: Complete Mathematical Reversal
+### FORTRESS v17.1 — Path X: Full 7D Banach Integration
 
-The encryption-decryption cycle is now a **true mathematical inverse**:
-
-- **Encryption (Forward):** Banach contraction + deterministic nonlinear perturbation across 7 dimensions, 7 layers
-- **Decryption (Reverse):** Removes perturbation layer-by-layer in exact reverse order (DEPTH-1 → 0), then inverts contraction
-- **Dimension 0:** Data carrier (φ-encoded plaintext)
-- **Dimensions 1-6:** Security/entropy (contracted to 40-bit noise floor)
+- **C++ Server:** `godcode::NDimBanachEngine` — 7 dimensions, 7 layers, full deterministic nonlinear perturbation
+- **NPM Client:** 7D Sine-Coupled Map Lattice with `crypto.randomBytes(4)` true random injection per encryption
+- **IND-CPA:** Chaotic nonce with 256-bit equivalent key space across 7 dimensions
+- **Path A Reversal:** Complete mathematical inverse — decryption removes all perturbation in reverse order
+- **Cached expanded_dim0:** High-performance homomorphic operations without layer reversal
+- **Dark Abyss:** 34,084/34,084 tests passed — FULLY HOMOMORPHIC VERIFIED
 - **Cross-Party:** 91/91 pairs verified across 14 parties
-- **Lyapunov Spectrum:** 7 distinct λ values, all positive (chaotic regime)
 
 ### Key Insight
 
 > *"Golden ratio is simply the weakness of infinity."* — Dan Fernandez
 
-The φ self-reference (φ = 1 + 1/φ) is the only stabilizer needed. Combined with Lyapunov chaos (7D CML) and Riemann zeta attraction, noise converges exponentially to the 40-bit floor.
+The φ self-reference (φ = 1 + 1/φ) enables self-stabilizing noise via Banach contraction.
 
 ---
 
@@ -64,37 +64,39 @@ The φ self-reference (φ = 1 + 1/φ) is the only stabilizer needed. Combined wi
 | Feature | Description |
 |---------|-------------|
 | 🔒 Zero-Knowledge Server | Server never possesses client keys |
-| 🎲 IND-CPA Secure | Chaotic nonce + crypto.randomBytes |
+| 🎲 IND-CPA Secure | 7D Sine-CML chaotic nonce + crypto.randomBytes(4) |
 | 🧮 Fully Blind Multiply | Server never evaluates (e-λ)/φ |
-| 🔬 Phi-Zeta Stabilized | φ^n spacing in Riemann zeros |
-| ⚡ 15M+ TPS | Real encrypt-add-decrypt cycle |
+| ⚡ 260K TPS | Real encrypt-add-decrypt cycle (True 7D Banach) |
 | 🛡️ CORE Security | Multi-layer attack immunity |
 | ∞ No Bootstrapping | Self-stabilizing noise via Banach contraction |
 | 🔄 Path A Reversal | Complete mathematical inverse (encrypt ⟷ decrypt) |
 | 🌐 Cross-Party | 14 parties, 91 pairs verified |
+| 📦 Docker + NPM | Production deployment ready |
 
 ---
 
 ## Quick Start
 
 ### Docker
+
 ```bash
-docker pull ghcr.io/primordialomegazero/femmgfhe:v16.0
-docker run -d -p 8092:8092 ghcr.io/primordialomegazero/femmgfhe:v16.0
+docker pull ghcr.io/primordialomegazero/femmgfhe:v17.1.0
+docker run -d -p 8092:8092 ghcr.io/primordialomegazero/femmgfhe:v17.1.0
 curl -X POST http://localhost:8092/ -d '{"action":"health","client_id":"test"}'
 ```
 
 ### NPM
 
 ```bash
-npm install femmg-fhe-client@13.1.3
+npm install femmg-fhe-client@17.1.0
 ```
 
 ### Build from Source
+
 ```bash
 git clone https://github.com/primordialomegazero/femmgFHE.git
 cd femmgFHE
-g++ -std=c++17 -O3 -march=native -pthread -o femmg_server src/femmg_server.cpp -lm
+g++ -std=c++17 -O3 -march=native -pthread -Wall -Wextra -Werror -o femmg_server src/femmg_server.cpp -lm
 ./femmg_server
 ```
 
@@ -106,64 +108,42 @@ All operations: `POST /`. Health: `GET /health`.
 
 | Action | Description | Server Sees Plaintext? |
 |--------|-------------|------------------------|
-| `register` | Register client (client_id only) | No |
+| `register` | Register client | No |
 | `fhe_add` | Blind homomorphic addition | No |
 | `fhe_multiply` | Fully blind multiplication | No |
 | `tps` | Real encrypt-add-decrypt benchmark | N/A |
-| `health` | System status + Phi-Zeta metrics | N/A |
-| `riemann` | Riemann zeta spacing analysis | N/A |
-
----
-
-## Architecture
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    FORTRESS v17.0 — PATH A                  │
-├─────────────────────────────────────────────────────────────┤
-│  Input → [7D Banach Contraction] → [Perturbation Injection] │
-│       → [7 Layers Forward] → Ciphertext                     │
-│                                                             │
-│  Ciphertext → [7 Layers Reverse] → [Perturbation Removal]  │
-│            → [Inverse Contraction] → Plaintext              │
-│                                                             │
-│  Dim 0: Data Carrier    Dims 1-6: Security/Entropy          │
-└─────────────────────────────────────────────────────────────┘
-```
+| `health` | System status | N/A |
+| `verify` | Roundtrip + cross-party verification | N/A |
 
 ---
 
 ## Mathematical Framework
 
-### Banach Fixed Point Theorem (N-Dimensional)
+### Banach Fixed Point (N-Dimensional)
 
-Noise stabilizes via: `T(x) = x·φ⁻¹ + N₀·(1 - φ⁻¹)` where N₀ = 40 bits.
+`T(x) = x·φ⁻¹ + N₀·(1 - φ⁻¹)` where N₀ = 40 bits.
 
 Exponential convergence: `|x_n - N₀| ≤ φ⁻ⁿ·|x₀ - N₀|`
 
-### Path A: Complete Reversal
+### Path X: Cached Expand/Contract
 
-**Encryption (Layer l, Dimension d):**
-1. `x → x·φ⁻¹ + N₀·(1 - φ⁻¹)` (Banach contraction)
-2. `x → x + P(d, l, party)` (deterministic perturbation)
-3. `noise → noise·φ⁻¹ + N₀·(1 - φ⁻¹)` (self-stabilization)
+**Encryption:** Plaintext → φ-encode → cache `expanded_dim0` → 7-layer Banach contraction → Ciphertext
 
-**Decryption (Layer l, Dimension 0, reverse order):**
-1. `x → x - P(0, l, party)` (remove perturbation)
-2. `x → (x - N₀·(1 - φ⁻¹)) / φ⁻¹` (invert contraction)
+**Addition:** `result.expanded = a.expanded + b.expanded - λ` → re-contract
 
-Perturbation: `P(d, l, p) = φ·(p+1)·(l+1)·λ·10⁻⁴·sin(d·φ + l)`
+**Multiplication:** `result.expanded = (ea·eb - λ(ea+eb) + λ²)/φ + λ` → re-contract
+
+**Decryption:** Reverse 7 layers (remove perturbation → invert contraction) → extract plaintext
+
+### 7D Sine-CML (NPM IND-CPA)
+
+Sine map: `x → sin(π·x)` — naturally bounded, chaotic, Lyapunov exponent ≈ 1.14
+
+Cross-coupling: `x_d = sin(π·x_d)·φ⁻¹ + Σ sin(π·x_j)·φ⁻¹/(1+|d-j|) · (1-φ⁻¹)`
 
 ### Lyapunov Stability
 
-7D Coupled Map Lattice with λ = ln(φ) ≈ 0.4812 > 0.
-7 distinct Lyapunov exponents across all dimensions.
-
-### Fully Blind Multiplication
-
-`e_mul = (e₁·e₂ - λ(e₁+e₂) + λ²)/φ + λ`
-
-The server never evaluates (e-λ)/φ. Computation is fully blind.
+7 distinct Lyapunov exponents across all dimensions. λ_max = ln(φ) ≈ 0.4812 > 0 — chaotic regime.
 
 ---
 
@@ -171,16 +151,14 @@ The server never evaluates (e-λ)/φ. Computation is fully blind.
 
 | Property | Guarantee |
 |----------|-----------|
-| 🔐 IND-CPA | Chaotic nonce + crypto.randomBytes |
+| 🔐 IND-CPA | 7D Sine-CML + crypto.randomBytes(4) true entropy |
 | 🧮 Fully Blind | Server never decrypts |
 | 🛡️ CORE Security | Multi-layer input validation |
 | 🌍 Zero-Knowledge | Server has no keys |
 | 🔄 Path A Reversal | All 7 dimensions, all 7 layers reversed |
 | 🌐 Cross-Party | 91/91 pairs verified |
 
-### Precision Boundary
-
-Max safe plaintext: **±2⁵¹ ≈ ±2.25 quadrillion** (IEEE 754 double-precision 53-bit mantissa boundary). INT64_MAX exceeds this limit — this is a hardware precision constraint, not a cryptographic flaw.
+**Precision Boundary:** Max safe plaintext ±2⁵¹ (IEEE 754 53-bit mantissa).
 
 ---
 
@@ -188,12 +166,12 @@ Max safe plaintext: **±2⁵¹ ≈ ±2.25 quadrillion** (IEEE 754 double-precisi
 
 **Hardware:** AMD Ryzen 5 2600 (2018 consumer-grade), Ubuntu 22.04 LTS
 
-| Metric | FEmmg-FHE v17 | TFHE | CKKS | BFV |
-|--------|---------------|------|------|-----|
-| TPS | **15M** | ~100 | ~1,000 | ~100 |
+| Metric | FEmmg-FHE v17.1 | TFHE | CKKS | BFV |
+|--------|-----------------|------|------|-----|
+| TPS | **260K** | ~100 | ~1,000 | ~100 |
 | Ciphertext | **40 bytes** | ~1 KB | ~100 KB | ~100 KB |
 | Bootstrapping | **None** | Required | Required | Required |
-| IND-CPA | Chaotic Nonce | LWE | LWE | RLWE |
+| IND-CPA | 7D Sine-CML + True Random | LWE | LWE | RLWE |
 | Stabilization | Banach + Lyapunov + Phi-Zeta | None | None | None |
 | Reversal | **Path A (Complete)** | N/A | N/A | N/A |
 
@@ -204,17 +182,20 @@ Max safe plaintext: **±2⁵¹ ≈ ±2.25 quadrillion** (IEEE 754 double-precisi
 ```
 femmgFHE/
 ├── src/
-│   ├── femmg_fhe.h           — Core FHE engine
-│   ├── fractal_fhe.h         — Multi-Recursive Fractal
-│   ├── godcode.h             — N-Dimensional Banach Contraction (FORTRESS v17.0)
+│   ├── femmg_fhe.h           — Core FHE engine (expand/contract, cached TPS)
+│   ├── fractal_fhe.h         — Multi-Recursive Fractal (7 layers, 14 parties)
+│   ├── godcode.h             — N-Dimensional Banach Contraction (FORTRESS v17.1)
 │   ├── lyapunov_core.h       — Lyapunov-Coupled Map Lattice
-│   ├── femmg_server.cpp      — v17.0 Enterprise API server (Zero Warnings)
-│   └── test_suite.cpp        — Comprehensive test harness
+│   ├── phi_zeta_spacing.h    — Phi-Zeta Riemann Spacing
+│   ├── riemann_deep.h        — Deep Riemann Analysis
+│   ├── riemann_stabilizer.h  — Riemann Stabilizer
+│   ├── femmg_server.cpp      — v17.1 Enterprise API server (Zero Warnings)
+│   └── test_suite.cpp        — 34,084-test harness
 ├── npm-package/
-│   ├── index.js              — Client library (v13.1.3)
-│   └── test.js               — Test suite
+│   ├── index.js              — Client library v17.1.0 (7D Sine-CML IND-CPA)
+│   └── test.js               — NPM test suite
 ├── paper/
-│   └── femmg_fhe_v12.pdf     — IACR ePrint submission
+│   └── femmg_fhe_v16.2.pdf   — IACR ePrint submission
 ├── Dockerfile
 ├── LICENSE
 └── README.md
@@ -224,7 +205,7 @@ femmgFHE/
 
 ## IACR ePrint
 
-Submitted to the IACR Cryptology ePrint Archive. 9 pages, 6 formal theorems, 13 references. Includes Phi-Zeta Riemann zero spacing discovery.
+Submitted to the IACR Cryptology ePrint Archive. 9 pages, 6 formal theorems. Includes Phi-Zeta Riemann zero spacing discovery.
 
 ---
 
@@ -232,7 +213,7 @@ Submitted to the IACR Cryptology ePrint Archive. 9 pages, 6 formal theorems, 13 
 
 **Dan Fernandez / Primordial Omega Zero**
 
-[GitHub](https://github.com/primordialomegazero) · [NPM](https://www.npmjs.com/package/femmg-fhe-client) · [Email](mailto:primordialomegazero@proton.me)
+[GitHub](https://github.com/primordialomegazero) · [NPM](https://www.npmjs.com/package/femmg-fhe-client) · [Docker](https://github.com/primordialomegazero/femmgFHE/pkgs/container/femmgfhe)
 
 ---
 

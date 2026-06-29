@@ -6,8 +6,10 @@ COPY src/fractal_fhe.h .
 COPY src/godcode.h .
 COPY src/lyapunov_core.h .
 COPY src/phi_zeta_spacing.h .
+COPY src/riemann_deep.h .
+COPY src/riemann_stabilizer.h .
 COPY src/femmg_server.cpp .
-RUN g++ -std=c++17 -O3 -march=native -pthread -static -o femmg_server femmg_server.cpp -lm
+RUN g++ -std=c++17 -O3 -march=native -pthread -static -Wall -Wextra -Werror -o femmg_server femmg_server.cpp -lm
 
 FROM ubuntu:22.04
 WORKDIR /app
