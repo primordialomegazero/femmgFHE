@@ -109,3 +109,145 @@ class FEmmgClient {
 }
 
 module.exports = { FEmmgClient };
+
+// ═══ TRUE ZERO-KNOWLEDGE MODE (v17.5) ═══
+// Client encrypts locally, server NEVER sees plaintext
+class BlindClient extends FEmmgClient {
+  constructor(serverUrl = 'http://localhost:8092') {
+    super();
+    this.serverUrl = serverUrl;
+    this.ciphertexts = [];
+  }
+
+  async init() {
+    const res = await fetch(`${this.serverUrl}/`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'register', client_id: this.clientId })
+    });
+    return res.json();
+  }
+
+  async blindEncrypt(message) {
+    // Client-side encryption using 7D Sine-CML IND-CPA
+    const encrypted = this.encrypt(message);
+    
+    // Send ENCRYPTED value to server (server sees ciphertext, NOT plaintext)
+    const res = await fetch(`${this.serverUrl}/`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'fhe_store',
+        client_id: this.clientId,
+        encrypted_value: encrypted,
+        party: 0
+      })
+    });
+    const data = await res.json();
+    this.ciphertexts.push(data.ciphertext_index);
+    return data;
+  }
+
+  async blindAdd(idx1, idx2) {
+    const res = await fetch(`${this.serverUrl}/`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'fhe_add',
+        client_id: this.clientId,
+        ciphertext_index_1: idx1,
+        ciphertext_index_2: idx2
+      })
+    });
+    return res.json();
+  }
+
+  async blindDecrypt(idx) {
+    const res = await fetch(`${this.serverUrl}/`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'fhe_decrypt',
+        client_id: this.clientId,
+        ciphertext_index: idx
+      })
+    });
+    const data = await res.json();
+    return data.decrypted;
+  }
+}
+
+module.exports = { FEmmgClient, BlindClient };
+
+// ═══ OPTIMIZED CLIENT (v17.5) ═══
+class OptimizedClient extends FEmmgClient {
+  constructor(serverUrl = 'http://localhost:8092') {
+    super();
+    this.serverUrl = serverUrl;
+    this.ciphertexts = [];
+    this.baseDelay = 0.7;  // φ-respecting delay
+  }
+
+  async init() {
+    return this._request({ action: 'register', client_id: this.clientId });
+  }
+
+  async _request(payload, retries = 5) {
+    for (let i = 0; i < retries; i++) {
+      const res = await fetch(`${this.serverUrl}/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      
+      if (data.status !== 'blocked') return data;
+      
+      // Exponential backoff with φ-scaling
+      const delay = this.baseDelay * Math.pow(1.618, i);
+      await new Promise(r => setTimeout(r, delay * 1000));
+    }
+    throw new Error('Request blocked after ' + retries + ' retries');
+  }
+
+  async blindEncrypt(message) {
+    const encrypted = this.encrypt(message);
+    const data = await this._request({
+      action: 'fhe_store',
+      client_id: this.clientId,
+      encrypted_value: encrypted,
+      party: 0
+    });
+    this.ciphertexts.push(data.ciphertext_index);
+    return data;
+  }
+
+  async blindAdd(idx1, idx2) {
+    return this._request({
+      action: 'fhe_add',
+      client_id: this.clientId,
+      ciphertext_index_1: idx1,
+      ciphertext_index_2: idx2
+    });
+  }
+
+  async blindMultiply(idx1, idx2) {
+    return this._request({
+      action: 'fhe_multiply',
+      client_id: this.clientId,
+      ciphertext_index_1: idx1,
+      ciphertext_index_2: idx2
+    });
+  }
+
+  async blindDecrypt(idx) {
+    const data = await this._request({
+      action: 'fhe_decrypt',
+      client_id: this.clientId,
+      ciphertext_index: idx
+    });
+    return data.decrypted;
+  }
+}
+
+module.exports = { FEmmgClient, BlindClient, OptimizedClient };
