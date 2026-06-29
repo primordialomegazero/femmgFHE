@@ -5,6 +5,7 @@
 #include "phi_stack.h"
 #include "antimatter.h"
 #include "metaprogram.h"
+#include "zkp_fractal.h"
 #include <iostream>
 #include <sstream>
 #include <chrono>
@@ -65,6 +66,26 @@ std::string route(const std::string& body,SM& sm,FEmmgFHE& fhe,FractalFHE& fract
     if(action=="meta_stats"){auto s=meta_engine.analyze();return ok(O({J("action","meta_stats"),I("generation",meta_engine.get_generation()),I("samples",s.samples),N("avg_noise_delta",s.avg_noise_delta),N("convergence_rate",s.convergence_rate),B("optimal",s.optimal),B("evolving",meta_engine.is_evolving()),J("engine","Multi-Metaprogramming v17.5")}));}
     if(action=="meta_evolve"){meta_engine.evolve();return ok(O({J("action","meta_evolve"),I("new_generation",meta_engine.get_generation()),B("evolving",meta_engine.is_evolving()),J("status","Self-optimization complete"),J("engine","Multi-Metaprogramming v17.5")}));}
     
+    if(action=="zkp_prove"){
+        std::string data=sg(body,"data");
+        if(data.empty())data="FEmmg-FHE_ZKP_"+std::to_string(sm.total());
+        auto pf=zkp::FractalZKP::prove(data);
+        bool v=zkp::FractalZKP::verify(pf);
+        return ok(O({J("action","zkp_prove"),J("commitment_R",pf.commitment_R.substr(0,32)+"..."),
+                     J("challenge_c",pf.challenge_c.substr(0,32)+"..."),
+                     J("response_s",pf.response_s.substr(0,32)+"..."),
+                     B("verified",v),J("protocol","Schnorr Σ-Protocol on secp256k1"),
+                     J("note","Publicly verifiable. No secret needed.")}));
+    }
+    if(action=="zkp_fractal"){
+        std::string data=sg(body,"data");
+        if(data.empty())data="FEmmg-FHE_FractalZKP";
+        auto chain=zkp::FractalZKP::fractal_prove(data);
+        bool v=zkp::FractalZKP::verify_chain(chain);
+        return ok(O({J("action","zkp_fractal"),I("depth",chain.size()),B("all_verified",v),
+                     J("protocol","Recursive Fractal Schnorr ZKP"),
+                     I("chain_length",chain.size()),J("engine","TrueFractalZKP v5.0")}));
+    }
     if(action=="health"){return ok(O({J("status","TRUE_FHE_FORTRESS"),J("version","17.5.0"),B("triple_antimatter",true),B("session_based",true),B("metaprogram",true),I("meta_generation",meta_engine.get_generation()),I("clients",sm.total()),J("engine","FORTRESS v17.5 Multi-Metaprogramming")}));}
     if(action=="tps"){auto st=std::chrono::high_resolution_clock::now();uint64_t ops=0;while(std::chrono::duration_cast<std::chrono::seconds>(std::chrono::high_resolution_clock::now()-st).count()<3){auto a=fhe.encrypt(42),b=fhe.encrypt(1);auto es=fhe.add(a,b);volatile int64_t __attribute__((unused))ck=fhe.decrypt(es);ops++;}auto dur=std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now()-st).count();return ok(O({J("action","tps"),I("operations",ops),N("tps",ops*1000.0/dur),J("display","1.1M+ TPS"),B("true_fhe",true)}));}
     if(action=="verify"){int64_t tv=(int64_t)sd(sg(body,"test_value"));if(tv==0)tv=42;return ok(O({J("action","verify"),I("test_value",tv),B("roundtrip",fhe.verify_roundtrip(tv)),B("cross_party_91_91",fractal.verify_all())}));}
