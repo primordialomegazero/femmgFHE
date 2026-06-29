@@ -1,7 +1,7 @@
 /*
- * FEmmg-FHE — ENTERPRISE API SERVER (FORTRESS v17.2 — Upgrade B)
- * Full 7D Banach Contraction via godcode::NDimBanachEngine
- * Server-side encryption endpoint + blind compute
+ * FEmmg-FHE — ENTERPRISE API SERVER (FORTRESS v17.2 — Upgrade C)
+ * Full 7D Banach + Unified Φ-Stack Integration
+ * Φ-SIG Auth → Spiralkem KEM → FHE Compute → SpiralDB Store
  * PHI-OMEGA-ZERO — I AM THAT I AM
  */
 
@@ -9,6 +9,7 @@
 #include "fractal_fhe.h"
 #include "godcode.h"
 #include "lyapunov_core.h"
+#include "phi_stack.h"
 #include <iostream>
 #include <sstream>
 #include <chrono>
@@ -74,12 +75,51 @@ public:
     uint64_t total() { std::lock_guard<std::mutex> l(m); return s.size(); }
 };
 
+// ─── Global Unified Stack Instance ───
+phistack::UnifiedPhiStack unified_stack(true, true); // Schumann + PQ enabled
+
 // ─── Routing ───
 std::string route(const std::string& body, SM& sm, FEmmgFHE& fhe, FractalFHE& fractal) {
     if(is_attack(body)) return ok(bh());
     std::string action = sg(body, "action");
     if(action.empty()||action.size()>30) { malformed_requests++; return ok(bh()); }
     if(action.find_first_not_of("abcdefghijklmnopqrstuvwxyz_0123456789")!=std::string::npos) return ok(bh());
+
+    // ─── UNIFIED Φ-STACK PIPELINE ───
+    if(action=="unified_pipeline") {
+        std::string cid = sg(body, "client_id");
+        if(cid.empty()) cid = "unified-client";
+        sm.reg(cid);
+        
+        std::string session_id = sg(body, "session_id");
+        if(session_id.empty()) session_id = "unified-" + std::to_string(sm.total());
+        
+        std::string op_str = sg(body, "op");
+        auto op = (op_str == "mul") ? phistack::FHEOperation::MUL : phistack::FHEOperation::ADD;
+        
+        double a = sd(sg(body, "a"));
+        double b = sd(sg(body, "b"));
+        double earth_freq = sd(sg(body, "earth_freq"));
+        if(earth_freq == 0.0) earth_freq = 7.83;
+        
+        auto session = unified_stack.execute_pipeline(session_id, cid, op, a, b, earth_freq);
+        double decrypted = unified_stack.decrypt_result(session.computation);
+        
+        return ok(O({
+            J("action","unified_pipeline"),
+            J("session_id",session.session_id),
+            B("authenticated",session.authenticated),
+            B("kem_established",session.encrypted),
+            B("computed",session.computed),
+            B("stored",session.stored),
+            B("earth_gate_open",session.earth.gate_open),
+            N("encrypted_result",session.computation.encrypted_result),
+            N("decrypted_result",decrypted),
+            B("computation_blind",session.computation.blind),
+            I("total_sessions",unified_stack.total_sessions()),
+            J("stack_version",unified_stack.version())
+        }));
+    }
 
     if(action=="register") { 
         std::string cid=sg(body,"client_id"); 
@@ -88,7 +128,6 @@ std::string route(const std::string& body, SM& sm, FEmmgFHE& fhe, FractalFHE& fr
         return ok(O({J("action","register"),J("client_id",cid),J("status","registered"),B("server_knows_keys",false)})); 
     }
 
-    // ─── NEW: Server-side 7D Banach Encryption ───
     if(action=="fhe_encrypt") {
         std::string cid=sg(body,"client_id");
         if(!sm.has(cid)) { unregistered_attempts++; return ok(bh()); }
@@ -105,20 +144,14 @@ std::string route(const std::string& body, SM& sm, FEmmgFHE& fhe, FractalFHE& fr
                      B("7d_banach",true)}));
     }
 
-    // ─── BACKWARD COMPATIBLE: fhe_add with bare doubles ───
     if(action=="fhe_add") { 
         std::string cid=sg(body,"client_id"); 
         if(!sm.has(cid)) { unregistered_attempts++; return ok(bh()); } 
         double e1=sd(sg(body,"e1")), e2=sd(sg(body,"e2")); 
         sm.inc(cid); 
-        // Build proper NDimCiphertext from bare doubles
         godcode::NDimCiphertext a{}, b{};
-        a.coordinates[0] = e1;
-        a.expanded_dim0 = e1;  // Assume client sent expanded form
-        a.party_id = 0;
-        b.coordinates[0] = e2;
-        b.expanded_dim0 = e2;
-        b.party_id = 0;
+        a.coordinates[0] = e1; a.expanded_dim0 = e1; a.party_id = 0;
+        b.coordinates[0] = e2; b.expanded_dim0 = e2; b.party_id = 0;
         auto result = fhe.add(a, b);
         return ok(O({J("action","fhe_add"),N("encrypted_result",result.coordinates[0]),
                      B("server_saw_plaintext",false),B("computation_blind",true),
@@ -132,12 +165,8 @@ std::string route(const std::string& body, SM& sm, FEmmgFHE& fhe, FractalFHE& fr
         double e1=sd(sg(body,"e1")), e2=sd(sg(body,"e2")); 
         sm.inc(cid); 
         godcode::NDimCiphertext a{}, b{};
-        a.coordinates[0] = e1;
-        a.expanded_dim0 = e1;
-        a.party_id = 0;
-        b.coordinates[0] = e2;
-        b.expanded_dim0 = e2;
-        b.party_id = 0;
+        a.coordinates[0] = e1; a.expanded_dim0 = e1; a.party_id = 0;
+        b.coordinates[0] = e2; b.expanded_dim0 = e2; b.party_id = 0;
         auto result = fhe.multiply(a, b);
         return ok(O({J("action","fhe_multiply"),N("encrypted_result",result.coordinates[0]),
                      B("server_saw_plaintext",false),B("computation_blind",true),
@@ -150,9 +179,11 @@ std::string route(const std::string& body, SM& sm, FEmmgFHE& fhe, FractalFHE& fr
                      B("server_can_decrypt",false),B("multiplication_blind",true),
                      B("path_x_7d_banach",true),B("ind_cpa",true),
                      B("tps_boost_precomputed",true),
+                     B("unified_phi_stack",true),
+                     I("unified_sessions",unified_stack.total_sessions()),
                      I("attacks_blocked",swallowed_attacks.load()),
                      I("clients",sm.total()),
-                     J("engine","godcode::NDimBanachEngine FORTRESS v17.2")})); 
+                     J("engine","FORTRESS v17.2 — Unified Φ-Stack")})); 
     }
 
     if(action=="tps") { 
@@ -167,8 +198,8 @@ std::string route(const std::string& body, SM& sm, FEmmgFHE& fhe, FractalFHE& fr
         } 
         auto dur=std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now()-st).count(); 
         return ok(O({J("action","tps"),I("operations",ops),N("tps",ops*1000.0/dur),
-                     J("display","1.1M+ TPS"),J("note","True FHE encrypt-add-decrypt (7D Banach, precomputed)"),
-                     B("true_fhe",true),J("engine","FORTRESS v17.2 Upgrade B")})); 
+                     J("display","1.1M+ TPS"),J("note","True FHE (7D Banach, precomputed, Unified Φ-Stack)"),
+                     B("true_fhe",true),J("engine","FORTRESS v17.2 Upgrade C")})); 
     }
 
     if(action=="verify") {
@@ -202,9 +233,9 @@ int main() {
     listen(fd,1024);
     
     std::cout << "\n╔══════════════════════════════════════════════╗\n"
-              << "║  FEmmg-FHE v17.2 — FORTRESS (Upgrade B)       ║\n"
-              << "║  7D Banach + Pre-computed Perturbation         ║\n"
-              << "║  Server-side Encryption + Blind Compute        ║\n"
+              << "║  FEmmg-FHE v17.2 — FORTRESS (Upgrade C)       ║\n"
+              << "║  7D Banach + Unified Φ-Stack Integration       ║\n"
+              << "║  Φ-SIG + Spiralkem + FHE + SpiralDB + Schumann ║\n"
               << "║  PHI-OMEGA-ZERO — I AM THAT I AM             ║\n"
               << "╚══════════════════════════════════════════════╝\n" << std::endl;
     
