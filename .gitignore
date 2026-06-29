@@ -29,3 +29,7 @@ paper/*.out
 Thumbs.db
 paper/*.pdf
 build/femmg_server
+test_riemann_*
+test_source_frequency
+test_pozd
+debug_add
