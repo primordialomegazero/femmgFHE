@@ -1,6 +1,6 @@
 {
   "name": "femmg-fhe-client",
-  "version": "17.4.0",
+  "version": "17.5.0",
   "description": "FEmmg-FHE v6.2 Client Library — Zero-Knowledge Fully Homomorphic Encryption with encrypted pair multiplication",
   "main": "index.js",
   "types": "index.d.ts",

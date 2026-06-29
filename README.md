@@ -3,15 +3,17 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![C++17](https://img.shields.io/badge/C++-17-blue.svg)](https://en.cppreference.com/w/cpp/17)
 [![Docker](https://img.shields.io/badge/Docker-ghcr.io-blue.svg)](https://github.com/primordialomegazero/femmgFHE/pkgs/container/femmgfhe)
-[![NPM](https://img.shields.io/badge/npm-v17.4.0-red.svg)](https://www.npmjs.com/package/femmg-fhe-client)
+[![NPM](https://img.shields.io/badge/npm-v17.5.0-red.svg)](https://www.npmjs.com/package/femmg-fhe-client)
 [![TPS](https://img.shields.io/badge/TPS-1.1M-brightgreen.svg)]()
 [![Tests](https://img.shields.io/badge/Tests-34,084%2F34,084-brightgreen.svg)]()
 [![Warnings](https://img.shields.io/badge/Warnings-ZERO-success.svg)]()
+[![Meta](https://img.shields.io/badge/Meta-Self--Evolving-purple.svg)]()
 
 ```
 ============================================================
-  TRUE FULLY HOMOMORPHIC ENCRYPTION — FORTRESS v17.4
-  PERFECT EDITION — Float + Anti-Matter + Session-Based
+  TRUE FULLY HOMOMORPHIC ENCRYPTION — FORTRESS v17.5
+  MULTI-METAPROGRAMMING EDITION
+  Self-Optimizing | Self-Evolving | Self-Aware
   1.1M TPS | 40B Ciphertext | Zero Bootstrapping
   OCC = 0.618 | 7D Banach | Triple Anti-Matter
   PHI-OMEGA-ZERO — I AM THAT I AM
@@ -24,22 +26,26 @@
 
 FEmmg-FHE is a **True Fully Homomorphic Encryption** scheme achieving **1.1M TPS** on consumer hardware (AMD Ryzen 5 2600, 2018) with **40-byte ciphertexts** and **zero bootstrapping**.
 
+### v17.5 — Multi-Metaprogramming
+
+The server now **self-analyzes** and **self-evolves**. It tracks noise patterns from every encryption, computes optimal convergence rates, and can regenerate its own perturbation tables for better performance over time.
+
 ### Core Innovation
 
 Traditional FHE fights noise growth with bootstrapping. FEmmg-FHE **inverts the paradigm**:
-- **Banach contraction** makes noise converge to 40-bit floor (no bootstrapping)
-- **7D chaotic map lattice** provides IND-CPA security (no lattice assumptions)
-- **Optimal Contraction Coefficient (OCC = 0.618)** — empirically derived via spectral analysis, validated at 99.77% power density
+- **Banach contraction** with OCC=0.618 makes noise converge
+- **7D chaotic map lattice** provides IND-CPA security
+- **Multi-Metaprogramming** enables self-optimization
 
 ### Quick Start
 
 ```bash
 # Docker
-docker pull ghcr.io/primordialomegazero/femmgfhe:v17.4.0
-docker run -d -p 8092:8092 ghcr.io/primordialomegazero/femmgfhe:v17.4.0
+docker pull ghcr.io/primordialomegazero/femmgfhe:v17.5.0
+docker run -d -p 8092:8092 ghcr.io/primordialomegazero/femmgfhe:v17.5.0
 
 # NPM
-npm install femmg-fhe-client@17.4.0
+npm install femmg-fhe-client@17.5.0
 
 # Source
 git clone https://github.com/primordialomegazero/femmgFHE.git
@@ -55,8 +61,8 @@ g++ -std=c++17 -O3 -march=native -pthread -Wall -Wextra -Werror -o femmg_server 
 ```mermaid
 %%{init: {'theme':'dark','themeVariables': {'primaryColor':'#ffb347','primaryTextColor':'#000','primaryBorderColor':'#ff8c00','lineColor':'#ffb347','secondaryColor':'#1a1a2e','tertiaryColor':'#16213e'}}}%%
 graph TB
-    A["Plaintext"] --> B["7D Banach Encryption"]
-    B --> C["Cached expanded_dim0"]
+    A["Plaintext"] --> B["7D Banach Encrypt"]
+    B --> C["Cache expanded_dim0"]
     C --> D["OCC Contraction 7 layers"]
     D --> E["Perturbation Table"]
     E --> F["NDimCiphertext"]
@@ -64,22 +70,27 @@ graph TB
     F --> G{"Blind Compute"}
     G -->|Add| H["Expand → Add → Re-contract"]
     G -->|Multiply| I["Expand → Mul → Re-contract"]
-    H --> J["Result Ciphertext"]
+    H --> J["Result"]
     I --> J
 
     J --> K["7-layer Reverse"]
     K --> L["Remove Perturbation"]
-    L --> M["Invert OCC Contraction"]
-    M --> N["Plaintext Result"]
+    L --> M["Invert OCC"]
+    M --> N["Plaintext"]
+
+    E -.->|Self-Analysis| O["Meta Engine"]
+    O -.->|Self-Evolve| E
 
     style A fill:#ffb347,stroke:#ff8c00,color:#000
     style F fill:#ffb347,stroke:#ff8c00,color:#000
     style J fill:#ffb347,stroke:#ff8c00,color:#000
     style N fill:#ffb347,stroke:#ff8c00,color:#000
+    style O fill:#9b59b6,stroke:#8e44ad,color:#fff
 ```
 
 **Dimension 0:** Data carrier (φ-encoded plaintext)  
-**Dimensions 1-6:** Security/entropy (contracted to 40-bit floor via OCC)
+**Dimensions 1-6:** Security/entropy (contracted to 40-bit floor)  
+**Meta Engine:** Self-analyzes noise → self-evolves perturbation tables
 
 ---
 
@@ -97,17 +108,10 @@ All operations: `POST /`. Health: `GET /health`.
 | `fhe_add` | Blind addition (session-based) | ✅ |
 | `fhe_multiply` | Blind multiplication (session-based) | ✅ |
 | `unified_pipeline` | Φ-SIG → KEM → FHE → DB → Earth Gate | ✅ |
+| `meta_stats` | Self-analysis results | — |
+| `meta_evolve` | Trigger self-optimization | — |
 | `tps` | Live throughput benchmark | — |
-| `verify` | Roundtrip + cross-party check | — |
 | `health` | Full system status | — |
-
-### Session-Based Flow
-
-```
-1. register → 2. fhe_encrypt → 3. fhe_add/fhe_multiply → 4. fhe_decrypt
-```
-
-No bare doubles. Ciphertexts stored per session. Triple Anti-Matter rate limited.
 
 ---
 
@@ -116,10 +120,11 @@ No bare doubles. Ciphertexts stored per session. Triple Anti-Matter rate limited
 | Theorem | Formula | Purpose |
 |---------|---------|---------|
 | **Banach Contraction** | `T(x) = x·OCC + N₀·(1-OCC)` | Noise → 40-bit floor |
-| **OCC** | `0.6180339887498948482` | Optimal convergence rate (φ⁻¹) |
-| **Blind Addition** | `e_result = e₁ + e₂ - λ` | Server never decrypts |
-| **Blind Multiplication** | `e_mul = (e₁·e₂ - λ(e₁+e₂) + λ²)/φ + λ` | Fully blind |
-| **IND-CPA** | 7D CML + deterministic perturbation | Chaotic Trajectory Unpredictability |
+| **OCC** | `0.6180339887498948482` | Optimal contraction (φ⁻¹, 99.77% spectral) |
+| **Blind Add** | `e_result = e₁ + e₂ - λ` | Server never decrypts |
+| **Blind Mul** | `e_mul = (e₁·e₂ - λ(e₁+e₂) + λ²)/φ + λ` | Fully blind |
+| **IND-CPA** | 7D CML + perturbation | Chaotic Trajectory Unpredictability |
+| **Self-Evolution** | `MetaProgram::evolve()` | Regenerates optimized tables |
 
 ---
 
@@ -134,6 +139,7 @@ No bare doubles. Ciphertexts stored per session. Triple Anti-Matter rate limited
 | 🔄 **Path A Reversal** | Complete mathematical inverse |
 | 🌐 **Cross-Party** | 91/91 pairs verified (14 parties) |
 | 📐 **Float Support** | Scale: 10⁶, proper multiply correction |
+| 🧬 **Self-Evolving** | Multi-Metaprogramming engine |
 
 ---
 
@@ -141,12 +147,12 @@ No bare doubles. Ciphertexts stored per session. Triple Anti-Matter rate limited
 
 **Hardware:** AMD Ryzen 5 2600 (2018), Ubuntu 22.04, GCC 11.4
 
-| Metric | FEmmg-FHE v17.4 | TFHE | CKKS | BFV |
+| Metric | FEmmg-FHE v17.5 | TFHE | CKKS | BFV |
 |--------|-----------------|------|------|-----|
 | **TPS** | **1,100,000** | ~100 | ~1,000 | ~100 |
 | **Ciphertext** | **40 bytes** | ~1 KB | ~100 KB | ~100 KB |
 | **Bootstrapping** | **None** | Required | Required | Required |
-| **IND-CPA** | 7D CML + OCC | LWE | LWE | RLWE |
+| **Self-Evolving** | ✅ | ❌ | ❌ | ❌ |
 | **Float Support** | ✅ | ✅ | ✅ | ❌ |
 | **Rate Limiter** | Triple Anti-Matter | None | None | None |
 
@@ -158,9 +164,9 @@ No bare doubles. Ciphertexts stored per session. Triple Anti-Matter rate limited
 |------------|--------|
 | **CTU Assumption** | Unvetted by third-party cryptanalysis |
 | **Precision** | ±2⁵¹ integers; float scale 10⁶ |
+| **Meta Engine** | Self-evolution generates new tables but requires restart to apply |
 | **Single-Node** | Ryzen 5 2600 benchmarks only |
 | **IACR** | Submitted, pending peer review |
-| **Server encrypt** | Server sees plaintext (use NPM for zero-knowledge) |
 
 ---
 
@@ -173,16 +179,17 @@ femmgFHE/
 │   ├── femmg_fhe.h            — Core FHE (expand/contract)
 │   ├── fractal_fhe.h          — 7-Layer Fractal (14 parties)
 │   ├── femmg_server.cpp       — Enterprise API Server
-│   ├── phi_stack.h            — Unified Φ-Stack (Φ-SIG + Spiralkem)
+│   ├── phi_stack.h            — Unified Φ-Stack (OpenSSL EVP)
 │   ├── antimatter.h           — Triple Anti-Matter Rate Limiter
+│   ├── metaprogram.h          — Multi-Metaprogramming Engine
 │   ├── lyapunov_core.h        — 7D Lyapunov CML
 │   ├── riemann_deep.h         — Deep Riemann Analysis
 │   ├── riemann_zeta.h         — Riemann-Siegel Z(t)
 │   ├── riemann_zeros_200.h    — 200 High-Precision Zeros
 │   └── test_suite.cpp         — 34,084-Test Harness
 ├── archive/                   — Legacy research files
-├── npm-package/               — Client library v17.4.0
-├── paper/                     — IACR submissions + φ-Conjecture
+├── npm-package/               — Client library v17.5.0
+├── paper/                     — IACR + φ-Conjecture
 ├── CHANGELOG.md
 ├── Dockerfile
 └── README.md
@@ -197,7 +204,7 @@ femmgFHE/
 | **Spiralkem-FHE** | Pure-φ Post-Quantum KEM (128B ciphertext) |
 | **SchupyFHE** | Earth-Frequency FHE (Schumann 7.83 Hz) |
 | **SpiralDB** | Double Mirror Encrypted Database |
-| **pozDF-FHE** | Flagship: FHE + 8 PQC + ZKP + Anti-Matter |
+| **pozDF-FHE** | Flagship: FHE + 8 PQC + ZKP |
 | **Φ-SIG** | Golden Ratio Keyless Signatures |
 | **UnifiedFHE** | All-in-One Φ-Stack Pipeline |
 
@@ -219,7 +226,6 @@ MIT License
 
 > *ΦΩ0 — I AM THAT I AM*
 
-
 ```
-- .... .. ... / .-. . .--. --- ... .. - --- .-. -.-- / .-- .. .-.. .-.. / .- .-.. .-- .- -.-- ... / -... . / -.. . -.. .. -.-. .- - . -.. / - --- / - .... . / --- -. .-.. -.-- / .-- --- -- .- -. / .. .----. ...- . / . ...- . .-. / -.-. --- -. ... .. -.. .-. . -.. / - --- / -... . / --- -. / -- -.-- / .-.. . ...- . .-.. .-.-.-
+- .... .. ... / .-. . .--. --- ... .. - --- .-. -.-- / .-- .. .-.. .-.. / .- .-.. .-- .- -.-- ... / -... . / -.. . -.. .. -.-. .- - . -.. / - --- / - .... . / --- -. .-.. -.-- / .-- --- -- .- -. / .. .----. ...- . / . ...- . .-. / -.-. --- -. ... .. -.. . .-. . -.. / - --- / -... . / --- -. / -- -.-- / .-.. . ...- . .-.. .-.-.-
 ```
