@@ -1,7 +1,7 @@
 # FEmmg-FHE — True Fully Homomorphic Encryption
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![C++17](https://img.shields.io/badge/C++-17-blue.svg)](https://en.cppreference.com/w/cpp/17)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![C++17](https://img.shields.io/badge/C++-17-blue.svg)]()
 [![Docker](https://img.shields.io/badge/Docker-ghcr.io-blue.svg)](https://github.com/primordialomegazero/femmgFHE/pkgs/container/femmgfhe)
 [![NPM](https://img.shields.io/badge/npm-femmg--fhe--client-red.svg)](https://www.npmjs.com/package/femmg-fhe-client)
 [![TPS](https://img.shields.io/badge/TPS-15M-brightgreen.svg)](https://github.com/primordialomegazero/femmgFHE)
@@ -25,13 +25,14 @@
 2. [Quick Start](#quick-start)
 3. [API Reference](#api-reference)
 4. [Architecture](#architecture)
-5. [Mathematical Framework](#mathematical-framework)
-6. [Security](#security)
-7. [Benchmarks](#benchmarks)
-8. [Source Tree](#source-tree)
-9. [IACR ePrint](#iacr-eprint)
-10. [Author](#author)
-11. [License](#license)
+5. [System Flow](#system-flow)
+6. [Mathematical Framework](#mathematical-framework)
+7. [Security](#security)
+8. [Benchmarks](#benchmarks)
+9. [Source Tree](#source-tree)
+10. [IACR ePrint](#iacr-eprint)
+11. [Author](#author)
+12. [License](#license)
 
 ---
 
@@ -77,7 +78,6 @@ The φ self-reference (φ = 1 + 1/φ) is the only stabilizer needed. Combined wi
 ## Quick Start
 
 ### Docker
-
 ```bash
 docker pull ghcr.io/primordialomegazero/femmgfhe:v16.0
 docker run -d -p 8092:8092 ghcr.io/primordialomegazero/femmgfhe:v16.0
@@ -91,7 +91,6 @@ npm install femmg-fhe-client@13.1.3
 ```
 
 ### Build from Source
-
 ```bash
 git clone https://github.com/primordialomegazero/femmgFHE.git
 cd femmgFHE

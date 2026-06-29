@@ -9,6 +9,7 @@
 #include "fractal_fhe.h"
 #include "godcode.h"
 #include "lyapunov_core.h"
+#include "phi_zeta_spacing.h"
 #include <iostream>
 #include <sstream>
 #include <chrono>
@@ -18,9 +19,12 @@
 #include <cstring>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <arpa/inet.h>
 #include <unistd.h>
 #include <map>
 #include <mutex>
+
+
 
 constexpr int PORT = 8092;
 constexpr int THREADS = 12;
@@ -154,6 +158,9 @@ std::string route(const std::string& body, SM& sm, FEmmgFHE& fhe, FractalFHE& fr
     invalid_actions++; return ok(bh()); 
 }
 
+}
+// ═══ MAIN ═══
+}
 int main() {
     SM sm; 
     FEmmgFHE fhe;
