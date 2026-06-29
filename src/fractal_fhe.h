@@ -15,7 +15,7 @@ class FractalFHE {
 public:
     FractalFHE() {
         for(int i = 0; i < PARTIES; i++)
-            seeds[i] = PHI * (i + 1) * PHI_INV + FLOOR * (1.0 - PHI_INV);
+            seeds[i] = PHI * (i + 1) * OCC + FLOOR * (1.0 - OCC);
     }
 
     // 7-layer fractal encryption

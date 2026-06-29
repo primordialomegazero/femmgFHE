@@ -17,7 +17,7 @@
 #include <iomanip>
 
 constexpr double PHI      = godcode::PHI;
-constexpr double PHI_INV  = godcode::PHI_INV;
+constexpr double OCC  = godcode::OCC;
 constexpr double LAMBDA   = godcode::LAMBDA;
 constexpr double FLOOR    = godcode::FLOOR;
 constexpr int    DEPTH    = godcode::DEPTH;
@@ -57,11 +57,11 @@ public:
         
         // Dimensions 1-6: phi-weighted merge
         for(int d = 1; d < godcode::DIMS; d++) {
-            result.coordinates[d] = a.coordinates[d] * PHI_INV 
-                                  + b.coordinates[d] * (1.0 - PHI_INV);
+            result.coordinates[d] = a.coordinates[d] * OCC 
+                                  + b.coordinates[d] * (1.0 - OCC);
         }
         
-        result.noise = a.noise * PHI_INV + b.noise * (1.0 - PHI_INV);
+        result.noise = a.noise * OCC + b.noise * (1.0 - OCC);
         
         for(int d = 0; d < godcode::DIMS; d++) {
             result.lyapunov_spectrum[d] = std::max(a.lyapunov_spectrum[d], 
@@ -89,11 +89,11 @@ public:
         
         // Dimensions 1-6: phi-weighted merge
         for(int d = 1; d < godcode::DIMS; d++) {
-            result.coordinates[d] = a.coordinates[d] * PHI_INV 
-                                  + b.coordinates[d] * (1.0 - PHI_INV);
+            result.coordinates[d] = a.coordinates[d] * OCC 
+                                  + b.coordinates[d] * (1.0 - OCC);
         }
         
-        result.noise = (a.noise + b.noise) * PHI_INV + FLOOR * (1.0 - PHI_INV);
+        result.noise = (a.noise + b.noise) * OCC + FLOOR * (1.0 - OCC);
         
         for(int d = 0; d < godcode::DIMS; d++) {
             result.lyapunov_spectrum[d] = std::max(a.lyapunov_spectrum[d], 
