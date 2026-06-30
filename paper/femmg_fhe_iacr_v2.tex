@@ -171,6 +171,8 @@ Let $e_1 = m_1 \varphi + \lambda$ and $e_2 = m_2 \varphi + \lambda$. Then:
 Therefore $\text{Mul}(ct_1, ct_2) = m_1 m_2 \varphi + \lambda = \text{Enc}(m_1 \times m_2)$.
 \end{proof}
 
+\textbf{Arbitrary-depth composability.} A natural concern is whether the multiplication formula works after re-contraction. Our implementation uses a \textit{cached expand/contract} architecture (Path X): the ciphertext stores both the contracted value $\text{ct.coordinates}[0]$ (for security) and the pre-contraction value $\text{ct.expanded\_dim0}$ (for fast homomorphic operations). Each multiplication reads the cached expanded values, computes the blind formula, stores the result in $\text{result.expanded\_dim0}$, and re-contracts only $\text{coordinates}[0]$. This ensures that after any number of operations, the expanded value is always available and correct. We verify this with chained multiplication tests (10-chain: $\text{Enc}(2) \times 2^{10} = 1024$) in our automated test suite.
+
 \subsection{Perturbation Layer}
 \label{sec:perturbation}
 
@@ -251,15 +253,14 @@ For dimension $d \in \{0,\ldots,6\}$:
 The 7D CML has 7 positive Lyapunov exponents. The maximum exponent is $\lambda_{\max} = -\ln(\text{OCC}) = \ln(\varphi) \approx 0.4812$. The Lyapunov time (time to lose one bit of precision) is $\tau = 1/\lambda_{\max} \approx 2.08$ iterations.
 \end{theorem}
 
-\begin{assumption}[Chaotic Trajectory Unpredictability -- CTU]
-For any probabilistic polynomial-time (PPT) adversary $\mathcal{A}$ observing a sequence of $t$ consecutive outputs of the 7D CML, the advantage in predicting the $(t+1)$-th output is bounded by:
+\begin{assumption}[Computational Irreversibility of the 7D CML]
+The 7D Coupled Map Lattice exhibits \textit{computational irreversibility}: given a sequence of $t$ consecutive outputs, no PPT adversary can predict the $(t+1)$-th output with advantage greater than:
 \begin{equation}
-    \text{Adv}^{\text{CTU-classical}}_{\mathcal{A}} \leq O(2^{-t \cdot \lambda_{\min}})
+    \text{Adv}^{\text{CML-predict}}_{\mathcal{A}} \leq O(2^{-t \cdot \lambda_{\min}})
 \end{equation}
-where $\lambda_{\min} \approx 0.48$ is the minimum Lyapunov exponent. For quantum adversaries, Grover's algorithm provides at most quadratic speedup:
-\begin{equation}
-    \text{Adv}^{\text{CTU-quantum}}_{\mathcal{A}} \leq O(2^{-t \cdot \lambda_{\min}/2})
-\end{equation}
+where $\lambda_{\min} \approx 0.48$ is the minimum Lyapunov exponent. This is a \textit{computational} assumption (not information-theoretic): the deterministic chaotic system is bijective, but the exponential divergence of trajectories makes practical prediction infeasible. The assumption is empirically supported by the Lyapunov analysis but has not been reduced to a standard cryptographic hardness assumption. We note this as a limitation and invite cryptanalysis.
+
+For IND-CPA, we additionally inject 256 bits of true randomness (from the operating system's cryptographic RNG) as a nonce seed per encryption. This ensures that even identical plaintexts produce different ciphertexts regardless of the CML state. The chaotic perturbation then amplifies this entropy across 7 dimensions.
 \end{assumption}
 
 \subsection{IND-CPA Security}
