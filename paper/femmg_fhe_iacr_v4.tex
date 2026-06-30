@@ -501,7 +501,7 @@ While 34,084 tests pass, we have not produced machine-checked proofs (e.g., Coq 
 \label{sec:conclusion}
 % ============================================================
 
-We have demonstrated that bootstrapping-free Fully Homomorphic Encryption is achievable through Banach contraction with the golden ratio as the optimal contraction coefficient. Our scheme achieves 21.7M TPS on consumer hardware in deep circuit configuration (5.0M TPS full-cycle) with 40-byte wire-format ciphertexts. The Fibonacci-Lyapunov engine eliminates noise growth entirely---validated at 10 billion consecutive operations---removing the bootstrapping bottleneck that has limited FHE for 15 years while eliminating the bootstrapping bottleneck entirely.
+We have demonstrated that bootstrapping-free Fully Homomorphic Encryption is achievable through Banach contraction with the golden ratio as the optimal contraction coefficient. Our scheme achieves 21.7M TPS on consumer hardware in deep circuit configuration (5.0M TPS full-cycle) with 40-byte wire-format ciphertexts. The Fibonacci-Lyapunov engine eliminates noise growth entirely---validated at 10 billion consecutive operations---removing the bootstrapping bottleneck that has limited FHE for 15 years.
 
 The key insight is that noise does not need to be reset---it can be made to converge to a stable fixed point. The Banach Fixed Point Theorem, proven in 1922, provides the mathematical foundation for this approach. The golden ratio $\varphi$, known since antiquity, provides the optimal contraction rate.
 
