@@ -1,44 +1,50 @@
-declare module 'femmg-fhe-client' {
-  interface ClientKeys {
-    phi: number;
-    lambda: number;
-    client_id: string;
-    seed: number;
-  }
+/**
+ * FEmmg-FHE v21.0 - TypeScript Definitions
+ */
 
-  interface PublicInfo {
-    client_id: string;
-    version: string;
-    protocol: string;
-  }
+export interface Ciphertext {
+    coordinates: number[];
+    expanded_dim0: number;
+    noise: number;
+    phi_state: number;
+    operations: number;
+    party_id: number;
+    nonce: string;
+    seed: string;
+    signature: string;
+}
 
-  interface RegistrationPayload {
-    action: string;
-    client_id: string;
-  }
+export interface Config {
+    serverUrl?: string;
+}
 
-  interface FHEPayload {
-    action: string;
-    e1: number;
-    e2: number;
-    client_id: string;
-  }
-
-  class FEmmgClient {
-    phi: number;
-    lambda: number;
-    clientId: string;
-
-    constructor(phi?: number | null);
-    encrypt(message: number): number;
-    decrypt(encryptedValue: number): number;
-    getRegistrationPayload(): RegistrationPayload;
-    getAddPayload(e1: number, e2: number): FHEPayload;
-    getMultiplyPayload(e1: number, e2: number): FHEPayload;
-    getPublicInfo(): PublicInfo;
-    getSecretKeys(): ClientKeys;
-    static fromKeys(keys: ClientKeys): FEmmgClient;
-  }
-
-  export { FEmmgClient, ClientKeys, PublicInfo, RegistrationPayload, FHEPayload };
+export class FEmmgClient {
+    constructor(config?: Config);
+    
+    /** Register a new session */
+    register(): Promise<string>;
+    
+    /** Encrypt plaintext locally (client-side) */
+    encrypt(plaintext: number | string, party?: number): Ciphertext;
+    
+    /** Generate hybrid nonce from 3 algos */
+    generateHybridNonce(): Buffer;
+    
+    /** Store encrypted data (True ZK) */
+    store(ciphertext: Ciphertext): Promise<number>;
+    
+    /** Decrypt by index */
+    decrypt(index: number): Promise<number>;
+    
+    /** Homomorphic add */
+    add(index1: number, index2: number): Promise<number>;
+    
+    /** Homomorphic multiply */
+    multiply(index1: number, index2: number): Promise<number>;
+    
+    /** Health check */
+    health(): Promise<any>;
+    
+    /** Benchmark TPS */
+    tps(): Promise<any>;
 }

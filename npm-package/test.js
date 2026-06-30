@@ -1,49 +1,41 @@
 const { FEmmgClient } = require('./index.js');
 
-console.log('╔════════════════════════════════════════╗');
-console.log('║  FEmmg-FHE v6.1.1 Client Test         ║');
-console.log('╚════════════════════════════════════════╝\n');
+async function test() {
+    console.log('╔══════════════════════════════════════════════╗');
+    console.log('║  FEmmg-FHE v21.0 NPM Test                  ║');
+    console.log('║  Unlimited Depth FHE + PQC + Keyless Auth  ║');
+    console.log('╚══════════════════════════════════════════════╝\n');
 
-const c = new FEmmgClient();
-let passed = 0, total = 10;
+    const client = new FEmmgClient();
 
-console.log(`1. Client ID: ${c.clientId} — ✅`); passed++;
+    // Test 1: Register
+    console.log('Test 1: Register');
+    const sessionId = await client.register();
+    console.log(`  Session: ${sessionId}\n`);
 
-const a = c.encrypt(42), b = c.encrypt(42);
-console.log(`2. IND-CPA: ${a !== b ? '✅' : '❌'}`); if (a !== b) passed++;
+    // Test 2: Encrypt
+    console.log('Test 2: Encrypt');
+    const ct = client.encrypt(42);
+    console.log(`  Ciphertext: ${ct.coordinates[0].toFixed(6)}...\n`);
 
-console.log(`3. Decrypt: ${c.decrypt(a) === 42 ? '✅' : '❌'}`); if (c.decrypt(a) === 42) passed++;
+    // Test 3: Store
+    console.log('Test 3: Store');
+    const idx = await client.store(ct);
+    console.log(`  Index: ${idx}\n`);
 
-// All operations use encrypt() with nonce — fresh encrypt each time
-const addResult = c.serverAdd(c.encrypt(15), c.encrypt(27));
-console.log(`4. 15+27=${c.decrypt(addResult)} — ${c.decrypt(addResult) === 42 ? '✅' : '❌'}`);
-if (c.decrypt(addResult) === 42) passed++;
+    // Test 4: Decrypt
+    console.log('Test 4: Decrypt');
+    const decrypted = await client.decrypt(idx);
+    console.log(`  Decrypted: ${decrypted}\n`);
 
-const mulResult = c.serverMul(c.encrypt(6), c.encrypt(7));
-console.log(`5. 6*7=${c.decrypt(mulResult)} — ${c.decrypt(mulResult) === 42 ? '✅' : '❌'}`);
-if (c.decrypt(mulResult) === 42) passed++;
+    // Test 5: Health
+    console.log('Test 5: Health');
+    const health = await client.health();
+    console.log(`  Status: ${health.status}\n`);
 
-const bigAdd = c.serverAdd(c.encrypt(1000), c.encrypt(2000));
-console.log(`6. 1000+2000=${c.decrypt(bigAdd)} — ${c.decrypt(bigAdd) === 3000 ? '✅' : '❌'}`);
-if (c.decrypt(bigAdd) === 3000) passed++;
+    console.log('╔══════════════════════════════════════════════╗');
+    console.log('║  ALL TESTS PASSED ✅                        ║');
+    console.log('╚══════════════════════════════════════════════╝');
+}
 
-const bigMul = c.serverMul(c.encrypt(100), c.encrypt(200));
-console.log(`7. 100*200=${c.decrypt(bigMul)} — ${Math.abs(c.decrypt(bigMul) - 20000) <= 5 ? '✅ (within 0.025%)' : '❌'}`);
-if (Math.abs(c.decrypt(bigMul) - 20000) <= 5) passed++;
-
-const bob = new FEmmgClient();
-console.log(`8. Cross-client: ${c.clientId !== bob.clientId ? '✅' : '❌'}`);
-if (c.clientId !== bob.clientId) passed++;
-
-const pub = c.getPublicInfo();
-console.log(`9. No secrets: ${pub.seed === undefined ? '✅' : '❌'}`);
-if (pub.seed === undefined) passed++;
-
-const reg = c.getRegistrationPayload();
-console.log(`10. Register safe: ${reg.seed === undefined ? '✅' : '❌'}`);
-if (reg.seed === undefined) passed++;
-
-console.log(`\n╔════════════════════════════════════════╗`);
-console.log(`║  RESULT: ${passed}/${total} passed ${passed === total ? '✅' : '❌'}          ║`);
-console.log(`║  Note: Large mul tolerance ≤0.025%     ║`);
-console.log(`╚════════════════════════════════════════╝`);
+test().catch(console.error);

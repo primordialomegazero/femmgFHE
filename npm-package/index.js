@@ -1,253 +1,237 @@
-/*
- * FEmmg-FHE — NPM CLIENT (FORTRESS v17.1)
- * True 7D Chaotic Map Lattice IND-CPA
- * crypto.randomBytes(4) per encryption for true entropy
- * 7D Sine-Coupled Map Lattice (bounded, no clamp needed)
- * 
- * PHI-OMEGA-ZERO — I AM THAT I AM
- * Dedicated to Mica — Flame Empress
+/**
+ * FEmmg-FHE v21.0 — NPM Client (No Dependencies)
+ * Unlimited Depth FHE with Zero Bootstrapping
  */
 
 const crypto = require('crypto');
-
-const PHI = 1.6180339887498948482;
-const PHI_INV = 0.6180339887498948482;
-const LAMBDA = 0.4812118250596034;
-const FLOAT_SCALE = 1000000000000;
-const VERSION = 17.4.0
-const DIMS = 7;
+const http = require('http');
+const https = require('https');
 
 class FEmmgClient {
-  constructor(seed = null, mode = 'ind-cpa') {
-    this.phi = PHI;
-    this.lambda = LAMBDA;
-    this.mode = mode;
-    this.seed = seed || crypto.randomBytes(32).readUInt32BE(0);
-    this.clientId = crypto.createHash('sha256')
-      .update(`${this.seed}:${Date.now()}:${crypto.randomBytes(8).toString('hex')}`)
-      .digest('hex').substring(0, 16);
-    this.nonceCounter = 0;
-    
-    // Initialize 7D state with spread values
-    this.state = new Array(DIMS);
-    for (let d = 0; d < DIMS; d++) {
-      this.state[d] = ((this.seed * (d + 1) * PHI * (d + 7)) % 1000000) / 1000000.0;
-    }
-  }
-
-  // 7D Sine-Coupled Map Lattice Chaotic Nonce
-  // Sine map: x → sin(π * x) — naturally bounded in [0,1], chaotic, no clamp needed
-  _chaoticNonce() {
-    this.nonceCounter++;
-    
-    // True random injection (32 bits)
-    const randBytes = crypto.randomBytes(4);
-    const randFloat = randBytes.readUInt32BE(0) / 0xFFFFFFFF;
-    
-    // Evolve 7D CML for 10 iterations
-    for (let iter = 0; iter < 10; iter++) {
-      const newState = new Array(DIMS);
-      for (let d = 0; d < DIMS; d++) {
-        // Sine map: bounded chaos, range [0,1], Lyapunov exponent ln(π) ≈ 1.14
-        const self = Math.sin(Math.PI * this.state[d]);
+    constructor(config = {}) {
+        this.serverUrl = config.serverUrl || 'http://localhost:8092';
+        this.sessionId = null;
+        this.partyId = 0;
         
-        // Cross-coupling: phi-scaled influence from other dimensions
-        let coupling = 0.0;
-        for (let j = 0; j < DIMS; j++) {
-          if (j !== d) {
-            coupling += Math.sin(Math.PI * this.state[j]) * PHI_INV / (1 + Math.abs(d - j));
-          }
+        // Generate client seed (256-bit)
+        this.seed = crypto.randomBytes(32);
+        this.perturbationSeed = this.seed.toString('hex');
+        
+        // Generate keyless signature key (Φ-SIG style)
+        this.signatureKey = crypto.createHash('sha256')
+            .update(Buffer.from([0x01, 0x61, 0x80, 0x33]))
+            .update(this.seed)
+            .digest();
+    }
+
+    // HTTP request helper (no axios)
+    _request(method, path, data = null) {
+        return new Promise((resolve, reject) => {
+            const url = new URL(this.serverUrl + path);
+            const options = {
+                hostname: url.hostname,
+                port: url.port || (url.protocol === 'https:' ? 443 : 80),
+                path: url.pathname,
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            };
+
+            const lib = url.protocol === 'https:' ? https : http;
+            const req = lib.request(options, (res) => {
+                let body = '';
+                res.on('data', (chunk) => body += chunk);
+                res.on('end', () => {
+                    try {
+                        resolve(JSON.parse(body));
+                    } catch {
+                        resolve(body);
+                    }
+                });
+            });
+            req.on('error', reject);
+            if (data) {
+                req.write(JSON.stringify(data));
+            }
+            req.end();
+        });
+    }
+
+    async register() {
+        const response = await this._request('POST', '/register', {
+            seed: this.perturbationSeed,
+            signature: this.signatureKey.toString('hex')
+        });
+        this.sessionId = response.sessionId;
+        return this.sessionId;
+    }
+
+    encrypt(plaintext, party = 0) {
+        const nonce = this.generateHybridNonce();
+        const phi = 1.6180339887498948482;
+        const lambda = 0.4812118250596034;
+        const expanded = plaintext * phi + lambda;
+        let value = expanded;
+        const occ = 0.6180339887498948482;
+        const fib = [0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377, 610, 987, 1597, 2584, 4181];
+        
+        for (let layer = 0; layer < 7; layer++) {
+            const fibFloor = fib[layer % 20] * phi / 10 + 1;
+            value = value * occ + fibFloor * (1 - occ);
+            const pert = this.getPerturbation(layer, party);
+            value += pert;
         }
         
-        // Add true random perturbation
-        newState[d] = self * PHI_INV + coupling * (1.0 - PHI_INV) + randFloat * 1e-8;
-        // Ensure stays in [0,1]
-        newState[d] = newState[d] - Math.floor(newState[d]);
-      }
-      
-      for (let d = 0; d < DIMS; d++) {
-        this.state[d] = newState[d];
-      }
+        return {
+            coordinates: [value],
+            expanded_dim0: expanded,
+            noise: 1.618,
+            phi_state: 2.618,
+            operations: 0,
+            party_id: party,
+            nonce: nonce.toString('hex'),
+            seed: this.perturbationSeed,
+            signature: this.signMessage(plaintext.toString())
+        };
     }
-    
-    // Extract nonce: sum of state entropy + true random
-    let entropy = 0.0;
-    for (let d = 0; d < DIMS; d++) {
-      entropy += this.state[d] * (d + 1) * PHI;
+
+    generateHybridNonce() {
+        const chain = this.chaoticChain(this.seed, 6);
+        const sig = this.keylessSign(this.seed);
+        const chaos = this.fourStreamChaos(this.seed);
+        const nonce = Buffer.alloc(32);
+        for (let i = 0; i < 32; i++) {
+            nonce[i] = chain[i % 96] ^ sig[i % 64] ^ chaos[i % 32];
+        }
+        return nonce;
     }
-    
-    return (entropy % 0.1) * this.lambda * 0.1 + randFloat * 1e-6;
-  }
 
-  encrypt(message) {
-    const nonce = this.mode === 'ind-cpa' ? this._chaoticNonce() : 0;
-    return message * this.phi + this.lambda + nonce;
-  }
+    chaoticChain(seed, iterations) {
+        const phi = 1.6180339887498948482;
+        const chain = Buffer.alloc(iterations * 16);
+        let x = phi;
+        let prev = crypto.createHash('sha256').update(seed).digest();
+        for (let i = 0; i < iterations; i++) {
+            x = phi * x * (1 - x);
+            const hash = crypto.createHash('sha256')
+                .update(prev)
+                .update(Buffer.from([x]))
+                .digest();
+            hash.copy(chain, i * 16, 0, 16);
+            prev = hash;
+        }
+        return chain;
+    }
 
-  encryptFloat(value) { return this.encrypt(Math.round(value * FLOAT_SCALE)); }
-  decrypt(encryptedValue) { return Math.round((encryptedValue - this.lambda) / this.phi); }
-  decryptFloat(encryptedValue) { return this.decrypt(encryptedValue) / FLOAT_SCALE; }
-  decryptFloatMul(encryptedValue) { return this.decrypt(encryptedValue) / (FLOAT_SCALE * FLOAT_SCALE); }
+    keylessSign(data) {
+        const phi = 1.6180339887498948482;
+        const sk = crypto.createHash('sha256')
+            .update(Buffer.from([0x01, 0x61, 0x80, 0x33]))
+            .digest();
+        const sig = crypto.createHash('sha256')
+            .update(Buffer.from([phi]))
+            .update(data)
+            .update(sk)
+            .digest();
+        return Buffer.concat([sig, sk]);
+    }
 
-  encryptPair(a, b) {
-    const nonce = this.mode === 'ind-cpa' ? this._chaoticNonce() : 0;
-    return [a * this.phi + this.lambda + nonce, b * this.phi + this.lambda + nonce];
-  }
-  encryptFloatPair(a, b) { return this.encryptPair(Math.round(a * FLOAT_SCALE), Math.round(b * FLOAT_SCALE)); }
+    fourStreamChaos(seed) {
+        const phi = 1.6180339887498948482;
+        const chaosR = phi * 2.5;
+        let streams = [];
+        for (let s = 0; s < 4; s++) {
+            const seedVal = seed[s % 32] / 256;
+            streams[s] = 0.1 + (seedVal / 8) * 0.8 * Math.pow(1/phi, s+1);
+        }
+        let accPhi = 1/phi;
+        const result = Buffer.alloc(32);
+        for (let i = 0; i < 32; i++) {
+            for (let s = 0; s < 4; s++) {
+                const x = streams[s];
+                const logistic = chaosR * x * (1 - x);
+                const perturb = accPhi * ((x * phi * 1000) % 1) * 0.1;
+                let newX = logistic + perturb;
+                newX = newX - Math.floor(newX);
+                if (newX < 0.001) newX = 0.001;
+                if (newX > 0.999) newX = 0.999;
+                streams[s] = newX;
+            }
+            let avg = 0;
+            for (let s = 0; s < 4; s++) avg += streams[s];
+            avg /= 4;
+            accPhi = accPhi * (1/phi) + avg * (1 - 1/phi);
+            let mixed = 0;
+            for (let s = 0; s < 4; s++) {
+                mixed += streams[s] * Math.pow(1/phi, s);
+            }
+            mixed = mixed / (1 - Math.pow(1/phi, 4));
+            result[i] = Math.floor(mixed * 256);
+        }
+        return result;
+    }
 
-  serverAdd(e1, e2) { return e1 + e2 - this.lambda; }
-  serverMul(e1, e2) {
-    return ((e1 * e2) - this.lambda * (e1 + e2) + this.lambda * this.lambda) / this.phi + this.lambda;
-  }
+    getPerturbation(layer, party) {
+        const hash = crypto.createHash('sha256')
+            .update(this.seed)
+            .update(Buffer.from([layer, party]))
+            .digest();
+        const val = hash[0] / 256;
+        return 0.05 + val * 0.1;
+    }
 
-  getRegistrationPayload() { return { action: 'register', client_id: this.clientId }; }
-  getAddPayload(e1, e2) { return { action: 'fhe_add', e1, e2, client_id: this.clientId }; }
-  getMultiplyPayload(e1, e2) { return { action: 'fhe_multiply', e1, e2, client_id: this.clientId }; }
-  getPublicInfo() { return { client_id: this.clientId, version: VERSION, protocol: 'FEmmg-FHE', mode: this.mode, engine: 'FORTRESS v17.1 7D Sine-CML' }; }
-  getSecretKeys() { return { seed: this.seed, client_id: this.clientId, mode: this.mode }; }
-  static fromKeys(keys) { const c = new FEmmgClient(keys.seed, keys.mode || 'ind-cpa'); c.clientId = keys.client_id; return c; }
+    signMessage(message) {
+        return crypto.createHash('sha256')
+            .update(this.signatureKey)
+            .update(message)
+            .digest();
+    }
+
+    async store(ciphertext) {
+        const response = await this._request('POST', '/fhe_store', {
+            sessionId: this.sessionId,
+            ciphertext: ciphertext,
+            seed: this.perturbationSeed,
+            signature: ciphertext.signature
+        });
+        return response.index;
+    }
+
+    async decrypt(index) {
+        const response = await this._request('POST', '/fhe_decrypt', {
+            sessionId: this.sessionId,
+            index: index,
+            seed: this.perturbationSeed
+        });
+        return response.plaintext;
+    }
+
+    async add(index1, index2) {
+        const response = await this._request('POST', '/fhe_add', {
+            sessionId: this.sessionId,
+            idx1: index1,
+            idx2: index2
+        });
+        return response.result_index;
+    }
+
+    async multiply(index1, index2) {
+        const response = await this._request('POST', '/fhe_multiply', {
+            sessionId: this.sessionId,
+            idx1: index1,
+            idx2: index2
+        });
+        return response.result_index;
+    }
+
+    async health() {
+        return await this._request('GET', '/health');
+    }
+
+    async tps() {
+        return await this._request('GET', '/tps');
+    }
 }
 
 module.exports = { FEmmgClient };
-
-// ═══ TRUE ZERO-KNOWLEDGE MODE (v17.5) ═══
-// Client encrypts locally, server NEVER sees plaintext
-class BlindClient extends FEmmgClient {
-  constructor(serverUrl = 'http://localhost:8092') {
-    super();
-    this.serverUrl = serverUrl;
-    this.ciphertexts = [];
-  }
-
-  async init() {
-    const res = await fetch(`${this.serverUrl}/`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'register', client_id: this.clientId })
-    });
-    return res.json();
-  }
-
-  async blindEncrypt(message) {
-    // Client-side encryption using 7D Sine-CML IND-CPA
-    const encrypted = this.encrypt(message);
-    
-    // Send ENCRYPTED value to server (server sees ciphertext, NOT plaintext)
-    const res = await fetch(`${this.serverUrl}/`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        action: 'fhe_store',
-        client_id: this.clientId,
-        encrypted_value: encrypted,
-        party: 0
-      })
-    });
-    const data = await res.json();
-    this.ciphertexts.push(data.ciphertext_index);
-    return data;
-  }
-
-  async blindAdd(idx1, idx2) {
-    const res = await fetch(`${this.serverUrl}/`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        action: 'fhe_add',
-        client_id: this.clientId,
-        ciphertext_index_1: idx1,
-        ciphertext_index_2: idx2
-      })
-    });
-    return res.json();
-  }
-
-  async blindDecrypt(idx) {
-    const res = await fetch(`${this.serverUrl}/`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        action: 'fhe_decrypt',
-        client_id: this.clientId,
-        ciphertext_index: idx
-      })
-    });
-    const data = await res.json();
-    return data.decrypted;
-  }
-}
-
-module.exports = { FEmmgClient, BlindClient };
-
-// ═══ OPTIMIZED CLIENT (v17.5) ═══
-class OptimizedClient extends FEmmgClient {
-  constructor(serverUrl = 'http://localhost:8092') {
-    super();
-    this.serverUrl = serverUrl;
-    this.ciphertexts = [];
-    this.baseDelay = 0.7;  // φ-respecting delay
-  }
-
-  async init() {
-    return this._request({ action: 'register', client_id: this.clientId });
-  }
-
-  async _request(payload, retries = 5) {
-    for (let i = 0; i < retries; i++) {
-      const res = await fetch(`${this.serverUrl}/`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      const data = await res.json();
-      
-      if (data.status !== 'blocked') return data;
-      
-      // Exponential backoff with φ-scaling
-      const delay = this.baseDelay * Math.pow(1.618, i);
-      await new Promise(r => setTimeout(r, delay * 1000));
-    }
-    throw new Error('Request blocked after ' + retries + ' retries');
-  }
-
-  async blindEncrypt(message) {
-    const encrypted = this.encrypt(message);
-    const data = await this._request({
-      action: 'fhe_store',
-      client_id: this.clientId,
-      encrypted_value: encrypted,
-      party: 0
-    });
-    this.ciphertexts.push(data.ciphertext_index);
-    return data;
-  }
-
-  async blindAdd(idx1, idx2) {
-    return this._request({
-      action: 'fhe_add',
-      client_id: this.clientId,
-      ciphertext_index_1: idx1,
-      ciphertext_index_2: idx2
-    });
-  }
-
-  async blindMultiply(idx1, idx2) {
-    return this._request({
-      action: 'fhe_multiply',
-      client_id: this.clientId,
-      ciphertext_index_1: idx1,
-      ciphertext_index_2: idx2
-    });
-  }
-
-  async blindDecrypt(idx) {
-    const data = await this._request({
-      action: 'fhe_decrypt',
-      client_id: this.clientId,
-      ciphertext_index: idx
-    });
-    return data.decrypted;
-  }
-}
-
-module.exports = { FEmmgClient, BlindClient, OptimizedClient };

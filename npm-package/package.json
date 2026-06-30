@@ -1,33 +1,44 @@
 {
-  "name": "femmg-fhe-client",
-  "version": "20.0.0",
-  "description": "FEmmg-FHE v6.2 Client Library — Zero-Knowledge Fully Homomorphic Encryption with encrypted pair multiplication",
+  "name": "@primordialomegazero/femmg-fhe",
+  "version": "21.0.1",
+  "description": "FEmmg-FHE: Unlimited Depth FHE with Zero Bootstrapping + PQC + Keyless Auth",
   "main": "index.js",
   "types": "index.d.ts",
-  "files": [
-    "index.js",
-    "index.d.ts",
-    "README.md"
-  ],
   "scripts": {
-    "test": "node test.js"
+    "test": "node test.js",
+    "prepublishOnly": "npm test"
   },
   "keywords": [
     "fhe",
-    "fully-homomorphic-encryption",
-    "zero-knowledge",
-    "banach-contraction",
+    "homomorphic-encryption",
+    "post-quantum",
+    "chaos",
+    "fibonacci",
+    "lyapunov",
     "golden-ratio",
-    "chaotic-nonce",
-    "ind-cpa",
-    "privacy",
-    "encryption",
-    "homomorphic"
+    "cryptography",
+    "zero-bootstrapping",
+    "unlimited-depth",
+    "pqc",
+    "kem",
+    "keyless",
+    "signatures",
+    "phi",
+    "banach",
+    "fractal",
+    "full-homomorphic-encryption"
   ],
   "author": "Dan Joseph M. Fernandez / Primordial Omega Zero",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/primordialomegazero/femmgFHE"
+    "url": "https://github.com/primordialomegazero/femmgFHE.git"
+  },
+  "bugs": {
+    "url": "https://github.com/primordialomegazero/femmgFHE/issues"
+  },
+  "homepage": "https://github.com/primordialomegazero/femmgFHE#readme",
+  "engines": {
+    "node": ">=16.0.0"
   }
 }

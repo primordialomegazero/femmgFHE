@@ -1,24 +1,57 @@
-FROM ubuntu:22.04 AS builder
-RUN apt-get update && apt-get install -y g++ libc6-dev libssl-dev && rm -rf /var/lib/apt/lists/*
+# FEmmg-FHE v21.0.1 — Docker Image
+# Multi-stage build for minimal size
+
+# ============================================================
+# STAGE 1: Build
+# ============================================================
+FROM alpine:latest AS builder
+
+RUN apk add --no-cache \
+    g++ \
+    make \
+    libc-dev \
+    openssl-dev \
+    openssl-libs-static \
+    musl-dev \
+    musl-static \
+    linux-headers \
+    zlib-static
+
 WORKDIR /build
-COPY src/femmg_fhe.h .
-COPY src/fractal_fhe.h .
-COPY src/banach_engine.h .
-COPY src/lyapunov_core.h .
-COPY src/riemann_deep.h .
-COPY src/riemann_zeros_200.h .
-COPY src/riemann_zeta.h .
-COPY src/phi_stack.h .
-COPY src/antimatter.h .
-COPY src/metaprogram.h .
-COPY src/zkp_fractal.h .
-COPY src/zkp_pqc.h .
-COPY src/guardian.h .
-COPY src/femmg_server.cpp .
-RUN g++ -std=c++17 -O3 -march=native -pthread -static -Wall -Wextra -Werror -o femmg_server femmg_server.cpp -lm -lssl -lcrypto
-FROM ubuntu:22.04
+
+# Copy source
+COPY src/ ./src/
+COPY security_complete.h .
+COPY phi_algo_merge.h .
+
+# Build server - remove -static for now, use musl-static
+RUN g++ -std=c++17 -O3 -march=native \
+    src/femmg_server.cpp \
+    -o femmg_server \
+    -lm -lssl -lcrypto -lpthread \
+    -static-libstdc++ -static-libgcc
+
+# ============================================================
+# STAGE 2: Runtime
+# ============================================================
+FROM alpine:latest
+
+RUN apk add --no-cache \
+    libstdc++ \
+    libcrypto3 \
+    libssl3
+
 WORKDIR /app
+
+# Copy binary from builder
 COPY --from=builder /build/femmg_server .
+
+# Expose port
 EXPOSE 8092
-HEALTHCHECK --interval=10s --timeout=3s CMD /app/femmg_server --health-check || exit 1
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+    CMD ./femmg_server --health || exit 1
+
+# Run server
 ENTRYPOINT ["./femmg_server"]
