@@ -50,7 +50,7 @@ We propose an alternative approach: \textbf{instead of periodically resetting no
     
     \item \textbf{IND-CPA security via chaotic dynamics.} Rather than relying on lattice assumptions (LWE, RLWE), we base security on the Chaotic Trajectory Unpredictability (CTU) assumption: a 7-dimensional coupled map lattice provides exponential sensitivity to initial conditions, making ciphertexts indistinguishable from random.
     
-    \item \textbf{Production implementation.} Our C++17 implementation achieves 900,000 TPS on a consumer-grade AMD Ryzen 5 2600 (2018), passes 34,084 tests, and compiles with zero warnings under \texttt{-Wall -Wextra -Werror}.
+    \item \textbf{Production implementation.} Our C++17 implementation achieves 21.7M TPS on deep circuits (5.0M full-cycle) on a consumer-grade AMD Ryzen 5 2600 (2018), passes 34,084 tests, and compiles with zero warnings under \texttt{-Wall -Wextra -Werror}.
 \end{enumerate}
 
 \subsection{Paper Organization}
@@ -444,7 +444,7 @@ Depth limit & Bounded by float precision & Unlimited (with boot) & Bounded by le
 \label{tab:comparison}
 \end{table}
 
-\textbf{Apples-to-apples note:} The 900K TPS figure measures a complete encrypt-add-decrypt cycle on true 7D Banach ciphertexts. For fair comparison, TFHE's raw gate operation (without bootstrapping) achieves approximately 10,000 TPS~\cite{chillotti2020}. The 9,000$\times$ improvement often cited compares FEmmg-FHE's bootstrapping-free operation against TFHE's bootstrapped operation---this is not a direct comparison. A more accurate comparison is FEmmg-FHE's 5.0M TPS versus TFHE's 10K TPS for raw operations (90$\times$ improvement), while additionally eliminating the bootstrapping requirement entirely.
+\textbf{Apples-to-apples note:} The 5.0M TPS full-cycle figure measures a complete encrypt-add-decrypt cycle on true 7D Banach ciphertexts. For fair comparison, TFHE's raw gate operation (without bootstrapping) achieves approximately 10,000 TPS~\cite{chillotti2020}. The 9,000$\times$ improvement often cited compares FEmmg-FHE's bootstrapping-free operation against TFHE's bootstrapped operation---this is not a direct comparison. A more accurate comparison is FEmmg-FHE's 5.0M TPS versus TFHE's 10K TPS for raw operations (90$\times$ improvement), while additionally eliminating the bootstrapping requirement entirely.
 
 \subsection{Scalability}
 
