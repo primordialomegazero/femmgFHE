@@ -138,6 +138,54 @@ g++ -std=c++17 -O3 -march=native -pthread -Wall -Wextra -Werror \
 
 ---
 
+
+### System Architecture (Mermaid)
+
+```mermaid
+graph TD
+    subgraph Client["🖥️ Client"]
+        A[Plaintext m] --> B[Encrypt: m·φ + λ]
+        B --> C[7-Layer Banach Contraction]
+        C --> D[Ciphertext ct]
+        D --> E[fhe_store]
+        E --> F[Decrypt]
+        F --> G[Plaintext m']
+    end
+
+    subgraph Server["🖥️ Server Blind"]
+        H[(Ciphertext Store)]
+        I[Blind Add: e1+e2-λ]
+        J[Blind Mul: e1e2-λe1+e2+λ2/φ+λ]
+        K[Re-contract: BanachL]
+    end
+
+    subgraph KEM["🔐 Φ-PKE KEM"]
+        L[7-Lane Lyapunov-Riemann]
+        M[Riemann Zeros Anchor]
+        N[Fibonacci Attractors]
+        O[256-bit CSPRNG Nonce]
+    end
+
+    D -->|"ct never plaintext"| H
+    H --> I
+    H --> J
+    I --> K
+    J --> K
+    K -->|"result ct"| H
+    H -->|"ct"| F
+    O --> L
+    M --> L
+    N --> L
+    L -->|"Shared Secret"| B
+    L -->|"Shared Secret"| F
+
+    style Client fill:#1a1a2e,stroke:#e94560,color:#fff
+    style Server fill:#16213e,stroke:#0f3460,color:#fff
+    style KEM fill:#0f3460,stroke:#e94560,color:#fff
+```
+
+---
+
 ## Mathematical Breakthrough
 
 ```
@@ -305,6 +353,66 @@ g++ -std=c++17 -O3 -march=native -pthread -Wall -Wextra -Werror \
 | Fractal ZKP | Schnorr Σ-protocol, 7-layer recursive chain |
 | Post-Quantum | Φ-PKE: 7-lane Lyapunov-Riemann Parallel (NIST Level 5+) |
 | Guardian | Self-healing infrastructure with live system metrics |
+
+---
+
+
+### Security System Flow (Mermaid)
+
+```mermaid
+graph TD
+    subgraph Input["🌐 Input Layer"]
+        A[Plaintext m] --> B[256-bit CSPRNG Nonce]
+        B --> C[Client Perturbation Seed]
+        C --> D[7D CML State Init]
+    end
+
+    subgraph KEM_Layer["🔐 Φ-PKE KEM Layer"]
+        E[7 Parallel Lanes] --> F[Lane 0: Fibonacci φ¹]
+        E --> G[Lane 1: Riemann γ₁]
+        E --> H[Lane 2: Fibonacci φ²]
+        E --> I[Lane 3: Riemann γ₃]
+        E --> J[Lane 4: Fibonacci φ³]
+        E --> K[Lane 5: Riemann γ₅]
+        E --> L[Lane 6: Fibonacci φ⁴]
+        F --> M[Lyapunov Coupling Matrix]
+        G --> M
+        H --> M
+        I --> M
+        J --> M
+        K --> M
+        L --> M
+        M --> N[Shared Secret 256-bit]
+    end
+
+    subgraph FHE_Layer["🔒 FHE Layer"]
+        O[Encrypt] --> P[7-Layer Banach Contraction]
+        P --> Q[Fibonacci Attractor per Layer]
+        Q --> R[Ciphertext + Cached Expand]
+        R --> S[Blind Homomorphic Ops]
+        S --> T[Re-contraction]
+        T --> R
+    end
+
+    subgraph Verify["✅ Verification Layer"]
+        U[Fractal Schnorr ZKP]
+        V[Anti-Matter Rate Limiter]
+        W[Guardian Self-Healing]
+        X[IND-CPA Game Check]
+    end
+
+    D --> E
+    N --> O
+    R --> U
+    S --> V
+    S --> W
+    U --> X
+
+    style Input fill:#1a1a2e,stroke:#00ff88,color:#fff
+    style KEM_Layer fill:#0f3460,stroke:#e94560,color:#fff
+    style FHE_Layer fill:#16213e,stroke:#0f3460,color:#fff
+    style Verify fill:#1a1a2e,stroke:#ffd700,color:#fff
+```
 
 ---
 
