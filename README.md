@@ -3,7 +3,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![C++17](https://img.shields.io/badge/C++-17-blue.svg)]()
 [![Docker](https://img.shields.io/badge/Docker-ghcr.io-blue.svg)](https://github.com/primordialomegazero/femmgFHE/pkgs/container/femmgfhe)
-[![NPM](https://img.shields.io/badge/npm-v20.0.0-red.svg)](https://www.npmjs.com/package/femmg-fhe-client)
+[![NPM](https://img.shields.io/badge/npm-v21.0.2-red.svg)](https://www.npmjs.com/package/femmg-fhe-client)
 [![TPS](https://img.shields.io/badge/TPS-21.7M-brightgreen.svg)]()
 [![Tests](https://img.shields.io/badge/Tests-34,084%2F34,084-brightgreen.svg)]()
 [![Noise](https://img.shields.io/badge/Noise-1.83%20bits%20FLAT-success.svg)]()
@@ -45,11 +45,11 @@ Traditional FHE schemes (TFHE, CKKS, BFV/BGV) require computationally expensive 
 
 ```bash
 # Docker
-docker pull ghcr.io/primordialomegazero/femmgfhe:v20.0.0
-docker run -d -p 8092:8092 ghcr.io/primordialomegazero/femmgfhe:v20.0.0
+docker pull ghcr.io/primordialomegazero/femmgfhe:v21.0.2
+docker run -d -p 8092:8092 ghcr.io/primordialomegazero/femmgfhe:v21.0.2
 
 # NPM
-npm install femmg-fhe-client@20.0.0
+npm install femmg-fhe-client@21.0.2
 
 # Source
 git clone https://github.com/primordialomegazero/femmgFHE.git
@@ -104,6 +104,56 @@ Client                         Server
 ```
 
 ---
+
+## Security Hardening (v21.0)
+
+FEmmg-FHE v21.0 introduces multiple layers of security hardening:
+
+
+
+### 1. Client-Side Perturbation Seed
+
+The 7D chaotic perturbation is seeded by a **client-provided secret**, not a server-side
+
+pre-computed table. This ensures the server cannot reconstruct the perturbation sequence,
+
+closing the deterministic perturbation attack vector.
+
+
+
+### 2. 256-Bit CSPRNG Nonce
+
+Every encryption injects **256 bits of true randomness** from the operating system's
+
+cryptographically secure pseudorandom number generator (CSPRNG). This guarantees
+
+IND-CPA: identical plaintexts produce different ciphertexts regardless of CML state.
+
+
+
+### 3. Post-Quantum Phi-Lattice KEM
+
+Spiralkem + Phi-SIG merged into the core: chaotic chain key encapsulation with
+
+phi-hardened signatures. NIST Level 5 equivalent security without lattice assumptions.
+
+
+
+### 4. Environment-Based Security Toggle
+
+- `FEMMG_DEV_MODE=1`: Disables CORE filter + Anti-Matter rate limiter (development)
+
+- `FEMMG_DEV_MODE=0` (default): Full security enforcement (production)
+
+
+
+### 5. Fractal Zero-Knowledge Proofs
+
+Schnorr Σ-protocol on secp256k1 with 7-layer recursive chain. Publicly verifiable.
+
+No secret needed for verification. `s*G == R + c*Y` (Fiat-Shamir transform).
+
+
 
 ## Mathematical Breakthrough
 
