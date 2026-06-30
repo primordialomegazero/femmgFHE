@@ -392,6 +392,13 @@ Cross-party fractal & 7 layers $\times$ 14 parties & 140 (add) / 128 (mul) & All
 
 \subsection{Throughput}
 
+We report two throughput metrics:
+\begin{itemize}
+    \item \textbf{Full cycle:} A complete encrypt-add-decrypt sequence on fresh ciphertexts. This measures end-to-end performance including 7-layer Banach contraction, perturbation injection, blind addition, expand/contract, and 7-layer decryption reversal.
+    \item \textbf{Deep circuit:} Repeated homomorphic additions on a \textit{single ciphertext} without re-encryption. This measures the raw throughput of the homomorphic operation itself, excluding encryption overhead. The same ciphertext is reused for all operations; the cached expand/contract architecture (Path X, Section 3.6) enables this optimization.
+\end{itemize}
+Both metrics use true 7D Banach ciphertexts with full IND-CPA perturbation. No operations use bare arithmetic.
+
 \begin{table}[h]
 \centering
 \begin{tabular}{@{}lrr@{}}
@@ -465,6 +472,22 @@ Chaotic systems have been explored for symmetric encryption~\cite{strogatz2018} 
 Non-lattice FHE constructions exist (e.g., based on approximate GCD or learning with rounding) but none have achieved practical performance. To our knowledge, this is the first FHE scheme to use Banach contraction for noise management and the first to achieve sub-millisecond operation times without specialized hardware.
 
 % ============================================================
+\section{Data Availability}
+
+All benchmark data, source code, and test scripts are publicly available at:
+\begin{center}
+\url{https://github.com/primordialomegazero/femmgFHE}
+\end{center}
+
+The 10 billion operation test was conducted on June 30, 2026 using the compiled binary \texttt{test\_10b\_ops} (included in the repository). The test performs consecutive homomorphic additions on a single ciphertext with periodic progress reporting at every 10\% interval. Raw output logs are available in the repository's \texttt{paper/} directory. The 34,084-test automated suite (\texttt{test\_suite.cpp}) can be reproduced by running:
+
+\begin{verbatim}
+g++ -std=c++17 -O3 -march=native -pthread -o test_suite src/test_suite.cpp -lm
+./test_suite
+\end{verbatim}
+
+All benchmarks were performed on an AMD Ryzen 5 2600 (12 cores, 3.4 GHz, 2018), 16 GB DDR4 RAM, Ubuntu 22.04 WSL2, GCC 11.4.0 with \texttt{-O3 -march=native}. No specialized hardware, GPU acceleration, or cloud instances were used.
+
 \section{Limitations and Future Work}
 \label{sec:limit}
 % ============================================================
