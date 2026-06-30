@@ -44,19 +44,20 @@
 
 ## What Is FEmmg-FHE?
 
-```
-┌──────────────────────────────────────────────────────────┐
-│ FEmmg-FHE is the world's first Unlimited Depth Fully     │
-│ Homomorphic Encryption scheme. Not leveled. Not bounded. │
-│ Truly unlimited depth with zero bootstrapping.           │
-│                                                          │
-│ Traditional FHE schemes (TFHE, CKKS, BFV/BGV) require    │
-│ bootstrapping to manage noise growth, limiting them to   │
-│ ~100 operations/second. FEmmg-FHE inverts the paradigm:  │
-│ instead of fighting noise, the Fibonacci-Lyapunov engine │
-│ makes noise CONVERGE and LOCK at 1.83 bits — forever.    │
-└──────────────────────────────────────────────────────────┘
-```
+FEmmg-FHE is the world's first **Unlimited Depth Fully Homomorphic Encryption** scheme. Not leveled. Not bounded. **Truly unlimited depth with zero bootstrapping.**
+
+### How It's Different
+
+| Feature | Traditional FHE (BFV/BGV/CKKS/TFHE) | FEmmg-FHE |
+|---------|--------------------------------------|-----------|
+| **Foundation** | LWE / RLWE (lattice cryptography) | Fibonacci-Lyapunov Banach Contraction |
+| **Noise** | Grows polynomially with each op | **Converges to fixed point (1.83 bits)** |
+| **Bootstrapping** | Required to reset noise | **ZERO — never needed** |
+| **Security Basis** | Hardness of lattice problems | Chaotic Trajectory Unpredictability (CTU) |
+| **Depth Limit** | Bounded by noise ceiling | **Unlimited** (no noise growth) |
+| **KEM** | Not included | Φ-PKE: 7-lane Lyapunov-Riemann Parallel |
+
+Traditional FHE schemes (TFHE, CKKS, BFV/BGV) rely on the hardness of **Learning With Errors (LWE)** and require computationally expensive bootstrapping to manage noise growth, limiting them to ~100 operations per second. FEmmg-FHE **does not use LWE, RLWE, or lattice assumptions.** Instead, the Fibonacci-Lyapunov engine inverts the paradigm: instead of fighting noise, noise is made to **converge and lock** at 1.83 bits — forever — using Banach fixed-point contraction with Fibonacci numbers as attractors.
 
 ### The Breakthrough: Fibonacci-Lyapunov Engine (v21.4)
 
