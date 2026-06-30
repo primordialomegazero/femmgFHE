@@ -11,7 +11,7 @@
 
 ```
 ============================================================
-  TRUE FULLY HOMOMORPHIC ENCRYPTION — FORTRESS v17.5
+  POST-BOOTSTRAPPING, ZERO-KNOWLEDGE FHE — FORTRESS v17.5
   GUARDIAN + PQC EDITION
   ML-KEM-1024 | ML-DSA-87 | Fractal Schnorr ZKP
   900K TPS | 40B Ciphertext | Zero Bootstrapping
@@ -24,7 +24,7 @@
 
 ## What Is FEmmg-FHE?
 
-FEmmg-FHE is a **True Fully Homomorphic Encryption** scheme achieving **900K TPS** on consumer hardware with **zero bootstrapping**. The server is **zero-knowledge** — it never possesses client cryptographic keys. It includes **self-healing infrastructure** (Guardian) and **post-quantum cryptography** (ML-KEM-1024 + ML-DSA-87 + Fractal ZKP).
+FEmmg-FHE is a **Post-Bootstrapping, Zero-Knowledge Fully Homomorphic Encryption** scheme achieving **900K TPS** on consumer hardware with **zero bootstrapping**. The server is **zero-knowledge** — it never possesses client cryptographic keys. It includes **self-healing infrastructure** (Guardian) and **post-quantum cryptography** (ML-KEM-1024 + ML-DSA-87 + Fractal ZKP).
 
 ### Features
 
