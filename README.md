@@ -79,28 +79,15 @@
 
 ## Quick Start
 
-```
-┌──────────────────────────────────────────────────────────┐
-│                      QUICK START                          │
-├──────────────────────────────────────────────────────────┤
-│                                                          │
-│  DOCKER                                                  │
-│  $ docker pull ghcr.io/primordialomegazero/femmgfhe:v21.4.0│
-│  $ docker run -d -p 8092:8092 ghcr.io/.../femmgfhe:v21.4.0│
-│                                                          │
-│  NPM                                                     │
-│  $ npm install @primordialomegazero/femmg-fhe@21.4.0     │
-│                                                          │
-│  SOURCE                                                  │
-│  $ git clone https://github.com/primordialomegazero/femmgFHE│
-│  $ cd femmgFHE                                           │
-│  $ g++ -std=c++17 -O3 -march=native -pthread             │
-│        -Wall -Wextra -Werror -o femmg_server             │
-│        src/femmg_server.cpp -lm -lssl -lcrypto           │
-│  $ ./femmg_server                                        │
-│                                                          │
-└──────────────────────────────────────────────────────────┘
-```
+| Method | Command |
+|--------|---------|
+| **Docker** | `docker pull ghcr.io/primordialomegazero/femmgfhe:v21.4.0` |
+| | `docker run -d -p 8092:8092 ghcr.io/primordialomegazero/femmgfhe:v21.4.0` |
+| **NPM** | `npm install @primordialomegazero/femmg-fhe@21.4.0` |
+| **Source** | `git clone https://github.com/primordialomegazero/femmgFHE.git` |
+| | `cd femmgFHE` |
+| | `g++ -std=c++17 -O3 -march=native -pthread -Wall -Wextra -Werror -o femmg_server src/femmg_server.cpp -lm -lssl -lcrypto` |
+| | `./femmg_server` |
 
 ---
 
@@ -176,75 +163,25 @@ graph TD
 
 ## Mathematical Breakthrough
 
-```
-┌──────────────────────────────────────────────────────────┐
-│                MATHEMATICAL BREAKTHROUGH                  │
-├──────────────────────────────────────────────────────────┤
-│                                                          │
-│  FIBONACCI FLOORS                                        │
-│  Each Banach contraction layer uses a different Fibonacci│
-│  number as the attractor:                                │
-│  F₁=0, F₂=1, F₃=1, F₄=2, F₅=3, F₆=5, F₇=8, F₈=13, ...  │
-│  The Fibonacci spiral and golden ratio spiral are ONE.   │
-│                                                          │
-│  LYAPUNOV STABILITY                                      │
-│  λ = ln(φ) ≈ 0.4812 > 0                                 │
-│  Chaotic divergence → IND-CPA security.                  │
-│  Fibonacci convergence → stability.                      │
-│  Together → unlimited depth FHE.                         │
-│                                                          │
-│  WHY NOISE NEVER GROWS                                   │
-│  T(x) = x·φ⁻¹ + F_n·(1-φ⁻¹)                             │
-│  Contraction toward Fibonacci floors locks noise at      │
-│  1.83 bits — FOREVER.                                    │
-│                                                          │
-│  BANACH FIXED POINT WITH FIBONACCI ATTRACTORS             │
-│  |x_n - F_n| ≤ OCCⁿ · |x₀ - F₀|                         │
-│  Exponential convergence to the Fibonacci sequence.      │
-│                                                          │
-│  FULLY BLIND HOMOMORPHIC MULTIPLICATION                  │
-│  e_mul = (e₁·e₂ - λ(e₁+e₂) + λ²)/φ + λ                  │
-│  Proof: e₁e₂ - λ(e₁+e₂) + λ² = m₁m₂φ²                   │
-│  Server never evaluates (e-λ)/φ.                         │
-│                                                          │
-└──────────────────────────────────────────────────────────┘
-```
+| Concept | Detail |
+|---------|--------|
+| **Fibonacci Floors** | Each Banach contraction layer uses a different Fibonacci number as the attractor: F₁=0, F₂=1, F₃=1, F₄=2, F₅=3, F₆=5, F₇=8, F₈=13, ... The Fibonacci spiral and the golden ratio spiral are ONE. |
+| **Lyapunov Stability** | λ = ln(φ) ≈ 0.4812 > 0. Chaotic divergence provides IND-CPA security. Fibonacci convergence provides stability. Together, they create unlimited depth FHE. |
+| **Why Noise Never Grows** | T(x) = x·φ⁻¹ + F_n·(1-φ⁻¹). The contraction toward Fibonacci floors locks noise at 1.83 bits — FOREVER. |
+| **Banach Fixed Point** | \|x_n - F_n\| ≤ OCCⁿ · \|x₀ - F₀\|. Exponential convergence to the Fibonacci sequence. Each layer contracts toward a different Fibonacci number, creating a self-scaling, self-stabilizing system. |
+| **Blind Multiplication** | e_mul = (e₁·e₂ - λ(e₁+e₂) + λ²)/φ + λ. Algebraic proof: e₁e₂ - λ(e₁+e₂) + λ² = m₁m₂φ². Server never evaluates (e-λ)/φ. |
 
 ---
 
 ## Security Hardening (v21.4)
 
-```
-┌──────────────────────────────────────────────────────────┐
-│                  SECURITY HARDENING                       │
-├──────────────────────────────────────────────────────────┤
-│                                                          │
-│  1. CLIENT-SIDE PERTURBATION SEED                        │
-│  The 7D chaotic perturbation is seeded by a client-      │
-│  provided secret, not a server-side pre-computed table.  │
-│  Server cannot reconstruct the perturbation sequence.    │
-│                                                          │
-│  2. 256-BIT CSPRNG NONCE (HARDENED)                      │
-│  Every encryption injects 256 bits of true randomness    │
-│  via /dev/urandom with full-read loop. Fail-closed on    │
-│  entropy exhaustion. Guarantees IND-CPA.                 │
-│                                                          │
-│  3. Φ-PKE: 7-LANE LYAPUNOV-RIEMANN PARALLEL KEM          │
-│  Integer core (unlimited precision) + Floating-point     │
-│  chaos injection (Riemann Z(t), φ-contraction).          │
-│  7 parallel lanes anchored to different Riemann zeros.   │
-│  NIST Level 5+ equivalent without lattice assumptions.   │
-│                                                          │
-│  4. ENVIRONMENT-BASED SECURITY TOGGLE                    │
-│  FEMMG_DEV_MODE=1: Disables CORE + Anti-Matter (dev)     │
-│  FEMMG_DEV_MODE=0 (default): Full enforcement (prod)     │
-│                                                          │
-│  5. FRACTAL ZERO-KNOWLEDGE PROOFS                        │
-│  Schnorr Σ-protocol on secp256k1, 7-layer recursive      │
-│  chain. Publicly verifiable. s*G == R + c*Y.             │
-│                                                          │
-└──────────────────────────────────────────────────────────┘
-```
+| # | Layer | Mechanism |
+|---|-------|-----------|
+| 1 | **Client-Side Perturbation Seed** | The 7D chaotic perturbation is seeded by a client-provided secret, not a server-side pre-computed table. Server cannot reconstruct the perturbation sequence. |
+| 2 | **256-Bit CSPRNG Nonce (Hardened)** | Every encryption injects 256 bits of true randomness via `/dev/urandom` with full-read loop. Fail-closed on entropy exhaustion. Guarantees IND-CPA. |
+| 3 | **Φ-PKE: 7-Lane Lyapunov-Riemann Parallel KEM** | Integer core (unlimited precision) + Floating-point chaos injection (Riemann Z(t), φ-contraction). 7 parallel lanes anchored to different Riemann zeros. NIST Level 5+ equivalent without lattice assumptions. |
+| 4 | **Environment-Based Security Toggle** | `FEMMG_DEV_MODE=1`: Disables CORE filter + Anti-Matter (development). `FEMMG_DEV_MODE=0` (default): Full security enforcement (production). |
+| 5 | **Fractal Zero-Knowledge Proofs** | Schnorr Σ-protocol on secp256k1 with 7-layer recursive chain. Publicly verifiable. `s*G == R + c*Y` (Fiat-Shamir transform). |
 
 ---
 
