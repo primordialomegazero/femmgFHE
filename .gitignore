@@ -44,3 +44,6 @@ debug_add
 src/test_phi_zeta
 src/test_phi_zeta2
 src/test_riemann_stabilizer
+guardian.log
+guardian_alerts.log
+*.bak
