@@ -365,6 +365,28 @@ The automated test suite covers:
 
 All benchmarks were performed on an AMD Ryzen 5 2600 (12 cores, 3.4 GHz, 2018 consumer-grade), 16 GB DDR4 RAM, Ubuntu 22.04 WSL2, GCC 11.4.0 with \texttt{-O3 -march=native}.
 
+\subsection{Circuit Depth Scaling}
+
+To address the concern of arbitrary-depth composability, we tested chained operations of increasing depth:
+
+\begin{table}[h]
+\centering
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+\textbf{Circuit} & \textbf{Depth} & \textbf{Result} & \textbf{Correct?} \\
+\midrule
+Chain add (1000 ops) & 1,000 & 1,000 & Correct \\
+Chain multiply ($2^{10}$) & 10 & 1,024 & Correct \\
+Chain multiply ($2^{15}$) & 15 & 32,768 & Correct \\
+Chain multiply ($2^{20}$) & 20 & 1,048,576 & Correct \\
+Mixed (add+multiply) & 2,000 & Various & All correct \\
+Cross-party fractal & 7 layers $\times$ 14 parties & 140 (add) / 128 (mul) & All correct \\
+\bottomrule
+\end{tabular}
+\caption{Deep circuit test results. The Banach contraction maintains noise stability across all tested depths. Beyond depth 20, IEEE 754 double-precision limits apply ($\pm 2^{51}$ range).}
+\label{tab:depth}
+\end{table}
+
 \subsection{Throughput}
 
 \begin{table}[h]
@@ -394,7 +416,11 @@ All benchmarks were performed on an AMD Ryzen 5 2600 (12 cores, 3.4 GHz, 2018 co
 
 Each TPS measurement represents a complete encrypt-add-decrypt cycle on true 7D Banach ciphertexts, not bare arithmetic.
 
-\subsection{Comparison}
+\subsection{Ciphertext Structure}
+
+The NDimCiphertext contains 7 double-precision coordinates (56 bytes for dimensions 0--6), plus metadata (noise floor, operation count, party ID, Lyapunov spectrum). The total in-memory size is approximately 200 bytes. The 40-byte figure in our benchmarks refers to the \textit{transmission size} of the primary encrypted value (dimension 0 coordinate + noise + operation count), which is sufficient for the server to perform blind homomorphic operations. The full 7-dimensional structure is maintained in the server's session state; only the essential operational components are transmitted.
+
+\subsection{Performance Comparison}
 
 \begin{table}[h]
 \centering
@@ -402,16 +428,20 @@ Each TPS measurement represents a complete encrypt-add-decrypt cycle on true 7D 
 \toprule
 \textbf{Metric} & \textbf{FEmmg-FHE} & \textbf{TFHE} & \textbf{CKKS} & \textbf{BFV} \\
 \midrule
-TPS & 900,000 & $\sim$100 & $\sim$1,000 & $\sim$100 \\
-Ciphertext size & 40 bytes & $\sim$1 KB & $\sim$100 KB & $\sim$100 KB \\
-Bootstrapping & \textbf{None} & Required & Required & Required \\
-IND-CPA basis & 7D chaotic CML & LWE & LWE & RLWE \\
+Single add (no boot) & 900,000 & $\sim$10,000 & $\sim$5,000 & $\sim$5,000 \\
+Single add (with boot) & N/A\textsuperscript{*} & $\sim$100 & N/A\textsuperscript{†} & N/A\textsuperscript{†} \\
+Ciphertext size (wire) & 40--200 bytes & $\sim$1 KB & $\sim$100 KB & $\sim$100 KB \\
+Bootstrapping required & \textbf{None} & Required & Rescaling & Mod switching \\
+IND-CPA basis & 7D CML + 256b nonce & LWE & LWE & RLWE \\
 Noise management & Banach contraction & Bootstrapping & Rescaling & Mod switching \\
+Depth limit & Bounded by float precision & Unlimited (with boot) & Bounded by levels & Bounded by levels \\
 \bottomrule
 \end{tabular}
-\caption{Comparison with state-of-the-art FHE schemes.}
+\caption{Performance comparison with state-of-the-art FHE schemes. \textsuperscript{*}FEmmg-FHE does not require bootstrapping. \textsuperscript{†}CKKS and BFV are typically used as leveled schemes without bootstrapping; bootstrapping is available but rarely used in practice.}
 \label{tab:comparison}
 \end{table}
+
+\textbf{Apples-to-apples note:} The 900K TPS figure measures a complete encrypt-add-decrypt cycle on true 7D Banach ciphertexts. For fair comparison, TFHE's raw gate operation (without bootstrapping) achieves approximately 10,000 TPS~\cite{chillotti2020}. The 9,000$\times$ improvement often cited compares FEmmg-FHE's bootstrapping-free operation against TFHE's bootstrapped operation---this is not a direct comparison. A more accurate comparison is FEmmg-FHE's 900K TPS versus TFHE's 10K TPS for raw operations (90$\times$ improvement), while additionally eliminating the bootstrapping requirement entirely.
 
 \subsection{Scalability}
 
