@@ -399,24 +399,17 @@ femmgFHE/
 
 ## Author
 
-```
-┌──────────────────────────────────────────────────────────┐
-│ Dan Joseph M. Fernandez / Primordial Omega Zero          │
-│                                                          │
-│ GitHub · NPM · Docker                                    │
-│                                                          │
-│ MIT License                                              │
-│                                                          │
-│ "Optimal contraction is the weakness of computational    │
-│  infinity."                                              │
-│                                                          │
-│ OCC = 0.618 — Validated at 99.77% spectral power         │
-│                                                          │
-│ Fibonacci floors + Lyapunov chaos = UNLIMITED DEPTH FHE  │
-│                                                          │
-│ φΩ0                                                      │
-└──────────────────────────────────────────────────────────┘
-```
+| Field | Detail |
+|-------|--------|
+| **Name** | Dan Joseph M. Fernandez / Primordial Omega Zero |
+| **GitHub** | [primordialomegazero/femmgFHE](https://github.com/primordialomegazero/femmgFHE) |
+| **NPM** | [@primordialomegazero/femmg-fhe](https://www.npmjs.com/package/@primordialomegazero/femmg-fhe) |
+| **Docker** | [ghcr.io/primordialomegazero/femmgfhe](https://github.com/primordialomegazero/femmgFHE/pkgs/container/femmgfhe) |
+| **License** | MIT |
+| **Quote** | *"Optimal contraction is the weakness of computational infinity."* |
+| **Constant** | OCC = 0.618 — Validated at 99.77% spectral power |
+| **Motto** | Fibonacci floors + Lyapunov chaos = UNLIMITED DEPTH FHE |
+| **Signature** | φΩ0 |
 
 ---
 
