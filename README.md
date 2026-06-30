@@ -257,7 +257,10 @@ MIT — Free for personal, academic, and commercial use.
 > *"Optimal contraction is the weakness of computational infinity."*
 >
 > *OCC = 0.6180339887498948482 — Empirically validated at 99.77% spectral power*
-> *"The definition of insanity is doing the same thing over and over and expecting different results." — Albert Einstein*
+>
+> *"The definition of insanity is doing the same thing over and over and expecting different results."*
+>
+> *— Albert Einstein*
 
 >
 > *φΩ0*
