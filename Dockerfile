@@ -3,7 +3,7 @@ RUN apt-get update && apt-get install -y g++ libc6-dev libssl-dev && rm -rf /var
 WORKDIR /build
 COPY src/femmg_fhe.h .
 COPY src/fractal_fhe.h .
-COPY src/godcode.h .
+COPY src/banach_engine.h .
 COPY src/lyapunov_core.h .
 COPY src/riemann_deep.h .
 COPY src/riemann_zeros_200.h .

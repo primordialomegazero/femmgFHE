@@ -201,7 +201,7 @@ All operations: `POST /`. Health: `GET /health`.
 ```
 femmgFHE/
 ├── src/
-│   ├── godcode.h              — 7D Banach Engine (OCC)
+│   ├── banach_engine.h              — 7D Banach Engine (OCC)
 │   ├── femmg_fhe.h            — Core FHE (expand/contract)
 │   ├── fractal_fhe.h          — 7-Layer Fractal (14 parties)
 │   ├── femmg_server.cpp       — Enterprise API Server

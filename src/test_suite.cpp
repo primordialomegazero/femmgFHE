@@ -5,7 +5,7 @@
 
 #include "femmg_fhe.h"
 #include "fractal_fhe.h"
-#include "godcode.h"
+#include "banach_engine.h"
 #include <iostream>
 #include <vector>
 #include <chrono>
@@ -113,13 +113,13 @@ int main() {
         t("-999 through 7 layers", fractal.decrypt(ct) == -999);
     }
     {
-        std::vector<godcode::NDimCiphertext> cts;
+        std::vector<banach::NDimCiphertext> cts;
         for(int i = 0; i < PARTIES; i++) cts.push_back(fractal.encrypt(10, i));
         auto result = fractal.chain_add(cts);
         t("14-party chain add = 140", fractal.decrypt(result) == 140);
     }
     {
-        std::vector<godcode::NDimCiphertext> cts;
+        std::vector<banach::NDimCiphertext> cts;
         for(int i = 0; i < 7; i++) cts.push_back(fractal.encrypt(2, i));
         auto result = fractal.chain_multiply(cts);
         t("7-party chain multiply = 128", fractal.decrypt(result) == 128);

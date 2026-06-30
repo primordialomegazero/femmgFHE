@@ -19,27 +19,27 @@ public:
     }
 
     // 7-layer fractal encryption
-    godcode::NDimCiphertext encrypt(int64_t value, int party) {
+    banach::NDimCiphertext encrypt(int64_t value, int party) {
         return fhe.encrypt(value, party);
     }
 
-    int64_t decrypt(const godcode::NDimCiphertext& ct) { 
+    int64_t decrypt(const banach::NDimCiphertext& ct) { 
         return fhe.decrypt(ct); 
     }
 
     // Chain ADD across parties — TRUE FHE
-    godcode::NDimCiphertext chain_add(const std::vector<godcode::NDimCiphertext>& cts) {
+    banach::NDimCiphertext chain_add(const std::vector<banach::NDimCiphertext>& cts) {
         if(cts.empty()) return fhe.encrypt(0);
-        godcode::NDimCiphertext result = cts[0];
+        banach::NDimCiphertext result = cts[0];
         for(size_t i = 1; i < cts.size(); i++)
             result = fhe.add(result, cts[i]);
         return result;
     }
 
     // Chain MULTIPLY across parties — TRUE FHE
-    godcode::NDimCiphertext chain_multiply(const std::vector<godcode::NDimCiphertext>& cts) {
+    banach::NDimCiphertext chain_multiply(const std::vector<banach::NDimCiphertext>& cts) {
         if(cts.empty()) return fhe.encrypt(1);
-        godcode::NDimCiphertext result = cts[0];
+        banach::NDimCiphertext result = cts[0];
         for(size_t i = 1; i < cts.size(); i++)
             result = fhe.multiply(result, cts[i]);
         return result;

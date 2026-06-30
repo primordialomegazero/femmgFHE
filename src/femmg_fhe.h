@@ -9,43 +9,43 @@
  */
 
 #pragma once
-#include "godcode.h"
+#include "banach_engine.h"
 #include <cmath>
 #include <cstdint>
 #include <string>
 #include <sstream>
 #include <iomanip>
 
-constexpr double PHI      = godcode::PHI;
-constexpr double OCC  = godcode::OCC;
-constexpr double LAMBDA   = godcode::LAMBDA;
-constexpr double FLOOR    = godcode::FLOOR;
-constexpr int    DEPTH    = godcode::DEPTH;
-constexpr int    PARTIES  = godcode::PARTIES;
+constexpr double PHI      = banach::PHI;
+constexpr double OCC  = banach::OCC;
+constexpr double LAMBDA   = banach::LAMBDA;
+constexpr double FLOOR    = banach::FLOOR;
+constexpr int    DEPTH    = banach::DEPTH;
+constexpr int    PARTIES  = banach::PARTIES;
 
 class FEmmgFHE {
 private:
-    godcode::NDimBanachEngine engine;
+    banach::NDimBanachEngine engine;
     int party_counter = 0;
 
 public:
     FEmmgFHE() = default;
 
     // ─── ENCRYPTION (Path X: Full 7D Banach, cached expanded_dim0) ───
-    godcode::NDimCiphertext encrypt(int64_t m, int party = -1) {
+    banach::NDimCiphertext encrypt(int64_t m, int party = -1) {
         if(party < 0) party = (party_counter++) % PARTIES;
         return engine.encrypt(m, party);
     }
 
     // ─── DECRYPTION (Path A: Complete Reversal) ───
-    int64_t decrypt(const godcode::NDimCiphertext& ct) const {
+    int64_t decrypt(const banach::NDimCiphertext& ct) const {
         return engine.decrypt(ct);
     }
 
     // ─── HOMOMORPHIC ADDITION (FAST — uses cached expanded_dim0) ───
-    godcode::NDimCiphertext add(const godcode::NDimCiphertext& a, 
-                                 const godcode::NDimCiphertext& b) {
-        godcode::NDimCiphertext result;
+    banach::NDimCiphertext add(const banach::NDimCiphertext& a, 
+                                 const banach::NDimCiphertext& b) {
+        banach::NDimCiphertext result;
         result.party_id = a.party_id;
         result.operations = a.operations + b.operations + 1;
         
@@ -56,14 +56,14 @@ public:
         engine.recontract_dim0(result);
         
         // Dimensions 1-6: phi-weighted merge
-        for(int d = 1; d < godcode::DIMS; d++) {
+        for(int d = 1; d < banach::DIMS; d++) {
             result.coordinates[d] = a.coordinates[d] * OCC 
                                   + b.coordinates[d] * (1.0 - OCC);
         }
         
         result.noise = a.noise * OCC + b.noise * (1.0 - OCC);
         
-        for(int d = 0; d < godcode::DIMS; d++) {
+        for(int d = 0; d < banach::DIMS; d++) {
             result.lyapunov_spectrum[d] = std::max(a.lyapunov_spectrum[d], 
                                                     b.lyapunov_spectrum[d]);
         }
@@ -72,9 +72,9 @@ public:
     }
 
     // ─── HOMOMORPHIC MULTIPLICATION (FAST — uses cached expanded_dim0) ───
-    godcode::NDimCiphertext multiply(const godcode::NDimCiphertext& a, 
-                                      const godcode::NDimCiphertext& b) {
-        godcode::NDimCiphertext result;
+    banach::NDimCiphertext multiply(const banach::NDimCiphertext& a, 
+                                      const banach::NDimCiphertext& b) {
+        banach::NDimCiphertext result;
         result.party_id = a.party_id;
         result.operations = a.operations + b.operations + 1;
         
@@ -88,14 +88,14 @@ public:
         engine.recontract_dim0(result);
         
         // Dimensions 1-6: phi-weighted merge
-        for(int d = 1; d < godcode::DIMS; d++) {
+        for(int d = 1; d < banach::DIMS; d++) {
             result.coordinates[d] = a.coordinates[d] * OCC 
                                   + b.coordinates[d] * (1.0 - OCC);
         }
         
         result.noise = (a.noise + b.noise) * OCC + FLOOR * (1.0 - OCC);
         
-        for(int d = 0; d < godcode::DIMS; d++) {
+        for(int d = 0; d < banach::DIMS; d++) {
             result.lyapunov_spectrum[d] = std::max(a.lyapunov_spectrum[d], 
                                                     b.lyapunov_spectrum[d]);
         }
@@ -104,7 +104,7 @@ public:
     }
 
     // ─── SERIALIZATION ───
-    std::string serialize(const godcode::NDimCiphertext& ct) const {
+    std::string serialize(const banach::NDimCiphertext& ct) const {
         std::ostringstream oss;
         oss << std::setprecision(15);
         oss << "{\"dim0\":" << ct.coordinates[0]
@@ -116,14 +116,14 @@ public:
         return oss.str();
     }
 
-    godcode::NDimCiphertext deserialize(const std::string& json) const {
-        godcode::NDimCiphertext ct;
+    banach::NDimCiphertext deserialize(const std::string& json) const {
+        banach::NDimCiphertext ct;
         ct.coordinates[0] = extract_double(json, "dim0");
         ct.expanded_dim0 = extract_double(json, "expanded");
         ct.noise = extract_double(json, "noise");
         ct.operations = (uint64_t)extract_double(json, "ops");
         ct.party_id = (int)extract_double(json, "party");
-        for(int d = 1; d < godcode::DIMS; d++) {
+        for(int d = 1; d < banach::DIMS; d++) {
             ct.coordinates[d] = FLOOR;
             ct.lyapunov_spectrum[d] = 0.48;
         }
@@ -136,15 +136,15 @@ public:
         return engine.verify_roundtrip(test_value, party);
     }
 
-    bool verify_contraction(const godcode::NDimCiphertext& ct) const {
+    bool verify_contraction(const banach::NDimCiphertext& ct) const {
         return engine.verify_contraction(ct);
     }
 
-    double max_lyapunov_exponent(const godcode::NDimCiphertext& ct) const {
+    double max_lyapunov_exponent(const banach::NDimCiphertext& ct) const {
         return engine.max_lyapunov_exponent(ct);
     }
 
-    double get_noise(const godcode::NDimCiphertext& ct) const { return ct.noise; }
+    double get_noise(const banach::NDimCiphertext& ct) const { return ct.noise; }
 
 private:
     double extract_double(const std::string& json, const std::string& key) const {

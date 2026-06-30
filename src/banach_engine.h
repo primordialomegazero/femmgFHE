@@ -22,7 +22,7 @@
 #include <array>
 #include <atomic>
 
-namespace godcode {
+namespace banach {
 
 // ═══ EMPIRICALLY-DERIVED CONSTANTS ═══
 constexpr double PHI              = 1.6180339887498948482;
@@ -207,4 +207,4 @@ public:
     NDimBanachEngine& get_engine() { return engine; }
 };
 
-} // namespace godcode
+} // namespace banach
