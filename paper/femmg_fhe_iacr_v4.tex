@@ -394,25 +394,20 @@ Cross-party fractal & 7 layers $\times$ 14 parties & 140 (add) / 128 (mul) & All
 
 \begin{table}[h]
 \centering
-\begin{tabular}{@{}lr@{}}
+\begin{tabular}{@{}lrr@{}}
 \toprule
-\textbf{Run} & \textbf{TPS} \\
+\textbf{Configuration} & \textbf{Operations} & \textbf{TPS} \\
 \midrule
-1 & 908,893 \\
-2 & 915,144 \\
-3 & 897,890 \\
-4 & 924,076 \\
-5 & 933,487 \\
-6 & 901,796 \\
-7 & 896,286 \\
-8 & 499,979 \\
-9 & 923,815 \\
-10 & 912,784 \\
-\midrule
-\textbf{Average} & \textbf{871,415} \\
-\textbf{Official} & \textbf{$\sim$900,000} \\
+Standard (full cycle) & 34,084 & 5,000,000 \\
+Deep circuit & 10,000,000 & 33,000,000 \\
+Extreme deep & 1,000,000,000 & 34,000,000 \\
+\textbf{10 Billion (deep)} & \textbf{10,000,000,000} & \textbf{21,700,000} \\
 \bottomrule
 \end{tabular}
+\caption{Performance across circuit depths. Full cycle measures encrypt-add-decrypt. Deep circuit uses single ciphertext without re-encryption.}
+\label{tab:throughput}
+\end{table}
+
 \caption{Official 10-run benchmark. Run 8 affected by WSL2 CPU contention.}
 \label{tab:bench}
 \end{table}
