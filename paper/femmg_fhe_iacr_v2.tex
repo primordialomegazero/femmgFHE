@@ -378,7 +378,7 @@ To address the concern of arbitrary-depth composability, we tested chained opera
 Chain add (1000 ops) & 1,000 & 1,000 & Correct \\
 Chain multiply ($2^{10}$) & 10 & 1,024 & Correct \\
 Chain multiply ($2^{15}$) & 15 & 32,768 & Correct \\
-Chain multiply ($2^{20}$) & 20 & 1,048,576 & Correct \\
+Chain multiply ($2^{20}$) & 20 & 1,048,576 & Correct\textsuperscript{*} \\
 Mixed (add+multiply) & 2,000 & Various & All correct \\
 Cross-party fractal & 7 layers $\times$ 14 parties & 140 (add) / 128 (mul) & All correct \\
 \bottomrule
@@ -437,7 +437,7 @@ Noise management & Banach contraction & Bootstrapping & Rescaling & Mod switchin
 Depth limit & Bounded by float precision & Unlimited (with boot) & Bounded by levels & Bounded by levels \\
 \bottomrule
 \end{tabular}
-\caption{Performance comparison with state-of-the-art FHE schemes. \textsuperscript{*}FEmmg-FHE does not require bootstrapping. \textsuperscript{†}CKKS and BFV are typically used as leveled schemes without bootstrapping; bootstrapping is available but rarely used in practice.}
+\caption{Performance comparison with state-of-the-art FHE schemes. \textsuperscript{*}FEmmg-FHE does not require bootstrapping. \textsuperscript{†}CKKS and BFV are typically used as leveled schemes without bootstrapping, supporting bounded-depth circuits via rescaling and modulus switching respectively. Bootstrapping is available for both but rarely used in practice due to performance cost.}
 \label{tab:comparison}
 \end{table}
 
@@ -477,7 +477,7 @@ The Chaotic Trajectory Unpredictability assumption has not been vetted by the cr
 
 \subsection{Precision Constraints}
 
-The current implementation operates on 64-bit integers with IEEE 754 double-precision floating point for intermediate values. The maximum safe plaintext is $\pm 2^{51}$ due to the 53-bit mantissa.
+The current implementation accepts 64-bit integer plaintexts. Internally, the Banach contraction and perturbation operations use IEEE 754 double-precision floating point (53-bit mantissa) for the contraction layers. The maximum safe plaintext magnitude is $\pm 2^{51}$; beyond this, floating-point rounding may cause decryption errors. For applications requiring larger values, arbitrary-precision arithmetic (e.g., GMP) could extend the range.
 
 \subsection{No Formal Verification}
 
@@ -523,7 +523,7 @@ using the deterministic perturbation $P(d,\ell,p)$.
 \begin{equation}
     |\Pr[\text{Game 0 wins}] - \Pr[\text{Game 1 wins}]| \leq \text{Adv}^{\text{CTU}}_{\mathcal{A}}(\kappa)
 \end{equation}
-by definition of the CTU Assumption (Assumption 4.4).
+by definition of the Computational Irreversibility Assumption (Assumption 5.3).
 
 \textbf{Game 2 (Random Ciphertext).} The ciphertext is replaced with a uniformly random NDimCiphertext. Since the Banach contraction is a deterministic function of the expanded value plus random perturbation, and the perturbation in Game 1 is uniform, the resulting ciphertext distribution is statistically indistinguishable from uniform over the ciphertext space $\mathcal{C} = \mathbb{R}^7 \times [N_0-1, N_0+1]$.
 
