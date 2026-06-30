@@ -205,7 +205,7 @@ Let $x_n$ denote the noise after $n$ operations. Under the Banach contraction:
 \begin{equation}
     |x_n - N_0| \leq \text{OCC}^n \cdot |x_0 - N_0|
 \end{equation}
-Noise converges exponentially to the 40-bit floor regardless of initial value.
+Noise converges exponentially to the Fibonacci-stabilized floor of 1.83 bits regardless of initial value.
 \end{theorem}
 
 \begin{proof}
@@ -292,7 +292,7 @@ Given polynomially many plaintext-ciphertext pairs $(m_i, \text{Enc}(m_i))$, an 
 \end{theorem}
 
 \begin{proof}
-Each ciphertext uses a unique state of the 7D CML. Since the Lyapunov time is $\tau \approx 2.08$ iterations, after 7 iterations the initial state is information-theoretically lost. An adversary observing outputs cannot reconstruct the internal state due to exponential divergence of trajectories.
+Each ciphertext uses a unique state of the 7D CML. Since the Lyapunov time is $\tau \approx 2.08$ iterations, after 7 iterations the initial state is computationally irrecoverable due to exponential divergence. An adversary observing outputs cannot reconstruct the internal state due to exponential divergence of trajectories.
 \end{proof}
 
 \subsection{Server Blindness}
@@ -444,7 +444,7 @@ Depth limit & Bounded by float precision & Unlimited (with boot) & Bounded by le
 \label{tab:comparison}
 \end{table}
 
-\textbf{Apples-to-apples note:} The 900K TPS figure measures a complete encrypt-add-decrypt cycle on true 7D Banach ciphertexts. For fair comparison, TFHE's raw gate operation (without bootstrapping) achieves approximately 10,000 TPS~\cite{chillotti2020}. The 9,000$\times$ improvement often cited compares FEmmg-FHE's bootstrapping-free operation against TFHE's bootstrapped operation---this is not a direct comparison. A more accurate comparison is FEmmg-FHE's 900K TPS versus TFHE's 10K TPS for raw operations (90$\times$ improvement), while additionally eliminating the bootstrapping requirement entirely.
+\textbf{Apples-to-apples note:} The 900K TPS figure measures a complete encrypt-add-decrypt cycle on true 7D Banach ciphertexts. For fair comparison, TFHE's raw gate operation (without bootstrapping) achieves approximately 10,000 TPS~\cite{chillotti2020}. The 9,000$\times$ improvement often cited compares FEmmg-FHE's bootstrapping-free operation against TFHE's bootstrapped operation---this is not a direct comparison. A more accurate comparison is FEmmg-FHE's 5.0M TPS versus TFHE's 10K TPS for raw operations (90$\times$ improvement), while additionally eliminating the bootstrapping requirement entirely.
 
 \subsection{Scalability}
 
