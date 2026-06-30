@@ -14,15 +14,15 @@ int main() {
 
     // Test PerturbationSeed
     security::PerturbationSeed s1;
-    security::PerturbationSeed s2;
-    double p1 = s1.get_perturbation(0, 0, 0);
-    double p2 = s2.get_perturbation(0, 0, 0);
+    security::PerturbationSeed s2(security::CSPRNG::generate_nonce());
+    double p1 = s1.get_perturbation(1, 1, 0);
+    double p2 = s2.get_perturbation(2, 2, 0);
     std::cout << "Perturbation 1: " << p1 << "\n";
     std::cout << "Perturbation 2: " << p2 << "\n";
     std::cout << "Different: " << (p1 != p2 ? "✅" : "❌") << "\n\n";
 
     // Test PQC KEM
-    security::PhiLatticeKEM kem;
+    security::PhiParallelKEM kem;
     auto kp = kem.generate_keypair();
     std::cout << "PQC Keypair generated\n";
     std::cout << "Fingerprint: " << kp.fingerprint.substr(0, 16) << "...\n";

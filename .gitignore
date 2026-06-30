@@ -47,3 +47,7 @@ src/test_riemann_stabilizer
 guardian.log
 guardian_alerts.log
 *.bak
+
+# Symlinked security headers (source of truth in root)
+src/phi_algo_merge.h
+src/security_complete.h

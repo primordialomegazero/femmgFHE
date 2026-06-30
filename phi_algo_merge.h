@@ -156,6 +156,43 @@ static void phi_secure_encrypt(const uint8_t *plaintext, size_t pt_len,
 }
 
 // ============================================================
+
+// ============================================================
+// 5.5 CLIENT-SIDE PERTURBATION GENERATOR (v21.0.2)
+// Client provides secret; perturbation is deterministic,
+// server cannot reconstruct without client secret.
+// ============================================================
+static void client_perturbation_generate(const uint8_t *client_secret,
+                                          size_t secret_len,
+                                          uint8_t *perturbation_out,
+                                          size_t pert_len) {
+    uint8_t chain[32];
+    /* Derive 32-byte seed from client secret via phi_chaotic_chain */
+    phi_chaotic_chain(client_secret, chain, 7);
+    /* Mix with secret length for domain separation */
+    for(size_t i = 0; i < 32; i++) {
+        chain[i] ^= (uint8_t)(secret_len >> (i % 8));
+    }
+    /* Generate perturbation stream */
+    PQStream ps;
+    pq_stream_init(&ps, chain);
+    for(size_t i = 0; i < pert_len; i++) {
+        perturbation_out[i] = (uint8_t)(ps.streams[i % 7] * 255.0);
+    }
+}
+
+/* Shared secret derivation from client + server seeds */
+static int pq_derive_shared(const uint8_t *client_seed,
+                             const uint8_t *server_seed,
+                             uint8_t *shared_out) {
+    uint8_t combined[32];
+    for(int i = 0; i < 32; i++) {
+        combined[i] = client_seed[i] ^ server_seed[i];
+    }
+    phi_chaotic_chain(combined, shared_out, 13);
+    return 1;
+}
+
 // 6. SELF-TEST
 // ============================================================
 static int phi_algo_self_test(void) {
