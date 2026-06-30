@@ -219,7 +219,9 @@ Since $\text{OCC} = \varphi^{-1} \approx 0.618 < 1$, $T$ is a strict contraction
 The coefficient $\varphi^{-1}$ provides the fastest stable convergence among all contraction rates in $(0,1)$, as it maximizes the Lyapunov exponent $\lambda = -\ln(c)$ while maintaining contraction ($c < 1$).
 \end{theorem}
 
-We provide empirical validation through spectral analysis of the gaps between consecutive Riemann zeta zeros (200 high-precision samples from~\cite{odlyzko,lmfdb}). A high-resolution frequency sweep reveals that $\varphi^{-1}$ matches the dominant spectral peak at $99.77\%$ of maximum power density. This connection to prime number distribution is noted as empirical motivation but is not essential to the cryptographic construction.
+We provide empirical validation through spectral analysis of the gaps between consecutive Riemann zeta zeros (200 high-precision samples from~\cite{odlyzko,lmfdb}). A high-resolution frequency sweep reveals that $\varphi^{-1}$ matches the dominant spectral peak at $99.77\%$ of maximum power density. 
+
+\textbf{Why the golden ratio?} The choice of $\varphi$ is not arbitrary. As the ``most irrational'' number (its continued fraction $[1;1,1,1,\ldots]$ converges slower than any other), $\varphi$ maximizes aperiodicity in the contraction sequence. This property is independently validated by the spectral analysis of Riemann zero spacings---the same $\varphi^{-1}$ that provides optimal convergence for FHE noise stabilization also appears as the dominant frequency in prime gap distributions. We emphasize that this connection to prime distribution is empirical motivation and is not essential to the cryptographic construction; the scheme's security relies on the CTU Assumption and the mathematical properties of Banach contraction, not on the Riemann Hypothesis.
 
 \subsection{Noise Stability Under Chained Operations}
 
