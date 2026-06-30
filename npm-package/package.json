@@ -1,6 +1,6 @@
 {
   "name": "@primordialomegazero/femmg-fhe",
-  "version": "21.0.1",
+  "version": "21.0.0",
   "description": "FEmmg-FHE: Unlimited Depth FHE with Zero Bootstrapping + PQC + Keyless Auth",
   "main": "index.js",
   "types": "index.d.ts",

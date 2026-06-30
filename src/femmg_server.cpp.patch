@@ -1,5 +1,0 @@
-// Add this to main() in femmg_server.cpp
-if (argc > 1 && strcmp(argv[1], "--insecure") == 0) {
-    disable_antimatter = true;
-    cout << "⚠️  ANTI-MATTER DISABLED (insecure mode)" << endl;
-}
