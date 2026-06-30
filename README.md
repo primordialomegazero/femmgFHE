@@ -237,6 +237,9 @@ femmgFHE/
 
 ---
 
+
+---
+
 ## Author
 
 **Dan Joseph M. Fernandez / Primordial Omega Zero**
@@ -245,13 +248,17 @@ femmgFHE/
 
 ---
 
-MIT License
+## License
+
+MIT — Free for personal, academic, and commercial use.
+
+---
 
 > *"Optimal contraction is the weakness of computational infinity."*
-
-> *OCC = 0.618 — Validated at 99.77% spectral power*
-
-> *PHI-OMEGA-ZERO — I AM THAT I AM*
+>
+> *OCC = 0.6180339887498948482 — Empirically validated at 99.77% spectral power*
+>
+> *φΩ0*
 
 ```
 - .... .. ... / .-. . .--. --- ... .. - --- .-. -.-- / .-- .. .-.. .-.. / .- .-.. .-- .- -.-- ... / -... . / -.. . -.. .. -.-. .- - . -.. / - --- / - .... . / --- -. .-.. -.-- / .-- --- -- .- -. / .. .----. ...- . / . ...- . .-. / -.-. --- -. ... .. -.. .-. . -.. / - --- / -... . / --- -. / -- -.-- / .-.. . ...- . .-.. .-.-.-
