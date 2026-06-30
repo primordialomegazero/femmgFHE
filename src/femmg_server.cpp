@@ -6,6 +6,7 @@
 #include "antimatter.h"
 #include "metaprogram.h"
 #include "zkp_fractal.h"
+#include "zkp_pqc.h"
 #include "guardian.h"
 #include <iostream>
 #include <sstream>
@@ -50,6 +51,7 @@ phistack::UnifiedPhiStack unified_stack(true,true);
 antimatter::TripleAntiMatter rate_limiter(true);
 metaprogram::MetaProgram meta_engine;
 guardian::GuardianEngine guardian_engine;
+zkppqc::UnifiedPQCZKP pqc_engine;
 
 std::string route(const std::string& body,SM& sm,FEmmgFHE& fhe,FractalFHE& fractal){
     if(is_attack(body)){std::cerr << "ATTACK: " << body << std::endl;return ok(bh());}
@@ -100,6 +102,18 @@ std::string route(const std::string& body,SM& sm,FEmmgFHE& fhe,FractalFHE& fract
         }
         alerts+="]";
         return ok(alerts);
+    }
+    if(action=="pqc_session"){
+        std::string data=sg(body,"data");
+        if(data.empty())data="FEmmg-FHE_PQC_Session";
+        auto session=pqc_engine.establishSecureSession(data);
+        auto s=pqc_engine.getStats();
+        return ok(O({J("action","pqc_session"),B("established",session.established),B("verified",session.verified),I("kem_ops",s.kem_ops),I("sig_ops",s.sig_ops),I("zkp_ops",s.zkp_ops),I("fractal_chains",s.fractal_chains),J("kem","ML-KEM-1024-PHI (NIST Level 5)"),J("sig","ML-DSA-87-PHI (NIST Level 5)"),J("zkp","Schnorr+Fractal+phi-chain")}));
+    }
+    if(action=="pqc_kem"){
+        auto kp=pqc_engine.generateKEMKeypair();
+        auto enc=pqc_engine.encapsulate(kp);
+        return ok(O({J("action","pqc_kem"),B("valid",enc.valid),J("algorithm","ML-KEM-1024-PHI"),I("nist_level",5),J("note","phi-KDF hardened shared secret")}));
     }
     if(action=="health"){return ok(O({J("status","TRUE_FHE_FORTRESS"),J("version","17.5.0"),B("triple_antimatter",true),B("session_based",true),B("metaprogram",true),B("true_zkp",true),B("blind_store",true),I("meta_generation",meta_engine.get_generation()),I("clients",sm.total()),J("engine","FORTRESS v17.5 Complete")}));}
     if(action=="tps"){auto st=std::chrono::high_resolution_clock::now();uint64_t ops=0;while(std::chrono::duration_cast<std::chrono::seconds>(std::chrono::high_resolution_clock::now()-st).count()<3){auto a=fhe.encrypt(42),b=fhe.encrypt(1);auto es=fhe.add(a,b);volatile int64_t __attribute__((unused))ck=fhe.decrypt(es);ops++;}auto dur=std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now()-st).count();return ok(O({J("action","tps"),I("operations",ops),N("tps",ops*1000.0/dur),J("display","1.1M+ TPS"),B("true_fhe",true)}));}
