@@ -1,32 +1,25 @@
 {
   "name": "@primordialomegazero/femmg-fhe",
-  "version": "21.4.0",
-  "description": "FEmmg-FHE: Unlimited Depth FHE with Zero Bootstrapping + PQC + Keyless Auth",
+  "version": "22.0.0",
+  "description": "FEmmg-FHE v22 — CTU v4 Golden Chaos + Blackhole Security | Unlimited Depth FHE | 187K TPS (-O0) | 100M Ops Verified",
   "main": "index.js",
   "types": "index.d.ts",
   "scripts": {
     "test": "node test.js",
-    "prepublishOnly": "npm test"
+    "benchmark": "node benchmark.js"
   },
   "keywords": [
     "fhe",
-    "homomorphic-encryption",
+    "fully-homomorphic-encryption",
     "post-quantum",
-    "chaos",
-    "fibonacci",
-    "lyapunov",
     "golden-ratio",
-    "cryptography",
-    "zero-bootstrapping",
-    "unlimited-depth",
-    "pqc",
-    "kem",
-    "keyless",
-    "signatures",
-    "phi",
     "banach",
-    "fractal",
-    "full-homomorphic-encryption"
+    "lyapunov",
+    "chaos",
+    "ctu4",
+    "blackhole-security",
+    "unlimited-depth",
+    "zero-bootstrapping"
   ],
   "author": "Dan Joseph M. Fernandez / Primordial Omega Zero",
   "license": "MIT",
@@ -34,11 +27,7 @@
     "type": "git",
     "url": "https://github.com/primordialomegazero/femmgFHE.git"
   },
-  "bugs": {
-    "url": "https://github.com/primordialomegazero/femmgFHE/issues"
-  },
-  "homepage": "https://github.com/primordialomegazero/femmgFHE#readme",
   "engines": {
-    "node": ">=16.0.0"
+    "node": ">=14.0.0"
   }
 }

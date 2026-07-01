@@ -5,6 +5,7 @@
  */
 
 #pragma once
+#include "../phi_constants.h"
 #include "femmg_fhe.h"
 #include <vector>
 
@@ -15,7 +16,7 @@ class FractalFHE {
 public:
     FractalFHE() {
         for(int i = 0; i < phi_constants::PARTIES; i++)
-            seeds[i] = PHI * (i + 1) * OCC + 0.0;
+            seeds[i] = phi_constants::PHI * (i + 1) * phi_constants::OCC + 0.0;
     }
 
     // 7-layer fractal encryption
@@ -47,7 +48,7 @@ public:
 
     // 91 cross-party verifications
     bool verify_all() {
-        int64_t test = (int64_t)(PHI * 100);
+        int64_t test = (int64_t)(phi_constants::PHI * 100);
         for(int i = 0; i < phi_constants::PARTIES; i++) {
             for(int j = i + 1; j < phi_constants::PARTIES; j++) {
                 auto a = encrypt(test, i);

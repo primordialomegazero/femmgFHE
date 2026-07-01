@@ -1,50 +1,39 @@
 /**
- * FEmmg-FHE v21.0 - TypeScript Definitions
+ * FEmmg-FHE v22 — CTU v4 Golden Chaos + Blackhole Security
+ * Unlimited Depth Fully Homomorphic Encryption
  */
 
-export interface Ciphertext {
+declare module '@primordialomegazero/femmg-fhe' {
+  export interface FHEConfig {
+    key?: string;
+    mode?: 'banach' | 'golden-chaos' | 'blackhole';
+    nonce?: bigint;
+  }
+
+  export interface Ciphertext {
     coordinates: number[];
-    expanded_dim0: number;
+    chaos_history: number[];
+    value_int: bigint;
     noise: number;
-    phi_state: number;
     operations: number;
-    party_id: number;
-    nonce: string;
-    seed: string;
-    signature: string;
-}
+  }
 
-export interface Config {
-    serverUrl?: string;
-}
+  export class FEmmgFHE {
+    constructor(config?: FHEConfig);
+    encrypt(plaintext: bigint | number): Ciphertext;
+    decrypt(ciphertext: Ciphertext): bigint;
+    add(a: Ciphertext, b: Ciphertext): Ciphertext;
+    multiply(a: Ciphertext, b: Ciphertext): Ciphertext;
+    noise(): number;
+    operations(): bigint;
+  }
 
-export class FEmmgClient {
-    constructor(config?: Config);
-    
-    /** Register a new session */
-    register(): Promise<string>;
-    
-    /** Encrypt plaintext locally (client-side) */
-    encrypt(plaintext: number | string, party?: number): Ciphertext;
-    
-    /** Generate hybrid nonce from 3 algos */
-    generateHybridNonce(): Buffer;
-    
-    /** Store encrypted data (True ZK) */
-    store(ciphertext: Ciphertext): Promise<number>;
-    
-    /** Decrypt by index */
-    decrypt(index: number): Promise<number>;
-    
-    /** Homomorphic add */
-    add(index1: number, index2: number): Promise<number>;
-    
-    /** Homomorphic multiply */
-    multiply(index1: number, index2: number): Promise<number>;
-    
-    /** Health check */
-    health(): Promise<any>;
-    
-    /** Benchmark TPS */
-    tps(): Promise<any>;
+  export class BlackholeFHE {
+    constructor(config?: FHEConfig);
+    encrypt(data: Buffer | Uint8Array): Buffer;
+    decrypt(data: Buffer): Buffer;
+  }
+
+  export const VERSION: string;
+  export const CTU_VERSION: string;
 }

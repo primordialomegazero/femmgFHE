@@ -1,0 +1,18 @@
+FROM alpine:latest
+RUN apk add --no-cache g++ make libc-dev openssl-dev
+WORKDIR /app
+COPY . ./
+
+# Create inline test
+RUN echo '#include "src/femmg_blackhole.h"' > test.cpp
+RUN echo '#include <iostream>' >> test.cpp
+RUN echo 'int main() {' >> test.cpp
+RUN echo '  femmg_blackhole::FEmmgBlackhole fhe;' >> test.cpp
+RUN echo '  auto ct = fhe.encrypt(42, 0x9E3779B97F4A7C15ULL);' >> test.cpp
+RUN echo '  int64_t d = fhe.decrypt(ct);' >> test.cpp
+RUN echo '  std::cout << "FEmmg-BLACKHOLE v22: " << (d == 42 ? "✅ WORKING" : "❌ FAIL") << std::endl;' >> test.cpp
+RUN echo '  return d == 42 ? 0 : 1;' >> test.cpp
+RUN echo '}' >> test.cpp
+
+RUN g++ -std=c++17 -O3 -march=native -pthread -o femmg_blackhole test.cpp -lm -lssl -lcrypto
+CMD ["./femmg_blackhole"]
