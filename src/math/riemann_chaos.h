@@ -34,7 +34,7 @@ constexpr double ZEROS[14] = {
 
 // ═══ RIEMANN-SIEGEL Z(t) — THE CHAOS FUNCTION ═══
 inline double riemann_zeta_t(double t) {
-    if (t < 0) return 0;
+    if (t < 0) t = std::abs(t);  // Mirror for negative
     
     double sqrt_t_over_2pi = std::sqrt(t / (2.0 * M_PI));
     int N = static_cast<int>(sqrt_t_over_2pi);
@@ -69,6 +69,8 @@ public:
     // ═══ OBSERVE: ζ-driven chaos (replaces Golden Chaos observe) ═══
     std::pair<double, std::array<double, RIEMANN_LAYERS>> 
     observe(double value, uint64_t operation_id = 0) {
+        // Safety: Riemann Z(t) requires t >= 0
+        if (value < 0) value = std::abs(value) * PHI;
         std::array<double, RIEMANN_LAYERS> history{};
         
         if (operation_id == 0) operation_id = ++operation_counter_;

@@ -35,7 +35,7 @@ public:
         uint64_t nonce = global_nonce_ ^ op_id;
         
         // Step 1: Modulo-driven angle (hyper-sensitive to tiny changes)
-        double x_mod = std::fmod(value * 1000.0 + (nonce % 1000) * 0.001, PHI);
+        double x_mod = std::fmod(std::abs(value) * 1000.0 + (nonce % 1000) * 0.001, PHI);
         double theta = x_mod * M_PI / PHI;
         
         // Step 2: Self-amplification from sin(θ)
@@ -48,7 +48,7 @@ public:
         if (undecidable < -20.0) undecidable = -20.0;
         
         // Step 4: VALUE-BASED SCALING — restore magnitude!
-        double value_scale = std::abs(value) * PHI * 1000000.0 + 1.0;
+        double value_scale = std::abs(value) * PHI * 10000.0 + 1.0;
         
         // Step 5: Combine: value_scale * self_amp * (φ³ + tan²)
         double sign = (value >= 0) ? 1.0 : -1.0;

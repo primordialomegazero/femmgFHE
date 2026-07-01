@@ -40,7 +40,7 @@ public:
         uint64_t nonce = global_nonce_ ^ op_id;
         
         // Modulo-driven sensitivity
-        double x_mod = std::fmod(value * 1000.0 + (nonce % 1000) * 0.001, PHI);
+        double x_mod = std::fmod(std::abs(value) * 1000.0 + (nonce % 1000) * 0.001, PHI);
         double theta = x_mod * M_PI / PHI;
         
         // Step 1: POSITION measurement
@@ -71,7 +71,7 @@ public:
         }
         
         // Step 5: Value-based scaling
-        double value_scale = std::abs(value) * PHI * 1000000.0 + 1.0;
+        double value_scale = std::abs(value) * PHI * 10000.0 + 1.0;
         
         // Step 6: Combine — position amplifies, momentum modulates, uncertainty explodes!
         double direction = (value >= 0) ? 1.0 : -1.0;

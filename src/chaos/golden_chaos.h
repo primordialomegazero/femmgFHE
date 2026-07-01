@@ -78,9 +78,9 @@ public:
         for (int i = 0; i < LAYERS; i++) {
             // Nonce affects chaos at every layer
             double nonce_factor = static_cast<double>((harmonized_nonce >> (i * 4)) & 0xFF) / 256.0;
-            double chaos = PHI * 10.0 * std::sin(x * PHI + (i + nonce_factor) * PHI_INV);
+            double chaos = std::sin(x * PHI + (i + nonce_factor) * PHI_INV);
             history[i] = chaos;
-            x = x + chaos;
+            x = x * (PHI * PHI + chaos * 10.0);  // MULTIPLICATIVE! Amplifies differences!
         }
         
         return {x, history};
