@@ -49,6 +49,11 @@ Traditional FHE (since Gentry 2009) fights against noise. FEmmg-FHE makes noise 
 
 This is not an incremental improvement. It is a **paradigm shift** from noise management to noise elimination.
 
+> **"Optimal contraction is the weakness of computational infinity."**
+>
+> LWE's weakness = Noise growth. Triple Rashomon's strength = Noise convergence.
+> **TRIPLE RASHOMON = THE LWE KILLER.**
+
 ### How It's Different
 
 | Feature | Traditional FHE | FEmmg-FHE |
