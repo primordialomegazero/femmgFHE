@@ -3,7 +3,7 @@
 ![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)
 ![C++17](https://img.shields.io/badge/C++-17-blue.svg)
 ![Docker](https://img.shields.io/badge/Docker-Ready-blue.svg)
-![NPM](https://img.shields.io/badge/NPM-v22.1.1-red.svg)
+![NPM](https://img.shields.io/badge/NPM-v22.1.2-red.svg)
 ![TPS](https://img.shields.io/badge/TPS-86K%20(-O0)-brightgreen.svg)
 ![Avalanche](https://img.shields.io/badge/Avalanche-32B-brightgreen.svg)
 ![Noise](https://img.shields.io/badge/Noise-1.83%20bits%20FLATLINE-brightgreen.svg)
@@ -61,8 +61,8 @@ FEmmg-FHE is the world's first **Unlimited Depth Fully Homomorphic Encryption** 
 
 | Method | Command |
 |--------|---------|
-| **Docker** | `docker pull ghcr.io/primordialomegazero/femmgfhe:v22.1.1` |
-| **NPM** | `npm install @primordialomegazero/femmg-fhe@22.1.1` |
+| **Docker** | `docker pull ghcr.io/primordialomegazero/femmgfhe:v22.1.2` |
+| **NPM** | `npm install @primordialomegazero/femmg-fhe@22.1.2` |
 | **Source** | `git clone https://github.com/primordialomegazero/femmgFHE.git` |
 
 ---
@@ -194,7 +194,7 @@ graph LR
 | **Input Validation** | Input Validator | 8/8 | ✅ |
 | **Session Management** | Session Manager | 6/6 | ✅ |
 | **Audit Logging** | Audit Logger | 5/5 | ✅ |
-| **Error Handling** | Error Handler | 5/5 | ✅ |
+| **Error Handling** | SSS Error Handler (S/SS/SSS-Rank) | 6/6 | ✅ |
 
 ### Attack Resistance
 

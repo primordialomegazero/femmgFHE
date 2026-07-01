@@ -1,7 +1,7 @@
 {
   "name": "@primordialomegazero/femmg-fhe",
-  "version": "22.1.1",
-  "description": "FEmmg-FHE v22.1.1 — Keyless Φ-JWT. No keys, no secrets, just φ. CTU v5 Triple Rashomon. Quantum-resistant.",
+  "version": "22.1.2",
+  "description": "FEmmg-FHE v22.1.2 — CTU v5 Triple Rashomon + Φ-TLS + SSS Error Handler. 32B avalanche. Quantum-resistant.",
   "main": "index.js",
   "types": "index.d.ts",
   "scripts": {
