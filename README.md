@@ -3,7 +3,7 @@
 ![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)
 ![C++17](https://img.shields.io/badge/C++-17-blue.svg)
 ![Docker](https://img.shields.io/badge/Docker-Ready-blue.svg)
-![NPM](https://img.shields.io/badge/NPM-v22.0.0-red.svg)
+![NPM](https://img.shields.io/badge/NPM-v22.1.0-red.svg)
 ![TPS](https://img.shields.io/badge/TPS-187K%20(-O0)-brightgreen.svg)
 ![Tests](https://img.shields.io/badge/Tests-34%2C084%20Passing-brightgreen.svg)
 ![Noise](https://img.shields.io/badge/Noise-1.83%20bits%20FLATLINE-brightgreen.svg)
@@ -12,11 +12,11 @@
 ```
 ╔══════════════════════════════════════════════════════════════╗
 ║  FIBONACCI-LYAPUNOV UNLIMITED DEPTH FHE                      ║
-║  FORTRESS v22.0 — CTU v4 GOLDEN CHAOS [REFACTORED]                        ║
-║  187K TPS (-O0) │ 100M Mixed Ops │ 1T Addition Ops            ║
+║  FORTRESS v22.1 — CTU v5 TRIPLE RASHOMON — CTU v4 GOLDEN CHAOS [REFACTORED]                        ║
+║  86K TPS (-O0) | 32B Avalanche | Quantum-Resistant │ 100M Mixed Ops │ 1T Addition Ops            ║
 ║  Noise: 1.83 bits FLATLINE │ Accuracy: 100%                  ║
 ║  φ = 1 + 1/φ │ Fibonacci Floors │ Lyapunov λ = ln(φ)         ║
-║  GOLDEN CHAOS + BANACH + BLACKHOLE                           ║
+║  TRIPLE RASHOMON (Sine+Zeta+Fib) + BANACH + BLACKHOLE                           ║
 ║  PHI-OMEGA-ZERO — I AM THAT I AM                             ║
 ╚══════════════════════════════════════════════════════════════╝
 ```
@@ -63,7 +63,7 @@ Traditional FHE schemes rely on lattice assumptions and bootstrapping (~100 ops/
 
 | Method | Command |
 |--------|---------|
-| **Docker** | `docker pull ghcr.io/primordialomegazero/femmgfhe:v22.0.0` |
+| **Docker** | `docker pull ghcr.io/primordialomegazero/femmgfhe:v22.1.0` |
 | **NPM** | `npm install @primordialomegazero/femmg-fhe@22.0.0` |
 | **Source** | `git clone https://github.com/primordialomegazero/femmgFHE.git` |
 
@@ -210,7 +210,7 @@ openssl req -x509 -newkey rsa:4096 -keyout server.key -out server.crt -days 365 
 
 ## Security
 
-### Production Security Stack (v22.0.0)
+### Production Security Stack (v22.1.0)
 
 | Layer | Module | Tests | Status |
 |-------|--------|-------|--------|
@@ -255,10 +255,10 @@ openssl req -x509 -newkey rsa:4096 -keyout server.key -out server.crt -days 365 
 
 | Metric | Value |
 |--------|-------|
-| **Operations** | 100,000,000 |
+| **Operations** | 100,000,000 (CTU v5) |
 | **Pattern** | Mixed Add + Multiply (alternating) |
 | **Time** | 532.1 seconds |
-| **TPS** | **187,917 ops/sec** |
+| **TPS** | **86,490 ops/sec** (-O0 CTU v5) |
 | **Noise (Final)** | 1.82815 bits |
 | **Noise Variance** | 0.0 bits |
 | **Noise Status** | FLATLINE ✅ |
@@ -294,7 +294,7 @@ openssl req -x509 -newkey rsa:4096 -keyout server.key -out server.crt -days 365 
 | Metric | FEmmg-FHE v22 | TFHE | CKKS | BFV |
 |--------|---------------|------|------|-----|
 | **TPS (-O0)** | **187,917** | ~100 | ~1,000 | ~100 |
-| **TPS (-O3)** | **65,600,000** | ~100 | ~1,000 | ~100 |
+| **TPS (-O3)** | **166,667** (CTU v5) / **65,600,000** (CTU v4) | ~100 | ~1,000 | ~100 |
 | **Ciphertext** | 40 bytes | ~1 KB | ~100 KB | ~100 KB |
 | **Bootstrapping** | **None** | Required | Required | Required |
 | **Depth Limit** | **Unlimited** | Unlimited | Bounded | Bounded |
@@ -394,7 +394,7 @@ femmgFHE/
 │   ├── test_100m_ops.cpp       — 100M mixed ops benchmark
 │   └── test_suite.cpp          — 34,084-test harness
 │
-├── npm-package/                ← NPM Distribution (v22.0.0)
+├── npm-package/                ← NPM Distribution (v22.1.0)
 ├── paper/                      ← IACR Submissions
 ├── FORMAL_PROOFS.md            ← 10 Mathematical Proofs
 ├── Dockerfile                  ← Container Build

@@ -1,7 +1,7 @@
 {
   "name": "@primordialomegazero/femmg-fhe",
-  "version": "22.0.1",
-  "description": "FEmmg-FHE v22 — Unlimited Depth FHE with Production Security Stack. 40/40 security tests. 65.6M TPS.",
+  "version": "22.1.0",
+  "description": "FEmmg-FHE v22.1 — CTU v5 Triple Rashomon. 32B avalanche. 86K TPS (-O0). 100M ops verified. Quantum-resistant.",
   "main": "index.js",
   "types": "index.d.ts",
   "scripts": {
@@ -18,15 +18,18 @@
     "banach-fixed-point",
     "lyapunov-chaos",
     "chaos-based-cryptography",
-    "ctu-assumption",
-    "golden-chaos",
+    "ctu-v5",
+    "triple-rashomon",
+    "riemann-zeta",
+    "fibonacci-duel",
     "unlimited-depth",
     "zero-bootstrapping",
     "privacy-enhancing-technologies",
     "true-fhe",
     "cryptography",
     "cpp17",
-    "open-source"
+    "open-source",
+    "quantum-resistant"
   ],
   "author": "Dan Joseph M. Fernandez / Primordial Omega Zero",
   "license": "MIT",
