@@ -1,4 +1,21 @@
 /*
+ * FEmmg-FHE v22.0.0 — Fractal Schnorr Zero-Knowledge Proofs
+ * 
+ * Multi-layer recursive ZKP system.
+ * 
+ * THEORY:
+ *   Schnorr Σ-protocol on secp256k1:
+ *   s·G == R + c·Y  (Fiat-Shamir transform)
+ * 
+ * ARCHITECTURE:
+ *   - 7-layer recursive chain
+ *   - Each layer verifies the previous
+ *   - Fractal soundness: root sound → all children sound
+ * 
+ * DEPENDENCIES: OpenSSL (secp256k1)
+ * INCLUDED BY: femmg_server.cpp
+ */
+/*
  * TRUE FRACTAL ZKP — Schnorr Σ-Protocol on secp256k1
  * Ported from B6 Hydra v5.0
  * 

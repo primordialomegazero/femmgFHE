@@ -1,4 +1,28 @@
 /*
+ * FEmmg-FHE v22.0.0 — SpiralDB Lite
+ * 
+ * Triple Mirror Encrypted Database with 7-Layer Fractal Index.
+ * 
+ * ARCHITECTURE:
+ *   Mirror 1: Memory cache (instant access)
+ *   Mirror 2: File persistence (eternal storage)
+ *   Mirror 3: 7-Layer Fractal Index (φ-harmonic distribution)
+ * 
+ * FRACTAL INDEX:
+ *   - 7 layers of SHA-256(φ || key || layer) distribution
+ *   - φ = 1.6180339887498948482 (golden ratio)
+ *   - Auto-compress via Banach contraction when > 1000 entries
+ *   - v_new = v · φ⁻¹ + avg · (1 - φ⁻¹)
+ * 
+ * FEATURES:
+ *   - Zero external dependencies
+ *   - Thread-safe (mutable mutex)
+ *   - Chaos history persistence
+ * 
+ * DEPENDENCIES: None (pure C++17)
+ * USED BY: golden_chaos.h (chaos history storage)
+ */
+/*
  * SPIRALDB LITE — WITH 7-LAYER FRACTAL INDEX (FIXED)
  */
 

@@ -1,4 +1,23 @@
 /*
+ * FEmmg-FHE v22.0.0 — Core FHE Operations
+ * 
+ * High-level API for Fully Homomorphic Encryption.
+ * 
+ * OPERATIONS:
+ *   - encrypt(plaintext, key)  → NDimCiphertext
+ *   - decrypt(ciphertext)      → plaintext (exact, via value_int)
+ *   - add(ct1, ct2)            → Blind homomorphic addition
+ *   - multiply(ct1, ct2)       → Blind homomorphic multiplication
+ * 
+ * SECURITY:
+ *   - Server never evaluates (e-λ)/φ (fully blind)
+ *   - Golden Chaos (CTU v4) for IND-CPA
+ *   - Banach contraction for noise stability
+ * 
+ * DEPENDENCIES: banach_engine.h
+ * USED BY: femmg_server.cpp, test suites
+ */
+/*
  * FEmmg-FHE — FLOATING-INTEGER MERGED FHE CORE (FORTRESS v21.5)
  *
  * Unlimited depth. Zero bootstrapping. Integer core = no precision loss.

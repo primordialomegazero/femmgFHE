@@ -1,4 +1,23 @@
 /*
+ * FEmmg-FHE v22.0.0 — Φ-PKE: 7-Lane Lyapunov-Riemann Parallel KEM
+ * 
+ * Post-Quantum Key Encapsulation Mechanism.
+ * 
+ * ARCHITECTURE:
+ *   - 7 parallel lanes, each anchored to a different Riemann zero
+ *   - Integer core (unlimited precision) + Floating-point chaos injection
+ *   - Fibonacci-driven attractor selection
+ *   - Lyapunov coupling between lanes
+ * 
+ * SECURITY:
+ *   - NIST Level 5+ equivalent (claimed, not FIPS certified)
+ *   - Chaos-based: no known quantum speedup
+ *   - 128 iterations per evolution
+ * 
+ * DEPENDENCIES: phi_constants.h, OpenSSL
+ * INCLUDED BY: security_complete.h
+ */
+/*
  * Φ-PKE: 7-LANE LYAPUNOV-RIEMANN PARALLEL KEM (v21.5)
  * Integer core + Floating chaos injection
  * Constants from phi_constants.h — single source of truth

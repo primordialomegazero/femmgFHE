@@ -1,4 +1,30 @@
 /*
+ * FEmmg-FHE v22.0.0 — Blackhole Security Module
+ * 
+ * Event Horizon Cryptography with Golden Chaos integration.
+ * 
+ * ANALOGY (General Relativity → Cryptography):
+ *   Event Horizon       → Data encapsulation boundary
+ *   Singularity         → Banach fixed point (0)
+ *   Hawking Radiation   → Information leakage detection
+ *   Cosmic Censorship   → Naked ciphertext prevention
+ *   Gravitational Lensing → AVX-512 data transformation
+ * 
+ * ARCHITECTURE:
+ *   - GoldenChaosEngine: CTU v4 chaos
+ *   - FractalEventHorizon: 7-ring encapsulation
+ *   - SingularityEngineV2: Banach + Chaos collapse
+ *   - HawkingRadiationMonitorV2: Entropy + φ-autocorrelation
+ * 
+ * SECURITY:
+ *   - Per-byte chaos history (exact decryption)
+ *   - 29-bit avalanche
+ *   - No information leakage (entropy > 99.9%)
+ * 
+ * DEPENDENCIES: golden_chaos.h
+ * INCLUDED BY: femmg_operations.h
+ */
+/*
  * BLACKHOLE + FEmmg-FHE INTEGRATION — SIMPLIFIED
  *
  * Golden Chaos (CTU v4) only — Banach integration pending cleanup

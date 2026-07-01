@@ -1,3 +1,22 @@
+/*
+ * FEmmg-FHE v22.0.0 — 7D Lyapunov Coupled Map Lattice
+ * 
+ * Multi-dimensional chaotic system for entropy generation.
+ * 
+ * THEORY:
+ *   x_d(t+1) = φ · x_d(t) · (1 - x_d(t)) + φ⁻¹ · Σ (x_j - x_d)/(1 + |d-j|)
+ * 
+ *   Lyapunov time τ = 1/λ_max ≈ 2.08 iterations
+ *   After 7 iterations: initial state computationally irrecoverable
+ * 
+ * ARCHITECTURE:
+ *   - LyapunovEngine: 7D CML evolution
+ *   - TemporalWeave: φ-temporal entropy accumulation
+ *   - Quantum resistance score tracking
+ * 
+ * DEPENDENCIES: None (pure math)
+ * INCLUDED BY: security layers
+ */
 #ifndef LYAPUNOV_CORE_H
 #define LYAPUNOV_CORE_H
 

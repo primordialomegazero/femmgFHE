@@ -1,4 +1,26 @@
 /*
+ * FEmmg-FHE v22.0.0 — Banach Contraction Engine
+ * 
+ * Core mathematical engine for Unlimited Depth FHE.
+ * 
+ * THEORY:
+ *   Banach Fixed Point Theorem (1922): Every contraction mapping on a complete 
+ *   metric space has a unique fixed point. Noise converges exponentially to 
+ *   this fixed point — FOREVER.
+ * 
+ *   T(x) = x · φ⁻¹ + F_n · (1 - φ⁻¹)
+ *   |x_n - F_n| ≤ OCCⁿ · |x₀ - F₀|
+ * 
+ * ARCHITECTURE:
+ *   - 7 dimensions × 7 layers × 14 parties = 686-entry perturbation table
+ *   - Each layer contracts toward a different Fibonacci number (F₁=0, F₂=1, F₃=1...)
+ *   - Integer domain (value_int) for exact computation
+ *   - Float domain (coordinates[7]) for Banach security
+ * 
+ * DEPENDENCIES: phi_constants.h, golden_chaos.h
+ * INCLUDED BY: femmg_operations.h
+ */
+/*
  * FEmmg-FHE — FLOATING-INTEGER MERGED BANACH ENGINE (FORTRESS v21.5)
  *
  * TRUE UNLIMITED FHE:
