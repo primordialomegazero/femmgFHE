@@ -192,6 +192,22 @@ graph LR
 
 ---
 
+## Deployment
+
+See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for production deployment with TLS/HTTPS.
+
+### Quick Start (Development)
+```bash
+# HTTP (no encryption)
+./femmg_server
+
+# HTTPS with self-signed cert
+openssl req -x509 -newkey rsa:4096 -keyout server.key -out server.crt -days 365 -nodes
+./femmg_server --tls --cert server.crt --key server.key
+```
+
+---
+
 ## Security
 
 | Property | Mechanism |
