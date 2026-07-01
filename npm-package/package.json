@@ -1,7 +1,7 @@
 {
   "name": "@primordialomegazero/femmg-fhe",
-  "version": "22.0.0",
-  "description": "FEmmg-FHE v22 — Unlimited Depth FHE. Golden Chaos CTU v4 + Banach Contraction + Blackhole Security. 34,084 tests passing. 187K TPS (-O0). Zero bootstrapping.",
+  "version": "22.0.1",
+  "description": "FEmmg-FHE v22 — Unlimited Depth FHE with Production Security Stack. 40/40 security tests. 65.6M TPS.",
   "main": "index.js",
   "types": "index.d.ts",
   "scripts": {
