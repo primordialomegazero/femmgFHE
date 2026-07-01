@@ -70,6 +70,7 @@ class NDimBanachEngine {
     double pert_table[DIMS][DEPTH][PARTIES];
     memory_guard::MemoryGuard mem_guard_;
     bool memory_protection_ = false;
+    triple_rashomon::TripleRashomonEngine chaos_;  // CTU v5
 
     static double fibonacci_floor(int layer) {
         return (double)FIBONACCI[layer % 20] * PHI / 10.0 + 1.0;
@@ -87,6 +88,9 @@ class NDimBanachEngine {
 
 public:
     NDimBanachEngine() { build_perturbation_table(); }
+    
+    // CTU v5 nonce setup
+    void set_chaos_nonce(uint64_t nonce) { chaos_.set_nonce(nonce); }
     
     // Enable memory protection with session seed
     void enable_memory_protection(uint64_t seed) {
@@ -131,6 +135,17 @@ public:
             }
             ct.noise = ct.noise * OCC + NOISE_FLOOR * (1.0 - OCC);
         }
+        
+        // ═══ CTU v5: Triple Rashomon Chaos (21 layers) ═══
+        auto [chaos_val, chaos_hist] = chaos_.observe(ct.coordinates[0], op_counter.load());
+        ct.coordinates[0] = chaos_val;
+        // Store chaos history for audit
+        for (int i = 0; i < 14 && i < 7; i++) {
+            ct.lyapunov_spectrum[i] = chaos_hist[i];
+            ct.perturbation[i] = chaos_hist[i + 7];
+        }
+        ct.expanded_dim0 = chaos_hist[14];
+        
         return ct;
     }
 
