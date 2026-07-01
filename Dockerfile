@@ -1,21 +1,22 @@
-# Multi-stage build for FEmmg-FHE
-FROM ubuntu:22.04 AS builder
+FROM alpine:latest
+LABEL org.opencontainers.image.title="FEmmg-FHE v22.1"
+LABEL org.opencontainers.image.description="CTU v5 Triple Rashomon — 32B avalanche, 86K TPS (-O0), Quantum-resistant FHE"
+LABEL org.opencontainers.image.version="22.1.0"
+LABEL org.opencontainers.image.authors="Dan Joseph M. Fernandez / Primordial Omega Zero"
 
-RUN apt-get update && apt-get install -y g++ libssl-dev && rm -rf /var/lib/apt/lists/*
-
-WORKDIR /build
-COPY src/ src/
-COPY security_complete.h phi_algo_merge.h phi_parallel_kem.h ./
-
-RUN echo "=== Compiling FEmmg-FHE v21.4.0 ===" && \
-    g++ -std=c++17 -O3 -march=native -pthread -static -Wall -Wextra \
-    -o femmg_server src/femmg_server.cpp -lm -lssl -lcrypto && \
-    echo "=== Build complete! ===" && \
-    ls -la femmg_server
-
-FROM ubuntu:22.04
-RUN apt-get update && apt-get install -y libssl3 && rm -rf /var/lib/apt/lists/*
+RUN apk add --no-cache g++ make libc-dev openssl-dev
 WORKDIR /app
-COPY --from=builder /build/femmg_server .
+COPY . .
+
+# Compile server
+RUN g++ -std=c++17 -O3 -march=native -pthread \
+    -I src/core -I src/chaos -I src/security -I src/kem -I src/storage -I src/math \
+    -o femmg_server src/server/femmg_server.cpp -lm -lssl -lcrypto
+
+# Compile benchmark
+RUN g++ -std=c++17 -O0 -march=native -pthread \
+    -I src/core -I src/chaos -I src/security -I src/kem -I src/storage -I src/math \
+    -o test_ctu5_benchmark tests/test_ctu5_benchmark.cpp -lm -lssl -lcrypto
+
 EXPOSE 8092
 CMD ["./femmg_server"]
