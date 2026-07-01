@@ -192,14 +192,14 @@ graph TD
 
 ### FHE Operations (-O3 Optimized)
 
-| Test | Operations | Time | TPS | Noise | Accuracy | Type |
-|------|-----------|------|-----|-------|----------|------|
-| Standard suite | 34,084 | <1s | 5.0M | 1.83 | 100% | Encrypt+Add+Decrypt |
-| Deep circuit | 10,000,000 | 0.3s | 33M | 1.83 | 100% | Add only (single ct) |
-| Extreme deep | 1,000,000,000 | 28s | 34M | 1.83 | 99.9999978% | Add only (single ct) |
-| **10 BILLION** | **10,000,000,000** | **460s** | **21.7M** | **1.83** | **99.99999999%** | **Add only (single ct)** |
-| **100 BILLION** | **100,000,000,000** | **1,532s** | **65.3M** | **1.83** | **100%** | **Add + Multiply alternating** |
-| **1 TRILLION** | **1,000,000,000,000** | **15,241s (4.2h)** | **65.6M** | **1.83** | **100%** | **Add only (single ct)** |
+| Test | Operations | Time | TPS | Noise | Accuracy | Type | Date |
+|------|-----------|------|-----|-------|----------|------|------|
+| Standard suite | 34,084 | <1s | 5.0M | 1.83 | 100% | Encrypt+Add+Decrypt | Jun 2026 |
+| Deep circuit | 10,000,000 | 0.3s | 33M | 1.83 | 100% | Add only (single ct) | Jun 2026 |
+| Extreme deep | 1,000,000,000 | 28s | 34M | 1.83 | 99.9999978% | Add only (single ct) | Jun 2026 |
+| **10 BILLION** | **10,000,000,000** | **460s** | **21.7M** | **1.83** | **99.99999999%** | **Add only (single ct)** | **Jun 30, 2026** |
+| **100 BILLION** | **100,000,000,000** | **1,532s** | **65.3M** | **1.83** | **100%** | **Add + Multiply alternating** | **Jul 1, 2026** |
+| **1 TRILLION** | **1,000,000,000,000** | **15,241s (4.2h)** | **65.6M** | **1.83** | **100%** | **Add only (single ct)** | **Jul 1, 2026** |
 
 ### FHE Operations (-O0 Real, No Compiler Magic)
 
@@ -210,6 +210,12 @@ graph TD
 | Add (deep circuit) | 1,409,642 | 0.7 µs |
 | Full Cycle (encrypt+add+decrypt) | 110,889 | 9.0 µs |
 
+> **Note on TPS differences:** 
+> - **Jun 30 benchmarks** (10B, Extreme, Deep): v20.0 floating-point engine, 80-bit `long double`, single-threaded.
+> - **Jul 1 benchmarks** (100B, 1T): v21.5 floating-integer merged engine, `int64_t` integer core, -O3 optimized.
+> - 100B Mixed uses alternating add+multiply — faster per-op due to cached expand/contract (Path X).
+> - All tests on same hardware (AMD Ryzen 5 2600, 2018). Different dates = different engine versions.
+>
 > **Note:** -O0 measurements reflect true algorithmic performance. With -O3, throughput increases 3-5x.
 
 ### KEM Operations (Integer-Floating Merged Engine)
