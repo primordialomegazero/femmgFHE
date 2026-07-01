@@ -48,7 +48,7 @@ public:
         if (undecidable < -20.0) undecidable = -20.0;
         
         // Step 4: VALUE-BASED SCALING — restore magnitude!
-        double value_scale = std::abs(value) * PHI * 1000.0 + 1.0;
+        double value_scale = std::abs(value) * PHI * 1000000.0 + 1.0;
         
         // Step 5: Combine: value_scale * self_amp * (φ³ + tan²)
         double sign = (value >= 0) ? 1.0 : -1.0;

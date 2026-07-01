@@ -64,7 +64,7 @@ public:
         double direction = (oscillation >= 0) ? 1.0 : -1.0;
         
         // Step 5: VALUE-BASED SCALING
-        double value_scale = std::abs(value) * PHI * 1000.0 + 1.0;
+        double value_scale = std::abs(value) * PHI * 1000000.0 + 1.0;
         
         // Step 6: Combine: value_scale * φ^(|tan|) * sign(sin)
         double result = direction * value_scale * transfinite * (PHI_SQ + std::abs(diagonal) * 0.1);
