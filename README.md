@@ -1,13 +1,6 @@
 # FEmmg-FHE — Fibonacci-Lyapunov Fully Homomorphic Encryption
 
-![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)
-![C++17](https://img.shields.io/badge/C++-17-blue.svg)
-![Docker](https://img.shields.io/badge/Docker-Ready-blue.svg)
-![NPM](https://img.shields.io/badge/NPM-v22.1.2-red.svg)
-![TPS](https://img.shields.io/badge/TPS-86K%20(-O0)-brightgreen.svg)
-![Avalanche](https://img.shields.io/badge/Avalanche-32B-brightgreen.svg)
-![Noise](https://img.shields.io/badge/Noise-1.83%20bits%20FLATLINE-brightgreen.svg)
-![Depth](https://img.shields.io/badge/Depth-UNLIMITED-purple.svg)
+
 ![Quantum](https://img.shields.io/badge/Quantum-Resistant-blue.svg)
 
 ```
