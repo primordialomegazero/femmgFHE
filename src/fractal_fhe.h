@@ -10,11 +10,11 @@
 
 class FractalFHE {
     FEmmgFHE fhe;
-    double seeds[PARTIES];
+    double seeds[phi_constants::PARTIES];
 
 public:
     FractalFHE() {
-        for(int i = 0; i < PARTIES; i++)
+        for(int i = 0; i < phi_constants::PARTIES; i++)
             seeds[i] = PHI * (i + 1) * OCC + 0.0;
     }
 
@@ -48,8 +48,8 @@ public:
     // 91 cross-party verifications
     bool verify_all() {
         int64_t test = (int64_t)(PHI * 100);
-        for(int i = 0; i < PARTIES; i++) {
-            for(int j = i + 1; j < PARTIES; j++) {
+        for(int i = 0; i < phi_constants::PARTIES; i++) {
+            for(int j = i + 1; j < phi_constants::PARTIES; j++) {
                 auto a = encrypt(test, i);
                 auto b = encrypt(test, j);
                 if(decrypt(a) != test || decrypt(b) != test)

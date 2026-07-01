@@ -16,20 +16,33 @@
 class FEmmgFHE {
 private:
     banach::NDimBanachEngine engine;
-    int party_counter = 0;
+    std::atomic<int> party_counter{0};
 
 public:
     FEmmgFHE() = default;
 
     // ═══ ENCRYPT: Integer → Float (contract) → Ciphertext ═══
     banach::NDimCiphertext encrypt(int64_t m, int party = -1) {
-        if(party < 0) party = (party_counter++) % banach::PARTIES;
+        if(party < 0) party = (party_counter.fetch_add(1)) % banach::PARTIES;
         return engine.encrypt(m, party);
     }
 
     // ═══ DECRYPT: Float (expand) → Integer (exact) ═══
     int64_t decrypt(const banach::NDimCiphertext& ct) const {
+        // INTEGER DOMAIN: exact, no floating-point loss!
         return engine.decrypt(ct);
+    }
+
+    // ═══ MEMORY SANITIZATION (defense-in-depth) ═══
+    // Call after decrypt to zero-out sensitive data from memory
+    static void sanitize(banach::NDimCiphertext& ct) {
+        ct.value_int = 0;
+        for(int d=0; d<banach::DIMS; d++) {
+            ct.coordinates[d] = 0.0;
+            ct.coordinates_int[d] = 0;
+        }
+        ct.noise = 0.0;
+        ct.phi_state = 0.0;
     }
 
     // ═══ HOMOMORPHIC ADDITION: Blind, integer-safe ═══

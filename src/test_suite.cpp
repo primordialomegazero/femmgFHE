@@ -114,7 +114,7 @@ int main() {
     }
     {
         std::vector<banach::NDimCiphertext> cts;
-        for(int i = 0; i < PARTIES; i++) cts.push_back(fractal.encrypt(10, i));
+        for(int i = 0; i < phi_constants::PARTIES; i++) cts.push_back(fractal.encrypt(10, i));
         auto result = fractal.chain_add(cts);
         t("14-party chain add = 140", fractal.decrypt(result) == 140);
     }
