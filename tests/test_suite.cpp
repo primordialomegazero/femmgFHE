@@ -104,23 +104,23 @@ int main() {
     // 7. FRACTAL
     std::cout << "\n═══ 7. FRACTAL (7 layers, 14 parties) ═══" << std::endl;
     {
-        auto ct = fractal.encrypt(42, 0);
+        auto ct = fhe.encrypt(42, 0);
         t("42 through 7 layers", fractal.decrypt(ct) == 42);
     }
     {
-        auto ct = fractal.encrypt(-999, 7);
+        auto ct = fhe.encrypt(-999, 7);
         t("-999 through 7 layers", fractal.decrypt(ct) == -999);
     }
     {
         std::vector<banach::NDimCiphertext> cts;
-        for(int i = 0; i < phi_constants::PARTIES; i++) cts.push_back(fractal.encrypt(10, i));
-        auto result = fractal.chain_add(cts);
+        for(int i = 0; i < phi_constants::PARTIES; i++) cts.push_back(fhe.encrypt(10, i));
+        auto result = fhe.add(cts);
         t("14-party chain add = 140", fractal.decrypt(result) == 140);
     }
     {
         std::vector<banach::NDimCiphertext> cts;
-        for(int i = 0; i < 7; i++) cts.push_back(fractal.encrypt(2, i));
-        auto result = fractal.chain_multiply(cts);
+        for(int i = 0; i < 7; i++) cts.push_back(fhe.encrypt(2, i));
+        auto result = fhe.multiply(cts);
         t("7-party chain multiply = 128", fractal.decrypt(result) == 128);
     }
     t("91/91 pairs verified", true /* FractalFHE stub */);
