@@ -71,20 +71,87 @@ FEmmg-FHE is the world's first **Unlimited Depth Fully Homomorphic Encryption** 
 
 ### CTU v5 — Triple Rashomon
 
+```mermaid
+%%{init: {'theme': 'dark', 'themeVariables': { 'primaryColor': '#D4A017', 'primaryTextColor': '#000000', 'primaryBorderColor': '#D4A017', 'lineColor': '#D4A017', 'secondaryColor': '#2E0854', 'tertiaryColor': '#1a1a2e', 'background': '#0d1117', 'mainBkg': '#0d1117', 'nodeBorder': '#D4A017', 'clusterBkg': '#0d1117', 'clusterBorder': '#4B0082', 'titleColor': '#D4A017', 'edgeLabelBackground':'#0d1117', 'nodeTextColor': '#000000'}}}%%
+graph TB
+    subgraph PASS1["PASS 1 — Amplification ×1"]
+        S1["Sine Chaos<br/>sin(x·φ)"] --> Z1["Zeta Chaos<br/>ζ(t)"]
+        Z1 --> F1["Fib Duel<br/>φ²+chaos"]
+        F1 --> S1
+    end
+
+    subgraph PASS2["PASS 2 — Amplification ×φ"]
+        S2["Sine Chaos<br/>sin(x·φ)"] --> Z2["Zeta Chaos<br/>ζ(t)"]
+        Z2 --> F2["Fib Duel<br/>φ²+chaos"]
+        F2 --> S2
+    end
+
+    subgraph PASS3["PASS 3 — Amplification ×φ²"]
+        S3["Sine Chaos<br/>sin(x·φ)"] --> Z3["Zeta Chaos<br/>ζ(t)"]
+        Z3 --> F3["Fib Duel<br/>φ²+chaos"]
+        F3 --> S3
+    end
+
+    INPUT["Plaintext<br/>m"] --> PASS1
+    PASS1 --> PASS2
+    PASS2 --> PASS3
+    PASS3 --> OUTPUT["Ciphertext<br/>32B Avalanche<br/>Quantum-Resistant"]
+
+    style PASS1 fill:#1a1a2e,stroke:#D4A017,stroke-width:2px,color:#D4A017
+    style PASS2 fill:#1a1a2e,stroke:#D4A017,stroke-width:2px,color:#D4A017
+    style PASS3 fill:#1a1a2e,stroke:#D4A017,stroke-width:2px,color:#D4A017
+    style INPUT fill:#2E0854,stroke:#D4A017,stroke-width:2px,color:#000000
+    style OUTPUT fill:#2E0854,stroke:#D4A017,stroke-width:2px,color:#000000
+    style S1 fill:#D4A017,stroke:#D4A017,stroke-width:2px,color:#000000
+    style Z1 fill:#D4A017,stroke:#D4A017,stroke-width:2px,color:#000000
+    style F1 fill:#D4A017,stroke:#D4A017,stroke-width:2px,color:#000000
+    style S2 fill:#D4A017,stroke:#D4A017,stroke-width:2px,color:#000000
+    style Z2 fill:#D4A017,stroke:#D4A017,stroke-width:2px,color:#000000
+    style F2 fill:#D4A017,stroke:#D4A017,stroke-width:2px,color:#000000
+    style S3 fill:#D4A017,stroke:#D4A017,stroke-width:2px,color:#000000
+    style Z3 fill:#D4A017,stroke:#D4A017,stroke-width:2px,color:#000000
+    style F3 fill:#D4A017,stroke:#D4A017,stroke-width:2px,color:#000000
 ```
-┌────────────────────────────────────────────────────────────┐
-│  TRIPLE RASHOMON — 3 Engines × 3 Passes = 21 Layers        │
-│                                                             │
-│  Pass 1 (×1):   Sine → Zeta → Fib → Sine → Zeta → Fib...   │
-│  Pass 2 (×φ):   Sine → Zeta → Fib → Sine → Zeta → Fib...   │
-│  Pass 3 (×φ²):  Sine → Zeta → Fib → Sine → Zeta → Fib...   │
-│                                                             │
-│  Engine 1: Golden Chaos  — sin(x·φ)                        │
-│  Engine 2: Riemann Chaos — ζ(t) zeta function              │
-│  Engine 3: Fibonacci Duel — φ-amplified spiral             │
-│                                                             │
-│  Result: 32 BILLION avalanche between 42 and 43!           │
-└────────────────────────────────────────────────────────────┘
+
+### Security System Flow
+
+```mermaid
+%%{init: {'theme': 'dark', 'themeVariables': { 'primaryColor': '#D4A017', 'primaryTextColor': '#000000', 'primaryBorderColor': '#D4A017', 'lineColor': '#D4A017', 'secondaryColor': '#2E0854', 'tertiaryColor': '#1a1a2e', 'background': '#0d1117', 'mainBkg': '#0d1117', 'nodeBorder': '#D4A017', 'clusterBkg': '#0d1117', 'clusterBorder': '#4B0082', 'titleColor': '#D4A017', 'edgeLabelBackground':'#0d1117', 'nodeTextColor': '#000000'}}}%%
+graph LR
+    subgraph CLIENT["CLIENT"]
+        M["Message m"] --> CTU5["CTU v5<br/>Triple Rashomon<br/>21 layers"]
+        CTU5 --> CT["Ciphertext<br/>32B Avalanche"]
+    end
+
+    subgraph SERVER["SERVER — Blind"]
+        CT --> OPS["Blind Add/Multiply<br/>never evaluates (e-λ)/φ"]
+        OPS --> RESULT["Encrypted Result"]
+    end
+
+    subgraph SECURITY["SECURITY LAYERS"]
+        JWT["Φ-JWT<br/>Auth (7/7)"] --> CTU5
+        AM["Anti-Matter v2<br/>Rate Limit (5/5)"] --> CTU5
+        MG["Memory Guard<br/>Encrypted RAM (4/4)"] --> CT
+        IV["Input Validator<br/>No Injection (8/8)"] --> OPS
+    end
+
+    CLIENT --> SERVER
+    RESULT -->|decrypt| M2["Plaintext m"]
+    SECURITY --> CLIENT
+
+    style CLIENT fill:#1a1a2e,stroke:#D4A017,stroke-width:2px,color:#D4A017
+    style SERVER fill:#1a1a2e,stroke:#4B0082,stroke-width:2px,color:#D4A017
+    style SECURITY fill:#1a1a2e,stroke:#4B0082,stroke-width:2px,color:#D4A017
+    style M fill:#2E0854,stroke:#D4A017,stroke-width:2px,color:#000000
+    style M2 fill:#2E0854,stroke:#D4A017,stroke-width:2px,color:#000000
+    style CTU5 fill:#D4A017,stroke:#D4A017,stroke-width:2px,color:#000000
+    style CT fill:#2E0854,stroke:#D4A017,stroke-width:2px,color:#D4A017
+    style OPS fill:#D4A017,stroke:#D4A017,stroke-width:2px,color:#000000
+    style RESULT fill:#2E0854,stroke:#D4A017,stroke-width:2px,color:#D4A017
+    style JWT fill:#2E0854,stroke:#4B0082,stroke-width:1px,color:#D4A017
+    style AM fill:#2E0854,stroke:#4B0082,stroke-width:1px,color:#D4A017
+    style MG fill:#2E0854,stroke:#4B0082,stroke-width:1px,color:#D4A017
+    style IV fill:#2E0854,stroke:#4B0082,stroke-width:1px,color:#D4A017
 ```
 
 ### Security Architecture
