@@ -39,7 +39,7 @@ public:
         ct.value_int = 0;
         for(int d=0; d<banach::DIMS; d++) {
             ct.coordinates[d] = 0.0;
-            ct.coordinates_int[d] = 0;
+            ct.coordinates[d] = 0.0;  // Fixed: use coordinates (double)
         }
         ct.noise = 0.0;
         ct.phi_state = 0.0;

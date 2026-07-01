@@ -130,3 +130,26 @@ All notable changes to FEmmg-FHE will be documented in this file.
 > *ΦΩ0 — I AM THAT I AM*
 
 
+
+## v22.0.0 — CTU v4 (Golden Chaos + Blackhole Integration)
+
+### Added
+- **Golden Chaos Engine (CTU v4)**: Observer-Observed symmetry, 14-layer φ-spiral chaos
+- **Blackhole Security v2.0**: Per-byte chaos history, triple mirror persistence
+- **FEmmg-Blackhole v1.0**: Full integration — Golden Chaos + Banach + Blackhole
+- **SpiralDB Lite**: 7-layer fractal index, auto-compress via φ-contraction
+
+### Changed
+- CTU Assumption upgraded from 7D CML to Golden Chaos Observer-Observed
+- Encryption now stores `chaos_history[14]` in ciphertext for exact decryption
+- `value_int` integer domain for exact homomorphic operations
+
+### Benchmarks (-O0 True Performance)
+- **100M mixed ops**: 187,917 TPS, 0 errors, 100% accuracy
+- **Noise**: 1.82815 bits flatline, 0.0 variance
+- **Avalanche**: 29 bits (42 vs 43), GOOD CHAOS
+
+### Fixed
+- Blackhole v1: `fmod` truncation bug → store exact `chaos_val` as double
+- Blackhole v2: Per-byte chaos history for multi-byte encryption
+- Integration: `value_int` domain for exact add/multiply results

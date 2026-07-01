@@ -17,6 +17,9 @@
 #include <vector>
 #include <array>
 #include <atomic>
+#include "blackhole_fhe.h"
+#include "golden_chaos.h"
+#include "golden_chaos.h"
 #include <algorithm>
 
 namespace banach {
@@ -28,17 +31,14 @@ constexpr int DIMS    = CML_DIMS;
 constexpr int DEPTH   = BANACH_LAYERS;
 
 struct NDimCiphertext {
-    // INTEGER DOMAIN (exact, unlimited precision)
-    int64_t value_int;                    // m * FP_SCALE — exact!
-    int64_t coordinates_int[DIMS];        // dimension values in integer domain
-    
-    // FLOATING DOMAIN (Banach contraction only)
-    double coordinates[DIMS];             // contracted coordinates
-    double perturbation[DIMS];            // perturbation values
-    double noise;                         // converges to NOISE_FLOOR
-    double phi_state;                     // φ-scaled state
-    
-    // METADATA
+    std::array<double, DIMS> coordinates;
+    std::array<double, DIMS> perturbation;
+    double expanded_dim0;
+    double lyapunov_spectrum[DIMS];
+    double chaos_history[14];  // CTU v3: store chaos for exact decryption
+    int64_t value_int;         // Integer domain — exact value
+    double phi_state;          // φ-scaled state
+    double noise;
     uint64_t operations;
     int party_id;
 };
@@ -73,7 +73,13 @@ public:
         // INTEGER: store exact value — NO precision loss!
         ct.value_int = m * FP_SCALE;
         
-        // FLOAT: Banach contraction toward Fibonacci floors
+        // FLOAT: NONCE HARMONIZED BLACKHOLE
+        std::vector<uint8_t> data(8);
+        for(int i=0; i<8; i++) data[i] = (m >> (i*8)) & 0xFF;
+        
+        // Blackhole integration moved to blackhole_fhe.h
+        // Encryption handled by BlackholeFHE class
+        
         double expanded = (double)m * PHI + LAMBDA;
         ct.coordinates[0] = expanded;
         for(int d=1; d<DIMS; d++) ct.coordinates[d] = PHI * (d+1);
