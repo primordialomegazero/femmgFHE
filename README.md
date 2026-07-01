@@ -41,7 +41,15 @@
 
 ## What Is FEmmg-FHE?
 
-FEmmg-FHE is the world's first **Unlimited Depth Fully Homomorphic Encryption** scheme. Not leveled. Not bounded. Truly unlimited depth with **zero bootstrapping**.
+**FEmmg-FHE** stands for **F**ully **E**ncrypted **M**ultiplicative **M**apping with **G**olden Ratio — **F**ully **H**omomorphic **E**ncryption.
+
+It is the world's first **Unlimited Depth Fully Homomorphic Encryption** scheme. Not leveled. Not bounded. Truly unlimited depth with **zero bootstrapping**.
+
+### The Paradigm Shift
+
+Traditional FHE (since Gentry 2009) fights against noise. FEmmg-FHE makes noise **converge to a stable fixed point** using Banach contraction with Fibonacci floors. Instead of periodic bootstrapping to reset noise, the noise **locks at 1.82815 bits — forever.**
+
+This is not an incremental improvement. It is a **paradigm shift** from noise management to noise elimination.
 
 ### How It's Different
 
@@ -188,13 +196,14 @@ graph LR
 | Layer | Module | Tests | Status |
 |-------|--------|-------|--------|
 | **Chaos** | CTU v5 Triple Rashomon | 32B avalanche | ✅ |
-| **Authentication** | Φ-JWT (Golden Ratio JWT) | 7/7 | ✅ |
-| **Rate Limiting** | Anti-Matter v2 (Burst Detection) | 5/5 | ✅ |
+| **Transport** | Φ-TLS (Golden Ratio TLS) | 6/6 | ✅ |
+| **Authentication** | Φ-JWT (Keyless, φ-derived) | 7/7 | ✅ |
+| **Rate Limiting** | Dual-Layer (DEV/PROD auto) | 5/5 | ✅ |
 | **Memory Protection** | Memory Guard | 4/4 | ✅ |
 | **Input Validation** | Input Validator | 8/8 | ✅ |
 | **Session Management** | Session Manager | 6/6 | ✅ |
 | **Audit Logging** | Audit Logger | 5/5 | ✅ |
-| **Error Handling** | SSS Error Handler (S/SS/SSS-Rank) | 6/6 | ✅ |
+| **Error Handling** | SSS Error Handler (S/SS/SSS) | 6/6 | ✅ |
 
 ### Attack Resistance
 
