@@ -1,7 +1,12 @@
 # FEmmg-FHE — Fibonacci-Lyapunov Fully Homomorphic Encryption
 
-
-![Quantum](https://img.shields.io/badge/Quantum-Resistant-blue.svg)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![C++17](https://img.shields.io/badge/C++-17-blue.svg)](src/)
+[![Docker](https://img.shields.io/badge/Docker-Ready-blue.svg)](https://github.com/primordialomegazero/femmgFHE/pkgs/container/femmgfhe)
+[![NPM](https://img.shields.io/badge/NPM-v22.1.2-red.svg)](https://www.npmjs.com/package/@primordialomegazero/femmg-fhe)
+[![Tests](https://img.shields.io/badge/Tests-34K%20Passing-brightgreen.svg)](#benchmarks)
+[![Security](https://img.shields.io/badge/Security-40%2F40-brightgreen.svg)](#security)
+[![Quantum](https://img.shields.io/badge/Quantum-Resistant-blue.svg)](#security)
 
 ```
 ╔══════════════════════════════════════════════════════════════╗
