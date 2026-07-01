@@ -121,7 +121,8 @@ int main() {
     {
         std::vector<banach::NDimCiphertext> cts;
         for(int i = 0; i < 7; i++) cts.push_back(fhe.encrypt(2, i));
-        auto result = fhe.multiply(cts);
+        auto result = cts[0];
+        for(size_t i = 1; i < cts.size(); i++) result = fhe.multiply(result, cts[i]);
         t("7-party chain multiply = 128", fhe.decrypt(result) == 128);
     }
     t("91/91 pairs verified", true /* FractalFHE stub */);
