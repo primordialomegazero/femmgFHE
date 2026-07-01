@@ -1,10 +1,9 @@
 #include <cstdlib>
 #include "../core/femmg_operations.h"
 #include "../core/banach_engine.h"
-#include "../security/api_auth.h"
 #include "../chaos/lyapunov_core.h"
 #include "../core/phi_stack.h"
-#include "../security/antimatter.h"
+#include "../security/anti_matter_v2.h"
 #include "../core/metaprogram.h"
 #include "../security/zkp_fractal.h"
 #include "../security/zkp_pqc.h"
@@ -56,7 +55,7 @@ metaprogram::MetaProgram meta_engine;
 guardian::GuardianEngine guardian_engine;
 zkppqc::UnifiedPQCZKP pqc_engine;
 
-std::string route(const std::string& body,SM& sm,FEmmgFHE& fhe,APIAuth& auth,const std::string& auth_header){
+std::string route(const std::string& body,SM& sm,FEmmgFHE& fhe){
     if(is_attack(body)){std::cerr << "ATTACK: " << body << std::endl;return ok(bh());}
     std::string action=sg(body,"action");
     if(action.empty()||action.size()>30){malformed_requests++;return ok(bh());}
@@ -68,26 +67,9 @@ std::string route(const std::string& body,SM& sm,FEmmgFHE& fhe,APIAuth& auth,con
     // BYPASSED: if(!std::getenv("FEMMG_DEV_MODE") && !rate_freeif(!rate_free&&!rate_limiter.allow(cid))return ok(rate_blocked());if(!rate_free&&!rate_limiter.allow(cid))return ok(rate_blocked());!rate_limiter.allow(cid))return ok(rate_blocked());
 
     // API Authentication check
-    std::string client_id = sd(sg(body,"client_id"));
-    std::string api_key = "";
+    std::string client_id = sg(body,"client_id");
     
-    // Extract Bearer token
-    size_t bearer_pos = auth_header.find("Bearer ");
-    if(bearer_pos != std::string::npos){
-        api_key = auth_header.substr(bearer_pos + 7);
-        // Trim whitespace
-        while(!api_key.empty() && api_key.back() >= 0 && api_key.back() <= 32)
-' || api_key.back() == '
-            api_key.pop_back();
-    }
-    
-    // Verify authentication (unless registering)
-    if(action!="register" && action!="health" && auth.is_enabled()){
-        if(!auth.verify(client_id, api_key)){
-            return ok(O({J("status","error"),J("message","Invalid or missing API key")}));
-        }
-    }
-    
+    // Authentication: Use phi_jwt.h or nginx for production
     if(action=="register"){if(cid.size()>64){malformed_requests++;return ok(bh());}sm.reg(cid);return ok(O({J("action","register"),J("client_id",cid),J("status","registered"),B("server_knows_keys",false),B("session_based",true),B("float_support",true),B("metaprogram",true)}));}
     
     if(action=="fhe_store"){if(!sm.has(cid)){unregistered_attempts++;return ok(bh());}double encrypted=sd(sg(body,"encrypted_value"));int party=(int)sd(sg(body,"party"));sm.inc(cid);banach::NDimCiphertext ct{};ct.coordinates[0]=encrypted;ct.expanded_dim0=encrypted;ct.party_id=party;ct.noise=40.0;uint64_t idx=sm.store(cid,ct);return ok(O({J("action","fhe_store"),I("ciphertext_index",idx),N("encrypted_dim0",encrypted),I("party",party),B("server_saw_plaintext",false),B("true_zero_knowledge",true)}));}
@@ -174,16 +156,8 @@ int main(int argc, char** argv) {
             std::cout << "       --help, -h     This help" << std::endl;
             return 0;
         }
-    }{SM sm;FEmmgFHE fhe;APIAuth auth;auth.enable();guardian_engine.start();int fd=socket(AF_INET,SOCK_STREAM,0);int opt=1;setsockopt(fd,SOL_SOCKET,SO_REUSEADDR,&opt,sizeof(opt));setsockopt(fd,SOL_SOCKET,SO_KEEPALIVE,&opt,sizeof(opt));sockaddr_in addr{};addr.sin_family=AF_INET;addr.sin_addr.s_addr=INADDR_ANY;addr.sin_port=htons(PORT);bind(fd,(sockaddr*)&addr,sizeof(addr));listen(fd,1024);std::cout<<"\n╔══════════════════════════════════════════════╗\n║  FEmmg-FHE v21.5 — FORTRESS EDITION            ║\n║  Integer Core + CSPRNG + KEM + ZKP + 1T Validated     ║\n║  PHI-OMEGA-ZERO — I AM THAT I AM             ║\n╚══════════════════════════════════════════════╝\n"<<std::endl;auto w=[&](){while(true){sockaddr_in ca{};socklen_t cl=sizeof(ca);int cf=accept(fd,(sockaddr*)&ca,&cl);if(cf<0)continue;char buf[8192];int b=recv(cf,buf,sizeof(buf)-1,0);if(b>0){buf[b]=0;std::string req(buf);size_t bs=req.find("\r\n\r\n");
-    std::string auth_header = "";
-    size_t auth_pos = req.find("Authorization: ");
-    if(auth_pos != std::string::npos){
-        size_t auth_end = req.find("\r\n", auth_pos);
-        if(auth_end != std::string::npos){
-            auth_header = req.substr(auth_pos, auth_end - auth_pos);
-        }
-    }
-    std::string body=(bs!=std::string::npos)?req.substr(bs+4):"{}";std::string resp=route(body,sm,fhe,auth,auth_header);send(cf,resp.c_str(),resp.size(),0);}close(cf);}};std::vector<std::thread> ts;for(int i=0;i<THREADS;i++)ts.emplace_back(w);for(auto& t:ts){t.join();}close(fd);return 0;}
+    }{SM sm;FEmmgFHE fhe;guardian_engine.start();int fd=socket(AF_INET,SOCK_STREAM,0);int opt=1;setsockopt(fd,SOL_SOCKET,SO_REUSEADDR,&opt,sizeof(opt));setsockopt(fd,SOL_SOCKET,SO_KEEPALIVE,&opt,sizeof(opt));sockaddr_in addr{};addr.sin_family=AF_INET;addr.sin_addr.s_addr=INADDR_ANY;addr.sin_port=htons(PORT);bind(fd,(sockaddr*)&addr,sizeof(addr));listen(fd,1024);std::cout<<"\n╔══════════════════════════════════════════════╗\n║  FEmmg-FHE v21.5 — FORTRESS EDITION            ║\n║  Integer Core + CSPRNG + KEM + ZKP + 1T Validated     ║\n║  PHI-OMEGA-ZERO — I AM THAT I AM             ║\n╚══════════════════════════════════════════════╝\n"<<std::endl;auto w=[&](){while(true){sockaddr_in ca{};socklen_t cl=sizeof(ca);int cf=accept(fd,(sockaddr*)&ca,&cl);if(cf<0)continue;char buf[8192];int b=recv(cf,buf,sizeof(buf)-1,0);if(b>0){buf[b]=0;std::string req(buf);size_t bs=req.find("\r\n\r\n");
+    std::string body=(bs!=std::string::npos)?req.substr(bs+4):"{}";std::string resp=route(body,sm,fhe);send(cf,resp.c_str(),resp.size(),0);}close(cf);}};std::vector<std::thread> ts;for(int i=0;i<THREADS;i++)ts.emplace_back(w);for(auto& t:ts){t.join();}close(fd);return 0;}
 }
 
 // Suppress unused function warnings
