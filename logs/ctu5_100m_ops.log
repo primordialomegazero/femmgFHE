@@ -1,0 +1,32 @@
+═══════════════════════════════════════
+  CTU v5 — TRIPLE RASHOMON BENCHMARK
+  100M Encrypt+Decrypt Operations
+  -O0 True Performance
+  Date: July 2, 2026
+═══════════════════════════════════════
+
+[ 10%] Ops: 10M | Batch: 117733ms | TPS: 84937 | Errors: 0
+[ 20%] Ops: 20M | Batch: 117289ms | TPS: 85098 | Errors: 0
+[ 30%] Ops: 30M | Batch: 115276ms | TPS: 85641 | Errors: 0
+[ 40%] Ops: 40M | Batch: 110043ms | TPS: 86891 | Errors: 0
+[ 50%] Ops: 50M | Batch: 112518ms | TPS: 87281 | Errors: 0
+[ 60%] Ops: 60M | Batch: 119068ms | TPS: 86714 | Errors: 0
+[ 70%] Ops: 70M | Batch: 116492ms | TPS: 86588 | Errors: 0
+[ 80%] Ops: 80M | Batch: 115345ms | TPS: 86601 | Errors: 0
+[ 90%] Ops: 90M | Batch: 113999ms | TPS: 86724 | Errors: 0
+[100%] Ops: 100M | Batch: 114460ms | TPS: 86788 | Errors: 0
+
+═══════════════════════════════════════
+  FINAL RESULTS
+═══════════════════════════════════════
+  Total ops:     100,000,000
+  Total time:    1,152.2 seconds (19.2 minutes)
+  Average TPS:   86,788 ops/sec
+  Errors:        0
+  Noise max:     1.8 bits
+  Noise min:     1.8 bits
+  Noise var:     0.0 bits
+  Accuracy:      100.0%
+
+  ✅ CTU v5 — Triple Rashomon — Benchmark Complete!
+═══════════════════════════════════════

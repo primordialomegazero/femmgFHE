@@ -2,9 +2,10 @@
 
 ## CTU v5 (Triple Rashomon) — July 2, 2026
 
-| Test | Operations | Type | Time | TPS | Noise | Accuracy |
-|------|-----------|------|------|-----|-------|----------|
-| CTU v5 Integration | 100M | Encrypt+Decrypt | 1,156s | 86,490 (-O0) | 1.83 | 100% |
+| Test | Operations | Type | Time | TPS | Noise | Accuracy | Log |
+|------|-----------|------|------|-----|-------|----------|-----|
+| CTU v5 Benchmark | 100M | Encrypt+Decrypt | 1,152s | 86,788 (-O0) | 1.83 | 100% | [📄](logs/ctu5_100m_ops.log) |
+| CTU v5 Integration | 100M | Encrypt+Decrypt | 1,156s | 86,490 (-O0) | 1.83 | 100% | — |
 
 ## CTU v4 (Golden Chaos) — July 1, 2026
 
