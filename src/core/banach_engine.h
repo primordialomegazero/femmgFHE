@@ -41,6 +41,7 @@
 #include <atomic>
 #include "../security/blackhole.h"
 #include "../chaos/golden_chaos.h"
+#include "../security/memory_guard.h"
 #include <algorithm>
 
 namespace banach {
@@ -67,6 +68,8 @@ struct NDimCiphertext {
 class NDimBanachEngine {
     std::atomic<uint64_t> op_counter{0};
     double pert_table[DIMS][DEPTH][PARTIES];
+    memory_guard::MemoryGuard mem_guard_;
+    bool memory_protection_ = false;
 
     static double fibonacci_floor(int layer) {
         return (double)FIBONACCI[layer % 20] * PHI / 10.0 + 1.0;
@@ -84,6 +87,17 @@ class NDimBanachEngine {
 
 public:
     NDimBanachEngine() { build_perturbation_table(); }
+    
+    // Enable memory protection with session seed
+    void enable_memory_protection(uint64_t seed) {
+        mem_guard_.init(seed);
+        memory_protection_ = true;
+    }
+    
+    void disable_memory_protection() {
+        mem_guard_.wipe();
+        memory_protection_ = false;
+    }
 
     // ═══ ENCRYPT: Integer → Float (contract) → Ciphertext ═══
     NDimCiphertext encrypt(int64_t m, int party) {
@@ -93,6 +107,7 @@ public:
         
         // INTEGER: store exact value — NO precision loss!
         ct.value_int = m * FP_SCALE;
+        if (memory_protection_) ct.value_int = mem_guard_.encrypt(ct.value_int);
         
         // FLOAT: NONCE HARMONIZED BLACKHOLE
         std::vector<uint8_t> data(8);
@@ -121,7 +136,9 @@ public:
 
     // ═══ DECRYPT: Integer domain — EXACT, no floating-point loss! ═══
     int64_t decrypt(const NDimCiphertext& ct) const {
-        return ct.value_int / FP_SCALE;
+        int64_t val = ct.value_int;
+        if (memory_protection_) val = mem_guard_.decrypt(val);
+        return val / FP_SCALE;
     }
 
     // ═══ RECONTRACT (after homomorphic ops) ═══
