@@ -16,8 +16,8 @@
 namespace antimatter {
 
 constexpr double PHI = 1.6180339887498948482;
-constexpr int MAX_REQUESTS_PER_SECOND = 10000;  // Generous limit
-constexpr int BURST_THRESHOLD = 500;            // High threshold
+constexpr int MAX_REQUESTS_PER_SECOND = 1000;  // Generous limit
+constexpr int BURST_THRESHOLD = 30;            // High threshold
 constexpr int BLOCK_DURATION_SECONDS = 60;      // Only 1 minute block
 
 // ═══ SAFETY: Whitelist that NEVER gets blocked ═══
@@ -62,30 +62,26 @@ private:
         
         // More relaxed: 0.5ms minimum instead of φ-spiral calc
         client.phi_spiral_phase = std::fmod(client.phi_spiral_phase + 0.1, 7.0);
-        return elapsed >= 0.5;  // 0.5ms minimum gap
+        return elapsed >= 0.1;  // 0.5ms minimum gap
     }
     
-    // Layer 2: CML burst detection (relaxed)
+    // Layer 2: Simple burst counter (no window reset)
     bool cml_burst_check(ClientRate& client) {
         auto now = std::chrono::steady_clock::now();
-        auto window_elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
-            now - client.window_start).count();
         
-        if (window_elapsed > 1000) {
-            client.request_count = 0;
-            client.burst_count = 0;
-            client.window_start = now;
-        }
-        
+        // Reset burst count if enough time passed
         auto since_last = std::chrono::duration_cast<std::chrono::milliseconds>(
             now - client.last_request).count();
-        if (since_last < 100) {
-            client.burst_count++;
-            if (client.burst_count > BURST_THRESHOLD) {
-                return false;
-            }
-        } else {
+        if (since_last > 1000) {
+            client.burst_count = 0;  // Reset after 1 second of inactivity
+        }
+        
+        client.burst_count++;
+        if (client.burst_count > BURST_THRESHOLD) {
+            client.is_blocked = true;
+            client.blocked_until = now + std::chrono::seconds(BLOCK_DURATION_SECONDS);
             client.burst_count = 0;
+            return false;
         }
         
         return true;
@@ -116,10 +112,8 @@ public:
             client.burst_count = 0;
         }
         
-        // Layer 1: φ-Spiral (relaxed)
-        if (!phi_spiral_check(client)) {
-            return true;  // ⚠️ Warning only, don't block
-        }
+        // Layer 1: φ-Spiral (relaxed — log only, never block)
+        phi_spiral_check(client);  // Always continue
         
         // Layer 2: CML Burst
         if (!cml_burst_check(client)) {
