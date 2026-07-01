@@ -76,9 +76,8 @@ std::string route(const std::string& body,SM& sm,FEmmgFHE& fhe,APIAuth& auth,con
     if(bearer_pos != std::string::npos){
         api_key = auth_header.substr(bearer_pos + 7);
         // Trim whitespace
-        while(!api_key.empty() && (api_key.back() == ' ' || api_key.back() == '
+        while(!api_key.empty() && api_key.back() >= 0 && api_key.back() <= 32)
 ' || api_key.back() == '
-'))
             api_key.pop_back();
     }
     
