@@ -114,7 +114,8 @@ int main() {
     {
         std::vector<banach::NDimCiphertext> cts;
         for(int i = 0; i < phi_constants::PARTIES; i++) cts.push_back(fhe.encrypt(10, i));
-        auto result = fhe.add(cts);
+        auto result = cts[0];
+        for(size_t i = 1; i < cts.size(); i++) result = fhe.add(result, cts[i]);
         t("14-party chain add = 140", fhe.decrypt(result) == 140);
     }
     {
