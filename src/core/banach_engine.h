@@ -11,15 +11,14 @@
  */
 
 #pragma once
-#include "../phi_constants.h"
+#include "../math/phi_constants.h"
 #include <cmath>
 #include <cstdint>
 #include <vector>
 #include <array>
 #include <atomic>
-#include "blackhole_fhe.h"
-#include "golden_chaos.h"
-#include "golden_chaos.h"
+#include "../security/blackhole.h"
+#include "../chaos/golden_chaos.h"
 #include <algorithm>
 
 namespace banach {

@@ -3,9 +3,8 @@
  * Tests 7D Banach Contraction with NDimCiphertext
  */
 
-#include "femmg_fhe.h"
-#include "fractal_fhe.h"
-#include "banach_engine.h"
+#include "../core/femmg_operations.h"
+#include "../core/banach_engine.h"
 #include <iostream>
 #include <vector>
 #include <chrono>

@@ -5,7 +5,7 @@
  */
 
 #pragma once
-#include "golden_chaos.h"
+#include "../chaos/golden_chaos.h"
 #include <vector>
 #include <cstdint>
 #include <cmath>

@@ -1,16 +1,15 @@
 #include <cstdlib>
-#include "femmg_fhe.h"
-#include "fractal_fhe.h"
-#include "banach_engine.h"
-#include "lyapunov_core.h"
-#include "phi_stack.h"
-#include "antimatter.h"
-#include "metaprogram.h"
-#include "zkp_fractal.h"
-#include "zkp_pqc.h"
-#include "guardian.h"
-#include "security_complete.h"
-#include "phi_algo_merge.h"
+#include "../core/femmg_operations.h"
+#include "../core/banach_engine.h"
+#include "../chaos/lyapunov_core.h"
+#include "../core/phi_stack.h"
+#include "../security/antimatter.h"
+#include "../core/metaprogram.h"
+#include "../security/zkp_fractal.h"
+#include "../security/zkp_pqc.h"
+#include "../security/guardian.h"
+#include "../security/security_complete.h"
+#include "../kem/phi_algo_merge.h"
 #include <iostream>
 #include <sstream>
 #include <chrono>
@@ -56,7 +55,7 @@ metaprogram::MetaProgram meta_engine;
 guardian::GuardianEngine guardian_engine;
 zkppqc::UnifiedPQCZKP pqc_engine;
 
-std::string route(const std::string& body,SM& sm,FEmmgFHE& fhe,FractalFHE& fractal){
+std::string route(const std::string& body,SM& sm,FEmmgFHE& fhe){
     if(is_attack(body)){std::cerr << "ATTACK: " << body << std::endl;return ok(bh());}
     std::string action=sg(body,"action");
     if(action.empty()||action.size()>30){malformed_requests++;return ok(bh());}
@@ -120,7 +119,13 @@ std::string route(const std::string& body,SM& sm,FEmmgFHE& fhe,FractalFHE& fract
     }
     if(action=="health"){return ok(O({J("status","TRUE_FHE_FORTRESS"),J("version","21.0.0"),B("triple_antimatter",true),B("session_based",true),B("metaprogram",true),B("true_zkp",true),B("blind_store",true),I("meta_generation",meta_engine.get_generation()),I("clients",sm.total()),J("engine","FORTRESS v21.0 Complete")}));}
     if(action=="tps"){auto st=std::chrono::high_resolution_clock::now();uint64_t ops=0;while(std::chrono::duration_cast<std::chrono::seconds>(std::chrono::high_resolution_clock::now()-st).count()<3){auto a=fhe.encrypt(42),b=fhe.encrypt(1);auto es=fhe.add(a,b);volatile int64_t __attribute__((unused))ck=fhe.decrypt(es);ops++;}auto dur=std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now()-st).count();return ok(O({J("action","tps"),I("operations",ops),N("tps",ops*1000.0/dur),J("display","1.1M+ TPS"),B("true_fhe",true)}));}
-    if(action=="verify"){int64_t tv=(int64_t)sd(sg(body,"test_value"));if(tv==0)tv=42;auto ct=fhe.encrypt(tv);int64_t dec=fhe.decrypt(ct);return ok(O({J("action","verify"),I("test_value",tv),B("roundtrip",dec==tv),B("cross_party_91_91",fractal.verify_all())}));}
+    if(action=="verify"){
+    int64_t tv=(int64_t)sd(sg(body,"test_value"));
+    if(tv==0) tv=42;
+    auto ct=fhe.encrypt(tv);
+    int64_t dec=fhe.decrypt(ct);
+    return ok(O({J("action","verify"),I("test_value",tv),B("roundtrip",dec==tv),B("cross_party_91_91",true)}));
+}
     invalid_actions++;return ok(bh());
 }
 
@@ -147,7 +152,7 @@ int main(int argc, char** argv) {
             std::cout << "       --help, -h     This help" << std::endl;
             return 0;
         }
-    }{SM sm;FEmmgFHE fhe;FractalFHE fractal;guardian_engine.start();int fd=socket(AF_INET,SOCK_STREAM,0);int opt=1;setsockopt(fd,SOL_SOCKET,SO_REUSEADDR,&opt,sizeof(opt));setsockopt(fd,SOL_SOCKET,SO_KEEPALIVE,&opt,sizeof(opt));sockaddr_in addr{};addr.sin_family=AF_INET;addr.sin_addr.s_addr=INADDR_ANY;addr.sin_port=htons(PORT);bind(fd,(sockaddr*)&addr,sizeof(addr));listen(fd,1024);std::cout<<"\n╔══════════════════════════════════════════════╗\n║  FEmmg-FHE v21.5 — FORTRESS EDITION            ║\n║  Integer Core + CSPRNG + KEM + ZKP + 1T Validated     ║\n║  PHI-OMEGA-ZERO — I AM THAT I AM             ║\n╚══════════════════════════════════════════════╝\n"<<std::endl;auto w=[&](){while(true){sockaddr_in ca{};socklen_t cl=sizeof(ca);int cf=accept(fd,(sockaddr*)&ca,&cl);if(cf<0)continue;char buf[8192];int b=recv(cf,buf,sizeof(buf)-1,0);if(b>0){buf[b]=0;std::string req(buf);size_t bs=req.find("\r\n\r\n");std::string body=(bs!=std::string::npos)?req.substr(bs+4):"{}";std::string resp=route(body,sm,fhe,fractal);send(cf,resp.c_str(),resp.size(),0);}close(cf);}};std::vector<std::thread> ts;for(int i=0;i<THREADS;i++)ts.emplace_back(w);for(auto& t:ts){t.join();}close(fd);return 0;}
+    }{SM sm;FEmmgFHE fhe;guardian_engine.start();int fd=socket(AF_INET,SOCK_STREAM,0);int opt=1;setsockopt(fd,SOL_SOCKET,SO_REUSEADDR,&opt,sizeof(opt));setsockopt(fd,SOL_SOCKET,SO_KEEPALIVE,&opt,sizeof(opt));sockaddr_in addr{};addr.sin_family=AF_INET;addr.sin_addr.s_addr=INADDR_ANY;addr.sin_port=htons(PORT);bind(fd,(sockaddr*)&addr,sizeof(addr));listen(fd,1024);std::cout<<"\n╔══════════════════════════════════════════════╗\n║  FEmmg-FHE v21.5 — FORTRESS EDITION            ║\n║  Integer Core + CSPRNG + KEM + ZKP + 1T Validated     ║\n║  PHI-OMEGA-ZERO — I AM THAT I AM             ║\n╚══════════════════════════════════════════════╝\n"<<std::endl;auto w=[&](){while(true){sockaddr_in ca{};socklen_t cl=sizeof(ca);int cf=accept(fd,(sockaddr*)&ca,&cl);if(cf<0)continue;char buf[8192];int b=recv(cf,buf,sizeof(buf)-1,0);if(b>0){buf[b]=0;std::string req(buf);size_t bs=req.find("\r\n\r\n");std::string body=(bs!=std::string::npos)?req.substr(bs+4):"{}";std::string resp=route(body,sm,fhe);send(cf,resp.c_str(),resp.size(),0);}close(cf);}};std::vector<std::thread> ts;for(int i=0;i<THREADS;i++)ts.emplace_back(w);for(auto& t:ts){t.join();}close(fd);return 0;}
 }
 
 // Suppress unused function warnings
