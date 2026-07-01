@@ -210,15 +210,27 @@ openssl req -x509 -newkey rsa:4096 -keyout server.key -out server.crt -days 365 
 
 ## Security
 
+### Production Security Stack (v22.0.0)
+
+| Layer | Module | Tests | Status |
+|-------|--------|-------|--------|
+| **Authentication** | Φ-JWT (Golden Ratio JWT) | 7/7 | ✅ |
+| **Rate Limiting** | Anti-Matter v2 (Burst Detection) | 5/5 | ✅ |
+| **Memory Protection** | Memory Guard (value_int encryption) | 4/4 | ✅ |
+| **Input Validation** | Input Validator (Injection Prevention) | 8/8 | ✅ |
+| **Session Management** | Session Manager (Token-based) | 6/6 | ✅ |
+| **Audit Logging** | Audit Logger (No Plaintext) | 5/5 | ✅ |
+| **Error Handling** | Error Handler (No Stack Traces) | 5/5 | ✅ |
+
+### Cryptographic Security
+
 | Property | Mechanism |
 |----------|-----------|
 | **IND-CPA** | Golden Chaos (CTU v4) + 256-bit CSPRNG nonce |
 | **Fully Blind** | Server never evaluates (e-λ)/φ |
 | **True ZK** | fhe_store — server never sees plaintext |
 | **Post-Quantum** | Φ-PKE: 7-lane Lyapunov-Riemann Parallel (chaos-based, no known quantum speedup) |
-| **Anti-Matter** | Triple rate limiter (Phi-Spiral + 7D CML + Schumann) |
 | **Fractal ZKP** | Schnorr Σ-protocol, 7-layer recursive chain |
-| **Guardian** | Self-healing infrastructure with live system metrics |
 
 ### Attack Resistance
 
@@ -344,9 +356,19 @@ femmgFHE/
 │   │   └── lyapunov_core.h     — 7D Lyapunov CML
 │   │
 │   ├── security/                ← Security Layers
+│   │   ├── security.h          — Unified Security Module
+│   │   ├── phi_jwt.h           — Φ-JWT Authentication (7/7)
+│   │   ├── anti_matter_v2.h    — Rate Limiter (5/5)
+│   │   ├── memory_guard.h      — Memory Protection (4/4)
+│   │   ├── input_validator.h   — Input Validation (8/8)
+│   │   ├── session_manager.h   — Session Management (6/6)
+│   │   ├── audit_log.h         — Audit Logging (5/5)
+│   │   ├── error_handler.h     — Error Handling (5/5)
+│   │   ├── api_auth.h          — API Key Authentication
+│   │   ├── tls_wrapper.h       — TLS/HTTPS Support
 │   │   ├── blackhole.h         — Blackhole Security v2.0
-│   │   ├── blackhole_history.h — Per-byte chaos history persistence
-│   │   ├── antimatter.h        — Triple Anti-Matter Rate Limiter
+│   │   ├── blackhole_history.h — Per-byte chaos history
+│   │   ├── antimatter.h        — Triple Anti-Matter (legacy)
 │   │   ├── guardian.h          — Self-Healing Infrastructure
 │   │   ├── security_complete.h — Security Hardening Suite
 │   │   ├── zkp_fractal.h       — Fractal Schnorr ZKP (7-layer)
