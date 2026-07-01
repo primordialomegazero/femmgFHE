@@ -93,7 +93,7 @@ public:
     // ═══ UNOBSERVE: Reverse ζ chaos ═══
     double unobserve(double ciphertext, 
                      const std::array<double, RIEMANN_LAYERS>& history,
-                     uint64_t operation_id = 0) {
+                     uint64_t /*operation_id*/ = 0) {
         double x = ciphertext;
         
         for (int i = RIEMANN_LAYERS - 1; i >= 0; i--) {
