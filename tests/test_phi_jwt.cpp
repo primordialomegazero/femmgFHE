@@ -12,7 +12,7 @@ int main() {
     std::cout << "═══════════════════════════════════════" << std::endl;
     std::cout << std::endl;
     
-    PhiJWT jwt("test-master-secret");
+    PhiJWT jwt;  // Keyless — φ is the secret!
     int passed = 0;
     int total = 7;
     
