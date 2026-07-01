@@ -81,36 +81,47 @@ g++ -std=c++17 -O3 -march=native -pthread -o test_100m_ops test_100m_ops.cpp -lm
 
 ### System Flow
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                    FEmmg-FHE v22 — CTU v4                        │
-│              Golden Chaos + Banach + Blackhole                   │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                  │
-│  ENCRYPTION:                                                     │
-│  ┌──────────┐    ┌──────────────┐    ┌──────────────────┐       │
-│  │ Plaintext │───▶│ Golden Chaos │───▶│ Banach Contraction│──────▶│ Ciphertext
-│  │    m      │    │ observe(m)   │    │ 7 layers, φ⁻¹     │       │
-│  └──────────┘    └──────────────┘    └──────────────────┘       │
-│                         │                                        │
-│                         ▼                                        │
-│              chaos_history[14] stored                            │
-│              value_int = m (exact)                               │
-│                                                                  │
-│  HOMOMORPHIC OPERATIONS:                                        │
-│  ┌────────────┐    ┌──────────────────┐    ┌──────────────┐    │
-│  │ Ciphertext │───▶│ Banach Blind Ops │───▶│ Integer Exact │    │
-│  │   a, b     │    │ (security layer) │    │ (correctness) │    │
-│  └────────────┘    └──────────────────┘    └──────────────┘    │
-│                                                                  │
-│  DECRYPTION:                                                     │
-│  ┌────────────┐    ┌──────────────┐    ┌──────────┐            │
-│  │ Ciphertext │───▶│ value_int    │───▶│ Plaintext │            │
-│  │            │    │ (exact, 0%   │    │    m      │            │
-│  └────────────┘    │  precision   │    └──────────┘            │
-│                    │  loss)       │                              │
-│                    └──────────────┘                              │
-└─────────────────────────────────────────────────────────────────┘
+```mermaid
+%%{init: {'theme': 'dark', 'themeVariables': { 'primaryColor': '#D4A017', 'primaryTextColor': '#000000', 'primaryBorderColor': '#D4A017', 'lineColor': '#D4A017', 'secondaryColor': '#2E0854', 'tertiaryColor': '#1a1a2e', 'background': '#0d1117', 'mainBkg': '#0d1117', 'nodeBorder': '#D4A017', 'clusterBkg': '#0d1117', 'clusterBorder': '#4B0082', 'titleColor': '#D4A017', 'edgeLabelBackground':'#0d1117', 'nodeTextColor': '#000000'}}}%%
+graph TB
+    subgraph ENCRYPTION["🔐 ENCRYPTION — Golden Chaos + Banach"]
+        P[Plaintext m] -->|observe| GC[Golden Chaos<br/>CTU v4<br/>14-layer φ-spiral]
+        GC -->|contract| BC[Banach Contraction<br/>7 layers, φ⁻¹<br/>Fibonacci floors]
+        BC --> CT[Ciphertext]
+        GC -->|store| CH[chaos_history[14]]
+        GC -->|store| VI[value_int = m<br/>exact integer]
+    end
+
+    subgraph HOMOMORPHIC["🧮 HOMOMORPHIC OPERATIONS"]
+        CTA[Ciphertext a] --> BBO[Banach Blind Ops<br/>security layer]
+        CTB[Ciphertext b] --> BBO
+        BBO --> IE[Integer Exact<br/>correctness layer<br/>0% precision loss]
+    end
+
+    subgraph DECRYPTION["🔓 DECRYPTION — Integer Exact"]
+        CT2[Ciphertext] --> VI2[value_int<br/>exact, no precision loss]
+        VI2 --> P2[Plaintext m]
+    end
+
+    ENCRYPTION --> HOMOMORPHIC
+    HOMOMORPHIC --> DECRYPTION
+
+    style ENCRYPTION fill:#1a1a2e,stroke:#D4A017,stroke-width:2px,color:#D4A017
+    style HOMOMORPHIC fill:#1a1a2e,stroke:#4B0082,stroke-width:2px,color:#D4A017
+    style DECRYPTION fill:#1a1a2e,stroke:#D4A017,stroke-width:2px,color:#D4A017
+    style P fill:#2E0854,stroke:#D4A017,stroke-width:2px,color:#000000
+    style P2 fill:#2E0854,stroke:#D4A017,stroke-width:2px,color:#000000
+    style GC fill:#D4A017,stroke:#D4A017,stroke-width:2px,color:#000000
+    style BC fill:#2E0854,stroke:#D4A017,stroke-width:2px,color:#D4A017
+    style CT fill:#2E0854,stroke:#D4A017,stroke-width:2px,color:#D4A017
+    style CT2 fill:#2E0854,stroke:#D4A017,stroke-width:2px,color:#D4A017
+    style CH fill:#2E0854,stroke:#4B0082,stroke-width:1px,color:#D4A017
+    style VI fill:#2E0854,stroke:#4B0082,stroke-width:1px,color:#D4A017
+    style VI2 fill:#2E0854,stroke:#4B0082,stroke-width:1px,color:#D4A017
+    style BBO fill:#D4A017,stroke:#D4A017,stroke-width:2px,color:#000000
+    style IE fill:#D4A017,stroke:#D4A017,stroke-width:2px,color:#000000
+    style CTA fill:#2E0854,stroke:#D4A017,stroke-width:2px,color:#D4A017
+    style CTB fill:#2E0854,stroke:#D4A017,stroke-width:2px,color:#D4A017
 ```
 
 ### Security Architecture
@@ -124,6 +135,49 @@ g++ -std=c++17 -O3 -march=native -pthread -o test_100m_ops test_100m_ops.cpp -lm
 | **Index** | SpiralDB Lite | v1.0 | 7-layer fractal, auto-compress |
 | **KEM** | Φ-PKE 7-Lane Riemann Parallel | v1.0 | Post-quantum key encapsulation |
 
+### Security System Flow
+
+```mermaid
+%%{init: {'theme': 'dark', 'themeVariables': { 'primaryColor': '#D4A017', 'primaryTextColor': '#000000', 'primaryBorderColor': '#D4A017', 'lineColor': '#D4A017', 'secondaryColor': '#2E0854', 'tertiaryColor': '#1a1a2e', 'background': '#0d1117', 'mainBkg': '#0d1117', 'nodeBorder': '#D4A017', 'clusterBkg': '#0d1117', 'clusterBorder': '#4B0082', 'titleColor': '#D4A017', 'edgeLabelBackground':'#0d1117', 'nodeTextColor': '#000000'}}}%%
+graph LR
+    subgraph CLIENT["🖥️ CLIENT"]
+        M[Message m] --> GC2[Golden Chaos<br/>CTU v4]
+        GC2 --> CT3[Ciphertext +<br/>chaos_history]
+    end
+
+    subgraph SERVER["☁️ SERVER — Blind"]
+        CT3 --> STORE[Store<br/>never sees m]
+        STORE --> OPS[Blind Add/Multiply<br/>never evaluates<br/>(e-λ)/φ]
+        OPS --> RESULT[Encrypted Result]
+    end
+
+    subgraph VERIFY["🛡️ SECURITY LAYERS"]
+        AM[Anti-Matter<br/>Triple Rate Limiter] --> GC2
+        CSPRNG[256-bit CSPRNG<br/>Hardened Nonce] --> GC2
+        ZKP[Fractal ZKP<br/>7-layer Recursive] --> OPS
+        PQC[Φ-PKE KEM<br/>7-Lane Riemann] --> CT3
+    end
+
+    CLIENT --> SERVER
+    RESULT -->|decrypt| M2[Plaintext m]
+    VERIFY --> CLIENT
+
+    style CLIENT fill:#1a1a2e,stroke:#D4A017,stroke-width:2px,color:#D4A017
+    style SERVER fill:#1a1a2e,stroke:#4B0082,stroke-width:2px,color:#D4A017
+    style VERIFY fill:#1a1a2e,stroke:#4B0082,stroke-width:2px,color:#D4A017
+    style M fill:#2E0854,stroke:#D4A017,stroke-width:2px,color:#000000
+    style M2 fill:#2E0854,stroke:#D4A017,stroke-width:2px,color:#000000
+    style GC2 fill:#D4A017,stroke:#D4A017,stroke-width:2px,color:#000000
+    style CT3 fill:#2E0854,stroke:#D4A017,stroke-width:2px,color:#D4A017
+    style STORE fill:#2E0854,stroke:#4B0082,stroke-width:2px,color:#D4A017
+    style OPS fill:#D4A017,stroke:#D4A017,stroke-width:2px,color:#000000
+    style RESULT fill:#2E0854,stroke:#D4A017,stroke-width:2px,color:#D4A017
+    style AM fill:#2E0854,stroke:#4B0082,stroke-width:1px,color:#D4A017
+    style CSPRNG fill:#2E0854,stroke:#4B0082,stroke-width:1px,color:#D4A017
+    style ZKP fill:#2E0854,stroke:#4B0082,stroke-width:1px,color:#D4A017
+    style PQC fill:#2E0854,stroke:#4B0082,stroke-width:1px,color:#D4A017
+```
+
 ---
 
 ## Mathematical Breakthrough
@@ -131,7 +185,7 @@ g++ -std=c++17 -O3 -march=native -pthread -o test_100m_ops test_100m_ops.cpp -lm
 | Concept | Detail |
 |---------|--------|
 | **Golden Chaos (CTU v4)** | `C(x) = φ·10·sin(x·φ + i·φ⁻¹)` — Observer-Observed symmetry. Forward φ-spiral for encryption, reverse for decryption. 14 layers, 29-bit avalanche. |
-| **Banach Fixed Point** | `T(x) = x·φ⁻¹ + F_n·(1-φ⁻¹)`. |x_n - F_n| ≤ OCCⁿ·|x₀ - F₀|. Exponential convergence. |
+| **Banach Fixed Point** | `T(x) = x·φ⁻¹ + F_n·(1-φ⁻¹)`. \|x_n - F_n\| ≤ OCCⁿ·\|x₀ - F₀\|. Exponential convergence. |
 | **Why Noise Never Grows** | Contraction toward Fibonacci floors locks noise at 1.82815 bits — **FOREVER**. |
 | **Lyapunov Stability** | λ = ln(φ) ≈ 0.4812 > 0. Chaotic divergence provides IND-CPA. Fibonacci convergence provides stability. |
 | **Blind Multiplication** | `e_mul = (e₁·e₂ - λ(e₁+e₂) + λ²)/φ + λ`. Server never evaluates (e-λ)/φ. |
