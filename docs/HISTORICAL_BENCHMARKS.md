@@ -12,13 +12,13 @@
 |------|-----------|------|------|-----|-------|----------|
 | 100M Mixed | 100M | Add+Multiply | 532s | 187,917 (-O0) | 1.83 | 100% |
 | 100 Billion Mixed | 100B | Add+Multiply | 1,532s | 65.3M (-O3) | 1.83 | 100% |
-| 1 Trillion | 1T | Add only | 15,241s | 65.6M (-O3) | 1.83 | 100% |
+| 1 Trillion | 1T | Add only | 15,241s | 65.6M (-O3) | 1.83 | 100% | [📄 log](logs/1t_ops.log) |
 
 ## CTU v3 (Floating-Integer Merge) — June 30, 2026
 
 | Test | Operations | Type | Time | TPS | Noise | Accuracy |
 |------|-----------|------|------|-----|-------|----------|
-| 10 Billion | 10B | Add only | 460s | 21.7M (-O3) | 1.83 | 99.99999999% |
+| 10 Billion | 10B | Add only | 460s | 21.7M (-O3) | 1.83 | 99.99999999% | [📄 log](logs/10b_ops.log) |
 | Extreme Deep | 1B | Add only | 28s | 34M (-O3) | 1.83 | 99.9999978% |
 | Deep Circuit | 10M | Add only | 0.3s | 33M (-O3) | 1.83 | 100% |
 

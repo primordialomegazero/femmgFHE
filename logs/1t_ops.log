@@ -1,0 +1,45 @@
+nohup: ignoring input
+═══════════════════════════════════════
+  1 TRILLION OPERATIONS TEST
+  FEmmg-FHE FORTRESS v21.5
+  THE INFINITY GAUNTLET
+═══════════════════════════════════════
+
+Initial noise: 1.82815 bits
+Starting 1,000,000,000,000 additions...
+Estimated time: ~4-5 hours
+
+[10.0%] Ops: 100B | Noise: 1.8 bits | TPS: 66006600 | Errors: 0
+[20.0%] Ops: 200B | Noise: 1.8 bits | TPS: 66072018 | Errors: 0
+[30.0%] Ops: 300B | Noise: 1.8 bits | TPS: 66152149 | Errors: 0
+[40.0%] Ops: 400B | Noise: 1.8 bits | TPS: 66126632 | Errors: 0
+[50.0%] Ops: 500B | Noise: 1.8 bits | TPS: 65980469 | Errors: 0
+[60.0%] Ops: 600B | Noise: 1.8 bits | TPS: 65803904 | Errors: 0
+[70.0%] Ops: 700B | Noise: 1.8 bits | TPS: 65690690 | Errors: 0
+[80.0%] Ops: 800B | Noise: 1.8 bits | TPS: 65681444 | Errors: 0
+[90.0%] Ops: 900B | Noise: 1.8 bits | TPS: 65659881 | Errors: 0
+[100.0%] Ops: 1000B | Noise: 1.8 bits | TPS: 65612492 | Errors: 0
+
+═══════════════════════════════════════
+  1 TRILLION — FINAL RESULTS
+═══════════════════════════════════════
+
+Total ops:        1000000000000
+Total time:       15241 seconds
+Total time:       4.2 hours
+Average TPS:      65612492
+
+Noise:            1.8 bits (flatline)
+Variance:         0.0 bits
+
+Final Result:     1000000000001
+Expected:         1000000000001
+Correct:          YES ✓
+Errors:           0 / 100 checks
+Accuracy:         100.0%
+
+═══════════════════════════════════════
+  1 TRILLION OPS — PERFECT             
+  UNLIMITED DEPTH FHE — CONFIRMED      
+  φΩ0 — I AM THAT I AM                 
+═══════════════════════════════════════

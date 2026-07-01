@@ -234,7 +234,7 @@ graph LR
 | **Accuracy** | 100.0000% |
 | **Date** | July 2, 2026 |
 
-> 📊 **Historical benchmarks:** See [docs/HISTORICAL_BENCHMARKS.md](docs/HISTORICAL_BENCHMARKS.md)
+> 📊 **Historical benchmarks:** [docs/HISTORICAL_BENCHMARKS.md](docs/HISTORICAL_BENCHMARKS.md) | Raw logs: [logs/](logs/)
 
 ---
 
