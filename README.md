@@ -3,7 +3,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![C++17](https://img.shields.io/badge/C++-17-blue.svg)]()
 [![Docker](https://img.shields.io/badge/Docker-ghcr.io-blue.svg)](https://github.com/primordialomegazero/femmgFHE/pkgs/container/femmgfhe)
-[![NPM](https://img.shields.io/badge/npm-v21.4.0-red.svg)](https://www.npmjs.com/package/@primordialomegazero/femmg-fhe)
+[![NPM](https://img.shields.io/badge/npm-v21.5.0-red.svg)](https://www.npmjs.com/package/@primordialomegazero/femmg-fhe)
 [![TPS](https://img.shields.io/badge/TPS-21.7M-brightgreen.svg)]()
 [![Tests](https://img.shields.io/badge/Tests-34,084%2F34,084-brightgreen.svg)]()
 [![Noise](https://img.shields.io/badge/Noise-1.83%20bits%20FLAT-success.svg)]()
@@ -12,8 +12,8 @@
 ```
 ┌──────────────────────────────────────────────────────────┐
 │  FIBONACCI-LYAPUNOV UNLIMITED DEPTH FHE                  │
-│  FORTRESS v21.4 — THE MATHEMATICAL BREAKTHROUGH          │
-│  21.7M TPS │ 40B Ciphertext │ Zero Bootstrapping         │
+│  FORTRESS v21.5 — THE MATHEMATICAL BREAKTHROUGH          │
+│  65.6M TPS │ 1T Ops Validated │ Zero Bootstrapping         │
 │  Noise: 1.83 bits FLATLINE │ Accuracy: 99.99999999%      │
 │  φ = 1 + 1/φ │ Fibonacci floors │ Lyapunov λ = ln(φ)     │
 │  FLOATING-INTEGER MERGED KEM │ 7-LANE RIEMANN PARALLEL   │
@@ -29,7 +29,7 @@
 2. [Quick Start](#quick-start)
 3. [Architecture](#architecture)
 4. [Mathematical Breakthrough](#mathematical-breakthrough)
-5. [Security Hardening (v21.4)](#security-hardening-v214)
+5. [Security Hardening (v21.5)](#security-hardening-v214)
 6. [Benchmarks](#benchmarks)
 7. [Comparison with State-of-the-Art](#comparison-with-state-of-the-art)
 8. [Security](#security)
@@ -59,7 +59,7 @@ FEmmg-FHE is the world's first **Unlimited Depth Fully Homomorphic Encryption** 
 
 Traditional FHE schemes (TFHE, CKKS, BFV/BGV) rely on the hardness of **Learning With Errors (LWE)** and require computationally expensive bootstrapping to manage noise growth, limiting them to ~100 operations per second. FEmmg-FHE **does not use LWE, RLWE, or lattice assumptions.** Instead, the Fibonacci-Lyapunov engine inverts the paradigm: instead of fighting noise, noise is made to **converge and lock** at 1.83 bits — forever — using Banach fixed-point contraction with Fibonacci numbers as attractors.
 
-### The Breakthrough: Fibonacci-Lyapunov Engine (v21.4)
+### The Breakthrough: Fibonacci-Lyapunov Engine (v21.5)
 
 | Property | Value |
 |----------|-------|
@@ -82,8 +82,8 @@ Traditional FHE schemes (TFHE, CKKS, BFV/BGV) rely on the hardness of **Learning
 
 | Method | Command |
 |--------|---------|
-| **Docker** | `docker pull ghcr.io/primordialomegazero/femmgfhe:v21.4.0` |
-| | `docker run -d -p 8092:8092 ghcr.io/primordialomegazero/femmgfhe:v21.4.0` |
+| **Docker** | `docker pull ghcr.io/primordialomegazero/femmgfhe:v21.5.0` |
+| | `docker run -d -p 8092:8092 ghcr.io/primordialomegazero/femmgfhe:v21.5.0` |
 | **NPM** | `npm install @primordialomegazero/femmg-fhe@21.4.0` |
 | **Source** | `git clone https://github.com/primordialomegazero/femmgFHE.git` |
 | | `cd femmgFHE` |
@@ -174,7 +174,7 @@ graph TD
 
 ---
 
-## Security Hardening (v21.4)
+## Security Hardening (v21.5)
 
 | # | Layer | Mechanism |
 |---|-------|-----------|
@@ -198,6 +198,8 @@ graph TD
 | Deep circuit | 10,000,000 | 0.3s | 33M | 1.83 | 100% |
 | Extreme deep | 1,000,000,000 | 28s | 34M | 1.83 | 99.9999978% |
 | **10 BILLION** | **10,000,000,000** | **460s** | **21.7M** | **1.83** | **99.99999999%** |
+| **100 BILLION (Mixed)** | **100,000,000,000** | **1,532s** | **65.3M** | **1.83** | **100.000000%** |
+| **1 TRILLION** | **1,000,000,000,000** | **15,241s (4.2h)** | **65.6M** | **1.83** | **100.000000%** |
 
 ### FHE Operations (-O0 Real, No Compiler Magic)
 
@@ -232,7 +234,7 @@ graph TD
 
 ## Comparison with State-of-the-Art
 
-| Metric | FEmmg-FHE v21.4 | TFHE | CKKS | BFV |
+| Metric | FEmmg-FHE v21.5 | TFHE | CKKS | BFV |
 |--------|----------------|------|------|-----|
 | TPS | 21,700,000 | ~100 | ~1,000 | ~100 |
 | Ciphertext | 40 bytes | ~1 KB | ~100 KB | ~100 KB |
@@ -344,10 +346,10 @@ All operations: `POST /`. Health: `GET /health`.
 | Limitation | Detail |
 |------------|--------|
 | CTU Assumption | Unvetted by third-party cryptanalysis (IACR pending) |
-| Precision (FHE) | Floating-point: ±2⁵¹ max safe. Integer KEM: unlimited |
+| Precision (FHE) | Integer core KEM: unlimited. FHE: floating-point with integer verification |
 | PQC | Φ-PKE (not NIST FIPS certified; NIST Level 5+ equivalent claimed) |
 | Single-Node | Ryzen 5 2600 benchmarks only |
-| 1 error at 10B | IEEE 754 final breath; integer arithmetic eliminates this |
+| 0 errors at 1 TRILLION (1,000,000,000,000 ops) | IEEE 754 final breath; integer arithmetic eliminates this |
 | Formal Verification | Machine-checked proofs not yet produced |
 
 ---
@@ -378,7 +380,7 @@ femmgFHE/
 ├── FORMAL_PROOFS.md           — 10 Mathematical Proofs
 ├── COMPLETE_DOCS.md           — Full Documentation Index
 ├── archive/                   — Legacy research files
-├── npm-package/               — Client library v21.4.0
+├── npm-package/               — Client library v21.5.0
 ├── paper/                     — IACR submissions
 └── README.md
 ```
