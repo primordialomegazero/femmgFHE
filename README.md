@@ -237,6 +237,7 @@ graph LR
 | **Errors** | 0 / 100 checks |
 | **Accuracy** | 100.0000% |
 | **Compiler** | GCC 11.4.0, -O0 (no compiler magic) |
+| **Date** | July 1, 2026 |
 
 ### -O0 Operations Breakdown
 
@@ -249,14 +250,14 @@ graph LR
 
 ### Historical Benchmarks (All Verified)
 
-| Test | Operations | Time | TPS | Noise | Accuracy |
-|------|-----------|------|-----|-------|----------|
-| Standard Suite | 34,084 | <1s | 5.0M | 1.83 | 100% |
-| Deep Circuit | 10M | 0.3s | 33M | 1.83 | 100% |
-| Extreme Deep | 1B | 28s | 34M | 1.83 | 99.9999978% |
-| 10 Billion | 10B | 460s | 21.7M | 1.83 | 99.99999999% |
-| 100 Billion Mixed | 100B | 1,532s | 65.3M | 1.83 | 100% |
-| **1 Trillion** | **1T** | **15,241s (4.2h)** | **65.6M** | **1.83** | **100%** |
+| Test | Operations | Type | Time | TPS | Noise | Accuracy | Date |
+|------|-----------|------|------|-----|-------|----------|------|
+| Standard Suite | 34,084 | Encrypt+Add+Decrypt | <1s | 5.0M | 1.83 | 100% | Jun 2026 |
+| Deep Circuit | 10M | Add only (single ct) | 0.3s | 33M | 1.83 | 100% | Jun 2026 |
+| Extreme Deep | 1B | Add only (single ct) | 28s | 34M | 1.83 | 99.9999978% | Jun 2026 |
+| 10 Billion | 10B | Add only (single ct) | 460s | 21.7M | 1.83 | 99.99999999% | Jun 30, 2026 |
+| 100 Billion Mixed | 100B | Add + Multiply alternating | 1,532s | 65.3M | 1.83 | 100% | Jul 1, 2026 |
+| **1 Trillion** | **1T** | **Add only (single ct)** | **15,241s (4.2h)** | **65.6M** | **1.83** | **100%** | **Jul 1, 2026** |
 
 ---
 
