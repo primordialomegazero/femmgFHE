@@ -12,7 +12,7 @@
 ```
 ╔══════════════════════════════════════════════════════════════╗
 ║  FIBONACCI-LYAPUNOV UNLIMITED DEPTH FHE                      ║
-║  FORTRESS v22.0 — CTU v4 GOLDEN CHAOS                        ║
+║  FORTRESS v22.0 — CTU v4 GOLDEN CHAOS [REFACTORED]                        ║
 ║  187K TPS (-O0) │ 100M Mixed Ops │ 1T Addition Ops            ║
 ║  Noise: 1.83 bits FLATLINE │ Accuracy: 100%                  ║
 ║  φ = 1 + 1/φ │ Fibonacci Floors │ Lyapunov λ = ln(φ)         ║
@@ -313,30 +313,54 @@ All operations: `POST /`. Health: `GET /health`.
 
 ```
 femmgFHE/
+├── include/
+│   └── femmg_fhe.h              ← Single entry point for users
+│
 ├── src/
-│   ├── banach_engine.h        — Fibonacci-Lyapunov Banach Engine
-│   ├── femmg_fhe.h            — Core FHE (expand/contract)
-│   ├── femmg_blackhole.h      — FEmmg-Blackhole Integration (CTU v4)
-│   ├── golden_chaos.h         — Golden Chaos Engine (Observer-Observed)
-│   ├── blackhole_fhe.h        — Blackhole Security Module
-│   ├── blackhole_fixed.h      — Blackhole Per-Byte Chaos History
-│   ├── spiral_db_lite.h       — SpiralDB Lite (7-layer fractal index)
-│   ├── lyapunov_core.h        — 7D Lyapunov CML
-│   ├── security_complete.h    — Security Hardening Suite
-│   ├── phi_parallel_kem.h     — 7-Lane Lyapunov-Riemann Parallel KEM
-│   ├── phi_algo_merge.h       — Spiralkem + Φ-SIG Merge
-│   ├── antimatter.h           — Triple Anti-Matter Rate Limiter
-│   ├── guardian.h             — Self-Healing Infrastructure
-│   ├── zkp_fractal.h          — Fractal Schnorr ZKP
-│   ├── zkp_pqc.h              — Post-Quantum KEM + Sign + ZKP
-│   ├── riemann_zeta.h         — Riemann-Siegel Z(t)
-│   ├── femmg_server.cpp       — Enterprise API Server
-│   └── test_suite.cpp         — 34,084-Test Harness
-├── src/ctu4/                  — CTU v4 Source Files
-├── npm-package/               — Client library v22.0.0
-├── paper/                     — IACR submissions
-├── FORMAL_PROOFS.md           — 10 Mathematical Proofs
-└── README.md
+│   ├── core/                    ← Core FHE Engine
+│   │   ├── banach_engine.h     — Banach contraction (7D, 7 layers)
+│   │   ├── femmg_operations.h  — Encrypt, decrypt, add, multiply
+│   │   ├── phi_stack.h         — Unified Φ-Stack pipeline
+│   │   └── metaprogram.h       — Multi-metaprogramming engine
+│   │
+│   ├── chaos/                   ← CTU v4 Chaos Engines
+│   │   ├── golden_chaos.h      — Golden Chaos (Observer-Observed)
+│   │   └── lyapunov_core.h     — 7D Lyapunov CML
+│   │
+│   ├── security/                ← Security Layers
+│   │   ├── blackhole.h         — Blackhole Security v2.0
+│   │   ├── blackhole_history.h — Per-byte chaos history persistence
+│   │   ├── antimatter.h        — Triple Anti-Matter Rate Limiter
+│   │   ├── guardian.h          — Self-Healing Infrastructure
+│   │   ├── security_complete.h — Security Hardening Suite
+│   │   ├── zkp_fractal.h       — Fractal Schnorr ZKP (7-layer)
+│   │   └── zkp_pqc.h           — Post-Quantum KEM + Sign + ZKP
+│   │
+│   ├── kem/                     ← Key Encapsulation
+│   │   ├── phi_parallel_kem.h  — Φ-PKE: 7-Lane Riemann Parallel
+│   │   └── phi_algo_merge.h    — Spiralkem + Φ-SIG Merge
+│   │
+│   ├── storage/                 ← Data Persistence
+│   │   └── spiral_db_lite.h    — SpiralDB Lite (7-layer fractal index)
+│   │
+│   ├── math/                    ← Mathematical Utilities
+│   │   ├── phi_constants.h     — φ, OCC, λ constants
+│   │   ├── riemann_zeta.h      — Riemann-Siegel Z(t) function
+│   │   ├── riemann_zeros.h     — 200 high-precision zeros (Odlyzko)
+│   │   └── riemann_deep.h      — Deep Riemann analysis
+│   │
+│   └── server/                  ← API Server
+│       └── femmg_server.cpp    — Enterprise API (12-thread pool)
+│
+├── tests/                       ← Test Suite
+│   ├── test_100m_ops.cpp       — 100M mixed ops benchmark
+│   └── test_suite.cpp          — 34,084-test harness
+│
+├── npm-package/                ← NPM Distribution (v22.0.0)
+├── paper/                      ← IACR Submissions
+├── FORMAL_PROOFS.md            ← 10 Mathematical Proofs
+├── Dockerfile                  ← Container Build
+└── README.md                   ← This file
 ```
 
 ---
