@@ -35,8 +35,7 @@
 8. [API Reference](#api-reference)
 9. [Honest Limitations](#honest-limitations)
 10. [Source Tree](#source-tree)
-11. [Related Projects](#related-projects)
-12. [Author](#author)
+11. [Author](#author)
 
 ---
 
@@ -85,22 +84,22 @@ g++ -std=c++17 -O3 -march=native -pthread -o test_100m_ops test_100m_ops.cpp -lm
 %%{init: {'theme': 'dark', 'themeVariables': { 'primaryColor': '#D4A017', 'primaryTextColor': '#000000', 'primaryBorderColor': '#D4A017', 'lineColor': '#D4A017', 'secondaryColor': '#2E0854', 'tertiaryColor': '#1a1a2e', 'background': '#0d1117', 'mainBkg': '#0d1117', 'nodeBorder': '#D4A017', 'clusterBkg': '#0d1117', 'clusterBorder': '#4B0082', 'titleColor': '#D4A017', 'edgeLabelBackground':'#0d1117', 'nodeTextColor': '#000000'}}}%%
 graph TB
     subgraph ENCRYPTION["🔐 ENCRYPTION — Golden Chaos + Banach"]
-        P[Plaintext m] -->|observe| GC[Golden Chaos<br/>CTU v4<br/>14-layer φ-spiral]
-        GC -->|contract| BC[Banach Contraction<br/>7 layers, φ⁻¹<br/>Fibonacci floors]
-        BC --> CT[Ciphertext]
-        GC -->|store| CH[chaos_history[14]]
-        GC -->|store| VI[value_int = m<br/>exact integer]
+        P["Plaintext m"] -->|observe| GC["Golden Chaos<br/>CTU v4<br/>14-layer phi-spiral"]
+        GC -->|contract| BC["Banach Contraction<br/>7 layers, phi inverse<br/>Fibonacci floors"]
+        BC --> CT["Ciphertext"]
+        GC -->|store| CH["chaos history<br/>14 values"]
+        GC -->|store| VI["value int = m<br/>exact integer"]
     end
 
     subgraph HOMOMORPHIC["🧮 HOMOMORPHIC OPERATIONS"]
-        CTA[Ciphertext a] --> BBO[Banach Blind Ops<br/>security layer]
-        CTB[Ciphertext b] --> BBO
-        BBO --> IE[Integer Exact<br/>correctness layer<br/>0% precision loss]
+        CTA["Ciphertext a"] --> BBO["Banach Blind Ops<br/>security layer"]
+        CTB["Ciphertext b"] --> BBO
+        BBO --> IE["Integer Exact<br/>correctness layer<br/>0 percent precision loss"]
     end
 
     subgraph DECRYPTION["🔓 DECRYPTION — Integer Exact"]
-        CT2[Ciphertext] --> VI2[value_int<br/>exact, no precision loss]
-        VI2 --> P2[Plaintext m]
+        CT2["Ciphertext"] --> VI2["value int<br/>exact, no precision loss"]
+        VI2 --> P2["Plaintext m"]
     end
 
     ENCRYPTION --> HOMOMORPHIC
@@ -141,25 +140,25 @@ graph TB
 %%{init: {'theme': 'dark', 'themeVariables': { 'primaryColor': '#D4A017', 'primaryTextColor': '#000000', 'primaryBorderColor': '#D4A017', 'lineColor': '#D4A017', 'secondaryColor': '#2E0854', 'tertiaryColor': '#1a1a2e', 'background': '#0d1117', 'mainBkg': '#0d1117', 'nodeBorder': '#D4A017', 'clusterBkg': '#0d1117', 'clusterBorder': '#4B0082', 'titleColor': '#D4A017', 'edgeLabelBackground':'#0d1117', 'nodeTextColor': '#000000'}}}%%
 graph LR
     subgraph CLIENT["🖥️ CLIENT"]
-        M[Message m] --> GC2[Golden Chaos<br/>CTU v4]
-        GC2 --> CT3[Ciphertext +<br/>chaos_history]
+        M["Message m"] --> GC2["Golden Chaos<br/>CTU v4"]
+        GC2 --> CT3["Ciphertext plus<br/>chaos history"]
     end
 
     subgraph SERVER["☁️ SERVER — Blind"]
-        CT3 --> STORE[Store<br/>never sees m]
-        STORE --> OPS[Blind Add/Multiply<br/>never evaluates<br/>(e-λ)/φ]
-        OPS --> RESULT[Encrypted Result]
+        CT3 --> STORE["Store<br/>never sees m"]
+        STORE --> OPS["Blind Add/Multiply<br/>never evaluates<br/>decryption function"]
+        OPS --> RESULT["Encrypted Result"]
     end
 
     subgraph VERIFY["🛡️ SECURITY LAYERS"]
-        AM[Anti-Matter<br/>Triple Rate Limiter] --> GC2
-        CSPRNG[256-bit CSPRNG<br/>Hardened Nonce] --> GC2
-        ZKP[Fractal ZKP<br/>7-layer Recursive] --> OPS
-        PQC[Φ-PKE KEM<br/>7-Lane Riemann] --> CT3
+        AM["Anti-Matter<br/>Triple Rate Limiter"] --> GC2
+        CSPRNG["256-bit CSPRNG<br/>Hardened Nonce"] --> GC2
+        ZKP["Fractal ZKP<br/>7-layer Recursive"] --> OPS
+        PQC["Phi-PKE KEM<br/>7-Lane Riemann"] --> CT3
     end
 
     CLIENT --> SERVER
-    RESULT -->|decrypt| M2[Plaintext m]
+    RESULT -->|decrypt| M2["Plaintext m"]
     VERIFY --> CLIENT
 
     style CLIENT fill:#1a1a2e,stroke:#D4A017,stroke-width:2px,color:#D4A017
@@ -338,19 +337,6 @@ femmgFHE/
 ├── FORMAL_PROOFS.md           — 10 Mathematical Proofs
 └── README.md
 ```
-
----
-
-## Related Projects
-
-| Project | Description |
-|---------|-------------|
-| **Spiralkem-FHE** | Pure-φ Post-Quantum KEM (128B ciphertext) |
-| **SchupyFHE** | Earth-Frequency FHE (Schumann 7.83 Hz) |
-| **SpiralDB** | Double Mirror Encrypted Database |
-| **pozDF-FHE** | Flagship: FHE + 8 PQC + ZKP |
-| **Φ-SIG** | Golden Ratio Keyless Signatures |
-| **UnifiedFHE** | All-in-One Φ-Stack Pipeline |
 
 ---
 
