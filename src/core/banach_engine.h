@@ -40,7 +40,7 @@
 #include <array>
 #include <atomic>
 #include "../security/blackhole.h"
-#include "../chaos/golden_chaos.h"
+#include "../chaos/triple_rashomon.h"
 #include "../security/memory_guard.h"
 #include <algorithm>
 
