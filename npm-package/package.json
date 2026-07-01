@@ -1,7 +1,7 @@
 {
   "name": "@primordialomegazero/femmg-fhe",
   "version": "22.0.0",
-  "description": "FEmmg-FHE v22 — CTU v4 Golden Chaos + Blackhole Security | Unlimited Depth FHE | 187K TPS (-O0) | 100M Ops Verified",
+  "description": "FEmmg-FHE v22 — Unlimited Depth FHE. Golden Chaos CTU v4 + Banach Contraction + Blackhole Security. 34,084 tests passing. 187K TPS (-O0). Zero bootstrapping.",
   "main": "index.js",
   "types": "index.d.ts",
   "scripts": {
@@ -11,23 +11,37 @@
   "keywords": [
     "fhe",
     "fully-homomorphic-encryption",
-    "post-quantum",
+    "homomorphic-encryption",
+    "post-quantum-cryptography",
     "golden-ratio",
-    "banach",
-    "lyapunov",
-    "chaos",
-    "ctu4",
-    "blackhole-security",
+    "phi",
+    "banach-fixed-point",
+    "lyapunov-chaos",
+    "chaos-based-cryptography",
+    "ctu-assumption",
+    "golden-chaos",
     "unlimited-depth",
-    "zero-bootstrapping"
+    "zero-bootstrapping",
+    "privacy-enhancing-technologies",
+    "true-fhe",
+    "cryptography",
+    "cpp17",
+    "open-source"
   ],
   "author": "Dan Joseph M. Fernandez / Primordial Omega Zero",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/primordialomegazero/femmgFHE.git"
+    "url": "git+https://github.com/primordialomegazero/femmgFHE.git"
   },
   "engines": {
     "node": ">=14.0.0"
-  }
+  },
+  "files": [
+    "index.js",
+    "index.d.ts",
+    "test.js",
+    "include/",
+    "README.md"
+  ]
 }

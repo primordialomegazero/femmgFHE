@@ -1,18 +1,20 @@
 FROM alpine:latest
+LABEL org.opencontainers.image.title="FEmmg-FHE v22"
+LABEL org.opencontainers.image.description="Unlimited Depth FHE — Golden Chaos CTU v4 + Banach Contraction + Blackhole Security"
+LABEL org.opencontainers.image.authors="Dan Joseph M. Fernandez / Primordial Omega Zero"
+LABEL org.opencontainers.image.version="22.0.0"
+LABEL org.opencontainers.image.url="https://github.com/primordialomegazero/femmgFHE"
+
 RUN apk add --no-cache g++ make libc-dev openssl-dev
 WORKDIR /app
-COPY . ./
+COPY . .
 
-# Create inline test
-RUN echo '#include "src/femmg_blackhole.h"' > test.cpp
-RUN echo '#include <iostream>' >> test.cpp
-RUN echo 'int main() {' >> test.cpp
-RUN echo '  femmg_blackhole::FEmmgBlackhole fhe;' >> test.cpp
-RUN echo '  auto ct = fhe.encrypt(42, 0x9E3779B97F4A7C15ULL);' >> test.cpp
-RUN echo '  int64_t d = fhe.decrypt(ct);' >> test.cpp
-RUN echo '  std::cout << "FEmmg-BLACKHOLE v22: " << (d == 42 ? "✅ WORKING" : "❌ FAIL") << std::endl;' >> test.cpp
-RUN echo '  return d == 42 ? 0 : 1;' >> test.cpp
-RUN echo '}' >> test.cpp
+# Compile server
+RUN g++ -std=c++17 -O3 -march=native -pthread -o femmg_server src/server/femmg_server.cpp -lm -lssl -lcrypto
 
-RUN g++ -std=c++17 -O3 -march=native -pthread -o femmg_blackhole test.cpp -lm -lssl -lcrypto
-CMD ["./femmg_blackhole"]
+# Compile benchmark
+RUN g++ -std=c++17 -O3 -march=native -pthread -o test_100m_ops tests/test_100m_ops.cpp -lm -lssl -lcrypto
+
+# Default: run server
+EXPOSE 8092
+CMD ["./femmg_server"]

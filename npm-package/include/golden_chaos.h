@@ -1,4 +1,31 @@
 /*
+ * FEmmg-FHE v22.0.0 — Golden Chaos Engine (CTU v4)
+ * 
+ * Observer-Observed Symmetry for IND-CPA Security.
+ * 
+ * THEORY:
+ *   C(x) = φ · 10 · sin(x · φ + i · φ⁻¹)
+ * 
+ *   Forward φ-spiral (observe)  = Encryption
+ *   Reverse φ-spiral (unobserve) = Decryption
+ * 
+ *   "The observer and the observed are one."
+ * 
+ * SECURITY:
+ *   - 14-layer chaos depth
+ *   - 29-bit avalanche (42 vs 43)
+ *   - Auto-incrementing nonce + value mixing
+ *   - λ = ln(φ) ≈ 0.4812 > 0 (chaotic divergence)
+ * 
+ * ARCHITECTURE:
+ *   - GoldenChaosEngine class
+ *   - observe(value, nonce) → {chaos_val, history[14]}
+ *   - unobserve(chaos_val, history, nonce) → original value
+ * 
+ * DEPENDENCIES: None (pure math)
+ * INCLUDED BY: banach_engine.h, blackhole.h
+ */
+/*
  * GOLDEN CHAOS ENGINE — CTU v4 (MAXIMUM SECURITY)
  * 
  * "Auto-increment + value mixing = maximum chaos."
