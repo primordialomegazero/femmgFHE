@@ -192,14 +192,14 @@ graph TD
 
 ### FHE Operations (-O3 Optimized)
 
-| Test | Operations | Time | TPS | Noise | Accuracy |
-|------|-----------|------|-----|-------|----------|
-| Standard suite | 34,084 | <1s | 5.0M | 1.83 | 100% |
-| Deep circuit | 10,000,000 | 0.3s | 33M | 1.83 | 100% |
-| Extreme deep | 1,000,000,000 | 28s | 34M | 1.83 | 99.9999978% |
-| **10 BILLION** | **10,000,000,000** | **460s** | **21.7M** | **1.83** | **99.99999999%** |
-| **100 BILLION (Mixed)** | **100,000,000,000** | **1,532s** | **65.3M** | **1.83** | **100.000000%** |
-| **1 TRILLION** | **1,000,000,000,000** | **15,241s (4.2h)** | **65.6M** | **1.83** | **100.000000%** |
+| Test | Operations | Time | TPS | Noise | Accuracy | Type |
+|------|-----------|------|-----|-------|----------|------|
+| Standard suite | 34,084 | <1s | 5.0M | 1.83 | 100% | Encrypt+Add+Decrypt |
+| Deep circuit | 10,000,000 | 0.3s | 33M | 1.83 | 100% | Add only (single ct) |
+| Extreme deep | 1,000,000,000 | 28s | 34M | 1.83 | 99.9999978% | Add only (single ct) |
+| **10 BILLION** | **10,000,000,000** | **460s** | **21.7M** | **1.83** | **99.99999999%** | **Add only (single ct)** |
+| **100 BILLION** | **100,000,000,000** | **1,532s** | **65.3M** | **1.83** | **100%** | **Add + Multiply alternating** |
+| **1 TRILLION** | **1,000,000,000,000** | **15,241s (4.2h)** | **65.6M** | **1.83** | **100%** | **Add only (single ct)** |
 
 ### FHE Operations (-O0 Real, No Compiler Magic)
 
