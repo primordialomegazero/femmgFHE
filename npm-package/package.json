@@ -1,7 +1,7 @@
 {
   "name": "@primordialomegazero/femmg-fhe",
-  "version": "22.1.2",
-  "description": "FEmmg-FHE v22.1.2 — CTU v5 Triple Rashomon + Φ-TLS + SSS Error Handler. 32B avalanche. Quantum-resistant.",
+  "version": "22.2.0",
+  "description": "FEmmg-FHE v22.2 — CTU v5.2 Quintuple Rashomon. 5 engines, 25 layers, 276B avalanche. Quantum-resistant.",
   "main": "index.js",
   "types": "index.d.ts",
   "scripts": {
