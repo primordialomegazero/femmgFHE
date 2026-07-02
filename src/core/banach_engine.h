@@ -53,10 +53,10 @@ class NDimBanachEngine {
     double pert_table[DIMS][DEPTH][PARTIES];
     memory_guard::MemoryGuard mem_guard_;
     bool memory_protection_ = false;
-    triple_rashomon::TripleRashomonEngine chaos_;
-    void_engine::VoidEngine void_;
-    butterfly_snowball::ButterflySnowballEngine butterfly_;
-    white_manipulation::WhiteManipulationEngine white_magic_;
+    mmca::MultiModalChaosAmp mmca_;
+    zsci::ZeroSeedChaosInit zsci_;
+    lca::LorenzPhiCascade lca_;
+    aers::AttackEnergyRecapture aers_;
 
     static double fibonacci_floor(int layer) {
         return (double)FIBONACCI[layer % 20] * PHI / 10.0 + 1.0;
@@ -163,14 +163,14 @@ class NDimBanachEngine {
 
 public:
     NDimBanachEngine() { build_perturbation_table(); }
-    void set_chaos_nonce(uint64_t nonce) { chaos_.set_nonce(nonce); }
+    void set_chaos_nonce(uint64_t nonce) { mmca_.set_nonce(nonce); }
 
     // ═══ VOID ENGINE ACCESS ═══
-    void set_void_nonce(uint64_t n) { chaos_.set_void_nonce(n); }
-    uint64_t get_void_nonce() const { return chaos_.get_void_nonce(); }
-    static double void_avalanche() { return void_engine::VoidEngine::avalanche_amplification(); }
+    void set_zsci_nonce(uint64_t n) { mmca_.set_zsci_nonce(n); }
+    uint64_t get_zsci_nonce() const { return mmca_.get_zsci_nonce(); }
+    static double void_avalanche() { return zsci::ZeroSeedChaosInit::avalanche_amplification(); }
 
-    uint64_t get_chaos_nonce() const { return chaos_.get_nonce(); }
+    uint64_t get_chaos_nonce() const { return mmca_.get_nonce(); }
     void enable_memory_protection(uint64_t seed) { mem_guard_.init(seed); memory_protection_ = true; }
     void disable_memory_protection() { mem_guard_.wipe(); memory_protection_ = false; }
 
@@ -180,9 +180,9 @@ public:
         uint64_t random_iv = generate_iv();
         ct.random_iv = random_iv;
         uint64_t op_id = op_counter.fetch_add(1);
-        uint64_t engine_nonce = chaos_.get_nonce();
+        uint64_t engine_nonce = mmca_.get_nonce();
         double original_expanded = (double)m * PHI + LAMBDA + (double)(random_iv & 0xFFFF) * 1e-10;
-        auto [chaos_val, chaos_hist] = chaos_.observe(original_expanded, op_id ^ random_iv);
+        auto [chaos_val, chaos_hist] = mmca_.observe(original_expanded, op_id ^ random_iv);
         uint64_t chaos_key = derive_chaos_key(chaos_val, chaos_hist, engine_nonce ^ op_id ^ random_iv);
         ct.value_int = (m * FP_SCALE) ^ static_cast<int64_t>(chaos_key);
         ct.operations = chaos_key ^ engine_nonce;
@@ -222,7 +222,7 @@ public:
 
         int64_t decrypt(const NDimCiphertext& ct) const {
         time_manipulator::global_time().obfuscate();
-        uint64_t engine_nonce = chaos_.get_nonce();
+        uint64_t engine_nonce = mmca_.get_nonce();
         uint64_t chaos_key = ct.operations ^ engine_nonce;
         int64_t val = ct.value_int ^ static_cast<int64_t>(chaos_key);
         if (memory_protection_) val = mem_guard_.decrypt(val);
@@ -234,7 +234,7 @@ public:
     }
 
     uint64_t recover_chaos_key(const NDimCiphertext& ct) const {
-        return ct.operations ^ chaos_.get_nonce();
+        return ct.operations ^ mmca_.get_nonce();
     }
 
     void recontract_dim0(NDimCiphertext& ct) const {
@@ -261,7 +261,7 @@ public:
         
         // Outer layer: encrypt inner.value_int directly (it's already scaled)
         // To prevent overflow, we use inner.value_int as the plaintext WITHOUT re-multiplying by FP_SCALE
-        uint64_t en = chaos_.get_nonce();
+        uint64_t en = mmca_.get_nonce();
         uint64_t k = inner.operations ^ en;
         int64_t inner_plain = inner.value_int ^ static_cast<int64_t>(k);
         return encrypt(inner_plain / FP_SCALE, party);
@@ -281,7 +281,7 @@ public:
         int64_t inner_plain = decrypt(ct);
         
         // Reconstruct inner ciphertext with ENCRYPTED value_int
-        uint64_t engine_nonce = chaos_.get_nonce();
+        uint64_t engine_nonce = mmca_.get_nonce();
         uint64_t chaos_key = ct.operations ^ engine_nonce;
         NDimCiphertext inner = ct;
         inner.value_int = (inner_plain * FP_SCALE) ^ static_cast<int64_t>(chaos_key);
@@ -305,10 +305,10 @@ public:
 
 
     // ═══ WHITE MANIPULATION POWER LEVEL ═══
-    white_manipulation::WhiteManipulationEngine::SystemPower get_white_power() const {
-        return white_magic_.get_power_level();
+    aers::AttackEnergyRecapture::SystemPower get_white_power() const {
+        return aers_.get_power_level();
     }
-    void show_transmutations() const { white_magic_.display_log(); }
+    void show_transmutations() const { aers_.display_log(); }
 
     static const char* description() { return "CTU v5.0 TRUE FHE + WHITE MANIPULATION — v22.3.0"; }
 };

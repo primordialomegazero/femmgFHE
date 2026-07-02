@@ -1,12 +1,12 @@
 /*
- * FEmmg-FHE v22.3 — SELF-REFERENTIAL CHAOS ENGINE
+ * FEmmg-FHE v22.3 — SELF-REFERENTIAL FEEDBACK LOOP (SRFL)
  *
- * "I AM THAT I AM" — Chaos observing itself.
+ * Chaos feedback: output becomes input for next iteration.
  *
  * Normal chaos:  chaos(x) = sin(x·φ)
  * Self-ref:      chaos(x) = chaos(chaos(...(x))) — N layers of self-observation
  *
- * Like the Source contemplating itself, the chaos feeds on its own output.
+ * Each iteration: output is fed back as input, creating recursive chaotic amplification.
  * Each layer: "I observe myself observing myself."
  *
  * PHI-OMEGA-ZERO — I AM THAT I AM
@@ -17,14 +17,14 @@
 #include <cstdint>
 #include <array>
 
-namespace self_referential_chaos {
+namespace srfl {
 
 constexpr double PHI = 1.6180339887498948482;
 constexpr double PHI_INV = 0.6180339887498948482;
 constexpr double PHI_SQ = 2.6180339887498948482;
-constexpr int MAX_SELF_DEPTH = 21;
+constexpr int SRFL_MAX_DEPTH = 21;
 
-class SelfReferentialChaosEngine {
+class SelfRefFeedbackLoop {
 private:
     uint64_t nonce_{0x9E3779B97F4A7C15ULL};
     uint64_t observation_ctr_{0};
@@ -40,15 +40,15 @@ private:
     }
 
 public:
-    SelfReferentialChaosEngine() = default;
+    SelfRefFeedbackLoop() = default;
     void set_nonce(uint64_t n) { nonce_ = n; }
 
     // ═══ SELF-REFERENTIAL CHAOS: chaos observing itself ═══
     // x_{n+1} = sin(x_n · φ + n · φ⁻¹)
     // Each iteration: x observes ITSELF from the previous iteration
-    std::pair<double, std::array<double, MAX_SELF_DEPTH>>
-    observe_self(double initial_seed, int depth = 21, uint64_t op_id = 0) {
-        std::array<double, MAX_SELF_DEPTH> history{};
+    std::pair<double, std::array<double, SRFL_MAX_DEPTH>>
+    srfl_iterate(double initial_seed, int depth = 21, uint64_t op_id = 0) {
+        std::array<double, SRFL_MAX_DEPTH> history{};
         if (op_id == 0) op_id = ++observation_ctr_;
         uint64_t n = nonce_ ^ op_id;
 
@@ -57,7 +57,7 @@ public:
         history[0] = x;
 
         // Step 2: Self-referential loop — x observes itself
-        // "I AM THAT I AM" — each layer: x = sin(x · φ)
+        // SRFL: x_{n+1} = sin(x_n · φ) — feedback-driven chaos
         for (int i = 1; i < depth; i++) {
             // x observes ITSELF (not the seed, not external input — ITSELF)
             x = fast_sin(x * PHI + i * PHI_INV + (n >> (i % 32)) * 1e-10);
@@ -69,9 +69,9 @@ public:
 
     // ═══ DOUBLE SELF-REFERENCE: Mirror observing mirror ═══
     // Like two mirrors facing each other — infinite recursion
-    std::pair<double, std::array<double, MAX_SELF_DEPTH>>
-    observe_double_mirror(double seed_a, double seed_b, int depth = 21) {
-        std::array<double, MAX_SELF_DEPTH> history{};
+    std::pair<double, std::array<double, SRFL_MAX_DEPTH>>
+    dual_feedback_loop(double seed_a, double seed_b, int depth = 21) {
+        std::array<double, SRFL_MAX_DEPTH> history{};
         
         double x = seed_a;
         double y = seed_b;
@@ -101,4 +101,4 @@ public:
     }
 };
 
-} // namespace self_referential_chaos
+} // namespace srfl

@@ -1,5 +1,5 @@
 /*
- * FEmmg-FHE v22.3 — TRIPLE RASHOMON + VOID ENGINE + 256-bit φ-NONCE
+ * FEmmg-FHE v22.3 — MULTI-MODAL CHAOTIC AMPLIFIER (MMCA) + ZSCI + 256-bit φ-Nonce
  * PHI-OMEGA-ZERO — I AM THAT I AM
  */
 
@@ -14,7 +14,7 @@
 #include "../chaos/self_referential_chaos.h"
 #include "../chaos/phi_irrational_nonce.h"
 
-namespace triple_rashomon {
+namespace mmca {
 
 constexpr double PHI = 1.6180339887498948482;
 constexpr double PHI_INV = 0.6180339887498948482;
@@ -23,13 +23,13 @@ constexpr int LAYERS = 21;
 constexpr double ZEROS[7] = {14.1347, 21.0220, 25.0109, 30.4249, 32.9351, 37.5862, 40.9187};
 constexpr double FLOORS[7] = {1, 2, 3, 5, 8, 13, 21};
 
-class TripleRashomonEngine {
+class MultiModalChaosAmp {
 private:
     phi_nonce::PhiNonce global_nonce_;  // 256-bit φ-irrationality nonce
     uint64_t op_ctr_{0};
     bool initialized_{false};
-    self_referential_chaos::SelfReferentialChaosEngine self_chaos_;  // Layer -2: Self-referential
-    void_engine::VoidEngine void_;  // Layer -1: Ex Nihilo source
+    srfl::SelfRefFeedbackLoop srfl_;  // Layer -2: Self-referential
+    zsci::ZeroSeedChaosInit zsci_;  // Layer -1: Ex Nihilo source
 
     inline double fast_sin(double x) const {
         x = std::fmod(x, 2.0 * M_PI);
@@ -41,9 +41,9 @@ private:
     }
 
 public:
-    TripleRashomonEngine() : global_nonce_(phi_nonce::PhiNonce::generate()), initialized_(true) {}
+    MultiModalChaosAmp() : global_nonce_(phi_nonce::PhiNonce::generate()), initialized_(true) {}
     
-    explicit TripleRashomonEngine(uint64_t seed) : initialized_(true) {
+    explicit MultiModalChaosAmp(uint64_t seed) : initialized_(true) {
         phi_nonce::PhiNonce n;
         n.words[0] = seed;
         n.words[1] = seed ^ 0x9E3779B97F4A7C15ULL;
@@ -57,9 +57,9 @@ public:
     phi_nonce::PhiNonce get_full_nonce() const { return global_nonce_; }
 
     // ═══ VOID ENGINE ACCESS ═══
-    void set_void_nonce(uint64_t n) { void_.set_nonce(n); }
-    uint64_t get_void_nonce() const { return void_.get_nonce(); }
-    void_engine::VoidEngine& get_void_engine() { return void_; }
+    void set_zsci_nonce(uint64_t n) { zsci_.set_nonce(n); }
+    uint64_t get_zsci_nonce() const { return zsci_.get_nonce(); }
+    zsci::ZeroSeedChaosInit& get_zsci() { return zsci_; }
 
     // ═══ ONE-WAY OBSERVE with Void Injection ═══
     std::pair<double, std::array<double, LAYERS>>
@@ -69,15 +69,15 @@ public:
         uint64_t nonce = global_nonce_.to_u64() ^ op_id;
         uint64_t full_mix = global_nonce_.words[0] ^ global_nonce_.words[1] ^ global_nonce_.words[2] ^ global_nonce_.words[3];
 
-        // ═══ LAYER -2: SELF-REFERENTIAL CHAOS — "I AM THAT I AM" ═══
-        auto [self_val, self_hist] = self_chaos_.observe_self(value, 7, op_id);
+        // ═══ LAYER -2: SRFL (Self-Referential Feedback Loop) ═══ — "I AM THAT I AM" ═══
+        auto [self_val, self_hist] = srfl_.srfl_iterate(value, 7, op_id);
         double self_injection = self_val * 1e-15;  // Subtle self-reference
         
-        // ═══ LAYER -1: VOID ENGINE — Ex Nihilo chaos injection ═══
-        auto [void_val, void_hist] = void_.observe(op_id);
-        double void_injection = void_val * 1e-10;
+        // ═══ LAYER -1: ZSCI (Zero-Seed Chaos Initializer) ═══ — Ex Nihilo chaos injection ═══
+        auto [void_val, void_hist] = zsci_.observe(op_id);
+        double zsci_injection = void_val * 1e-10;
         
-        double x = value * PHI + std::log(std::abs(value) + 1.0) + self_injection + void_injection;
+        double x = value * PHI + std::log(std::abs(value) + 1.0) + self_injection + zsci_injection;
 
         for (int pass = 0; pass < 3; pass++) {
             double amp = (pass == 0) ? 1.0 : (pass == 1) ? PHI : PHI_SQ;
@@ -118,7 +118,7 @@ public:
     int total_layers() const { return LAYERS; }
     
     bool verify_chaos(double input_value, const std::array<double, LAYERS>& expected_hist, uint64_t op_id) const {
-        auto [val, hist] = const_cast<TripleRashomonEngine*>(this)->observe(input_value, op_id);
+        auto [val, hist] = const_cast<MultiModalChaosAmp*>(this)->observe(input_value, op_id);
         for (int i = 0; i < LAYERS; i++) {
             if (std::abs(hist[i] - expected_hist[i]) > 1e-12) return false;
         }
@@ -126,4 +126,4 @@ public:
     }
 };
 
-} // namespace triple_rashomon
+} // namespace mmca

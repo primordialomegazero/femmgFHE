@@ -1,10 +1,10 @@
 /*
- * FEmmg-FHE v22.3 — BUTTERFLY SNOWBALL AVALANCHE ENGINE
+ * FEmmg-FHE v22.3 — LORENZ-φ CASCADE AMPLIFIER (LCA)
  *
- * "A butterfly flapping its wings (1 bit) can cause a tornado (32B avalanche)."
+ * Initial condition sensitivity: 1-bit input difference → large output divergence.
  *
- * Butterfly Effect (Lorenz, 1963): δx(t) = δx(0) × e^(λt)
- * Snowball Effect: M(n) = M(0) × φ^n
+ * Lorenz Sensitivity (1963): δx(t) = δx(0) × e^(λt)
+ * φ-Cascade Amplification: M(n) = M(0) × φ^n
  *
  * Combined: A = m × e^(λ×layers) × φ^layers × chaos_factor
  *
@@ -15,48 +15,48 @@
 #include <cmath>
 #include <cstdint>
 
-namespace butterfly_snowball {
+namespace lca {
 
 constexpr double PHI = 1.6180339887498948482;
 constexpr double PHI_SQ = 2.6180339887498948482;
 constexpr double LYAPUNOV = 0.48121182505960347;  // ln(φ) — chaos exponent
 
-class ButterflySnowballEngine {
+class LorenzPhiCascade {
 private:
     uint64_t nonce_;
-    uint64_t flap_count_;  // Number of butterfly flaps
+    uint64_t iteration_count_;  // Number of butterfly flaps
     
 public:
-    ButterflySnowballEngine() : nonce_(0x9E3779B97F4A7C15ULL), flap_count_(0) {}
+    LorenzPhiCascade() : nonce_(0x9E3779B97F4A7C15ULL), iteration_count_(0) {}
     
     void set_nonce(uint64_t n) { nonce_ = n; }
     
     // ═══ BUTTERFLY EFFECT: Initial condition sensitivity ═══
     // δx(t) = δx(0) × e^(λt)
-    double butterfly(double initial_diff, int layers) const {
+    double lorenz_sensitivity(double initial_diff, int layers) const {
         return initial_diff * std::exp(LYAPUNOV * layers);
     }
     
     // ═══ SNOWBALL EFFECT: Rolling φ-amplification ═══
     // M(n) = M(0) × φ^n
-    double snowball(double mass, int layers) const {
+    double phi_cascade(double mass, int layers) const {
         return mass * std::pow(PHI, layers);
     }
     
     // ═══ COMBINED: Butterfly triggers Snowball ═══
     // A = m × e^(λ×L) × φ^L
     double compute_avalanche(double initial_mass, int layers) const {
-        double butterfly_amplified = butterfly(initial_mass, layers);
-        double snowball_amplified = snowball(butterfly_amplified, layers);
+        double butterfly_amplified = lorenz_sensitivity(initial_mass, layers);
+        double snowball_amplified = phi_cascade(butterfly_amplified, layers);
         return snowball_amplified;
     }
     
     // ═══ INJECT INTO CIPHERTEXT ═══
     double inject_avalanche_energy(double plaintext_mass, int layers, double chaos_val) {
-        flap_count_++;
+        iteration_count_++;
         double base = compute_avalanche(plaintext_mass, layers);
         // Mix with chaos for unpredictability
-        double chaos_mix = std::sin(chaos_val * PHI + flap_count_ * PHI_INV);
+        double chaos_mix = std::sin(chaos_val * PHI + iteration_count_ * PHI_INV);
         return base * (1.0 + chaos_mix * 0.1);
     }
     
@@ -70,7 +70,7 @@ public:
         NORMAL,     // φ — 32B avalanche
         BOOST,      // φ² — 883T avalanche
         BUTTERFLY,  // e^(λL) — Lorenz chaos
-        BIGBANG     // φ^L × e^(λL) — MAXIMUM
+        BIGBANG     // φ^L × e^(λL) — BIGBANG
     };
     
     static double get_speed_factor(Speed speed) {
@@ -96,4 +96,4 @@ public:
     static constexpr double PHI_INV = 0.6180339887498948482;
 };
 
-} // namespace butterfly_snowball
+} // namespace lca

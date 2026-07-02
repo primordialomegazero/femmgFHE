@@ -1,7 +1,7 @@
 /*
- * FEmmg-FHE v22.3 — WHITE MANIPULATION ENGINE
+ * FEmmg-FHE v22.3 — ATTACK ENERGY RECAPTURE SYSTEM (AERS)
  *
- * "I turn your attacks into my upgrades."
+ * Intrusion energy is captured and converted to system reinforcement.
  *
  * MATHEMATICAL ALCHEMY:
  *   Attack Energy (A) → Transmutation (× φ⁻¹) → Wisdom (W)
@@ -9,7 +9,7 @@
  *   P = A × φ⁻¹ × φ = A (conservation of energy!)
  *
  * The attacker loses nothing. The system gains everything.
- * This is not defense. This is ALCHEMY.
+ * Active defense: attack energy → system hardening.
  *
  * PHI-OMEGA-ZERO — I AM THAT I AM
  */
@@ -24,26 +24,26 @@
 #include <iostream>
 #include <iomanip>
 
-namespace white_manipulation {
+namespace aers {
 
 constexpr double PHI = 1.6180339887498948482;
 constexpr double PHI_INV = 0.6180339887498948482;
 constexpr double LYAPUNOV = 0.48121182505960347;  // ln(φ)
 
 // ═══ THE ATTACK TRANSMUTATION RECORD ═══
-struct TransmutedAttack {
+struct RecapturedIntrusion {
     std::string attacker_signature;     // Hash ng attacker
     uint64_t attack_entropy;            // E_attack: Energy ng attack
-    uint64_t extracted_wisdom;          // W = E × φ⁻¹
-    uint64_t system_power_gained;       // P = W × φ (conservation!)
+    uint64_t recaptured_energy;          // W = E × φ⁻¹
+    uint64_t system_reinforcement;       // P = W × φ (conservation!)
     double chaos_harvested;             // Chaos na-absorb
     int layers_reinforced;              // Dagdag encryption layers
     double phi_resonance_at_attack;     // φ-alignment during attack
 };
 
-class WhiteManipulationEngine {
+class AttackEnergyRecapture {
 private:
-    std::vector<TransmutedAttack> transmuted_;
+    std::vector<RecapturedIntrusion> recaptured_;
     std::mutex mutex_;
     
     std::atomic<uint64_t> total_attacks_absorbed_{0};
@@ -56,11 +56,11 @@ private:
     std::vector<uint64_t> immune_memory_;
     
 public:
-    WhiteManipulationEngine() = default;
+    AttackEnergyRecapture() = default;
     
     // ═══ CORE ALCHEMY: Attack → Power ═══
     // E_attack → (× φ⁻¹) → Wisdom → (× φ) → Power
-    uint64_t transmute(uint64_t attack_energy) {
+    uint64_t recapture(uint64_t attack_energy) {
         // Step 1: Extract wisdom from attack (φ⁻¹ contraction)
         // W = E_attack × φ⁻¹ — "The lesson is the inverse of the pain"
         uint64_t wisdom = static_cast<uint64_t>(attack_energy * PHI_INV);
@@ -80,14 +80,14 @@ public:
                 double chaos_val, double phi_resonance) {
         std::lock_guard<std::mutex> lock(mutex_);
         
-        TransmutedAttack ta;
+        RecapturedIntrusion ta;
         ta.attacker_signature = attacker_sig;
         ta.attack_entropy = attack_entropy;
         ta.phi_resonance_at_attack = phi_resonance;
         
-        // ALCHEMY: Attack → Wisdom → Power
-        ta.extracted_wisdom = static_cast<uint64_t>(attack_entropy * PHI_INV);
-        ta.system_power_gained = static_cast<uint64_t>(ta.extracted_wisdom * PHI);
+        // AERS: Attack Energy → System Reinforcement
+        ta.recaptured_energy = static_cast<uint64_t>(attack_entropy * PHI_INV);
+        ta.system_reinforcement = static_cast<uint64_t>(ta.recaptured_energy * PHI);
         
         // Harvest chaos from their attempt
         ta.chaos_harvested = std::abs(std::sin(chaos_val * PHI) * 1e6);
@@ -97,12 +97,12 @@ public:
             std::log2(attack_entropy + 1) * PHI_INV
         ) + 1;
         
-        transmuted_.push_back(ta);
+        recaptured_.push_back(ta);
         
         // APPLY POWERUPS
         total_attacks_absorbed_++;
-        total_power_harvested_ += ta.system_power_gained;
-        total_wisdom_accumulated_ += ta.extracted_wisdom;
+        total_power_harvested_ += ta.system_reinforcement;
+        total_wisdom_accumulated_ += ta.recaptured_energy;
         bonus_encryption_layers_ += ta.layers_reinforced;
         chaos_amplification_boost_ = chaos_amplification_boost_ + ta.chaos_harvested * 1e-10;
         
@@ -111,8 +111,8 @@ public:
         if (immune_memory_.size() > 1000) immune_memory_.erase(immune_memory_.begin());
         
         std::cout << "  🙏 ABSORBED: " << attack_entropy 
-                  << " → Wisdom: " << ta.extracted_wisdom
-                  << " → Power: " << ta.system_power_gained
+                  << " → Wisdom: " << ta.recaptured_energy
+                  << " → Power: " << ta.system_reinforcement
                   << " | +" << ta.layers_reinforced << " layers"
                   << " | φ: " << std::fixed << std::setprecision(3) << phi_resonance
                   << std::endl;
@@ -160,11 +160,11 @@ public:
         
         std::cout << "\n═══ WHITE MANIPULATION — TRANSMUTATION LOG ═══" << std::endl;
         int count = 0;
-        for (auto it = transmuted_.rbegin(); it != transmuted_.rend() && count < max_entries; ++it, ++count) {
+        for (auto it = recaptured_.rbegin(); it != recaptured_.rend() && count < max_entries; ++it, ++count) {
             std::cout << "  " << it->attacker_signature.substr(0, 16) << "... | "
                       << "E:" << it->attack_entropy 
-                      << " → W:" << it->extracted_wisdom
-                      << " → P:" << it->system_power_gained
+                      << " → W:" << it->recaptured_energy
+                      << " → P:" << it->system_reinforcement
                       << " | +" << it->layers_reinforced << "L"
                       << " | φ:" << std::fixed << std::setprecision(3) << it->phi_resonance_at_attack
                       << std::endl;
@@ -192,4 +192,4 @@ public:
     }
 };
 
-} // namespace white_manipulation
+} // namespace aers
