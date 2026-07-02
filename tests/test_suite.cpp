@@ -162,7 +162,7 @@ int main() {
     std::cout << "\n╔══════════════════════════════════════════════╗" << std::endl;
     std::cout << "║  RESULT: " << total_pass << "/" << (total_pass+total_fail) << " PASSED" << std::endl;
     std::cout << "║  VERDICT: " << (total_fail == 0 ? "FULLY HOMOMORPHIC VERIFIED" : "FAILURES DETECTED") << "         ║" << std::endl;
-    std::cout << "║  ENGINE: FORTRESS v17.0 — Path X (7D Banach)║" << std::endl;
+    std::cout << "║  ENGINE: FORTRESS v22.1 — CTU v5.0 Triple Rashomon║" << std::endl;
     std::cout << "╚══════════════════════════════════════════════╝" << std::endl;
     
     return total_fail == 0 ? 0 : 1;

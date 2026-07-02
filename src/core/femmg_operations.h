@@ -11,7 +11,7 @@
  * 
  * SECURITY:
  *   - Server never evaluates (e-λ)/φ (fully blind)
- *   - Golden Chaos (CTU v4) for IND-CPA
+ *   - Triple Rashomon (CTU v5.0) for IND-CPA
  *   - Banach contraction for noise stability
  * 
  * DEPENDENCIES: banach_engine.h

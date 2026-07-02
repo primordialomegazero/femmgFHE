@@ -57,7 +57,7 @@ struct NDimCiphertext {
     std::array<double, DIMS> perturbation;
     double expanded_dim0;
     double lyapunov_spectrum[DIMS];
-    double chaos_history[14];  // CTU v3: store chaos for exact decryption
+    double chaos_history[21];  // CTU v5.0: Triple Rashomon 21 layers
     int64_t value_int;         // Integer domain — exact value
     double phi_state;          // φ-scaled state
     double noise;
@@ -136,7 +136,7 @@ public:
             ct.noise = ct.noise * OCC + NOISE_FLOOR * (1.0 - OCC);
         }
         
-        // ═══ CTU v5.0: Triple Rashomon Chaos (21 layers) ═══
+        // ═══ CTU v5.0: Triple Rashomon Chaos (21 layers — 3 engines × 7) ═══
         double original_expanded = (double)m * PHI + LAMBDA;
         auto [chaos_val, chaos_hist] = chaos_.observe(original_expanded, op_counter.load());
         ct.coordinates[0] = chaos_val;
@@ -167,7 +167,7 @@ public:
         ct.noise = ct.noise * OCC + NOISE_FLOOR * (1.0 - OCC);
     }
 
-    static const char* description() { return "Floating-Integer Merged v21.5 — phi_constants.h"; }
+    static const char* description() { return "CTU v5.0 Triple Rashomon — v22.1.0"; }
 };
 
 } // namespace banach

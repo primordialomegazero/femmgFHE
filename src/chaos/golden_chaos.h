@@ -1,5 +1,5 @@
 /*
- * FEmmg-FHE v22.0.0 — Golden Chaos Engine (CTU v4)
+ * FEmmg-FHE v22.0.0 — Golden Chaos Engine (CTU v5.0)
  * 
  * Observer-Observed Symmetry for IND-CPA Security.
  * 
@@ -26,7 +26,7 @@
  * INCLUDED BY: banach_engine.h, blackhole.h
  */
 /*
- * GOLDEN CHAOS ENGINE — CTU v4 (MAXIMUM SECURITY)
+ * GOLDEN CHAOS ENGINE — CTU v5.0
  * 
  * "Auto-increment + value mixing = maximum chaos."
  */
