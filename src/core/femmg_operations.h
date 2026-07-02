@@ -235,7 +235,11 @@ public:
         }
         
         // Update operations field
-        result.operations = key_result ^ engine_nonce;
+                // FIXED: Derive fresh operations to prevent key leakage
+        // Old (VULNERABLE): key_a ^ key_b — leaks engine_nonce when a==b
+        // New: Mix with random_iv to break algebraic relation
+        uint64_t fresh_nonce = engine_nonce ^ a.random_iv ^ b.random_iv ^ (a.operations + b.operations);
+        result.operations = key_result ^ fresh_nonce;
         result.random_iv = a.random_iv ^ b.random_iv;
         
         // Float domain: blind addition
@@ -307,7 +311,11 @@ public:
             std::memcpy(&result.expanded_dim0, &blended, sizeof(blended));
         }
         
-        result.operations = key_result ^ engine_nonce;
+                // FIXED: Derive fresh operations to prevent key leakage
+        // Old (VULNERABLE): key_a ^ key_b — leaks engine_nonce when a==b
+        // New: Mix with random_iv to break algebraic relation
+        uint64_t fresh_nonce = engine_nonce ^ a.random_iv ^ b.random_iv ^ (a.operations + b.operations);
+        result.operations = key_result ^ fresh_nonce;
         result.random_iv = a.random_iv ^ b.random_iv;
         
         result.coordinates[0] = (a.coordinates[0] * b.coordinates[0] - banach::LAMBDA * (a.coordinates[0] + b.coordinates[0])
