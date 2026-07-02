@@ -290,16 +290,17 @@ femmgFHE/
 ├── include/femmg_fhe.h              ← Single entry point
 ├── src/
 │   ├── core/         (4 files)      ← Banach Engine + FHE Ops
-│   ├── chaos/        (4 files)      ← CTU v5: Triple Rashomon
+│   ├── chaos/        (3 files)      ← CTU v5.0: Triple Rashomon
 │   ├── security/     (14 files)     ← Production Security Stack
 │   ├── kem/          (2 files)      ← Φ-PKE Post-Quantum KEM
 │   ├── storage/      (1 file)       ← SpiralDB Lite
 │   ├── math/         (5 files)      ← φ, Riemann, Constants
 │   └── server/       (2 files)      ← Enterprise API + TLS
-├── tests/            (18 files)     ← Test Suite + Benchmarks
+├── tests/            (10 files)     ← Test Suite + Benchmarks
 ├── proofs/           (6 files)      ← Formal Mathematical Proofs
-├── docs/             (4 files)      ← Deployment + Historical Data
-├── npm-package/                     ← NPM Distribution
+├── docs/             (5 files)      ← Deployment + Historical Data
+├── logs/             (3 files)      ← Benchmark Logs (1T, 10B, 100M)
+├── npm-package/                     ← NPM Distribution (v22.1.3)
 └── README.md
 ```
 
