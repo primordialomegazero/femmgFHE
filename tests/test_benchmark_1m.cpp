@@ -35,7 +35,7 @@ int main() {
     std::cout << "  Time: " << dur_ms << " ms" << std::endl;
     std::cout << "  TPS: " << std::fixed << std::setprecision(0) << tps << " ops/sec" << std::endl;
     std::cout << "  Checksum: " << sum << std::endl;
-    std::cout << "  Accuracy: " << (sum == 499500 ? "100% ✅" : "FAIL ❌") << std::endl;  // sum of i%1000 for i=0..999999
+    std::cout << "  Accuracy: " << (sum == 499500000 ? "100% ✅" : "FAIL ❌") << std::endl;  // sum of i%1000 for i=0..999999
     
     // ═══ 1M HOMOMORPHIC ADDITIONS ═══
     std::cout << "\n═══ 1M HOMOMORPHIC ADDS ═══" << std::endl;
