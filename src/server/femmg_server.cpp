@@ -1,7 +1,6 @@
 #include <cstdlib>
 #include "../core/femmg_operations.h"
 #include "../core/banach_engine.h"
-#include "../chaos/lyapunov_core.h"
 #include "../core/phi_stack.h"
 #include "../security/anti_matter_v2.h"
 #include "../core/metaprogram.h"
