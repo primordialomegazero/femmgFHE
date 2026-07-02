@@ -58,21 +58,21 @@
 
 ```mermaid
 graph TD
-    SR[Self-Referential Chaos<br/>Layer -2<br/>I AM THAT I AM<br/>x=sin(x·φ)] --> V[Void Engine<br/>Layer -1<br/>Ex Nihilo ε→0]
-    V --> BS[Butterfly Snowball<br/>Layer 0<br/>E=mφ² Avalanche<br/>4 Speed Modes]
-    BS --> TR[Triple Rashomon<br/>21 layers<br/>Sine+Zeta+Fib Duel<br/>3 passes ×φ×φ²]
-    TR --> BC[Banach Contraction<br/>φ⁻¹ coefficient<br/>Noise → 1.82815]
-    BC --> FP[Fixed Point<br/>Noise FLATLINE]
+    SR["Self-Referential Chaos (Layer -2): I AM THAT I AM"] --> V["Void Engine (Layer -1): Ex Nihilo"]
+    V --> BS["Butterfly Snowball (Layer 0): E=mφ² Avalanche"]
+    BS --> TR["Triple Rashomon (21 layers): Sine+Zeta+Fibonacci"]
+    TR --> BC["Banach Contraction: Noise -> 1.82815"]
+    BC --> FP["Fixed Point: Noise FLATLINE"]
 ```
 
 ### Security Stack (v22.3)
 
 ```mermaid
 graph LR
-    WM[White Manipulation<br/>Attack→Power Alchemy] --> BH[Blackhole<br/>Active Counter-Attack]
-    BH --> MG[Memory Guard<br/>Double Mirror Fractal ARX]
-    MG --> TM[Time Manipulator<br/>Constant-Time Obfuscation]
-    TM --> IV[Integrity Tag<br/>12-Field IND-CCA2]
+    WM["White Manipulation: Attack->Power"] --> BH["Blackhole: Active Counter-Attack"]
+    BH --> MG["Memory Guard: Fractal ARX"]
+    MG --> TM["Time Manipulator: Constant-Time"]
+    TM --> IV["Integrity Tag: 12-Field IND-CCA2"]
 ```
 
 ---
