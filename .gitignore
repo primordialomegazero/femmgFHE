@@ -51,3 +51,8 @@ guardian_alerts.log
 # Symlinked security headers (source of truth in root)
 src/phi_algo_merge.h
 src/security_complete.h
+
+# Compiled test binaries (keep .cpp sources)
+test_*
+!test_*.cpp
+!test_*.sh

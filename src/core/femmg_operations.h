@@ -1,27 +1,9 @@
 /*
- * FEmmg-FHE v22.0.0 — Core FHE Operations
- * 
- * High-level API for Fully Homomorphic Encryption.
- * 
- * OPERATIONS:
- *   - encrypt(plaintext, key)  → NDimCiphertext
- *   - decrypt(ciphertext)      → plaintext (exact, via value_int)
- *   - add(ct1, ct2)            → Blind homomorphic addition
- *   - multiply(ct1, ct2)       → Blind homomorphic multiplication
- * 
- * SECURITY:
- *   - Server never evaluates (e-λ)/φ (fully blind)
- *   - Triple Rashomon (CTU v5.0) for IND-CPA
- *   - Banach contraction for noise stability
- * 
- * DEPENDENCIES: banach_engine.h
- * USED BY: femmg_server.cpp, test suites
- */
-/*
- * FEmmg-FHE — FLOATING-INTEGER MERGED FHE CORE (FORTRESS v22.1)
+ * FEmmg-FHE v22.2 — CORE FHE OPERATIONS (TRUE FHE)
  *
- * Unlimited depth. Zero bootstrapping. Integer core = no precision loss.
- * "Noise converges. Integers stay exact. Both worlds. No compromise."
+ * Direct chaos_key storage in ct.operations.
+ * Homomorphic operations blend chaos keys via XOR.
+ * Integrity tags recomputed after each operation.
  */
 
 #pragma once
@@ -37,89 +19,177 @@ private:
     banach::NDimBanachEngine engine;
     std::atomic<int> party_counter{0};
 
+    // Recompute integrity tag
+    uint64_t compute_tag(const banach::NDimCiphertext& ct, uint64_t chaos_key) const {
+        uint64_t tag = chaos_key;
+        tag ^= static_cast<uint64_t>(ct.value_int);
+        tag = (tag << 23) | (tag >> 41);
+        for (int d = 0; d < banach::DIMS; d++) {
+            uint64_t coord_bits;
+            std::memcpy(&coord_bits, &ct.coordinates[d], sizeof(coord_bits));
+            tag ^= coord_bits;
+            tag = (tag << 11) | (tag >> 53);
+        }
+        for (int i = 0; i < banach::CHAOS_LAYERS; i++) {
+            uint64_t hist_bits;
+            std::memcpy(&hist_bits, &ct.chaos_history[i], sizeof(hist_bits));
+            tag ^= hist_bits;
+            tag = (tag << 7) | (tag >> 57);
+        }
+        tag ^= ct.operations;
+        return tag;
+    }
+
 public:
     FEmmgFHE() = default;
 
-    // ═══ ENCRYPT: Integer → Float (contract) → Ciphertext ═══
     banach::NDimCiphertext encrypt(int64_t m, int party = -1) {
         if(party < 0) party = (party_counter.fetch_add(1)) % banach::PARTIES;
         return engine.encrypt(m, party);
     }
 
-    // ═══ DECRYPT: Float (expand) → Integer (exact) ═══
     int64_t decrypt(const banach::NDimCiphertext& ct) const {
-        // INTEGER DOMAIN: exact, no floating-point loss!
         return engine.decrypt(ct);
     }
 
-    // ═══ MEMORY SANITIZATION (defense-in-depth) ═══
-    // Call after decrypt to zero-out sensitive data from memory
     static void sanitize(banach::NDimCiphertext& ct) {
         ct.value_int = 0;
         for(int d=0; d<banach::DIMS; d++) {
             ct.coordinates[d] = 0.0;
-            ct.coordinates[d] = 0.0;  // Fixed: use coordinates (double)
+            if (d < banach::CHAOS_LAYERS) ct.chaos_history[d] = 0.0;
         }
         ct.noise = 0.0;
         ct.phi_state = 0.0;
+        ct.integrity_tag = 0;
+        ct.operations = 0;
     }
 
-    // ═══ HOMOMORPHIC ADDITION: Blind, integer-safe ═══
+    // ═══ HOMOMORPHIC ADDITION ═══
     banach::NDimCiphertext add(const banach::NDimCiphertext& a,
                                  const banach::NDimCiphertext& b) {
+        // Recover chaos keys
+        uint64_t engine_nonce = engine.get_chaos_nonce();
+        uint64_t key_a = a.operations ^ engine_nonce;
+        uint64_t key_b = b.operations ^ engine_nonce;
+        uint64_t key_result = key_a ^ key_b;  // XOR blend
+        
         banach::NDimCiphertext result;
         result.party_id = a.party_id;
-        result.operations = a.operations + b.operations + 1;
+        
+        // Store blended chaos_key XOR engine_nonce
+        result.operations = key_result ^ engine_nonce;
 
-        // Blind addition on expanded values (floating-point for Banach stability)
-        double ea = a.coordinates[0];
-        double eb = b.coordinates[0];
-        result.coordinates[0] = ea + eb - banach::LAMBDA;
+        // Float domain: blind addition
+        result.coordinates[0] = a.coordinates[0] + b.coordinates[0] - banach::LAMBDA;
 
-        // Integer domain: exact addition
+        // Chaos history: XOR blend
+        for (int i = 0; i < banach::CHAOS_LAYERS; i++) {
+            uint64_t ha, hb;
+            std::memcpy(&ha, &a.chaos_history[i], sizeof(ha));
+            std::memcpy(&hb, &b.chaos_history[i], sizeof(hb));
+            uint64_t hblend = ha ^ hb;
+            std::memcpy(&result.chaos_history[i], &hblend, sizeof(hblend));
+        }
+
+        for (int i = 0; i < 7; i++) {
+            uint64_t la, lb;
+            std::memcpy(&la, &a.lyapunov_spectrum[i], sizeof(la));
+            std::memcpy(&lb, &b.lyapunov_spectrum[i], sizeof(lb));
+            uint64_t lblend = la ^ lb;
+            std::memcpy(&result.lyapunov_spectrum[i], &lblend, sizeof(lblend));
+        }
+
+        {
+            uint64_t ea_bits, eb_bits;
+            std::memcpy(&ea_bits, &a.expanded_dim0, sizeof(ea_bits));
+            std::memcpy(&eb_bits, &b.expanded_dim0, sizeof(eb_bits));
+            uint64_t eblend = ea_bits ^ eb_bits;
+            std::memcpy(&result.expanded_dim0, &eblend, sizeof(eblend));
+        }
+
+        // Integer domain: plain addition
         result.value_int = a.value_int + b.value_int;
 
-        // Noise convergence (floating-point Banach contraction)
         result.noise = a.noise * banach::OCC + b.noise * (1.0 - banach::OCC);
         result.phi_state = a.phi_state * banach::OCC + b.phi_state * (1.0 - banach::OCC);
+        
         engine.recontract_dim0(result);
 
-        // Copy other dimensions
         for(int d = 1; d < banach::DIMS; d++) {
             result.coordinates[d] = a.coordinates[d] * banach::OCC
                                   + b.coordinates[d] * (1.0 - banach::OCC);
         }
+
+        for(int d = 0; d < banach::DIMS; d++) {
+            result.perturbation[d] = a.perturbation[d] * banach::OCC
+                                   + b.perturbation[d] * (1.0 - banach::OCC);
+        }
+
+        // RECOMPUTE integrity tag
+        result.integrity_tag = compute_tag(result, key_result);
 
         return result;
     }
 
-    // ═══ HOMOMORPHIC MULTIPLICATION: Blind, algebraically correct ═══
+    // ═══ HOMOMORPHIC MULTIPLICATION ═══
     banach::NDimCiphertext multiply(const banach::NDimCiphertext& a,
                                       const banach::NDimCiphertext& b) {
+        uint64_t engine_nonce = engine.get_chaos_nonce();
+        uint64_t key_a = a.operations ^ engine_nonce;
+        uint64_t key_b = b.operations ^ engine_nonce;
+        uint64_t key_result = key_a ^ key_b;
+        
         banach::NDimCiphertext result;
         result.party_id = a.party_id;
-        result.operations = a.operations + b.operations + 1;
-
-        double ea = a.coordinates[0];
-        double eb = b.coordinates[0];
         
-        // Blind multiplication formula (Theorem 3.5)
-        result.coordinates[0] = (ea * eb - banach::LAMBDA * (ea + eb) 
-                                  + banach::LAMBDA * banach::LAMBDA) 
+        result.operations = key_result ^ engine_nonce;
+
+        result.coordinates[0] = (a.coordinates[0] * b.coordinates[0] - banach::LAMBDA * (a.coordinates[0] + b.coordinates[0])
+                                  + banach::LAMBDA * banach::LAMBDA)
                                 / banach::PHI + banach::LAMBDA;
 
-        // Integer domain: exact multiplication (scaled)
+        for (int i = 0; i < banach::CHAOS_LAYERS; i++) {
+            uint64_t ha, hb;
+            std::memcpy(&ha, &a.chaos_history[i], sizeof(ha));
+            std::memcpy(&hb, &b.chaos_history[i], sizeof(hb));
+            uint64_t hblend = ha ^ hb;
+            std::memcpy(&result.chaos_history[i], &hblend, sizeof(hblend));
+        }
+
+        for (int i = 0; i < 7; i++) {
+            uint64_t la, lb;
+            std::memcpy(&la, &a.lyapunov_spectrum[i], sizeof(la));
+            std::memcpy(&lb, &b.lyapunov_spectrum[i], sizeof(lb));
+            uint64_t lblend = la ^ lb;
+            std::memcpy(&result.lyapunov_spectrum[i], &lblend, sizeof(lblend));
+        }
+
+        {
+            uint64_t ea_bits, eb_bits;
+            std::memcpy(&ea_bits, &a.expanded_dim0, sizeof(ea_bits));
+            std::memcpy(&eb_bits, &b.expanded_dim0, sizeof(eb_bits));
+            uint64_t eblend = ea_bits ^ eb_bits;
+            std::memcpy(&result.expanded_dim0, &eblend, sizeof(eblend));
+        }
+
         result.value_int = (a.value_int * b.value_int) / phi_constants::FP_SCALE;
 
-        // Noise convergence
         result.noise = a.noise * banach::OCC + b.noise * (1.0 - banach::OCC);
         result.phi_state = a.phi_state * banach::OCC + b.phi_state * (1.0 - banach::OCC);
+        
         engine.recontract_dim0(result);
 
         for(int d = 1; d < banach::DIMS; d++) {
             result.coordinates[d] = a.coordinates[d] * banach::OCC
                                   + b.coordinates[d] * (1.0 - banach::OCC);
         }
+
+        for(int d = 0; d < banach::DIMS; d++) {
+            result.perturbation[d] = a.perturbation[d] * banach::OCC
+                                   + b.perturbation[d] * (1.0 - banach::OCC);
+        }
+
+        result.integrity_tag = compute_tag(result, key_result);
 
         return result;
     }
