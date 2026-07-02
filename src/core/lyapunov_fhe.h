@@ -115,7 +115,12 @@ public:
     // ═══ ENCRYPT: double/float → Lyapunov-stabilized ciphertext ═══
     LyapCiphertext encrypt(double value, uint64_t seed = 0) {
         if (seed == 0) seed = std::chrono::high_resolution_clock::now().time_since_epoch().count();
-        uint64_t nonce = enc_counter_.fetch_add(1) ^ (seed & 0xFFFFFFFF);
+        // Splitmix64 hash of full seed for nonce uniqueness
+        uint64_t hashed_seed = seed;
+        hashed_seed = (hashed_seed ^ (hashed_seed >> 30)) * 0xBF58476D1CE4E5B9ULL;
+        hashed_seed = (hashed_seed ^ (hashed_seed >> 27)) * 0x94D049BB133111EBULL;
+        hashed_seed = hashed_seed ^ (hashed_seed >> 31);
+        uint64_t nonce = enc_counter_.fetch_add(1) ^ hashed_seed;
 
         // Extract exponent and mantissa (like IEEE 754)
         int exponent = 0;
