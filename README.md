@@ -188,7 +188,7 @@ graph LR
 | **Noise Convergence** | Contraction toward Fibonacci floors locks noise at 1.82815 bits — **FOREVER**. |
 | **Blind Multiplication** | $e_{mul} = (e_1·e_2 - λ(e_1+e_2) + λ²)/φ + λ$. Server never evaluates $(e-λ)/φ$. |
 
-> 📐 **Formal Proofs:** See [proofs/](proofs/) for 9 theorems with complete derivations.
+> 📐 **Formal Proofs:** [proofs/](proofs/) | 🔑 **Keyless Architecture:** [docs/KEYLESS_ARCHITECTURE.md](docs/KEYLESS_ARCHITECTURE.md)
 
 ---
 
