@@ -17,9 +17,12 @@
 #include <chrono>
 #include "../security/blackhole.h"
 #include "../chaos/triple_rashomon.h"
+#include "../chaos/void_engine.h"
+#include "../chaos/butterfly_snowball.h"
 #include "../security/memory_guard.h"
 #include "../security/time_manipulator.h"
 #include "../security/blackhole_active.h"
+#include "../security/white_manipulation.h"
 #include <algorithm>
 
 namespace banach {
@@ -51,6 +54,9 @@ class NDimBanachEngine {
     memory_guard::MemoryGuard mem_guard_;
     bool memory_protection_ = false;
     triple_rashomon::TripleRashomonEngine chaos_;
+    void_engine::VoidEngine void_;
+    butterfly_snowball::ButterflySnowballEngine butterfly_;
+    white_manipulation::WhiteManipulationEngine white_magic_;
 
     static double fibonacci_floor(int layer) {
         return (double)FIBONACCI[layer % 20] * PHI / 10.0 + 1.0;
@@ -294,7 +300,14 @@ public:
     // BigBang: 3.0 — MAXIMUM avalanche
     static constexpr double CHAOS_SPEED = PHI_SQ;  // Boost mode: φ²
 
-    static const char* description() { return "CTU v5.0 TRUE FHE + E=mc² CHAOS SPEED — v22.3.0"; }
+
+    // ═══ WHITE MANIPULATION POWER LEVEL ═══
+    white_manipulation::WhiteManipulationEngine::SystemPower get_white_power() const {
+        return white_magic_.get_power_level();
+    }
+    void show_transmutations() const { white_magic_.display_log(); }
+
+    static const char* description() { return "CTU v5.0 TRUE FHE + WHITE MANIPULATION — v22.3.0"; }
 };
 
 } // namespace banach
