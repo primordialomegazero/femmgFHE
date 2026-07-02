@@ -292,7 +292,7 @@ std::string route(const std::string& body, SM& sm, FEmmgFHE& fhe) {
         sm.inc(cid);
         banach::NDimCiphertext a, b;
         if (!sm.get(cid, i1, a) || !sm.get(cid, i2, b))
-            return ok(O({J("action", "fhe_multiply"), J("status"), "error")}));
+            return ok(O({J("action", "fhe_multiply"), J("status", "error")}));
         auto r = fhe.multiply(a, b);
         uint64_t ri = sm.store(cid, r);
         return ok(O({
