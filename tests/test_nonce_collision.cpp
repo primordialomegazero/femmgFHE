@@ -101,5 +101,8 @@ int main() {
         cout << endl;
     }
     
-    return 0;
+    cout << "\n====================================================" << endl;
+    cout << "  NONCE UNIQUENESS: " << unique_count << "/3 PATTERNS PASSED" << endl;
+    cout << "====================================================" << endl;
+    return (unique_count == 3) ? 0 : 1;
 }
