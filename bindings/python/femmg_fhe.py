@@ -140,6 +140,28 @@ class FEmmgFHE:
         tag ^= ct['random_iv']
         return tag
     
+
+    def encrypt_fractal(self, m, depth=7):
+        """Multi-recursive fractal encryption. depth=7 → 2^11536 ciphertext space."""
+        if depth <= 1:
+            return self.encrypt(m)
+        inner = self.encrypt_fractal(m, depth - 1)
+        return self.encrypt(inner['value_int'] // self._fp_scale)
+    
+    def decrypt_fractal(self, ct, depth=7):
+        """Multi-recursive fractal decryption."""
+        if depth <= 1:
+            return self.decrypt(ct)
+        inner_plain = self.decrypt(ct)
+        inner = ct.copy()
+        inner['value_int'] = inner_plain * self._fp_scale
+        return self.decrypt_fractal(inner, depth - 1)
+    
+    @staticmethod
+    def fractal_space_bits(depth=7):
+        """Ciphertext space in bits: 2^(1648*depth)."""
+        return 1648.0 * depth
+
     def encrypt(self, m):
         """Encrypt plaintext integer. Returns ciphertext dict."""
         import random

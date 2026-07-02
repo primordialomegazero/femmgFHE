@@ -91,6 +91,25 @@ public:
         return engine.encrypt(m, party);
     }
 
+
+    // ═══ MULTI-RECURSIVE FRACTAL ENCRYPT/DECRYPT ═══
+    banach::NDimCiphertext encrypt_fractal(int64_t m, int depth = 7, int party = -1) {
+        if(party < 0) party = (party_counter.fetch_add(1)) % banach::PARTIES;
+        return engine.encrypt_fractal(m, party, depth);
+    }
+    
+    int64_t decrypt_fractal(const banach::NDimCiphertext& ct, int depth = 7) const {
+        return engine.decrypt_fractal(ct, depth);
+    }
+    
+
+    // ═══ VOID ENGINE ACCESS ═══
+    static double void_avalanche() { return banach::NDimBanachEngine::void_avalanche(); }
+
+    static double fractal_space_bits(int depth = 7) {
+        return banach::NDimBanachEngine::ciphertext_space_bits(depth);
+    }
+
     int64_t decrypt(const banach::NDimCiphertext& ct) const {
         return engine.decrypt(ct);
     }
@@ -106,6 +125,22 @@ public:
         ct.integrity_tag = 0;
         ct.operations = 0;
         ct.random_iv = 0;
+    }
+
+
+    // ═══ FRACTAL HOMOMORPHIC ADDITION ═══
+    banach::NDimCiphertext add_fractal(const banach::NDimCiphertext& a,
+                                        const banach::NDimCiphertext& b, int depth = 7) {
+        auto result = add(a, b);
+        // Re-wrap with fractal layers
+        return engine.encrypt_fractal(result.value_int / phi_constants::FP_SCALE, result.party_id, depth);
+    }
+    
+    // ═══ FRACTAL HOMOMORPHIC MULTIPLICATION ═══
+    banach::NDimCiphertext multiply_fractal(const banach::NDimCiphertext& a,
+                                             const banach::NDimCiphertext& b, int depth = 7) {
+        auto result = multiply(a, b);
+        return engine.encrypt_fractal(result.value_int / phi_constants::FP_SCALE, result.party_id, depth);
     }
 
     // ═══ HOMOMORPHIC ADDITION — Multi-operand safe ═══

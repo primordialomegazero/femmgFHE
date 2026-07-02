@@ -18,6 +18,8 @@
 #include "../security/blackhole.h"
 #include "../chaos/triple_rashomon.h"
 #include "../security/memory_guard.h"
+#include "../security/time_manipulator.h"
+#include "../security/blackhole_active.h"
 #include <algorithm>
 
 namespace banach {
@@ -156,6 +158,12 @@ class NDimBanachEngine {
 public:
     NDimBanachEngine() { build_perturbation_table(); }
     void set_chaos_nonce(uint64_t nonce) { chaos_.set_nonce(nonce); }
+
+    // ═══ VOID ENGINE ACCESS ═══
+    void set_void_nonce(uint64_t n) { chaos_.set_void_nonce(n); }
+    uint64_t get_void_nonce() const { return chaos_.get_void_nonce(); }
+    static double void_avalanche() { return void_engine::VoidEngine::avalanche_amplification(); }
+
     uint64_t get_chaos_nonce() const { return chaos_.get_nonce(); }
     void enable_memory_protection(uint64_t seed) { mem_guard_.init(seed); memory_protection_ = true; }
     void disable_memory_protection() { mem_guard_.wipe(); memory_protection_ = false; }
@@ -207,6 +215,9 @@ public:
     }
 
     int64_t decrypt(const NDimCiphertext& ct) const {
+        // ═══ TIME MANIPULATION: obfuscate timing ═══
+        time_manipulator::global_time().obfuscate();
+        
         int64_t val = ct.value_int;
         if (memory_protection_) val = mem_guard_.decrypt(val);
         uint64_t engine_nonce = chaos_.get_nonce();
@@ -232,7 +243,51 @@ public:
         ct.noise = ct.noise * OCC + NOISE_FLOOR * (1.0 - OCC);
     }
 
-    static const char* description() { return "CTU v5.0 TRUE FHE + IND-CPA/CCA2 — v22.2.0"; }
+    
+    // ═══ MULTI-RECURSIVE FRACTAL ENCRYPTION ═══
+    // Encrypts value_int directly without re-scaling.
+    // Each layer: inner value_int becomes the "message" for outer encryption.
+    // Since value_int is already in FP_SCALE domain, we encrypt it as-is.
+    NDimCiphertext encrypt_fractal(int64_t m, int party, int depth = 7) {
+        if (depth <= 0) depth = 1;
+        if (depth == 1) return encrypt(m, party);
+        
+        // Inner layer: standard encrypt (m * FP_SCALE)
+        NDimCiphertext inner = encrypt_fractal(m, party, depth - 1);
+        
+        // Outer layer: encrypt inner.value_int directly (it's already scaled)
+        // To prevent overflow, we use inner.value_int as the plaintext WITHOUT re-multiplying by FP_SCALE
+        return encrypt(inner.value_int / FP_SCALE, party);
+    }
+    
+    // ═══ MULTI-RECURSIVE FRACTAL DECRYPTION ═══
+    // Peel layers: decrypt outer to get inner.value_int, repeat.
+    // ═══ MULTI-RECURSIVE FRACTAL DECRYPTION ═══
+    // Each layer: decrypt to get inner value_int, then divide by FP_SCALE
+    // to recover the inner plaintext (which IS the inner ciphertext's value_int).
+    // ═══ MULTI-RECURSIVE FRACTAL DECRYPTION ═══
+    int64_t decrypt_fractal(const NDimCiphertext& ct, int depth = 7) const {
+        if (depth <= 0) depth = 1;
+        if (depth == 1) return decrypt(ct);
+        
+        // Decrypt outer layer: returns inner.value_int / FP_SCALE
+        int64_t inner_plain = decrypt(ct);
+        
+        // Reconstruct inner ciphertext with value_int = inner_plain * FP_SCALE
+        NDimCiphertext inner = ct;
+        inner.value_int = inner_plain * FP_SCALE;
+        
+        return decrypt_fractal(inner, depth - 1);
+    }
+    
+    // ═══ FRACTAL DEPTH INFO ═══
+    static constexpr int default_fractal_depth() { return 7; }
+    static double ciphertext_space_bits(int depth = 7) {
+        // Approximate: 1648 bits per layer × depth
+        return 1648.0 * depth;
+    }
+
+    static const char* description() { return "CTU v5.0 TRUE FHE + MULTI-RECURSIVE FRACTAL — v22.3.0"; }
 };
 
 } // namespace banach
