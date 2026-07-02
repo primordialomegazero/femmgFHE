@@ -30,6 +30,7 @@
 #include <cstdint>
 #include <cstring>
 #include <fcntl.h>
+#include <cmath>
 #include <unistd.h>
 
 namespace phi_parallel {
