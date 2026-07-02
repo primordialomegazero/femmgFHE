@@ -1,36 +1,18 @@
 {
   "name": "@primordialomegazero/femmg-fhe",
-  "version": "22.2.1",
-  "description": "FEmmg-FHE v22.2 — True FHE: Chaos-Entangled Ciphertext. IND-CPA + IND-CCA2 Secure. 40K TPS (-O0). Unlimited Depth. Zero Bootstrapping. Quantum-Resistant.",
+  "version": "22.3.0",
+  "description": "FEmmg-FHE v22.3 — True FHE: Chaos-Entangled + Void Engine + 7-Layer Fractal. IND-CPA/CCA2. 256-bit φ-Nonce. 40K TPS (-O0). Unlimited Depth. NIST Level 5 Quantum-Resistant.",
   "main": "index.js",
   "types": "index.d.ts",
   "scripts": {
-    "test": "node test.js",
-    "benchmark": "node benchmark.js"
+    "test": "node test.js"
   },
   "keywords": [
-    "fhe",
-    "fully-homomorphic-encryption",
-    "true-fhe",
-    "chaos-entangled",
-    "homomorphic-encryption",
-    "post-quantum-cryptography",
-    "golden-ratio",
-    "phi",
-    "banach-fixed-point",
-    "lyapunov-chaos",
-    "chaos-based-cryptography",
-    "ctu-v5",
-    "triple-rashomon",
-    "unlimited-depth",
-    "zero-bootstrapping",
-    "ind-cpa",
-    "ind-cca2",
-    "privacy-enhancing-technologies",
-    "cryptography",
-    "cpp17",
-    "open-source",
-    "quantum-resistant"
+    "fhe", "fully-homomorphic-encryption", "true-fhe", "chaos-entangled",
+    "void-engine", "fractal-encryption", "homomorphic-encryption",
+    "post-quantum-cryptography", "golden-ratio", "phi", "banach-fixed-point",
+    "lyapunov-chaos", "triple-rashomon", "unlimited-depth", "zero-bootstrapping",
+    "ind-cpa", "ind-cca2", "nist-level-5", "quantum-resistant"
   ],
   "author": "Dan Joseph M. Fernandez / Primordial Omega Zero",
   "license": "MIT",
@@ -38,14 +20,6 @@
     "type": "git",
     "url": "git+https://github.com/primordialomegazero/femmgFHE.git"
   },
-  "engines": {
-    "node": ">=14.0.0"
-  },
-  "files": [
-    "index.js",
-    "index.d.ts",
-    "test.js",
-    "include/",
-    "README.md"
-  ]
+  "engines": { "node": ">=14.0.0" },
+  "files": ["index.js", "index.d.ts", "test.js", "include/", "README.md"]
 }

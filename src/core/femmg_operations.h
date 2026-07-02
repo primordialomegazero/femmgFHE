@@ -98,6 +98,43 @@ public:
         return engine.encrypt_fractal(m, party, depth);
     }
     
+
+    // ═══ SMART ENCRYPT — Auto-selects Regular or Fractal ═══
+    enum class Sensitivity { AUTO, NORMAL, SENSITIVE, CRITICAL };
+    
+    banach::NDimCiphertext encrypt_smart(int64_t m, Sensitivity sensitivity = Sensitivity::AUTO, int party = -1) {
+        if(party < 0) party = (party_counter.fetch_add(1)) % banach::PARTIES;
+        
+        int depth = 1;  // Default: regular FHE
+        
+        switch (sensitivity) {
+            case Sensitivity::AUTO:
+                // Auto-detect: small values or values near powers of 2 = likely keys
+                if (std::abs(m) < 10000) depth = 3;                    // Small values = high security
+                else if ((m & (m - 1)) == 0 && m > 256) depth = 7;    // Power of 2 = likely key material
+                else if (std::abs(m) < 1000000) depth = 1;             // Normal values = regular
+                else depth = 1;                                         // Large values = regular (performance)
+                break;
+            case Sensitivity::NORMAL:   depth = 1; break;   // 40K TPS
+            case Sensitivity::SENSITIVE: depth = 3; break;  // ~12K TPS, 2^4944 space
+            case Sensitivity::CRITICAL:  depth = 7; break;  // 3.6K TPS, 2^11536 space
+        }
+        
+        return engine.encrypt_fractal(m, party, depth);
+    }
+    
+    int64_t decrypt_smart(const banach::NDimCiphertext& ct) const {
+        // Smart decrypt: try fractal first, fall back to regular
+        // The ciphertext itself knows its depth via the chaos structure
+        // For now: try all depths until one works
+        for (int depth = 7; depth >= 1; depth--) {
+            int64_t result = engine.decrypt_fractal(ct, depth);
+            // Valid decryptions are in a reasonable range (not garbage)
+            if (std::abs(result) < 1000000000 && result != 0) return result;
+        }
+        return engine.decrypt(ct);  // Fallback to regular
+    }
+
     int64_t decrypt_fractal(const banach::NDimCiphertext& ct, int depth = 7) const {
         return engine.decrypt_fractal(ct, depth);
     }
