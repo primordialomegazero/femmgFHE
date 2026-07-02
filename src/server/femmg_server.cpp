@@ -388,7 +388,6 @@ int main(int argc, char** argv) {
         std::cout << "🔒 PRODUCTION MODE: Enabling memory protection..." << std::endl;
         // Memory guard is enabled via banach_engine when memory_protection is on
         // We set it in the FHE engine
-        fhe = FEmmgFHE();  // Fresh instance with random chaos nonce
     }
     
     guardian_engine.start();

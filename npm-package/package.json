@@ -1,6 +1,6 @@
 {
   "name": "@primordialomegazero/femmg-fhe",
-  "version": "22.2.0",
+  "version": "22.2.1",
   "description": "FEmmg-FHE v22.2 — True FHE: Chaos-Entangled Ciphertext. IND-CPA + IND-CCA2 Secure. 40K TPS (-O0). Unlimited Depth. Zero Bootstrapping. Quantum-Resistant.",
   "main": "index.js",
   "types": "index.d.ts",

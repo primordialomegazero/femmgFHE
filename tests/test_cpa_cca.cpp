@@ -9,6 +9,7 @@
 
 #include "../src/core/femmg_operations.h"
 #include <iostream>
+#include <functional>
 #include <iomanip>
 #include <cmath>
 
