@@ -112,8 +112,11 @@ private:
         std::memcpy(nonce_.data(), &random_nonce, sizeof(random_nonce));
         std::memcpy(nonce_.data() + 8, &seed, sizeof(seed));
 
-        uint64_t phi_bits;
-        std::memcpy(&phi_bits, &PHI, sizeof(double));
+        // Portable φ bits — IEEE 754 double: 0x3FF9E3779B97F4A7
+        // Uses union to avoid architecture-dependent memcpy
+        union { double d; uint64_t u; } phi_union;
+        phi_union.d = PHI;
+        uint64_t phi_bits = phi_union.u;
         
         for (size_t i = 0; i < KEY_SIZE; i++) {
             uint8_t a = static_cast<uint8_t>((seed >> ((i % 8) * 8)) & 0xFF);

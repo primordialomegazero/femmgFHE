@@ -81,11 +81,13 @@ public:
 class SystemMetrics {
     unsigned long long prev_total = 0, prev_idle = 0;
     struct rusage prev_rusage;
+    mutable std::mutex metrics_mutex_;
     
 public:
     SystemMetrics() { getrusage(RUSAGE_SELF, &prev_rusage); }
     
     double cpuUsage() {
+        std::lock_guard<std::mutex> lock(metrics_mutex_);
         std::ifstream stat("/proc/stat");
         if(!stat.is_open()) return 0.5;
         std::string cpu;
@@ -112,6 +114,7 @@ public:
     }
     
     double processCPU() {
+        std::lock_guard<std::mutex> lock(metrics_mutex_);
         struct rusage usage;
         getrusage(RUSAGE_SELF, &usage);
         double user_diff = usage.ru_utime.tv_sec - prev_rusage.ru_utime.tv_sec +
