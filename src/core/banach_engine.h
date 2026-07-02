@@ -287,7 +287,14 @@ public:
         return 1648.0 * depth;
     }
 
-    static const char* description() { return "CTU v5.0 TRUE FHE + MULTI-RECURSIVE FRACTAL — v22.3.0"; }
+
+    // ═══ CHAOS SPEED CONTROLLER — E = m × speed^(2×layers) ═══
+    // Normal: PHI (1.618) — 32B avalanche
+    // Boost:  PHI_SQ (2.618) — 883T avalanche  
+    // BigBang: 3.0 — MAXIMUM avalanche
+    static constexpr double CHAOS_SPEED = PHI_SQ;  // Boost mode: φ²
+
+    static const char* description() { return "CTU v5.0 TRUE FHE + E=mc² CHAOS SPEED — v22.3.0"; }
 };
 
 } // namespace banach

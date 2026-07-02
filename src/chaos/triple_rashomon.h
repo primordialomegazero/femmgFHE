@@ -11,6 +11,7 @@
 #include <chrono>
 #include <cstring>
 #include "../chaos/void_engine.h"
+#include "../chaos/self_referential_chaos.h"
 #include "../chaos/phi_irrational_nonce.h"
 
 namespace triple_rashomon {
@@ -27,6 +28,7 @@ private:
     phi_nonce::PhiNonce global_nonce_;  // 256-bit φ-irrationality nonce
     uint64_t op_ctr_{0};
     bool initialized_{false};
+    self_referential_chaos::SelfReferentialChaosEngine self_chaos_;  // Layer -2: Self-referential
     void_engine::VoidEngine void_;  // Layer -1: Ex Nihilo source
 
     inline double fast_sin(double x) const {
@@ -67,11 +69,15 @@ public:
         uint64_t nonce = global_nonce_.to_u64() ^ op_id;
         uint64_t full_mix = global_nonce_.words[0] ^ global_nonce_.words[1] ^ global_nonce_.words[2] ^ global_nonce_.words[3];
 
+        // ═══ LAYER -2: SELF-REFERENTIAL CHAOS — "I AM THAT I AM" ═══
+        auto [self_val, self_hist] = self_chaos_.observe_self(value, 7, op_id);
+        double self_injection = self_val * 1e-15;  // Subtle self-reference
+        
         // ═══ LAYER -1: VOID ENGINE — Ex Nihilo chaos injection ═══
         auto [void_val, void_hist] = void_.observe(op_id);
         double void_injection = void_val * 1e-10;
         
-        double x = value * PHI + std::log(std::abs(value) + 1.0) + void_injection;
+        double x = value * PHI + std::log(std::abs(value) + 1.0) + self_injection + void_injection;
 
         for (int pass = 0; pass < 3; pass++) {
             double amp = (pass == 0) ? 1.0 : (pass == 1) ? PHI : PHI_SQ;
