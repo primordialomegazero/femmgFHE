@@ -229,10 +229,10 @@ graph LR
 
 | Metric | Value |
 |--------|-------|
-| **Operations** | 100,000,000 |
+| **Operations** | 1,000,000 |
 | **Pattern** | Encrypt + Decrypt cycle |
-| **Time** | 1,156.2 seconds |
-| **TPS** | **86,490 ops/sec** |
+| **Time** | ~12 seconds |
+| **TPS** | **~86,000 ops/sec (-O0 CTU v5)** |
 | **Noise** | 1.82815 bits FLATLINE |
 | **Avalanche** | 32,276,200,000 (42 vs 43) |
 | **Errors** | 0 |

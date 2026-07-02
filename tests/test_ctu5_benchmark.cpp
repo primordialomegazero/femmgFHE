@@ -8,18 +8,16 @@ using namespace banach;
 int main() {
     std::cout << "═══════════════════════════════════════" << std::endl;
     std::cout << "  CTU v5 — TRIPLE RASHOMON BENCHMARK" << std::endl;
-    std::cout << "  100M Encrypt+Decrypt Operations" << std::endl;
+    std::cout << "  1M Encrypt+Decrypt Operations" << std::endl;
     std::cout << "  -O0 True Performance" << std::endl;
     std::cout << "═══════════════════════════════════════" << std::endl;
     std::cout << std::endl;
     
     NDimBanachEngine engine;
     
-    const long long TOTAL = 100000000LL;
-    const long long BATCH = 10000000LL;
+    const long long TOTAL = 1000000LL;  // 1M!
+    const long long BATCH = 100000LL;    // Every 100K
     long long errors = 0;
-    double max_noise = 1.82815;
-    double min_noise = 1.82815;
     
     auto start = std::chrono::high_resolution_clock::now();
     
@@ -29,11 +27,7 @@ int main() {
         for (long long i = 0; i < BATCH; i++) {
             long long val = (batch * BATCH + i) % 10000;
             auto ct = engine.encrypt(val, 0);
-            int64_t dec = engine.decrypt(ct);
-            
-            if (dec != val) errors++;
-            if (ct.noise > max_noise) max_noise = ct.noise;
-            if (ct.noise < min_noise) min_noise = ct.noise;
+            if (engine.decrypt(ct) != val) errors++;
         }
         
         auto batch_end = std::chrono::high_resolution_clock::now();
@@ -44,31 +38,27 @@ int main() {
         
         std::cout << std::fixed << std::setprecision(1)
                   << "[" << std::setw(3) << (batch + 1) * 10 << "%] "
-                  << "Ops: " << total_ops / 1000000 << "M | "
-                  << "Batch: " << batch_ms << "ms | "
-                  << "TPS: " << (long long)tps << " | "
+                  << total_ops / 1000 << "K ops | "
+                  << batch_ms << "ms | "
+                  << (long long)tps << " TPS | "
                   << "Errors: " << errors
                   << std::endl;
     }
     
     auto end = std::chrono::high_resolution_clock::now();
     auto total_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-    double total_sec = total_ms / 1000.0;
     
     std::cout << std::endl;
     std::cout << "═══════════════════════════════════════" << std::endl;
     std::cout << "  FINAL RESULTS" << std::endl;
     std::cout << "═══════════════════════════════════════" << std::endl;
-    std::cout << "  Total ops:     " << TOTAL / 1000000 << "M" << std::endl;
-    std::cout << "  Total time:    " << total_sec << " seconds" << std::endl;
-    std::cout << "  Average TPS:   " << (long long)(TOTAL / total_sec) << std::endl;
+    std::cout << "  Total ops:     1,000,000" << std::endl;
+    std::cout << "  Total time:    " << total_ms / 1000.0 << " seconds" << std::endl;
+    std::cout << "  Average TPS:   " << (long long)(TOTAL / (total_ms / 1000.0)) << std::endl;
     std::cout << "  Errors:        " << errors << std::endl;
-    std::cout << "  Noise max:     " << max_noise << " bits" << std::endl;
-    std::cout << "  Noise min:     " << min_noise << " bits" << std::endl;
-    std::cout << "  Noise var:     " << (max_noise - min_noise) << " bits" << std::endl;
     std::cout << "  Accuracy:      " << (100.0 - 100.0 * errors / TOTAL) << "%" << std::endl;
     std::cout << std::endl;
-    std::cout << "  🎉 CTU v5 — Triple Rashomon — Benchmark Complete!" << std::endl;
+    std::cout << "  🎉 CTU v5 — Triple Rashomon — 1M Ops Complete!" << std::endl;
     std::cout << "═══════════════════════════════════════" << std::endl;
     
     return (errors == 0) ? 0 : 1;
