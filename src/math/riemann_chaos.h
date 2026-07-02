@@ -80,11 +80,14 @@ public:
         
         for (int i = 0; i < RIEMANN_LAYERS; i++) {
             // Use Riemann zero as anchor point for chaos
-            double t = ZEROS[i] + (nonce % 1000) * 0.001 + x * 0.1;
+            int zero_idx = ((int)std::abs(value) * 13 + i * 7) % 14;
+            double t = ZEROS[zero_idx] + (nonce % 1000) * 0.001 + x * 0.01;
             double zeta_val = riemann_zeta_t(t);
             
             // Chaos = PHI * Z(t) * scaling
-            double chaos = PHI * 10.0 * zeta_val * std::sin(x * PHI + i * PHI_INV);
+                        // Chaos amplitude proportional to value — ensures 42 vs 43 differ MASSIVELY
+            double amp = PHI * 1000.0 * (1.0 + std::abs(value) * 0.5);
+            double chaos = amp * zeta_val * std::sin(x * PHI + i * PHI_INV);
             history[i] = chaos;
             x = x + chaos;
         }
