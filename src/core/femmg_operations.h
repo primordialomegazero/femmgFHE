@@ -18,7 +18,7 @@
  * USED BY: femmg_server.cpp, test suites
  */
 /*
- * FEmmg-FHE — FLOATING-INTEGER MERGED FHE CORE (FORTRESS v21.5)
+ * FEmmg-FHE — FLOATING-INTEGER MERGED FHE CORE (FORTRESS v22.1)
  *
  * Unlimited depth. Zero bootstrapping. Integer core = no precision loss.
  * "Noise converges. Integers stay exact. Both worlds. No compromise."

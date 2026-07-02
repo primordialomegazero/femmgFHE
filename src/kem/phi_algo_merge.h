@@ -1,6 +1,6 @@
 // ============================================================
 // PHI-ALGO MERGE: Spiralkem + Φ-SIG + Post-Quantoink
-// Integrated into FEmmg-FHE v21.0 - FIXED
+// Integrated into FEmmg-FHE v22.1 - FIXED
 // ============================================================
 
 #pragma once
@@ -158,7 +158,7 @@ static void phi_secure_encrypt(const uint8_t *plaintext, size_t pt_len,
 // ============================================================
 
 // ============================================================
-// 5.5 CLIENT-SIDE PERTURBATION GENERATOR (v21.0.2)
+// 5.5 CLIENT-SIDE PERTURBATION GENERATOR (v22.1.2)
 // Client provides secret; perturbation is deterministic,
 // server cannot reconstruct without client secret.
 // ============================================================

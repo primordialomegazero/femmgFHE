@@ -1,5 +1,5 @@
 /*
- * GUARDIAN.H — Self-Healing Infrastructure for FEmmg-FHE v17.5
+ * GUARDIAN.H — Self-Healing Infrastructure for FEmmg-FHE v22.1
  * 
  * Actual System Metrics (Linux /proc)
  * Structured JSON Logging

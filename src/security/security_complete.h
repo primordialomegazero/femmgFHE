@@ -1,5 +1,5 @@
 // ============================================================
-// FEmmg-FHE SECURITY COMPLETE v20.1
+// FEmmg-FHE SECURITY COMPLETE v22.1
 // ============================================================
 //  1. Client-side perturbation seed
 //  2. 256-bit OS-level CSPRNG nonce
@@ -190,12 +190,12 @@ public:
 // POST-QUANTUM: PHI-LATTICE KEM
 // ============================================================
 // ============================================================
-// Φ-PKE: LYAPUNOV-STABILIZED RIEMANN-PARALLEL KEM (v21.2)
+// Φ-PKE: LYAPUNOV-STABILIZED RIEMANN-PARALLEL KEM (v22.1)
 // Fibonacci + Golden Ratio + Lyapunov λ=ln(φ) + Riemann Zeros
 // Replaces PhiLatticeKEM — 7 parallel lanes, zero bugs
 // ============================================================
 // ============================================================
-// Φ-PKE v21.4: FLOATING-INTEGER MERGED KEM
+// Φ-PKE v22.1: FLOATING-INTEGER MERGED KEM
 // Integer core (state, Fibonacci, extraction) = NO precision limit
 // Floating-point injection (Riemann Z(t), φ-contraction) = MAX chaos
 // Bridge: int→float (perturbation) → int

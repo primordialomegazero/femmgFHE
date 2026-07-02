@@ -1,5 +1,5 @@
 /*
- * φ-CONSTANTS — SINGLE SOURCE OF TRUTH (v21.5)
+ * φ-CONSTANTS — SINGLE SOURCE OF TRUTH (v22.1)
  * 
  * Every φ value in FEmmg-FHE references THIS file.
  * No duplication. No drift. One φ to rule them all.

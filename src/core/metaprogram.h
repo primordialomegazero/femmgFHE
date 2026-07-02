@@ -1,5 +1,5 @@
 /*
- * FEmmg-FHE — MULTI-METAPROGRAMMING ENGINE (FORTRESS v17.5)
+ * FEmmg-FHE — MULTI-METAPROGRAMMING ENGINE (FORTRESS v22.1)
  * 
  * Self-modifying, self-optimizing perturbation system.
  * The server watches its own noise stabilization performance

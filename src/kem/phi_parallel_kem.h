@@ -18,7 +18,7 @@
  * INCLUDED BY: security_complete.h
  */
 /*
- * Φ-PKE: 7-LANE LYAPUNOV-RIEMANN PARALLEL KEM (v21.5)
+ * Φ-PKE: 7-LANE LYAPUNOV-RIEMANN PARALLEL KEM (v22.1)
  * Integer core + Floating chaos injection
  * Constants from phi_constants.h — single source of truth
  * 

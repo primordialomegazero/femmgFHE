@@ -21,7 +21,7 @@
  * INCLUDED BY: femmg_operations.h
  */
 /*
- * FEmmg-FHE — FLOATING-INTEGER MERGED BANACH ENGINE (FORTRESS v21.5)
+ * FEmmg-FHE — FLOATING-INTEGER MERGED BANACH ENGINE (FORTRESS v22.1)
  *
  * TRUE UNLIMITED FHE:
  * - Integer core: exact arithmetic, no precision loss (unlimited plaintext)

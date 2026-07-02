@@ -11,7 +11,7 @@
  *   Gravitational Lensing → AVX-512 data transformation
  * 
  * ARCHITECTURE:
- *   - GoldenChaosEngine: CTU v4 chaos
+ *   - GoldenChaosEngine: CTU v5.0 chaos
  *   - FractalEventHorizon: 7-ring encapsulation
  *   - SingularityEngineV2: Banach + Chaos collapse
  *   - HawkingRadiationMonitorV2: Entropy + φ-autocorrelation
@@ -27,7 +27,7 @@
 /*
  * BLACKHOLE + FEmmg-FHE INTEGRATION — SIMPLIFIED
  *
- * Golden Chaos (CTU v4) only — Banach integration pending cleanup
+ * Golden Chaos (CTU v5.0) only — Banach integration pending cleanup
  */
 
 #pragma once

@@ -1,5 +1,5 @@
 /*
- * FEmmg-FHE — TEST SUITE (FORTRESS v17.0 Path X)
+ * FEmmg-FHE — TEST SUITE (FORTRESS v22.1 Path X)
  * Tests 7D Banach Contraction with NDimCiphertext
  */
 
