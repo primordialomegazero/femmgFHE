@@ -15,6 +15,7 @@ constexpr int MQ_VARS = 8;
 constexpr int MQ_EQS = 12;
 constexpr int CODE_LEN = 64;
 constexpr int CODE_DIM = 32;
+constexpr int REPEAT_COUNT = 8;
 constexpr int HASH_CHAIN = 7;
 
 class InfoTheoreticLayer {
@@ -32,43 +33,47 @@ public:
         for (size_t i = 0; i < size; i++) cipher[i] = plain[i] ^ pad_[i];
     }
     void decrypt(const uint8_t* cipher, uint8_t* plain, size_t size) {
-        encrypt(cipher, plain, size);
+        encrypt(cipher, plain, size);  // XOR is symmetric
     }
 };
 
 class CodingTheoryLayer {
-    std::vector<std::vector<uint8_t>> G_;
+    static constexpr int USED_BITS = 8;
+    static constexpr int REPEAT = CODE_LEN / USED_BITS;
+    
 public:
-    CodingTheoryLayer() {
-        G_.resize(CODE_DIM, std::vector<uint8_t>(CODE_LEN, 0));
-        double x = PHI;
-        for (int i = 0; i < CODE_DIM; i++)
-            for (int j = 0; j < CODE_LEN; j++) {
-                x = std::sin(x * PHI + (i * CODE_LEN + j) * PHI_INV);
-                G_[i][j] = (std::abs(x) > 0.5) ? 1 : 0;
-            }
-    }
+    CodingTheoryLayer() {}
+    
     std::vector<uint8_t> encode(const std::vector<uint8_t>& msg) {
         std::vector<uint8_t> cw(CODE_LEN, 0);
-        for (int i = 0; i < CODE_DIM; i++)
-            if (msg[i])
-                for (int j = 0; j < CODE_LEN; j++) cw[j] ^= G_[i][j];
+        for (int i = 0; i < USED_BITS; i++) {
+            uint8_t bit = (i < (int)msg.size()) ? (msg[i] & 1) : 0;
+            for (int r = 0; r < REPEAT; r++) {
+                cw[i * REPEAT + r] = bit;
+            }
+        }
         return cw;
     }
+    
     void add_errors(std::vector<uint8_t>& cw, int n, uint64_t seed) {
         double x = (double)seed * PHI;
         for (int e = 0; e < n; e++) {
             x = std::sin(x * PHI + e * PHI_INV);
-            cw[std::abs((int)(x * CODE_LEN)) % CODE_LEN] ^= 1;
+            int pos = std::abs((int)(x * 100000)) % CODE_LEN;
+            cw[pos] ^= 1;
         }
     }
-    std::vector<uint8_t> decode(std::vector<uint8_t>& rx, int) {
+    
+    std::vector<uint8_t> decode(const std::vector<uint8_t>& rx, int max_errors) {
         std::vector<uint8_t> msg(CODE_DIM, 0);
-        for (int i = 0; i < CODE_DIM; i++) {
+        for (int i = 0; i < USED_BITS; i++) {
             int ones = 0;
-            for (int j = 0; j < CODE_LEN; j++) if (G_[i][j] && rx[j]) ones++;
-            msg[i] = (ones > 0) ? 1 : 0;
+            for (int r = 0; r < REPEAT; r++) {
+                if (rx[i * REPEAT + r]) ones++;
+            }
+            msg[i] = (ones > REPEAT / 2) ? 1 : 0;
         }
+        for (int i = USED_BITS; i < CODE_DIM; i++) msg[i] = 0;
         return msg;
     }
 };
@@ -113,7 +118,7 @@ public:
 
 class HashBasedLayer {
     static constexpr int HS = 32;
-    std::array<uint8_t, HS> phi_hash(const uint8_t* d, size_t n, uint64_t seed) {
+    std::array<uint8_t, HS> phi_hash(const uint8_t* d, size_t n, uint64_t seed) const {
         std::array<uint8_t, HS> h{};
         double x = (double)seed * PHI;
         for (size_t i = 0; i < HS; i++) {
@@ -130,7 +135,7 @@ public:
             chain[i] = phi_hash(chain[i-1].data(), HS, seed ^ (i * 0x9E3779B9));
         return chain;
     }
-    bool verify_chain(const std::vector<std::array<uint8_t, HS>>& c, uint64_t seed) {
+    bool verify_chain(const std::vector<std::array<uint8_t, HS>>& c, uint64_t seed) const {
         for (int i = 1; i < HASH_CHAIN; i++)
             if (phi_hash(c[i-1].data(), HS, seed ^ (i * 0x9E3779B9)) != c[i]) return false;
         return true;
@@ -142,22 +147,49 @@ class AntiLatticeEngine {
     CodingTheoryLayer ct_;
     MQLayer mq_;
     HashBasedLayer hb_;
+    
+    static constexpr size_t PAYLOAD_SIZE = 16;  // Keep small for performance
+    
 public:
     std::vector<uint8_t> encrypt(const std::vector<uint8_t>& pt, uint64_t seed) {
         std::vector<uint8_t> ct;
-        it_.generate_pad(pt.size(), seed);
+        
+        // Step 1: Info-Theoretic (OTP XOR) — symmetric, easy to reverse
+        it_.generate_pad(pt.size() + 8, seed);  // +8 for extra data
         ct.resize(pt.size());
         it_.encrypt(pt.data(), ct.data(), pt.size());
+        
+        // Step 2: Append coding-theory encoded version
         std::vector<uint8_t> mb(CODE_DIM, 0);
-        for (size_t i = 0; i < std::min(pt.size(), (size_t)CODE_DIM); i++) mb[i] = pt[i] & 1;
+        for (size_t i = 0; i < std::min(pt.size(), (size_t)8); i++) mb[i] = pt[i] & 1;
         auto cw = ct_.encode(mb);
         ct_.add_errors(cw, 3, seed ^ 0x1111);
+        ct.insert(ct.end(), cw.begin(), cw.end());
+        
+        // Step 3: Append MQ output
         std::vector<int64_t> mi(MQ_VARS, 0);
-        for (int i = 0; i < std::min((int)cw.size(), MQ_VARS); i++) mi[i] = cw[i];
+        for (int i = 0; i < std::min((int)pt.size(), MQ_VARS); i++) mi[i] = pt[i];
         auto mqo = mq_.evaluate(mi);
-        for (int64_t v : mqo) { ct.push_back((uint8_t)(v & 0xFF)); ct.push_back((uint8_t)((v>>8)&0xFF)); }
+        for (int64_t v : mqo) { 
+            ct.push_back((uint8_t)(v & 0xFF)); 
+            ct.push_back((uint8_t)((v>>8)&0xFF)); 
+        }
+        
         return ct;
     }
+    
+    // ═══ DECRYPT: Reverse the encrypt process ═══
+    std::vector<uint8_t> decrypt(const std::vector<uint8_t>& ct, uint64_t seed, size_t original_size) {
+        if (ct.size() < original_size) return {};
+        
+        // Step 1: Info-Theoretic decrypt (first original_size bytes are XOR-encrypted)
+        it_.generate_pad(original_size + 8, seed);
+        std::vector<uint8_t> pt(original_size);
+        it_.decrypt(ct.data(), pt.data(), original_size);
+        
+        return pt;
+    }
+    
     static const char* name() { return "Anti-Lattice (IT+Coding+MQ+Hash)"; }
 };
 
