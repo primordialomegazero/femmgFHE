@@ -170,14 +170,20 @@ public:
                                         const banach::NDimCiphertext& b, int depth = 7) {
         auto result = add(a, b);
         // Re-wrap with fractal layers
-        return engine.encrypt_fractal(result.value_int / phi_constants::FP_SCALE, result.party_id, depth);
+        uint64_t en = engine.get_chaos_nonce();
+        uint64_t k = result.operations ^ en;
+        int64_t plain = result.value_int ^ static_cast<int64_t>(k);
+        return engine.encrypt_fractal(plain / phi_constants::FP_SCALE, result.party_id, depth);
     }
     
     // ═══ FRACTAL HOMOMORPHIC MULTIPLICATION ═══
     banach::NDimCiphertext multiply_fractal(const banach::NDimCiphertext& a,
                                              const banach::NDimCiphertext& b, int depth = 7) {
         auto result = multiply(a, b);
-        return engine.encrypt_fractal(result.value_int / phi_constants::FP_SCALE, result.party_id, depth);
+        uint64_t en = engine.get_chaos_nonce();
+        uint64_t k = result.operations ^ en;
+        int64_t plain = result.value_int ^ static_cast<int64_t>(k);
+        return engine.encrypt_fractal(plain / phi_constants::FP_SCALE, result.party_id, depth);
     }
 
     // ═══ HOMOMORPHIC ADDITION — Multi-operand safe ═══

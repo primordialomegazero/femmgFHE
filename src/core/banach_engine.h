@@ -261,7 +261,10 @@ public:
         
         // Outer layer: encrypt inner.value_int directly (it's already scaled)
         // To prevent overflow, we use inner.value_int as the plaintext WITHOUT re-multiplying by FP_SCALE
-        return encrypt(inner.value_int / FP_SCALE, party);
+        uint64_t en = chaos_.get_nonce();
+        uint64_t k = inner.operations ^ en;
+        int64_t inner_plain = inner.value_int ^ static_cast<int64_t>(k);
+        return encrypt(inner_plain / FP_SCALE, party);
     }
     
     // ═══ MULTI-RECURSIVE FRACTAL DECRYPTION ═══
@@ -277,9 +280,11 @@ public:
         // Decrypt outer layer: returns inner.value_int / FP_SCALE
         int64_t inner_plain = decrypt(ct);
         
-        // Reconstruct inner ciphertext with value_int = inner_plain * FP_SCALE
+        // Reconstruct inner ciphertext with ENCRYPTED value_int
+        uint64_t engine_nonce = chaos_.get_nonce();
+        uint64_t chaos_key = ct.operations ^ engine_nonce;
         NDimCiphertext inner = ct;
-        inner.value_int = inner_plain * FP_SCALE;
+        inner.value_int = (inner_plain * FP_SCALE) ^ static_cast<int64_t>(chaos_key);
         
         return decrypt_fractal(inner, depth - 1);
     }
