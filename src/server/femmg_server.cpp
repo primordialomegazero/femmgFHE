@@ -85,8 +85,8 @@ std::string route(const std::string& body,SM& sm,FEmmgFHE& fhe){
     
     if(action=="zkp_prove"){std::string data=sg(body,"data");if(data.empty())data="FEmmg-FHE_ZKP";auto pf=zkp::FractalZKP::prove(data);return ok(O({J("action","zkp_prove"),B("verified",zkp::FractalZKP::verify(pf)),J("protocol","Schnorr Σ-Protocol on secp256k1"),J("note","Publicly verifiable")}));}
     if(action=="zkp_fractal"){std::string data=sg(body,"data");if(data.empty())data="FEmmg-FHE_Fractal";auto chain=zkp::FractalZKP::fractal_prove(data);return ok(O({J("action","zkp_fractal"),I("depth",chain.size()),B("all_verified",zkp::FractalZKP::verify_chain(chain)),J("protocol","Recursive Fractal Schnorr ZKP"),J("engine","TrueFractalZKP v6.0")}));}
-    if(action=="meta_stats"){auto s=meta_engine.analyze();return ok(O({J("action","meta_stats"),I("generation",meta_engine.get_generation()),I("samples",s.samples),N("avg_noise_delta",s.avg_noise_delta),N("convergence_rate",s.convergence_rate),B("optimal",s.optimal),B("evolving",meta_engine.is_evolving()),J("engine","Multi-Metaprogramming v21.0")}));}
-    if(action=="meta_evolve"){meta_engine.evolve();return ok(O({J("action","meta_evolve"),I("new_generation",meta_engine.get_generation()),J("status","Self-optimization complete"),J("engine","Multi-Metaprogramming v21.0")}));}
+    if(action=="meta_stats"){auto s=meta_engine.analyze();return ok(O({J("action","meta_stats"),I("generation",meta_engine.get_generation()),I("samples",s.samples),N("avg_noise_delta",s.avg_noise_delta),N("convergence_rate",s.convergence_rate),B("optimal",s.optimal),B("evolving",meta_engine.is_evolving()),J("engine","Multi-Metaprogramming v22.1")}));}
+    if(action=="meta_evolve"){meta_engine.evolve();return ok(O({J("action","meta_evolve"),I("new_generation",meta_engine.get_generation()),J("status","Self-optimization complete"),J("engine","Multi-Metaprogramming v22.1")}));}
     
     if(action=="guardian"){std::cerr << "GUARDIAN HIT" << std::endl;
         return ok(O({J("action","guardian"),J("status",guardian_engine.status())}));
