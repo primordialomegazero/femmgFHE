@@ -40,7 +40,7 @@
 #include <array>
 #include <atomic>
 #include "../security/blackhole.h"
-#include "../chaos/quintuple_rashomon.h"
+#include "../chaos/eight_demon_gates.h"
 #include "../security/memory_guard.h"
 #include <algorithm>
 
@@ -70,7 +70,7 @@ class NDimBanachEngine {
     double pert_table[DIMS][DEPTH][PARTIES];
     memory_guard::MemoryGuard mem_guard_;
     bool memory_protection_ = false;
-    quintuple_rashomon::QuintupleRashomonEngine chaos_;  // CTU v5.2
+    eight_demon_gates::EightDemonGatesEngine chaos_;  // CTU v5.3
 
     static double fibonacci_floor(int layer) {
         return (double)FIBONACCI[layer % 20] * PHI / 10.0 + 1.0;
@@ -89,7 +89,7 @@ class NDimBanachEngine {
 public:
     NDimBanachEngine() { build_perturbation_table(); }
     
-    // CTU v5.2 nonce setup
+    // CTU v5.3 nonce setup
     void set_chaos_nonce(uint64_t nonce) { chaos_.set_nonce(nonce); }
     
     // Enable memory protection with session seed
@@ -136,18 +136,16 @@ public:
             ct.noise = ct.noise * OCC + NOISE_FLOOR * (1.0 - OCC);
         }
         
-        // ═══ CTU v5.2: Quintuple Rashomon Chaos (25 layers) ═══
-        // Use ORIGINAL expanded value (retains full 42 vs 43 difference!)
+        // ═══ CTU v5.3: 8 Demon Gates Chaos (8 layers) ═══
         double original_expanded = (double)m * PHI + LAMBDA;
         auto [chaos_val, chaos_hist] = chaos_.observe(original_expanded, op_counter.load());
         ct.coordinates[0] = chaos_val;
-        // Store chaos history for audit
-        for (int i = 0; i < 14 && i < 7; i++) {
+        // Store all 8 layers in lyapunov (7) + perturbation[0] (1)
+        for (int i = 0; i < 7 && i < 8; i++) {
             ct.lyapunov_spectrum[i] = chaos_hist[i];
-            ct.perturbation[i] = chaos_hist[i + 7];
         }
-        ct.expanded_dim0 = chaos_hist[14];
-        
+        ct.perturbation[0] = chaos_hist[7];
+
         return ct;
     }
 
