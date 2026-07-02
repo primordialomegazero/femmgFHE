@@ -1,9 +1,9 @@
-# Compiled binaries
-femmg_server
-build/
+# Binaries
 *.o
 *.out
 *.exe
+femmg_server
+build/
 
 # Test binaries (keep .cpp sources)
 test_*
@@ -27,3 +27,12 @@ Thumbs.db
 
 # Dependencies
 node_modules/
+
+# Paper artifacts (generated)
+paper/*.aux
+paper/*.log
+paper/*.pdf
+
+# Logs
+*.log
+!CHANGELOG.md
