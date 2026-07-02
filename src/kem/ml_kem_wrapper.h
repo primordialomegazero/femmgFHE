@@ -1,10 +1,8 @@
 /*
- * FEmmg-FHE v22.3 — ML-KEM Compatible Wrapper
+ * FEmmg-FHE v22.3 — ML-KEM Wrapper (Native liboqs)
  *
- * Standard KEM flow:
- *   keygen() → (pk, sk) where sk = seed, pk = seed || seed^KDF(seed)
- *   encapsulate(pk) → (ct, ss) where ct = random, ss = KDF(pk || ct)
- *   decapsulate(sk, ct) → ss = KDF(reconstruct_pk(sk) || ct)
+ * Uses actual NIST FIPS 203 ML-KEM-1024 via liboqs.
+ * Falls back to φ-PKE fractal KEM if liboqs unavailable.
  *
  * PHI-OMEGA-ZERO — I AM THAT I AM
  */
@@ -12,88 +10,108 @@
 #pragma once
 #include <chrono>
 #include <cmath>
-#include "phi_parallel_kem.h"
 #include <cstring>
 #include <array>
 #include <utility>
+#include <vector>
 #include <fcntl.h>
 #include <unistd.h>
 
+// Try to include native ML-KEM, fall back to φ-PKE
+#if __has_include(<oqs/oqs.h>)
+  #include <oqs/oqs.h>
+  #define FEMMG_HAS_NATIVE_MLKEM 1
+#else
+  #define FEMMG_HAS_NATIVE_MLKEM 0
+#endif
+
+#include "phi_parallel_kem.h"
+
 namespace ml_kem {
 
-constexpr size_t PK_SIZE = 64, SK_SIZE = 32, CT_SIZE = 64, SS_SIZE = 32;
+constexpr size_t PK_SIZE = 1568;
+constexpr size_t SK_SIZE = 3168;
+constexpr size_t CT_SIZE = 1568;
+constexpr size_t SS_SIZE = 32;
 
-using PublicKey = std::array<uint8_t, PK_SIZE>;
-using SecretKey = std::array<uint8_t, SK_SIZE>;
-using Ciphertext = std::array<uint8_t, CT_SIZE>;
+using PublicKey = std::vector<uint8_t>;
+using SecretKey = std::vector<uint8_t>;
+using Ciphertext = std::vector<uint8_t>;
 using SharedSecret = std::array<uint8_t, SS_SIZE>;
 
-// KDF: phi_parallel_kem extract
-inline void kdf(const uint8_t* input, size_t len, uint8_t* out) {
-    phi_parallel::PhiParallelKEM kem;
-    kem.engine.seed(input, len);
-    kem.engine.evolve(128);
-    kem.engine.extract(out, 32);
-}
+#if FEMMG_HAS_NATIVE_MLKEM
 
+// ═══ NATIVE ML-KEM-1024 via liboqs ═══
 inline std::pair<PublicKey, SecretKey> keygen() {
-    uint8_t seed[32];
-    int fd = open("/dev/urandom", O_RDONLY);
-    if (fd >= 0) { read(fd, seed, 32); close(fd); }
-    else { for (int i = 0; i < 32; i++) seed[i] = i * 7 + 3; }
-    
-    PublicKey pk{};
-    SecretKey sk{};
-    std::memcpy(sk.data(), seed, SK_SIZE);
-    
-    // pk = seed[0..31] || KDF(seed)
-    uint8_t derived[32];
-    kdf(seed, 32, derived);
-    for (size_t i = 0; i < 32; i++) pk[i] = seed[i];
-    for (size_t i = 0; i < 32; i++) pk[i+32] = derived[i];
-    
+    PublicKey pk(PK_SIZE);
+    SecretKey sk(SK_SIZE);
+    OQS_KEM* kem = OQS_KEM_new(OQS_KEM_alg_ml_kem_1024);
+    if (kem) {
+        OQS_KEM_keypair(kem, pk.data(), sk.data());
+        OQS_KEM_free(kem);
+    }
     return {pk, sk};
 }
 
 inline std::pair<Ciphertext, SharedSecret> encapsulate(const PublicKey& pk) {
-    // Generate ephemeral random
-    uint8_t ephemeral[32];
-    int fd = open("/dev/urandom", O_RDONLY);
-    if (fd >= 0) { read(fd, ephemeral, 32); close(fd); }
-    else { for (int i = 0; i < 32; i++) ephemeral[i] = i * 13 + 7; }
-    
-    Ciphertext ct{};
-    std::memcpy(ct.data(), ephemeral, CT_SIZE > 32 ? 32 : CT_SIZE);
-    
-    // ss = KDF(pk || ephemeral)
-    uint8_t combined[PK_SIZE + 32];
-    std::memcpy(combined, pk.data(), PK_SIZE);
-    std::memcpy(combined + PK_SIZE, ephemeral, 32);
-    
+    Ciphertext ct(CT_SIZE);
     SharedSecret ss{};
-    kdf(combined, PK_SIZE + 32, ss.data());
-    
+    OQS_KEM* kem = OQS_KEM_new(OQS_KEM_alg_ml_kem_1024);
+    if (kem) {
+        OQS_KEM_encaps(kem, ct.data(), ss.data(), pk.data());
+        OQS_KEM_free(kem);
+    }
     return {ct, ss};
 }
 
 inline SharedSecret decapsulate(const SecretKey& sk, const Ciphertext& ct) {
-    // Reconstruct pk from sk
-    PublicKey pk{};
-    uint8_t derived[32];
-    kdf(sk.data(), SK_SIZE, derived);
-    for (size_t i = 0; i < 32; i++) pk[i] = sk[i];
-    for (size_t i = 0; i < 32; i++) pk[i+32] = derived[i];
-    
-    // ss = KDF(pk || ct[0..31])
-    uint8_t combined[PK_SIZE + 32];
-    std::memcpy(combined, pk.data(), PK_SIZE);
-    std::memcpy(combined + PK_SIZE, ct.data(), 32);
-    
     SharedSecret ss{};
-    kdf(combined, PK_SIZE + 32, ss.data());
-    
+    OQS_KEM* kem = OQS_KEM_new(OQS_KEM_alg_ml_kem_1024);
+    if (kem) {
+        OQS_KEM_decaps(kem, ss.data(), ct.data(), sk.data());
+        OQS_KEM_free(kem);
+    }
     return ss;
 }
+
+inline const char* backend() { return "ML-KEM-1024 (liboqs) — NIST FIPS 203"; }
+
+#else
+
+// ═══ FALLBACK: φ-PKE Fractal KEM ═══
+inline std::pair<PublicKey, SecretKey> keygen() {
+    PublicKey pk(PK_SIZE);
+    SecretKey sk(SK_SIZE);
+    phi_parallel::PhiParallelKEM kem;
+    kem.generate();
+    std::memcpy(pk.data(), kem.public_token, 64);
+    std::memcpy(sk.data(), kem.private_token, 32);
+    return {pk, sk};
+}
+
+inline std::pair<Ciphertext, SharedSecret> encapsulate(const PublicKey& pk) {
+    Ciphertext ct(CT_SIZE);
+    SharedSecret ss{};
+    phi_parallel::PhiParallelKEM kem;
+    kem.engine.seed(pk.data(), 32);
+    kem.engine.evolve(128);
+    kem.engine.extract(ss.data(), 32);
+    kem.engine.extract(ct.data(), CT_SIZE > 64 ? 64 : CT_SIZE);
+    return {ct, ss};
+}
+
+inline SharedSecret decapsulate(const SecretKey& sk, const Ciphertext& ct) {
+    SharedSecret ss{};
+    phi_parallel::PhiParallelKEM kem;
+    kem.engine.seed(sk.data(), 32);
+    kem.engine.evolve(128);
+    kem.engine.extract(ss.data(), 32);
+    return ss;
+}
+
+inline const char* backend() { return "φ-PKE Fractal KEM (liboqs not available)"; }
+
+#endif
 
 inline bool self_test() {
     auto [pk, sk] = keygen();
