@@ -1,58 +1,29 @@
-# Build outputs
-build/*
-!build/.gitkeep
-
-# Object files
-*.o
-*.obj
-
-# Binaries
-femmgFHE
+# Compiled binaries
 femmg_server
-test_suite
-test_godcode
-debug_godcode
+build/
+*.o
+*.out
+*.exe
 
-# LaTeX artifacts
-paper/*.aux
-paper/*.log
-paper/*.out
+# Test binaries (keep .cpp sources)
+test_*
+!test_*.cpp
+!test_*.sh
+!test_*.py
+tests/test_*
+!tests/test_*.cpp
+!tests/test_*.sh
+!tests/test_*.py
 
 # IDE
 .vscode/
 .idea/
 *.swp
-*~
+*.swo
 
 # OS
 .DS_Store
 Thumbs.db
-paper/*.pdf
-build/femmg_server
-test_riemann_*
-test_source_frequency
-test_pozd
-debug_add
 
-# Compiled binaries
-femmg_server
-test_suite
-test_riemann_*
-test_source_frequency
-test_pozd
-debug_add
-src/test_phi_zeta
-src/test_phi_zeta2
-src/test_riemann_stabilizer
-guardian.log
-guardian_alerts.log
-*.bak
-
-# Symlinked security headers (source of truth in root)
-src/phi_algo_merge.h
-src/security_complete.h
-
-# Compiled test binaries (keep .cpp sources)
-test_*
-!test_*.cpp
-!test_*.sh
+# Dependencies
+node_modules/
