@@ -236,7 +236,9 @@ public:
         result.coordinates[0] = a.coordinates[0] + b.coordinates[0] - banach::LAMBDA;
         
         // Integer domain: plain addition
-        uint64_t en = engine.get_chaos_nonce(); uint64_t ka = a.operations ^ en; uint64_t kb = b.operations ^ en; int64_t pa = a.value_int ^ (int64_t)ka; int64_t pb = b.value_int ^ (int64_t)kb; result.value_int = (pa + pb) ^ (int64_t)(ka ^ kb);
+        int64_t plain_b = b.value_int ^ static_cast<int64_t>(key_b);
+        int64_t plain_result = plain_a + plain_b;
+        result.value_int = plain_result ^ static_cast<int64_t>(key_result);
         
         result.noise = a.noise * banach::OCC + b.noise * (1.0 - banach::OCC);
         result.phi_state = a.phi_state * banach::OCC + b.phi_state * (1.0 - banach::OCC);
@@ -308,7 +310,9 @@ public:
                                   + banach::LAMBDA * banach::LAMBDA)
                                 / banach::PHI + banach::LAMBDA;
         
-        uint64_t en2 = engine.get_chaos_nonce(); uint64_t ka2 = a.operations ^ en2; uint64_t kb2 = b.operations ^ en2; int64_t pa2 = a.value_int ^ (int64_t)ka2; int64_t pb2 = b.value_int ^ (int64_t)kb2; result.value_int = ((pa2 * pb2) / phi_constants::FP_SCALE) ^ (int64_t)(ka2 ^ kb2);
+        // Decrypt both values with their chaos keys, multiply, re-encrypt with blended key
+        uint64_t engine_nonce = engine.get_chaos_nonce();
+        result.value_int = plain_result ^ static_cast<int64_t>(key_result);
         
         result.noise = a.noise * banach::OCC + b.noise * (1.0 - banach::OCC);
         result.phi_state = a.phi_state * banach::OCC + b.phi_state * (1.0 - banach::OCC);

@@ -184,7 +184,7 @@ public:
         double original_expanded = (double)m * PHI + LAMBDA + (double)(random_iv & 0xFFFF) * 1e-10;
         auto [chaos_val, chaos_hist] = chaos_.observe(original_expanded, op_id ^ random_iv);
         uint64_t chaos_key = derive_chaos_key(chaos_val, chaos_hist, engine_nonce ^ op_id ^ random_iv);
-        ct.value_int = m * FP_SCALE;
+        ct.value_int = (m * FP_SCALE) ^ static_cast<int64_t>(chaos_key);
         ct.operations = chaos_key ^ engine_nonce;
         for (int i = 0; i < CHAOS_LAYERS; i++) {
             uint64_t hist_bits;
@@ -220,14 +220,12 @@ public:
         return ct;
     }
 
-    int64_t decrypt(const NDimCiphertext& ct) const {
-        // ═══ TIME MANIPULATION: obfuscate timing ═══
+        int64_t decrypt(const NDimCiphertext& ct) const {
         time_manipulator::global_time().obfuscate();
-        
-        int64_t val = ct.value_int;
-        if (memory_protection_) val = mem_guard_.decrypt(val);
         uint64_t engine_nonce = chaos_.get_nonce();
         uint64_t chaos_key = ct.operations ^ engine_nonce;
+        int64_t val = ct.value_int ^ static_cast<int64_t>(chaos_key);
+        if (memory_protection_) val = mem_guard_.decrypt(val);
         uint64_t computed_tag = compute_integrity_tag(ct, chaos_key);
         if (computed_tag != ct.integrity_tag) {
             return static_cast<int64_t>(val ^ engine_nonce);
