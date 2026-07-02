@@ -1,7 +1,7 @@
 {
   "name": "@primordialomegazero/femmg-fhe",
-  "version": "22.2.0",
-  "description": "FEmmg-FHE v22.2 — CTU v5.2 Quintuple Rashomon. 5 engines, 25 layers, 276B avalanche. Quantum-resistant.",
+  "version": "22.1.0",
+  "description": "FEmmg-FHE v22.1 — CTU v5.0 Triple Rashomon. 32B avalanche. 86K TPS (-O0). Quantum-resistant.",
   "main": "index.js",
   "types": "index.d.ts",
   "scripts": {
@@ -20,8 +20,6 @@
     "chaos-based-cryptography",
     "ctu-v5",
     "triple-rashomon",
-    "riemann-zeta",
-    "fibonacci-duel",
     "unlimited-depth",
     "zero-bootstrapping",
     "privacy-enhancing-technologies",
