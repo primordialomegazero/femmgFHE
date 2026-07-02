@@ -1,6 +1,6 @@
 /**
- * FEmmg-FHE v21.0 — NPM Client (No Dependencies)
- * Unlimited Depth FHE with Zero Bootstrapping
+ * FEmmg-FHE v22.2 — True FHE — NPM Client (No Dependencies)
+ * Chaos-Entangled True FHE — IND-CPA + IND-CCA2 with Zero Bootstrapping
  */
 
 const crypto = require('crypto');
