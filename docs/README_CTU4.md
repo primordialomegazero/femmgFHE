@@ -31,7 +31,7 @@ Decrypt: ct.value_int → plaintext (exact, 0% precision loss)
 | Layer | Technology | Version |
 |-------|-----------|---------|
 | Security | Golden Chaos (Observer-Observed) | CTU v4 |
-| Noise Stability | Banach Contraction (φ⁻¹) | v21.5 |
+| Noise Stability | Banach Contraction (φ⁻¹) | v22.1 |
 | Correctness | Integer Domain (value_int) | Float-Int Merge |
 | Persistence | Blackhole Security | v2.0 |
 | Index | SpiralDB Lite (7-layer fractal) | v1.0 |

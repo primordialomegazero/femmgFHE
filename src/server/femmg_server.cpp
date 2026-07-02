@@ -147,12 +147,12 @@ int main(int argc, char** argv) {
     for(int i=1; i<argc; i++) {
         std::string arg(argv[i]);
         if(arg == "--version" || arg == "-v") {
-            std::cout << "FEmmg-FHE v21.5 FORTRESS" << std::endl;
-            std::cout << "1 TRILLION ops validated | 65.6M TPS | Unlimited Depth" << std::endl;
+            std::cout << "FEmmg-FHE v22.1 FORTRESS" << std::endl;
+            std::cout << "1 TRILLION ops validated | 86K TPS (CTU v5.0) | Unlimited Depth" << std::endl;
             return 0;
         }
         if(arg == "--help" || arg == "-h") {
-            std::cout << "FEmmg-FHE v21.5 FORTRESS" << std::endl;
+            std::cout << "FEmmg-FHE v22.1 FORTRESS" << std::endl;
             std::cout << "Usage: ./femmg_server [--port PORT] [--threads N]" << std::endl;
             std::cout << "       --version, -v  Show version" << std::endl;
             std::cout << "       --help, -h     This help" << std::endl;
