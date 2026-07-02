@@ -1,20 +1,20 @@
 {
   "name": "@primordialomegazero/femmg-fhe",
-  "version": "22.3.1",
-  "description": "FEmmg-FHE v22.3.1 — True FHE: Self-Referential Chaos + Butterfly Snowball + White Manipulation + E=mφ² Avalanche. IND-CPA/CCA2. 256-bit φ-Nonce. Void Engine. 7-Layer Fractal. 8 Demon Gates. Native ML-KEM-1024. NIST Level 5.",
+  "version": "22.3.2",
+  "description": "FEmmg-FHE v22.3.1 — TRUE Fully Homomorphic Encryption. 23K TPS (-O0). Encrypted value_int. Zero bootstrapping. Unlimited depth. NIST Level 5. IND-CPA/CCA2. Multi-Modal Chaotic Amplifier (MMCA) + Zero-Seed Chaos Initializer (ZSCI) + Self-Referential Feedback Loop (SRFL) + Lorenz-φ Cascade Amplifier (LCA). Attack Energy Recapture System (AERS). Active Intrusion Countermeasure (AIC). Native ML-KEM-1024 via liboqs.",
   "main": "index.js",
   "types": "index.d.ts",
   "scripts": {
     "test": "node test.js"
   },
   "keywords": [
-    "fhe", "fully-homomorphic-encryption", "true-fhe", "chaos-entangled",
-    "void-engine", "self-referential-chaos", "butterfly-snowball",
-    "white-manipulation", "fractal-encryption", "homomorphic-encryption",
-    "post-quantum-cryptography", "golden-ratio", "phi", "banach-fixed-point",
-    "lyapunov-chaos", "triple-rashomon", "unlimited-depth", "zero-bootstrapping",
-    "ind-cpa", "ind-cca2", "nist-level-5", "quantum-resistant",
-    "ml-kem-1024", "fips-203", "liboqs", "e-mc2-avalanche"
+    "fhe", "fully-homomorphic-encryption", "true-fhe",
+    "zero-bootstrapping", "unlimited-depth", "banach-fixed-point",
+    "lyapunov-chaos", "golden-ratio", "phi",
+    "post-quantum-cryptography", "nist-level-5",
+    "ind-cpa", "ind-cca2", "quantum-resistant",
+    "ml-kem-1024", "fips-203", "liboqs",
+    "chaos-based-cryptography", "homomorphic-encryption"
   ],
   "author": "Dan Joseph M. Fernandez / Primordial Omega Zero",
   "license": "MIT",

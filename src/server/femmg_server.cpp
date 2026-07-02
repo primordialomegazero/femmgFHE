@@ -30,7 +30,6 @@
 
 #include "../core/femmg_operations.h"
 #include "../core/banach_engine.h"
-#include "../core/phi_stack.h"
 #include "../core/metaprogram.h"
 #include "../security/anti_matter_v2.h"
 #include "../security/zkp_fractal.h"
@@ -180,7 +179,7 @@ public:
 };
 
 // ═══ GLOBAL ENGINES ═══
-phistack::UnifiedPhiStack unified_stack(true, true);
+// ZSCI integrated into MMCA — no separate phi stack needed
 metaprogram::MetaProgram meta_engine;
 guardian::GuardianEngine guardian_engine;
 zkppqc::UnifiedPQCZKP pqc_engine;

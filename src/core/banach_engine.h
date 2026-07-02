@@ -15,7 +15,6 @@
 #include <cstring>
 #include <random>
 #include <chrono>
-#include "../security/blackhole.h"
 #include "../chaos/triple_rashomon.h"
 #include "../chaos/void_engine.h"
 #include "../chaos/butterfly_snowball.h"
