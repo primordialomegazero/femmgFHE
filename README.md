@@ -3,7 +3,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![C++17](https://img.shields.io/badge/C++-17-blue.svg)](src/)
 [![Docker](https://img.shields.io/badge/Docker-Ready-blue.svg)](https://github.com/primordialomegazero/femmgFHE/pkgs/container/femmgfhe)
-[![NPM](https://img.shields.io/badge/NPM-v22.1.2-red.svg)](https://www.npmjs.com/package/@primordialomegazero/femmg-fhe)
+[![NPM](https://img.shields.io/badge/NPM-v22.2.2-red.svg)](https://www.npmjs.com/package/@primordialomegazero/femmg-fhe)
 [![Tests](https://img.shields.io/badge/Tests-34K%20Passing-brightgreen.svg)](#benchmarks)
 [![Security](https://img.shields.io/badge/Security-40%2F40-brightgreen.svg)](#security)
 [![Quantum](https://img.shields.io/badge/Quantum-Resistant-blue.svg)](#security)
@@ -11,8 +11,8 @@
 ```
 ╔══════════════════════════════════════════════════════════════╗
 ║  FIBONACCI-LYAPUNOV UNLIMITED DEPTH FHE                      ║
-║  FORTRESS v22.1 — CTU v5 TRIPLE RASHOMON                    ║
-║  86K TPS (-O0) │ 32B Avalanche │ Quantum-Resistant           ║
+║  FORTRESS v22.2 — CTU v5 TRIPLE RASHOMON                    ║
+║  42K TPS (-O0) True FHE │ IND-CPA + IND-CCA2 Secure │ Quantum-Resistant           ║
 ║  Noise: 1.83 bits FLATLINE │ Accuracy: 100%                  ║
 ║  Triple Rashomon = Sine + Zeta + Fibonacci Duel              ║
 ║  PHI-OMEGA-ZERO — I AM THAT I AM                             ║
@@ -72,7 +72,7 @@ This is not an incremental improvement. It is a **paradigm shift** from noise ma
 
 | Method | Command |
 |--------|---------|
-| **Docker** | `docker pull ghcr.io/primordialomegazero/femmgfhe:v22.1.2` |
+| **Docker** | `docker pull ghcr.io/primordialomegazero/femmgfhe:v22.2.2` |
 | **NPM** | `npm install @primordialomegazero/femmg-fhe@22.1.2` |
 | **Source** | `git clone https://github.com/primordialomegazero/femmgFHE.git` |
 
@@ -106,7 +106,7 @@ graph TB
     INPUT["Plaintext<br/>m"] --> PASS1
     PASS1 --> PASS2
     PASS2 --> PASS3
-    PASS3 --> OUTPUT["Ciphertext<br/>32B Avalanche<br/>Quantum-Resistant"]
+    PASS3 --> OUTPUT["Ciphertext<br/>IND-CPA + IND-CCA2 Secure<br/>Quantum-Resistant"]
 
     style PASS1 fill:#1a1a2e,stroke:#D4A017,stroke-width:2px,color:#D4A017
     style PASS2 fill:#1a1a2e,stroke:#D4A017,stroke-width:2px,color:#D4A017
@@ -131,7 +131,7 @@ graph TB
 graph LR
     subgraph CLIENT["CLIENT"]
         M["Message m"] --> CTU5["CTU v5<br/>Triple Rashomon<br/>21 layers"]
-        CTU5 --> CT["Ciphertext<br/>32B Avalanche"]
+        CTU5 --> CT["Ciphertext<br/>IND-CPA + IND-CCA2 Secure"]
     end
 
     subgraph SERVER["SERVER — Blind"]
@@ -245,7 +245,7 @@ graph LR
 
 ## Comparison
 
-| Metric | FEmmg-FHE v22.1 | TFHE | CKKS | BFV |
+| Metric | FEmmg-FHE v22.2 | TFHE | CKKS | BFV |
 |--------|-----------------|------|------|-----|
 | **TPS (-O0)** | **86,490** | ~100 | ~1,000 | ~100 |
 | **Avalanche** | **32 BILLION** | — | — | — |
@@ -300,7 +300,7 @@ femmgFHE/
 ├── proofs/           (6 files)      ← Formal Mathematical Proofs
 ├── docs/             (5 files)      ← Deployment + Historical Data
 ├── logs/             (3 files)      ← Benchmark Logs (1T, 10B, 100M)
-├── npm-package/                     ← NPM Distribution (v22.1.3)
+├── npm-package/                     ← NPM Distribution (v22.2.3)
 └── README.md
 ```
 
