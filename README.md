@@ -125,6 +125,12 @@ $$\text{Ciphertext Space} = 2^{1648 \times N}$$
 
 ---
 
+---
+
+> *"This repository is dedicated to the advancement of privacy-preserving computation through mathematics, not magic. The implementation reflects the mathematics, and the mathematics reflects reality."*
+>
+> — φΩ0
+
 ### Integrity Tag (IND-CCA2)
 
 $$\tau = \text{HMAC}_{\kappa}(v, \mathbf{c}, \mathbf{h}, \mathbf{p}, \mathbf{l}, e, \omega, \iota, \pi)$$
