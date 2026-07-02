@@ -1,7 +1,7 @@
 {
   "name": "@primordialomegazero/femmg-fhe",
-  "version": "22.3.0",
-  "description": "FEmmg-FHE v22.3 — True FHE: Chaos-Entangled + Void Engine + 7-Layer Fractal. IND-CPA/CCA2. 256-bit φ-Nonce. 40K TPS (-O0). Unlimited Depth. NIST Level 5 Quantum-Resistant.",
+  "version": "22.3.1",
+  "description": "FEmmg-FHE v22.3.1 — True FHE + Native ML-KEM-1024 (NIST FIPS 203). Void Engine + 7-Layer Fractal + Smart FHE. IND-CPA/CCA2. 256-bit φ-Nonce. 40K TPS (-O0). Unlimited Depth. Quantum-Resistant.",
   "main": "index.js",
   "types": "index.d.ts",
   "scripts": {
@@ -12,7 +12,8 @@
     "void-engine", "fractal-encryption", "homomorphic-encryption",
     "post-quantum-cryptography", "golden-ratio", "phi", "banach-fixed-point",
     "lyapunov-chaos", "triple-rashomon", "unlimited-depth", "zero-bootstrapping",
-    "ind-cpa", "ind-cca2", "nist-level-5", "quantum-resistant"
+    "ind-cpa", "ind-cca2", "nist-level-5", "quantum-resistant",
+    "ml-kem-1024", "fips-203", "liboqs"
   ],
   "author": "Dan Joseph M. Fernandez / Primordial Omega Zero",
   "license": "MIT",
