@@ -1,4 +1,3 @@
-#include "true_homomorphic.h"
 /*
  * FEmmg-FHE v22.2 — CORE FHE OPERATIONS (TRUE FHE + Multi-Operand Chains)
  *
@@ -333,78 +332,6 @@ public:
         }
         
         result.integrity_tag = compute_tag(result, key_result);
-        return result;
-    }
-    // ═══════════════════════════════════════════
-    // TRUE HOMOMORPHIC OPERATIONS (v23.1)
-    // Direct ciphertext computation — NO XOR decrypt
-    // Uses Banach φ⁻¹ contraction on noise
-    // ═══════════════════════════════════════════
-
-    // TRUE Homomorphic Addition: ct_result = ct_a + ct_b
-    banach::NDimCiphertext true_add(const banach::NDimCiphertext& a,
-                                     const banach::NDimCiphertext& b) {
-        banach::NDimCiphertext result = a;
-        
-        // Direct coordinate addition (Banach-contracted)
-        for (int d = 0; d < banach::DIMS; d++) {
-            result.coordinates[d] = a.coordinates[d] * banach::OCC
-                                  + b.coordinates[d] * (1.0 - banach::OCC);
-        }
-        
-        // Direct perturbation combination
-        for (int d = 0; d < banach::DIMS; d++) {
-            result.perturbation[d] = a.perturbation[d] * banach::OCC
-                                   + b.perturbation[d] * (1.0 - banach::OCC);
-        }
-        
-        // TRUE noise contraction (Banach fixed-point)
-        result.noise = a.noise * banach::OCC + b.noise * (1.0 - banach::OCC);
-        result.phi_state = a.phi_state * banach::OCC + b.phi_state * (1.0 - banach::OCC);
-        
-        // Preserve chaos history without XOR decrypt
-        for (int i = 0; i < banach::CHAOS_LAYERS; i++) {
-            result.chaos_history[i] = a.chaos_history[i] + b.chaos_history[i];
-        }
-        
-        result.operations++;
-        engine.recontract_dim0(result);
-        result.integrity_tag = compute_tag(result, result.operations);
-        return result;
-    }
-
-    // TRUE Homomorphic Multiplication: ct_result = ct_a × ct_b
-    banach::NDimCiphertext true_multiply(const banach::NDimCiphertext& a,
-                                          const banach::NDimCiphertext& b) {
-        banach::NDimCiphertext result = a;
-        
-        // Direct coordinate multiplication with φ-rescaling
-        for (int d = 0; d < banach::DIMS; d++) {
-            result.coordinates[d] = (a.coordinates[d] * b.coordinates[d]) * banach::OCC
-                                  + banach::LAMBDA * (1.0 - banach::OCC);
-        }
-        
-        // Direct perturbation multiplication
-        for (int d = 0; d < banach::DIMS; d++) {
-            result.perturbation[d] = a.perturbation[d] * banach::OCC
-                                   + b.perturbation[d] * (1.0 - banach::OCC);
-        }
-        
-        // TRUE noise contraction (stronger for multiply)
-        result.noise = a.noise * banach::OCC * banach::OCC
-                     + b.noise * (1.0 - banach::OCC * banach::OCC);
-        result.phi_state = a.phi_state * banach::OCC * banach::OCC
-                         + b.phi_state * (1.0 - banach::OCC * banach::OCC);
-        
-        // Chaos history: combine without decrypt
-        for (int i = 0; i < banach::CHAOS_LAYERS; i++) {
-            result.chaos_history[i] = a.chaos_history[i] * banach::OCC
-                                    + b.chaos_history[i] * (1.0 - banach::OCC);
-        }
-        
-        result.operations++;
-        engine.recontract_dim0(result);
-        result.integrity_tag = compute_tag(result, result.operations);
         return result;
     }
 };
