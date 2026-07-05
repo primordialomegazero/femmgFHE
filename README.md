@@ -1,6 +1,6 @@
 # FEmmG-FHE: Bootstrapping-Free for Addition-Heavy Workloads
 
-**License**: MIT | **SEAL 4.3** | **C++17** | **NPM** | **Docker** | **IACR ePrint**
+**License**: MIT | **SEAL 4.3** | **C++17** | **NPM** | **Docker** | **IACR ePrint (Submitted)**
 
 ---
 
@@ -25,8 +25,12 @@ The ZANS contraction coefficient empirically approaches φ⁻¹ ≈ 0.618 near t
 | Max additions (measured) | ~500 | **1,000,000+** | 2,000× |
 | Noise drift per addition | ~1 bit | **0.00002–0.0013 bits** | 769–50,000× |
 | Multiplication chain depth (×2) | 10 ops | **19+ ops** | 2× |
-| Fib multiply noise cost | 33 bits | **1–11 bits** | 3–33× |
+| Fib multiply noise cost (UK×PT) | ~12 bits | **1–11 bits** | 1–12× |
 | Bootstrapping for additions | After ~500 ops | **Not needed** | ∞ |
+
+> **Note on "33 bits" vs "1–11 bits":** Standard BFV's 33 bits refers to **UK×UK** (ciphertext×ciphertext via `EvalMult`). The Fibonacci method uses **UK×PT** (ciphertext×plaintext via `multiply_plain`), which is a different operation. For apples-to-apples comparison, direct `multiply_plain` ×1000 costs ~12 bits, while Fibonacci ×1000 costs ~11 bits—a modest improvement.
+
+---
 
 ### Honest Clarifications
 
@@ -35,8 +39,9 @@ The ZANS contraction coefficient empirically approaches φ⁻¹ ≈ 0.618 near t
 | "1.6 bits per multiply" | **Net average** over 19-op chain with ZANS. Individual Fib multiplies cost **1-11 bits**. |
 | "17.5M additions" | **Projected** from 1M test. **Only 1M is verified.** |
 | "50,000× improvement" | **Asymptotic** at 1M ops. At 10K ops: **769×** improvement. |
-| "Bootstrapping-free FHE" | Bootstrapping-free **for addition-heavy workloads** with known multipliers. **UK×UK not solved.** |
 | "35,000× improvement" | Based on projection. Measured: **2,000×** (1M vs 500). |
+| "Bootstrapping-free FHE" | Bootstrapping-free **for addition-heavy workloads** with known multipliers. **UK×UK not solved.** |
+| "Fib vs Standard (33 bits)" | 33 bits = UK×UK. Fib method = UK×PT. Different operations. Direct UK×PT costs ~12 bits. |
 | "φ-Riemann connection" | **Speculative**. Requires 10⁶+ zeros for validation. |
 
 ---
@@ -163,10 +168,12 @@ g++ -std=c++17 -O2 tests/critical/test_fresh_vs_reused.cpp \
 | 9 | 1M ZANS | 0.00002 bits/op asymptotic | ✅ |
 | 10 | Fresh Enc(0) | NOT an artifact | ✅ |
 
+> **Note on Speed Comparison:** "Native" = SEAL's `multiply_plain` (C++). "Naive" = repeated addition (O(n) additions). "Fib" = Fibonacci-decomposed method.
+
 ### Fibonacci Multiplication Noise Costs (Measured)
 
-| Multiplier | Fib Terms | Noise Cost |
-|------------|-----------|------------|
+| Multiplier | Fib Terms | Noise Cost (UK×PT) |
+|------------|-----------|-------------------|
 | ×2 | 1 | **1 bit** |
 | ×42 | 2 | **6 bits** |
 | ×1000 | 2 | **11 bits** |
@@ -176,7 +183,7 @@ g++ -std=c++17 -O2 tests/critical/test_fresh_vs_reused.cpp \
 
 ## 📄 Paper
 
-**IACR ePrint**: [To be added after submission]
+**IACR ePrint**: Submitted (ID to be assigned)
 
 **Full paper**: [paper_expanded.pdf](paper/paper_expanded.pdf)
 
@@ -238,16 +245,6 @@ The golden ratio φ = (1+√5)/2 ≈ 1.618 and its inverse φ⁻¹ ≈ 0.618 app
 | **Formal IND-CPA Security** | ❌ Pending | Needs formal analysis in ZANS-augmented model |
 | **Plaintext Modulus** | ⚠️ Constrained | 20-bit modulus restricts values to < 2²⁰ ≈ 10⁶ |
 
-### Honest Clarifications Table
-
-| Claim | Clarification |
-|-------|---------------|
-| "1.6 bits/op" | Net average over 19-op chain with ZANS. Individual Fib multiplies cost 1-11 bits. |
-| "50,000× improvement" | Asymptotic at 1M ops. At 10K ops: 769× improvement. |
-| "17.5M additions" | Projected from 1M test. **Only 1M is verified.** |
-| "35,000× improvement" | Based on projection. Measured: 2,000× (1M vs 500). |
-| "Bootstrapping-free FHE" | Bootstrapping-free **for addition-heavy workloads with known multipliers**. UK×UK not solved. |
-
 ---
 
 ## 🗺️ Roadmap
@@ -257,6 +254,7 @@ The golden ratio φ = (1+√5)/2 ≈ 1.618 and its inverse φ⁻¹ ≈ 0.618 app
 - [x] CKKS cross-validation
 - [x] Fresh vs reused Enc(0) critical validation
 - [x] Complete paper with reviewer responses
+- [x] IACR ePrint submission
 - [ ] Multi-run statistical analysis with confidence intervals
 - [ ] Parameter sweep (N=2048, 4096, 8192, 32768)
 - [ ] ℓ₂ noise norm measurement
