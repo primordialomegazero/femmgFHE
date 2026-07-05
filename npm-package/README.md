@@ -1,35 +1,45 @@
-# FEmmg-FHE Client v17.4.0
+# @primordialomegazero/femmg-fhe v22.3.0
 
-JavaScript client for FEmmg-FHE — True Fully Homomorphic Encryption with Optimal Contraction Coefficient (OCC).
+**FEmmG-FHE: Bootstrapping-Free Fully Homomorphic Encryption**
+
+Zero-Anchor Noise Stabilization (ZANS) + Fibonacci-Decomposed Multiplication
+
+## 🔥 Latest: IACR ePrint 2026
+
+This package accompanies the paper:
+> *FEmmG-FHE: Zero-Anchor Noise Stabilization and Fibonacci-Decomposed Multiplication for Bootstrapping-Free Fully Homomorphic Encryption*
+
+**IACR ePrint:** `2026/XXXX` (pending)  
+**Paper:** [paper/paper_expanded.pdf](https://github.com/primordialomegazero/femmgFHE)
+
+## Key Results
+- **ZANS Addition:** 0.00002 bits/op (50,000× improvement)
+- **1M+ operations** without bootstrapping
+- **Fibonacci Multiplication:** 19+ chain, 1.6 bits/op
+- **CKKS cross-validated**
 
 ## Install
-
 ```bash
-npm install femmg-fhe-client@17.4.0
+npm install @primordialomegazero/femmg-fhe
 ```
 
 ## Quick Start
-
 ```javascript
-const { FEmmgClient } = require('femmg-fhe-client');
-const client = new FEmmgClient(); // Default: ind-cpa mode
+const { FEmmgClient } = require('@primordialomegazero/femmg-fhe');
+const client = new FEmmgClient();
 
-// Encrypt
 const e1 = client.encrypt(42);
 const e2 = client.encrypt(7);
 
-// Server-side homomorphic operations
+// ZANS-stabilized operations
 const eAdd = client.serverAdd(e1, e2);
-const eMul = client.serverMul(e1, e2);
-
-// Decrypt
 console.log(client.decrypt(eAdd)); // 49
-console.log(client.decrypt(eMul)); // 294
 ```
 
-## Features
+## Links
+- **GitHub:** https://github.com/primordialomegazero/femmgFHE
+- **Paper:** IACR ePrint 2026/XXXX
+- **License:** MIT
 
-- **7D Sine-CML IND-CPA**: Chaotic nonce with true random injection
-- **Fully Blind Operations**: Server never sees plaintext
-- **OCC-Validated**: Optimal Contraction Coefficient (0.618)
-- **Zero Dependencies**: Pure JavaScript, crypto.randomBytes only
+---
+*"The primes dance to the rhythm of φ; the golden ratio is the music of mathematics."* — ϕΩ0

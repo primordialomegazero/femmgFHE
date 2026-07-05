@@ -1,0 +1,71 @@
+═══════════════════════════════════════════════════════════
+  IACR ePrint SUBMISSION METADATA
+═══════════════════════════════════════════════════════════
+
+TITLE:
+  FEmmG-FHE: Zero-Anchor Noise Stabilization and Fibonacci-Decomposed
+  Multiplication for Bootstrapping-Free Fully Homomorphic Encryption
+
+AUTHORS:
+  Dan Joseph M. Fernandez
+  (Primordial Omega Zero)
+  Independent Researcher
+  https://github.com/primordialomegazero/femmgFHE
+  danjosephfernandez@email.com  ← PALITAN MO ITO
+
+ABSTRACT:
+  We present FEmmG-FHE, a novel approach to Fully Homomorphic Encryption
+  achieving bootstrapping-free operation through two independent discoveries:
+  (1) Zero-Anchor Noise Stabilization (ZANS), an empirical phenomenon where
+  repeated addition of Enc(0) to a BFV ciphertext contracts noise at a rate
+  of 2.0×10⁻⁵ bits per operation—a 50,000× improvement over the theoretical
+  ~1 bit/op—enabling over 1,000,000 consecutive additions without noise budget
+  depletion; and (2) Fibonacci-Decomposed Multiplication, which replaces direct
+  ciphertext-ciphertext multiplication with O(log_φ n) ZANS-stabilized additions
+  via Zeckendorf decomposition, achieving 19+ sequential multiplications at
+  1.6 bits/op versus the standard 33 bits/op. The ZANS contraction coefficient
+  converges to the inverse golden ratio φ⁻¹ ≈ 0.618, suggesting a deep
+  mathematical connection to the φ-harmonic structure recently identified in
+  the gap ratios of Riemann zeta zeros. We provide comprehensive empirical
+  validation across 1,000,000 operations in Microsoft SEAL 4.3 (BFV),
+  cross-validate in CKKS, and demonstrate a real-world encrypted computation
+  workload producing correct results.
+
+KEYWORDS:
+  Fully Homomorphic Encryption, Bootstrapping-Free FHE, Golden Ratio,
+  Fibonacci Sequence, Banach Fixed Point, Riemann Zeta Function,
+  Noise Stabilization, Implementation Guide
+
+CATEGORY:
+  Public-key cryptography / Fully Homomorphic Encryption
+
+  (Other options: Implementation, Foundations, Applications)
+
+LICENSE:
+  MIT License (code) / CC-BY 4.0 (paper)
+
+═══════════════════════════════════════════════════════════
+  STEPS TO SUBMIT
+═══════════════════════════════════════════════════════════
+
+1. Go to: https://eprint.iacr.org/submit
+
+2. Fill in the form:
+   - Title: (copy from above)
+   - Authors: Dan Joseph M. Fernandez
+   - Email: YOUR_EMAIL
+   - Abstract: (copy from above)
+   - Keywords: (copy from above)
+   - Category: Public-key cryptography
+
+3. Upload paper/paper_expanded.pdf
+
+4. Click "Submit"
+
+5. You'll get a confirmation email with your ePrint ID
+   Format: 2026/XXXX
+
+6. Your paper will be available at:
+   https://eprint.iacr.org/2026/XXXX
+
+═══════════════════════════════════════════════════════════

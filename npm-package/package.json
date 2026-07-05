@@ -1,7 +1,7 @@
 {
   "name": "@primordialomegazero/femmg-fhe",
-  "version": "22.3.3",
-  "description": "FEmmg-FHE — True Fully Homomorphic Encryption with Zero Bootstrapping",
+  "version": "22.3.0",
+  "description": "FEmmG-FHE: Zero-Anchor Noise Stabilization (ZANS) and Fibonacci-Decomposed Multiplication for Bootstrapping-Free FHE",
   "main": "index.js",
   "types": "index.d.ts",
   "files": [
@@ -10,40 +10,32 @@
     "include/",
     "README.md"
   ],
-  "scripts": {
-    "test": "node test.js",
-    "install": "node-gyp rebuild || echo 'Native build optional'",
-    "prepublishOnly": "npm test"
-  },
   "keywords": [
-    "fhe",
     "fully-homomorphic-encryption",
-    "chaos",
-    "banach",
-    "phi",
+    "fhe",
+    "bootstrapping-free",
+    "zans",
+    "zero-anchor-noise-stabilization",
+    "fibonacci",
     "golden-ratio",
-    "post-quantum",
+    "phi",
     "privacy",
     "encryption",
-    "homomorphic"
+    "post-quantum",
+    "bfv",
+    "ckks",
+    "seal"
   ],
-  "author": "Dan Joseph M. Fernandez / Primordial Omega Zero",
+  "author": "Dan Joseph M. Fernandez <primordialomegazero@gmail.com>",
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/primordialomegazero/femmgFHE.git"
   },
-  "bugs": {
-    "url": "https://github.com/primordialomegazero/femmgFHE/issues"
-  },
   "homepage": "https://github.com/primordialomegazero/femmgFHE#readme",
   "engines": {
     "node": ">=16.0.0"
   },
-  "dependencies": {
-    "node-addon-api": "^7.0.0"
-  },
-  "devDependencies": {
-    "node-gyp": "^10.0.0"
-  }
+  "dependencies": {},
+  "devDependencies": {}
 }

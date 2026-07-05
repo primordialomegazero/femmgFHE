@@ -1,47 +1,55 @@
-# FEmmg-FHE v23.0.2 — Docker Build
-# Lyapunov-Stabilized Floating-Point FHE
-# φΩ0 — I AM THAT I AM
-
-FROM ubuntu:22.04 AS builder
-
-RUN apt-get update && apt-get install -y \
-    build-essential \
-    libssl-dev \
-    git \
-    cmake \
-    wget \
-    && rm -rf /var/lib/apt/lists/*
-
-# Build liboqs from source (required for ML-KEM)
-RUN git clone --depth 1 --branch 0.10.0 https://github.com/open-quantum-safe/liboqs.git /tmp/liboqs \
-    && cd /tmp/liboqs \
-    && mkdir build && cd build \
-    && cmake -DOQS_USE_OPENSSL=ON -DBUILD_SHARED_LIBS=ON .. \
-    && make -j$(nproc) \
-    && make install \
-    && ldconfig \
-    && rm -rf /tmp/liboqs
-
-WORKDIR /app
-COPY . .
-
-RUN ldconfig && make clean && make all -j$(nproc)
-RUN make test || echo "Tests completed"
+# ╔══════════════════════════════════════════════════════════════╗
+# ║  FEmmG-FHE Docker Image v22.3                              ║
+# ║  ZANS Production Library + SEAL 4.3                        ║
+# ║  PHI-OMEGA-ZERO — I AM THAT I AM                          ║
+# ╚══════════════════════════════════════════════════════════════╝
 
 FROM ubuntu:22.04
 
-RUN apt-get update && apt-get install -y \
-    libssl3 \
+LABEL org.opencontainers.image.title="FEmmG-FHE"
+LABEL org.opencontainers.image.description="Zero-Anchor Noise Stabilization and Fibonacci-Decomposed Multiplication for Bootstrapping-Free FHE"
+LABEL org.opencontainers.image.authors="Dan Joseph M. Fernandez <primordialomegazero@gmail.com>"
+LABEL org.opencontainers.image.url="https://github.com/primordialomegazero/femmgFHE"
+LABEL org.opencontainers.image.version="22.3.0"
+LABEL org.opencontainers.image.licenses="MIT"
+
+# Install dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    g++ \
+    cmake \
+    git \
+    libgmp-dev \
+    libntl-dev \
+    ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy liboqs shared libraries from builder
-COPY --from=builder /usr/local/lib/liboqs.so* /usr/local/lib/
-RUN ldconfig
+# Install Microsoft SEAL 4.3
+WORKDIR /opt
+RUN git clone --depth 1 --branch v4.3.3 https://github.com/microsoft/SEAL.git seal && \
+    cd seal && \
+    cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DSEAL_BUILD_EXAMPLES=OFF -DSEAL_BUILD_TESTS=OFF && \
+    cmake --build build -j$(nproc) && \
+    cmake --install build && \
+    rm -rf build
 
-WORKDIR /app
-COPY --from=builder /app/build/femmg_server /app/
-COPY --from=builder /app/build/test_suite /app/
+# Copy FEmmG-FHE source
+WORKDIR /opt/femmg-fhe
+COPY . .
 
-EXPOSE 8443
+# Build server
+RUN g++ -std=c++17 -O2 -march=native \
+    src/server/femmg_server.cpp \
+    -I /usr/local/include/SEAL-4.3 \
+    /usr/local/lib/libseal-4.3.a \
+    -pthread -o /opt/femmg-fhe/build/femmg_server
 
-CMD ["./femmg_server"]
+# Expose port
+EXPOSE 8092
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --retries=3 \
+    CMD curl -f http://localhost:8092/health || exit 1
+
+# Run server
+CMD ["/opt/femmg-fhe/build/femmg_server"]
