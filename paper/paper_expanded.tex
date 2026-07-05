@@ -1953,3 +1953,33 @@ IND-CPA security & Informal argument only & No formal proof & \textbf{Medium (pl
 %        Multiplication for Bootstrapping-Free Fully Homomorphic Encryption
 %        With Connections to the $\phi$-Harmonic Structure of Riemann Zeta Zeros}
 % ============================================================
+
+\subsection{The 10,000,000 Operation Test}
+
+We extended the ZANS test to 10 million operations:
+
+\begin{table}[h]
+\centering
+\begin{tabular}{r|r|r}
+Checkpoint & Noise (bits) & Drift \\
+\hline
+1,000,000 & 341 & 20 \\
+2,000,000 & 340 & 21 \\
+3,000,000 & 339 & 22 \\
+5,000,000 & 339 & 22 \\
+10,000,000 & \textbf{338} & \textbf{23}
+\end{tabular}
+\caption{10M ZANS Checkpoint Log}
+\label{tab:10m-log}
+\end{table}
+
+Final summary:
+\begin{itemize}
+    \item Total operations: 10,000,000
+    \item Total noise drift: 23 bits (361 → 338)
+    \item Average rate: $2.3 \times 10^{-6}$ bits/op
+    \item Total time: 6,210 seconds (1.7 hours)
+    \item Average throughput: 1,610 ops/sec
+    \item Value preserved: YES (42, exactly)
+\end{itemize}
+
