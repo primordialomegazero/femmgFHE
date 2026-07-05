@@ -1,38 +1,24 @@
-# Binaries
+# Build artifacts
+build/
 *.o
 *.out
 *.exe
-femmg_server
-build/
 
-# Test binaries (keep .cpp sources)
-test_*
-!test_*.cpp
-!test_*.sh
-!test_*.py
-tests/test_*
-!tests/test_*.cpp
-!tests/test_*.sh
-!tests/test_*.py
-
-# IDE
-.vscode/
-.idea/
-*.swp
-*.swo
-
-# OS
-.DS_Store
-Thumbs.db
-
-# Dependencies
-node_modules/
-
-# Paper artifacts (generated)
+# LaTeX artifacts
 paper/*.aux
 paper/*.log
-paper/*.pdf
+paper/*.out
+paper/*.toc
 
-# Logs
-*.log
-!CHANGELOG.md
+# Backup files
+*.bak
+*.backup
+*~
+
+# IDE files
+.vscode/
+.idea/
+
+# Compiled binaries
+femmg_server
+test_suite
