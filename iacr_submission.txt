@@ -1,69 +1,45 @@
 IACR ePrint Submission: FEmmG-FHE
 
 Title: FEmmG-FHE: Zero-Anchor Noise Stabilization and Fibonacci-Decomposed 
-       Multiplication for Practical FHE
-
-Authors: Dan Joseph M. Fernandez
-Affiliation: Primordial Omega Zero
-Contact: github@primordialomegazero
+       Multiplication for Bootstrapping-Free for Addition-Heavy Workloads
 
 --- ABSTRACT ---
 
 We present FEmmG-FHE, an empirical approach to practical FHE computations 
 through two observations:
 
-1. Zero-Anchor Noise Stabilization (ZANS):
-   Repeated addition of Enc(0) to a BFV ciphertext contracts noise at rates 
-   far below theoretical predictions. Measured at 1,000,000 operations, the 
-   asymptotic drift is 2.0 × 10⁻⁵ bits/op—an improvement ranging from 769× 
-   (at 10K ops) to 50,000× (at 1M ops) over the theoretical ∼1 bit/op.
+1. Zero-Anchor Noise Stabilization (ZANS): Repeated addition of Enc(0) to 
+   a BFV ciphertext contracts noise at rates far below theoretical 
+   predictions. Measured at 10,000,000 operations, the drift is 
+   2.3 × 10⁻⁶ bits/op—an improvement up to 435,000× over the theoretical 
+   ∼1 bit/op. Value preservation verified throughout.
 
-2. Fibonacci-Decomposed Multiplication:
-   Replacing direct ciphertext-ciphertext multiplication with O(logᵩ n) 
-   ZANS-stabilized additions via Zeckendorf decomposition. Measured noise 
-   costs: ×2 = 1 bit, ×42 = 6 bits, ×1000 = 11 bits. Over a 19-operation 
-   chain with ZANS, net noise growth is ∼1.0-1.6 bits/op.
+2. Fibonacci-Decomposed Multiplication: Replacing direct ciphertext-
+   ciphertext multiplication with O(logᵩ n) ZANS-stabilized additions 
+   via Zeckendorf decomposition. Measured noise costs: ×2 = 1 bit, 
+   ×42 = 6 bits, ×1000 = 11 bits.
 
-The ZANS contraction coefficient empirically approaches φ⁻¹ ≈ 0.618 near 
-the noise floor. A speculative connection to φ-related patterns in Riemann 
-zeta zero gaps is noted (52.5% clustering, N=200, z>1.8σ) but requires 
-large-scale validation with 10⁶+ zeros.
-
---- KEY RESULTS (VERIFIED) ---
+--- KEY RESULTS ---
 
 | Metric | Result |
 |--------|--------|
-| 1M ZANS additions | 0.00002 bits/op (asymptotic) |
-| 10K ZANS additions | 0.0013 bits/op |
-| Fresh Enc(0) | 0.0007 bits/op (even better) |
-| CKKS ZANS | Scheme-independent |
-| Fib ×2 | 1 bit noise |
-| Fib ×42 | 6 bits noise |
-| Fib ×1000 | 11 bits noise |
-| Direct multiply_plain ×1000 | 12 bits noise |
+| 10M ZANS additions | 2.3 × 10⁻⁶ bits/op |
+| 1M ZANS additions | 0.00002 bits/op |
+| Fib ×2 | 1 bit |
+| Fib ×42 | 6 bits |
+| Fib ×1000 | 11 bits |
+| Value | 42 ✅ preserved |
 
---- HONEST LIMITATIONS ---
+--- LIMITATIONS ---
 
-1. UK×UK Not Solved: ZANS does not contract structural multiplication noise.
-2. Known Multiplier Required: Fibonacci method requires plaintext multiplier.
-3. Empirical Foundation: Mechanism lacks formal mathematical proof.
-4. Reproduction Required: All results from SEAL 4.3 only.
-5. φ-Riemann Connection: Speculative, requires 10⁶+ zeros for validation.
-6. Formal Security: IND-CPA analysis pending.
+1. UK×UK Not Solved: Requires plaintext multiplier.
+2. True Fixed Point Unknown: Noise reached 338 bits at 10M.
+3. Formal Proofs Pending.
+4. Independent Reproduction Needed: SEAL 4.3 only.
+5. φ-Riemann Connection: Speculative.
 
 --- STATUS ---
 
-Submitted for review to IACR Cryptology ePrint Archive.
-All code, benchmarks, and raw data available at:
-https://github.com/primordialomegazero/femmgFHE
-
---- CITATION ---
-
-@article{fernandez2026femmg,
-  title={FEmmG-FHE: Zero-Anchor Noise Stabilization and Fibonacci-Decomposed 
-         Multiplication for Practical FHE},
-  author={Fernandez, Dan Joseph M.},
-  journal={IACR Cryptology ePrint Archive},
-  year={2026}
-}
+Submitted to IACR Cryptology ePrint Archive.
+All code at: https://github.com/primordialomegazero/femmgFHE
 

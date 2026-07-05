@@ -396,7 +396,6 @@ Enc(100) & 361 & 349 & 0.002400 \\
 5,000  & 349 & 2    & 0.000500 \\
 10,000 & 348 & 1    & 0.000200 \\
 50,000 & 345 & 3    & 0.000075 \\
-100,000 & 344 & 1    & 0.000020 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -1441,7 +1440,7 @@ We acknowledge the reviewer's valid criticisms:
 \textbf{Can adversaries ``clean'' ciphertexts?} Yes—and this is \textbf{not a vulnerability}. ZANS is a public algorithm; any party can apply it to any ciphertext. The result is a ciphertext with noise contracted toward the fixed point but still encrypted under the original key. Decryption remains impossible without the secret key because:
 \begin{enumerate}[leftmargin=*]
     \item IND-CPA security of BFV relies on the RLWE assumption, which is independent of noise budget magnitude (above the correctness threshold).
-    \item A ciphertext at the noise floor (341 bits) is still computationally indistinguishable from a fresh encryption under RLWE.
+    \item A ciphertext at the noise floor (338 bits) is still computationally indistinguishable from a fresh encryption under RLWE.
     \item Noise contraction does not leak plaintext bits—it only affects the noise polynomial.
 \end{enumerate}
 
@@ -1701,7 +1700,7 @@ We verified decryption correctness at every checkpoint in our tests, but always 
     \item \textbf{Fibonacci basis caching:} Pre-compute $a \times F_0, a \times F_1, \ldots, a \times F_{30}$ once per base value $a$. Subsequent multiplications use only $\mathcal{O}(\log_\phi b)$ additions from the cache.
 \end{itemize}
 
-\textbf{Estimated optimized throughput:} With all optimizations applied, we estimate ZANS throughput of $10^5$--$10^6$ ops/sec (vs. current 1,634 ops/sec), and Fibonacci multiplication within $2$--$5\times$ of native \texttt{multiply\_plain}.
+\textbf{Estimated optimized throughput:} With all optimizations applied, we estimate ZANS throughput of $10^5$--$10^6$ ops/sec (vs. current 1,610 ops/sec), and Fibonacci multiplication within $2$--$5\times$ of native \texttt{multiply\_plain}.
 
 \subsection*{D.7 Summary of Open Problems}
 
