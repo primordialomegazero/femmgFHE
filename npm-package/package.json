@@ -1,41 +1,19 @@
 {
   "name": "@primordialomegazero/femmg-fhe",
-  "version": "22.3.0",
+  "version": "22.4.0",
   "description": "FEmmG-FHE: Zero-Anchor Noise Stabilization (ZANS) and Fibonacci-Decomposed Multiplication for Bootstrapping-Free FHE",
   "main": "index.js",
   "types": "index.d.ts",
-  "files": [
-    "index.js",
-    "index.d.ts",
-    "include/",
-    "README.md"
-  ],
+  "files": ["index.js", "index.d.ts", "include/", "README.md"],
   "keywords": [
-    "fully-homomorphic-encryption",
-    "fhe",
-    "bootstrapping-free",
-    "zans",
-    "zero-anchor-noise-stabilization",
-    "fibonacci",
-    "golden-ratio",
-    "phi",
-    "privacy",
-    "encryption",
-    "post-quantum",
-    "bfv",
-    "ckks",
-    "seal"
+    "fully-homomorphic-encryption", "fhe", "bootstrapping-free",
+    "zans", "zero-anchor-noise-stabilization", "fibonacci",
+    "golden-ratio", "phi", "privacy", "encryption", "post-quantum"
   ],
-  "author": "Dan Joseph M. Fernandez <primordialomegazero@gmail.com>",
+  "author": "Dan Joseph M. Fernandez",
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/primordialomegazero/femmgFHE.git"
-  },
-  "homepage": "https://github.com/primordialomegazero/femmgFHE#readme",
-  "engines": {
-    "node": ">=16.0.0"
-  },
-  "dependencies": {},
-  "devDependencies": {}
+  }
 }
