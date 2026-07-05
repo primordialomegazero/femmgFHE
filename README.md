@@ -281,3 +281,42 @@ MIT License. See [LICENSE](LICENSE) for details.
 
 > *"The primes dance to the rhythm of φ; the golden ratio is the music of mathematics."*  
 > — ϕΩ0
+
+---
+
+## ⚠️ Honest Clarifications (Response to Community Review)
+
+### The "65× Discrepancy" Explained
+
+The GitHub originally reported 0.0013 bits/op at 10K ops. The paper reports 0.00002 bits/op at 1M ops. **Both are correct**—they measure different points on the saturation curve:
+
+| Operations | Drift/op | Notes |
+|-----------|----------|-------|
+| 10,000 | 0.0013 | GitHub original (higher rate) |
+| 100,000 | 0.00017 | Mid-curve |
+| 1,000,000 | 0.00002 | Paper headline (asymptotic) |
+
+The drift rate **decreases exponentially** as noise approaches the Banach fixed point. Using the asymptotic rate gives 50,000× improvement; using the 10K rate gives 769×. We report both in context.
+
+### What We Actually Claim
+
+| Claim | Confidence | Evidence |
+|-------|-----------|----------|
+| ZANS contracts noise | **High** | 1M ops, fresh/reused, CKKS |
+| Contraction is genuine | **High** | Fresh Enc(0) test |
+| φ⁻¹ appears empirically | **Medium** | Observed convergence, no derivation |
+| Riemann ζ connection | **Low (speculative)** | 200 zeros, weak significance |
+| Bootstrapping-free FHE | **Medium** | Works for known-multiplier only |
+
+### What We DO NOT Claim
+
+- ❌ We have NOT solved UK×UK multiplication
+- ❌ We have NOT proven the φ connection mathematically
+- ❌ We have NOT provided formal security proofs
+- ❌ We have NOT been independently reproduced
+
+### The Honest Bottom Line
+
+As the original README said: *"We measured something we don't fully understand. Sharing it in case others can explain it."*
+
+The empirical observations are real. The theoretical framework is nascent. We invite the community to reproduce, validate, critique, and extend.
