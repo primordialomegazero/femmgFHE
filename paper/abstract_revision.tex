@@ -1,0 +1,34 @@
+% ============================================================
+% ABSTRACT - REVISED VERSION
+% Changes: Clarified 1.6 bits/op, 17.5M, 50,000×, φ-Riemann
+% ============================================================
+
+\begin{abstract}
+We present FEmmG-FHE, an empirical approach to practical FHE computations through two observations:
+
+\vspace{0.2cm}
+\textbf{Zero-Anchor Noise Stabilization (ZANS):} 
+Repeated addition of Enc(0) to a BFV ciphertext contracts noise at rates far below theoretical predictions.
+Measured at 1,000,000 operations, the asymptotic drift is 2.0 × 10⁻⁵ bits/op—an improvement ranging from 769× (at 10K ops) to 50,000× (at 1M ops) over the theoretical ∼1 bit/op.
+Value preservation is verified throughout.
+
+\vspace{0.2cm}
+\textbf{Fibonacci-Decomposed Multiplication:} 
+Replacing direct ciphertext-ciphertext multiplication with O(logᵩ n) ZANS-stabilized additions via Zeckendorf decomposition.
+Measured Fibonacci multiplication noise costs: ×2 = 1 bit, ×42 = 6 bits, ×1000 = 11 bits.
+Over a 19-operation chain with ZANS stabilization, net noise growth is ∼1.0-1.6 bits/op.
+
+\vspace{0.2cm}
+The ZANS contraction coefficient empirically approaches φ⁻¹ ≈ 0.618 near the noise floor.
+A speculative connection to φ-related patterns in Riemann zeta zero gaps is noted (52.5\% clustering, N=200, z>1.8σ) but requires large-scale validation with 10⁶+ zeros.
+
+\vspace{0.2cm}
+\textbf{Honest Limitations:}
+UK×UK multiplication is not solved.
+Formal mathematical proof is pending.
+Independent reproduction is pending (currently SEAL 4.3 only).
+The φ-Riemann connection is speculative.
+
+\vspace{0.2cm}
+\textit{"We measured something we don't fully understand. Sharing it in case others can explain it."}
+\end{abstract}

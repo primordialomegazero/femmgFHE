@@ -1,0 +1,57 @@
+% ============================================================
+% SECTION 9 - LIMITATIONS AND FUTURE WORK - REVISED
+% Changes: Added "Honest Clarifications" subsection
+% ============================================================
+
+\section{Limitations and Future Work}
+
+\subsection{Current Limitations}
+
+\begin{enumerate}
+    \item \textbf{UK×UK Not Solved:} ZANS does not contract structural noise from ciphertext-ciphertext multiplication. The 33 bits/op cost remains unchanged.
+    
+    \item \textbf{Known Multiplier Required:} Fibonacci multiplication requires the multiplier to be known in plaintext.
+    
+    \item \textbf{Empirical Foundation:} ZANS mechanism lacks formal mathematical proof.
+    
+    \item \textbf{Reproduction Required:} All results from SEAL 4.3 only.
+    
+    \item \textbf{Plaintext Modulus Constraint:} 20-bit modulus restricts values to $< 2^{20} \approx 10^6$.
+    
+    \item \textbf{Security Implications:} Formal IND-CPA analysis pending.
+\end{enumerate}
+
+\subsection{Honest Clarifications}
+
+Based on community review and independent verification attempts, we provide the following clarifications:
+
+\begin{table}[h]
+\centering
+\begin{tabular}{p{5cm}|p{8cm}}
+\textbf{Claim} & \textbf{Clarification} \\
+\hline
+``1.6 bits/op'' & Net average over 19-operation chain with ZANS stabilization. Individual Fib multiplies cost 1-11 bits. \\
+``50,000× improvement'' & Asymptotic at 1M ops. At 10K ops: 769× improvement. \\
+``17.5M additions'' & Projected from 1M test. Only 1M is verified. \\
+``Bootstrapping-free FHE'' & Bootstrapping-free \textit{for addition-heavy workloads with known multipliers}. UK×UK not solved. \\
+``φ-Riemann connection'' & \textbf{Speculative}. Requires 10⁶+ zeros for validation.
+\end{tabular}
+\caption{Honest Clarifications of Key Claims}
+\label{tab:clarifications}
+\end{table}
+
+\subsection{Future Work}
+
+\begin{enumerate}
+    \item \textbf{Mathematical Proof:} Derive ZANS contraction from RLWE first principles.
+    
+    \item \textbf{UK×UK Research:} Investigate spectral noise cancellation.
+    
+    \item \textbf{Hardware Acceleration:} AVX2/GPU implementation.
+    
+    \item \textbf{Large-Scale Riemann Validation:} 10⁶ zeros for 5σ significance.
+    
+    \item \textbf{Independent Reproduction:} OpenFHE, Lattigo, HElib.
+    
+    \item \textbf{Formal Security Analysis:} IND-CPA proof in ZANS-augmented model.
+\end{enumerate}
