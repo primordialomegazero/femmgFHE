@@ -10,7 +10,7 @@ FEmmG-FHE presents two empirical observations enabling practical FHE computation
 
 **Zero-Anchor Noise Stabilization (ZANS):** Adding Enc(0) to a BFV ciphertext repeatedly contracts noise at rates far below theoretical predictions—enabling **10,000,000 measured** consecutive additions without noise budget depletion.
 
-**Fibonacci-Decomposed Multiplication:** Replacing direct ciphertext-ciphertext multiplication with O(logᵩ n) ZANS-stabilized additions via Zeckendorf decomposition, achieving deeper multiplication chains than standard approaches for known multipliers.
+**Fibonacci-Decomposed Multiplication:** Replacing direct ciphertext-ciphertext multiplication with O(logᵩ n) ZANS-stabilized additions via Zeckendorf decomposition, achieving deeper multiplication chains for known multipliers.
 
 > *"We measured something we don't fully understand. Sharing it in case others can explain it."*
 
@@ -39,7 +39,7 @@ FEmmG-FHE presents two empirical observations enabling practical FHE computation
 
 ---
 
-## 📊 Extended Saturation Curve
+## 📊 Extended Saturation Curve (1K → 10M)
 
 | Operations | Noise | Drift/op |
 |------------|-------|----------|
@@ -63,10 +63,21 @@ FEmmG-FHE presents two empirical observations enabling practical FHE computation
 | Duration | 6,210 seconds (~1.7 hours) |
 | Throughput | 1,610 ops/sec |
 
+### Checkpoint Log
+
+| Checkpoint | Noise | Drift |
+|------------|-------|-------|
+| 1M | 341 | 20 bits |
+| 2M | 340 | 21 bits |
+| 3M | 339 | 22 bits |
+| 5M | 339 | 22 bits |
+| **10M** | **338** | **23 bits** |
+
 ---
 
 ## 🚀 Quick Start
 
+### C++
 ```cpp
 #include "zans_production_lib.h"
 
@@ -78,6 +89,16 @@ int main() {
     engine.zans_n(ct, 1000);
     std::cout << engine.decrypt(ct) << "\n";  // 42
 }
+```
+
+### NPM
+```bash
+npm install @primordialomegazero/femmg-fhe
+```
+
+### Docker
+```bash
+docker pull ghcr.io/primordialomegazero/femmg-fhe:latest
 ```
 
 ---
@@ -98,6 +119,17 @@ docker pull ghcr.io/primordialomegazero/femmg-fhe:latest
 
 ---
 
+## 🧪 Running Tests
+
+```bash
+# 10 Million ZANS stress test (~1.7 hours)
+g++ -std=c++17 -O3 -march=native tests/comprehensive/test_10m_zans.cpp \
+    -I /usr/local/include/SEAL-4.3 \
+    /usr/local/lib/libseal-4.3.a -pthread -o test_10m && ./test_10m
+```
+
+---
+
 ## ⚠️ Honest Limitations
 
 | Limitation | Status |
@@ -106,7 +138,6 @@ docker pull ghcr.io/primordialomegazero/femmg-fhe:latest
 | **Formal Proof** | ❌ Pending |
 | **Independent Reproduction** | ❌ Pending (SEAL 4.3 only) |
 | **True Fixed Point** | ❌ Unknown (338 at 10M) |
-| **φ-Riemann Connection** | ❌ Speculative |
 
 ---
 
@@ -122,7 +153,13 @@ docker pull ghcr.io/primordialomegazero/femmg-fhe:latest
 
 **Dan Joseph M. Fernandez** — Primordial Omega Zero
 
+- GitHub: [@primordialomegazero](https://github.com/primordialomegazero)
+- NPM: [@primordialomegazero/femmg-fhe](https://www.npmjs.com/package/@primordialomegazero/femmg-fhe)
+- Docker: `ghcr.io/primordialomegazero/femmg-fhe:latest`
+
 ---
 
-**"The primes dance to the rhythm of φ; the golden ratio is the music of mathematics."**
-— ϕΩ0
+## 📄 License
+
+MIT License. See [LICENSE](LICENSE) for details.
+
