@@ -1,0 +1,46 @@
+IACR Cryptology ePrint Archive Submission Form
+
+--- TITLE ---
+FEmmG-FHE: Zero-Anchor Noise Stabilization and Fibonacci-Decomposed 
+Multiplication for Practical FHE
+
+--- AUTHORS ---
+Dan Joseph M. Fernandez (Primordial Omega Zero)
+
+--- ABSTRACT ---
+We present FEmmG-FHE, an empirical approach to practical FHE computations 
+through two observations:
+
+1. Zero-Anchor Noise Stabilization (ZANS): Repeated addition of Enc(0) to 
+   a BFV ciphertext contracts noise at rates far below theoretical 
+   predictions. Measured at 1,000,000 operations, the asymptotic drift is 
+   2.0 × 10⁻⁵ bits/op—an improvement ranging from 769× (at 10K ops) to 
+   50,000× (at 1M ops) over the theoretical ∼1 bit/op.
+
+2. Fibonacci-Decomposed Multiplication: Replacing direct ciphertext-
+   ciphertext multiplication with O(logᵩ n) ZANS-stabilized additions 
+   via Zeckendorf decomposition. Measured noise costs: ×2 = 1 bit, 
+   ×42 = 6 bits, ×1000 = 11 bits. Over a 19-operation chain with ZANS, 
+   net noise growth is ∼1.0-1.6 bits/op.
+
+The ZANS contraction coefficient empirically approaches φ⁻¹ ≈ 0.618 near 
+the noise floor. A speculative connection to φ-related patterns in 
+Riemann zeta zero gaps is noted but requires large-scale validation.
+
+--- CATEGORY ---
+Cryptography and Security
+
+--- KEYWORDS ---
+Fully Homomorphic Encryption, Noise Stabilization, Golden Ratio, 
+Fibonacci Sequence, Banach Fixed Point, Empirical Cryptography
+
+--- SUBMISSION NOTES ---
+This is an empirical work with honest limitations clearly stated. 
+UK×UK multiplication is not solved. Formal mathematical proof is pending. 
+Independent reproduction is pending (currently SEAL 4.3 only).
+
+--- STATUS ---
+Submitted for review to IACR Cryptology ePrint Archive.
+All code, benchmarks, and raw data available at:
+https://github.com/primordialomegazero/femmgFHE
+

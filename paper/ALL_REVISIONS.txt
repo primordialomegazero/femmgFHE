@@ -1,0 +1,51 @@
+╔══════════════════════════════════════════════════════════════╗
+║  FEmmG-FHE PAPER REVISIONS - SUMMARY                       ║
+║  Based on Actual Test Results & Community Review           ║
+╚══════════════════════════════════════════════════════════════╝
+
+📄 SECTION REVISIONS:
+
+1. TITLE
+   OLD: "Bootstrapping-Free Fully Homomorphic Encryption"
+   NEW: "Zero-Anchor Noise Stabilization and Fibonacci-Decomposed 
+        Multiplication for Practical FHE"
+
+2. ABSTRACT
+   OLD: "1.6 bits/op" (as per-op cost)
+   NEW: "1.0-1.6 bits/op net average with ZANS over chain"
+   
+   OLD: "17,500,000+ additions"
+   NEW: "1,000,000 measured additions"
+   
+   OLD: "50,000× improvement"
+   NEW: "769× at 10K to 50,000× at 1M"
+   
+   OLD: φ-Riemann in abstract
+   NEW: Moved to speculative section
+
+3. SECTION 4.5 (Multiplication Chain)
+   Added clarification: 1.6 bits is net average, not per-op cost
+
+4. SECTION 4.6 (Large Multipliers)
+   Added actual measured noise costs: ×2=1, ×42=6, ×1000=11
+
+5. SECTION 7 (φ-Harmonic)
+   Marked as SPECULATIVE, added honest assessment
+
+6. SECTION 9 (Limitations)
+   Added "Honest Clarifications" table
+
+📁 FILES CREATED:
+   - abstract_revision.tex
+   - title_revision.tex
+   - section4_5_revision.tex
+   - section4_6_revision.tex
+   - section7_revision.tex
+   - section9_revision.tex
+   - ALL_REVISIONS.txt
+
+🔧 NEXT STEPS:
+   1. Merge these revisions into paper_expanded.tex
+   2. Recompile to PDF
+   3. Update IACR submission
+   4. Verify all numbers match test data
