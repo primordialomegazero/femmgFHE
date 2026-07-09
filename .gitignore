@@ -22,3 +22,5 @@ paper/*.toc
 # Compiled binaries
 femmg_server
 test_suite
+femmgFHE/
+openfhe-development/

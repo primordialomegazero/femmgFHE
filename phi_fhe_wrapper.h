@@ -1,5 +1,5 @@
 #pragma once
-#include "seal/seal.h"
+#include <seal/seal.h>
 #include <cmath>
 #include <vector>
 #include <iostream>
