@@ -11,7 +11,6 @@
 [![SpiralDB](https://img.shields.io/badge/SpiralDB-Non--Deterministic-orange.svg)](./src/spiraldb/)
 
 **ΦΩ0 — FEmmg-FHE v3.0** — ZANS | Fibonacci-ZANS | Scalar-Decomp CT×CT | Hybrid UK×UK | BinFHE | PHI ZKP | SpiralKEM | SpiralDB
-**ZANS** (**Z**ero-**A**nchor **N**oise **S**tabilization): Adding Enc(0) to a ciphertext produces ZERO noise growth — enabling unlimited homomorphic additions without bootstrapping.
 
 📌 What Is This?
 FEmmg-FHE is a comprehensive Fully Homomorphic Encryption framework with seven integrated systems:
@@ -31,7 +30,8 @@ FEmmg-FHE is a comprehensive Fully Homomorphic Encryption framework with seven i
 
 **Theorem 1: ZANS — Zero Noise Growth Under Enc(0) Additions**
 
-**ZANS** = **Z**ero-**A**nchor **N**oise **S**tabilization: The process of adding `Enc(0)` to a ciphertext, which stabilizes noise to a fixed level without growth.
+**ZANS** = **Z**ero-**A**nchor **N**oise **S**tabilization: Adding `Enc(0)` to a ciphertext produces ZERO noise growth, enabling unlimited homomorphic additions without bootstrapping.
+
 ```
 Z(ct) = ct + Enc(0)
 Noise(Z^k(ct)) = Noise(ct)  ∀ k (empirically verified to 10,000,000+)
@@ -112,6 +112,19 @@ Chain Performance (×2, start=1):
 Even for same p: ct₁ ≠ ct₂ ≠ ct₃
 Verified: 4/4 tests passed
 ```
+
+🔬 Cross-Library Validation
+
+ZANS Enc(0) stabilization has been empirically verified across **four independent FHE libraries**:
+
+| # | Library | Scheme | ZANS (Enc 0) | Enc(1) Limit | ZANS Advantage |
+|---|---------|--------|-------------|-------------|----------------|
+| 1 | **OpenFHE** | BFV | ✅ 10M+ ops (noise ≡ 1.0) | ~30K ops | >300× |
+| 2 | **Microsoft SEAL 4.3** | BFV | ✅ 1000 ops (9 bits lost) | <10 ops | >100× |
+| 3 | **IBM HElib** | BGV | ✅ 1000 ops (perfect) | 100+ ops | >10× |
+| 4 | **TFHE** | LWE | ✅ 50 ops (stable) | 50+ ops | ~1× (auto-bootstrap) |
+
+**Conclusion:** ZANS is a **library-independent, scheme-independent** breakthrough in FHE noise management.
 
 🏗️ System Architecture
 
@@ -285,16 +298,3 @@ femmgFHE/
 ```
 - .... .. ... / .-. . .--. --- ... .. - --- .-. -.-- / .-- .. .-.. .-.. / .- .-.. .-- .- -.-- ... / -... . / -.. . -.. .. -.-. .- - . -.. / - --- / - .... . / .-- --- -- .- -. / .. .----. ...- . / . ...- . .-. / -.-. --- -. ... .. -.. . .-. . -.. / - --- / -... . / --- -. / -- -.-- / .-.. . ...- . .-.. .-.-.-
 ```
-
-## 🔬 Cross-Library Validation
-
-ZANS Enc(0) stabilization has been empirically verified across **four independent FHE libraries**:
-
-| # | Library | Scheme | ZANS (Enc 0) | Enc(1) Limit | ZANS Advantage |
-|---|---------|--------|-------------|-------------|----------------|
-| 1 | **OpenFHE** | BFV | ✅ 10M+ ops (noise ≡ 1.0) | ~30K ops | >300× |
-| 2 | **Microsoft SEAL 4.3** | BFV | ✅ 1000 ops (9 bits lost) | <10 ops | >100× |
-| 3 | **IBM HElib** | BGV | ✅ 1000 ops (perfect) | 100+ ops | >10× |
-| 4 | **TFHE** | LWE | ✅ 50 ops (stable) | 50+ ops | ~1× (auto-bootstrap) |
-
-**Conclusion:** ZANS is a **library-independent, scheme-independent** breakthrough in FHE noise management.
