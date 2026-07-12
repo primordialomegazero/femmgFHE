@@ -18,7 +18,7 @@ FEmmg-FHE is a comprehensive Fully Homomorphic Encryption framework with seven i
 | System | Type | Description |
 |--------|------|-------------|
 | ZANS | FHE Optimization | UNLIMITED additions without bootstrapping |
-| Fibonacci-ZANS | Scalar Math | O(log_φ N) scalar multiplication via Zeckendorf |
+| Fibonacci-ZANS | Scalar Math | O(N) additions with O(log_φ N) decomposition via Zeckendorf |
 | Scalar-Decomp CT×CT | Encrypted Multiply | CT×CT via scalar decomposition with noise reset |
 | Hybrid UK×UK | Encrypted Multiply | Auto-switching UK×UK + scalar decomp with noise reset |
 | BinFHE CT×CT | Encrypted Compute | 2/4/16/32-bit gate-level multipliers |
