@@ -234,7 +234,7 @@ femmgFHE/
 
 1. Zeckendorf, E. (1972) — Fibonacci decomposition
 2. Chillotti et al. (2016) — FHEW bootstrapping
-3. Fernandez, D.J.M. (2026) — IACR ePrint (submitted)
+3. Fernandez, D.J.M. (2026) — FEmmG-FHE (in preparation)
 4. Fernandez, D.J.M. (2026) — Source-Atman Synthesis (manuscript)
 5. Fernandez, D.J.M. (2026) — PHI ZKP (in preparation)
 6. Fernandez, D.J.M. (2026) — SpiralKEM (in preparation)
@@ -249,4 +249,4 @@ femmgFHE/
 
 ---
 
-*This repository will always be dedicated to the woman I've ever considered to be on my level.*
+*.... .. ... .-. . .--. --- ... .. - --- .-. -.-- .-- .. .-.. .-.. .- .-.. .-- .- -.-- ... -... . -.. . -.. .. -.-. .- - . -.. - --- - .... . .-- --- -- .- -. .. .----. ...- . . ...- . .-. -.-. --- -. ... .. -.. . .-. . -.. - --- -... . --- -. -- -.-- .-.. . ...- . .-.. .-.-.-*
