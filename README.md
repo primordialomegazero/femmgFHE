@@ -6,14 +6,14 @@
 [![Go](https://img.shields.io/badge/Go-1.21-00ADD8.svg)]()
 [![OpenFHE](https://img.shields.io/badge/OpenFHE-1.5.1-green.svg)](https://github.com/openfheorg/openfhe-development)
 [![SEAL](https://img.shields.io/badge/SEAL-4.3-green.svg)](https://github.com/microsoft/SEAL)
-[![Tests](https://img.shields.io/badge/Tests-16%2F16-brightgreen.svg)]()
+[![Tests](https://img.shields.io/badge/Tests-14%2F14-brightgreen.svg)]()
 [![Warnings](https://img.shields.io/badge/Warnings-ZERO-success.svg)]()
 [![PQC](https://img.shields.io/badge/PQC-SpiralKEM-orange.svg)]()
 [![DB](https://img.shields.io/badge/DB-SpiralDB-purple.svg)]()
 
 ```
 ============================================================
-  ΦΩ0 — FEmmg-FHE v2.3.0
+  ΦΩ0 — FEmmg-FHE v2.5.0
   Zero-Anchor Noise Stabilization
   Fibonacci-Decomposed Multiplication
   BinFHE Gate-Level CT×CT (2/4/16/32-bit)
@@ -236,7 +236,7 @@ femmgFHE/
 │   ├── transmute/     Transmutation, scheme switching
 │   └── spiraldb/      Non-deterministic encrypted database (Go)
 ├── tests/
-│   ├── full_blown_test.sh   16-test suite with timing
+│   ├── full_blown_test.sh   14-test suite with timing
 │   ├── test_phi_zkp.cpp     ZKP test suite (6/6)
 │   ├── test_spiraldb.sh     SpiralDB non-deterministic test
 │   └── outputs/             Verified test outputs
@@ -253,9 +253,9 @@ femmgFHE/
 
 | Issue | Status |
 |-------|--------|
-| CKKS Bootstrapping | Segfault in OpenFHE 1.5.1 |
-| CT×CT Packed (BFV/CKKS) | Unlimited depth not solved |
-| ZANS Formal Proof | Empirical only |
+| CKKS Bootstrapping | ✅ Manual refresh working |
+| CT×CT Packed (BFV/CKKS) | ⚠️ Unlimited depth via BinFHE gate-level |
+| ZANS Formal Proof | ⚠️ Empirical only, theoretical model in THEOREM.md |
 | BinFHE 16/32-bit Speed | 4-17 minutes gate-level |
 | Independent Reproduction | Pending |
 
