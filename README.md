@@ -1,5 +1,13 @@
 # FEmmg-FHE — Zero-Anchor Noise Stabilization & Verifiable FHE
-License: MIT C++ C Go OpenFHE Tests Build PQC SpiralDB Solidity
+![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
+![C++](https://img.shields.io/badge/C%2B%2B-17-blue)
+![C](https://img.shields.io/badge/C-11-blue)
+![Go](https://img.shields.io/badge/Go-1.21-00ADD8)
+![OpenFHE](https://img.shields.io/badge/OpenFHE-1.5.1-green)
+![Tests](https://img.shields.io/badge/Tests-15%2F15-brightgreen)
+![Build](https://img.shields.io/badge/Build-Passing-brightgreen)
+![PQC](https://img.shields.io/badge/PQC-Ready-purple)
+![Solidity](https://img.shields.io/badge/Solidity-0.8.20-363636)
 
 ΦΩ0 — FEmmg-FHE v4.0 — ZANS | Fibonacci-ZANS | Scalar-Decomp CT×CT | Hybrid UK×UK | BinFHE | PHI ZKP | SpiralKEM | SpiralDB | CKKS+ZANS | Packed BFV | Smart Reset | Recursive SNARK | Solidity Verifier
 
@@ -235,4 +243,6 @@ femmgFHE/
 
 [GitHub](https://github.com/primordialomegazero)
 
+```
 - .... .. ... / .-. . .--. --- ... .. - --- .-. -.-- / .-- .. .-.. .-.. / .- .-.. .-- .- -.-- ... / -... . / -.. . -.. .. -.-. .- - . -.. / - --- / - .... . / .-- --- -- .- -. / .. .----. ...- . / . ...- . .-. / -.-. --- -. ... .. -.. . .-. . -.. / - --- / -... . / --- -. / -- -.-- / .-.. . ...- . .-.. .-.-.-
+```
