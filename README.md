@@ -10,16 +10,7 @@
 [![PQC](https://img.shields.io/badge/PQC-Ready-purple.svg)](https://csrc.nist.gov/projects/post-quantum-cryptography)
 [![SpiralDB](https://img.shields.io/badge/SpiralDB-Non--Deterministic-orange.svg)](./src/spiraldb/)
 
-============================================================
-  ΦΩ0 — FEmmg-FHE v3.0
-  Zero-Anchor Noise Stabilization (ZANS)
-  Fibonacci-Decomposed Scalar Multiplication
-  Scalar-Decomposed CT×CT with Noise Reset
-  BinFHE Gate-Level CT×CT (2/4/16/32-bit)
-  Verifiable FHE with Zero-Knowledge Proofs
-  Pure-φ Post-Quantum KEM (128B ciphertext)
-  Non-Deterministic Encrypted Database
-============================================================
+**ΦΩ0 — FEmmg-FHE v3.0** — ZANS | Fibonacci-ZANS | Scalar-Decomp CT×CT | Hybrid UK×UK | BinFHE | PHI ZKP | SpiralKEM | SpiralDB
 📌 What Is This?
 FEmmg-FHE is a comprehensive Fully Homomorphic Encryption framework with seven integrated systems:
 
