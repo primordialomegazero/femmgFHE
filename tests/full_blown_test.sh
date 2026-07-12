@@ -129,7 +129,7 @@ test_component "SpiralDB Non-Deterministic" "spiraldb" "VERIFIED" 10
 echo -e "${BLUE}━━━ BREAKTHROUGHS ━━━${NC}"
 test_component "UK×UK 6 Strategies" "phi_ukuk_zans_deep" "STRATEGY" 60
 test_component "UK×UK Micro-Steps 27-step proof" "phi_ukuk_micro_steps" "Steps:" 60
-    echo -e "  [18] Subtraction \& Division ${YELLOW}(skipped — division too slow)${NC}"; SKIPPED=$((SKIPPED + 1))
+    echo -e "     (Subtraction & Division — skipped, division too slow)
 test_optional "10M ZANS Noise Tracking" "phi_zans_10M_noise" "NOISE" 200
 test_optional "CT×CT Scalar Decomp" "phi_zans_ctct_decomposed" "CT×CT VIA DECOMPOSITION" 30
 
