@@ -11,6 +11,8 @@
 [![SpiralDB](https://img.shields.io/badge/SpiralDB-Non--Deterministic-orange.svg)](./src/spiraldb/)
 
 **ΦΩ0 — FEmmg-FHE v3.0** — ZANS | Fibonacci-ZANS | Scalar-Decomp CT×CT | Hybrid UK×UK | BinFHE | PHI ZKP | SpiralKEM | SpiralDB
+**ZANS** (**Z**ero-**A**nchor **N**oise **S**tabilization): Adding Enc(0) to a ciphertext produces ZERO noise growth — enabling unlimited homomorphic additions without bootstrapping.
+
 📌 What Is This?
 FEmmg-FHE is a comprehensive Fully Homomorphic Encryption framework with seven integrated systems:
 
@@ -28,6 +30,8 @@ FEmmg-FHE is a comprehensive Fully Homomorphic Encryption framework with seven i
 🔥 Mathematical Breakthroughs
 
 **Theorem 1: ZANS — Zero Noise Growth Under Enc(0) Additions**
+
+**ZANS** = **Z**ero-**A**nchor **N**oise **S**tabilization: The process of adding `Enc(0)` to a ciphertext, which stabilizes noise to a fixed level without growth.
 ```
 Z(ct) = ct + Enc(0)
 Noise(Z^k(ct)) = Noise(ct)  ∀ k (empirically verified to 10,000,000+)
