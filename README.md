@@ -102,80 +102,46 @@ Complexity: O(log_φ n) vs O(n) standard
 
 ```mermaid
 flowchart TB
-    subgraph Client["🖥️ Client"]
-        A[Data] --> B[Encrypt]
-        B --> C[Generate ZKP]
-        C --> D[Send CT + Proof]
-    end
-    
-    subgraph Server["☁️ Server (Untrusted)"]
-        D --> E[Receive CT]
-        E --> F{Operation Type}
-        F -->|Addition| G[ZANS: Add + Enc(0)]
-        F -->|Multiplication| H[EvalMult + ZANS Stabilize]
-        F -->|CT×CT| I[BinFHE Gate-Level]
-        G --> J[Generate Proof]
-        H --> J
-        I --> J
-        J --> K[Result CT + Proof Chain]
-    end
-    
-    subgraph Verify["🔍 Verification"]
-        K --> L[Check ZKP]
-        L --> M{Valid?}
-        M -->|Yes| N[Decrypt Result]
-        M -->|No| O[REJECT]
-    end
-    
-    subgraph Bootstrap["♻️ Bootstrapping"]
-        P{Noise Low?} -->|Yes| Q[BFV → BinFHE]
-        Q --> R[Bootstrap Bits]
-        R --> S[BinFHE → BFV]
-        S --> T[Fresh Noise Budget]
-    end
+    A[Client Data] --> B[Encrypt with ZKP]
+    B --> C[Send CT and Proof]
+    C --> D[Server Operations]
+    D --> E{Op Type}
+    E -->|Add| F[ZANS Stabilized]
+    E -->|Mult| G[EvalMult with ZANS]
+    E -->|CTxCT| H[BinFHE Gate-Level]
+    F --> I[Generate Proof]
+    G --> I
+    H --> I
+    I --> J[Result with Proof Chain]
+    J --> K[Verify ZKP]
+    K --> L{Valid?}
+    L -->|Yes| M[Decrypt]
+    L -->|No| N[REJECT]
 ```
 
-### Security Layer Flow
-
+**Security Flow:**
 ```mermaid
 sequenceDiagram
     participant Alice
     participant Server
     participant Bob
-    
-    Note over Alice,Server: SpiralKEM Key Exchange
-    Alice->>Server: Public Key (64B)
-    Server->>Alice: Ciphertext (128B)
-    Alice->>Alice: Decaps → Shared Secret (32B)
-    
-    Note over Alice,Bob: Verifiable FHE
-    Alice->>Server: Enc(x) + ZKP
-    Bob->>Server: Enc(y) + ZKP
-    Server->>Server: EvalAdd(x,y) + ZKP
-    Server->>Server: EvalMult(x,y) + ZKP
-    Server->>Bob: Enc(result) + Proof Chain
-    Bob->>Bob: Verify ZKP → Decrypt
-    
-    Note over Server: Noise Budget Low?
-    Server->>Server: Scheme Switch: BFV→BinFHE→BFV
+    Alice->>Server: Public Key 64B
+    Server->>Alice: Ciphertext 128B
+    Alice->>Alice: Shared Secret 32B
+    Alice->>Server: Enc(x) with ZKP
+    Bob->>Server: Enc(y) with ZKP
+    Server->>Server: Compute with Proofs
+    Server->>Bob: Enc(result) with Proof Chain
+    Bob->>Bob: Verify ZKP then Decrypt
 ```
 
-### ZKP Protocol Stack
-
+**Bootstrapping Chain:**
 ```mermaid
 flowchart LR
-    subgraph Proofs["🔐 Zero-Knowledge Proofs"]
-        A[Sigma Protocol] --> B[NIZK<br/>Fiat-Shamir]
-        B --> C[Recursive NIZK<br/>Chain Proofs]
-        C --> D[SNARK<br/>24B Constant]
-        D --> E[EC-SNARK<br/>BN254, 96B]
-    end
-    
-    subgraph Sizes["📦 Proof Sizes"]
-        F[Per Op: 32B] --> G[Chain: 128B]
-        G --> H[SNARK: 24B]
-        H --> I[EC-SNARK: 96B]
-    end
+    A[BFV Noise Low] --> B[Decrypt to BinFHE]
+    B --> C[Bootstrap Each Bit]
+    C --> D[Re-encrypt to BFV]
+    D --> E[Fresh Noise Budget]
 ```
 
 ---
@@ -186,8 +152,7 @@ flowchart LR
 
 - Ubuntu 22.04 (or compatible)
 - OpenFHE 1.5.1+ installed at `/usr/local`
-- OpenSSL 3.x
-- GMP, NTL
+- OpenSSL 3.x, GMP, NTL
 - g++ 11+, gcc 11+
 
 ### Build All
@@ -203,33 +168,28 @@ This builds 14 binaries with **zero compiler warnings.**
 ### Run Tests
 
 ```bash
-# Full blown test suite (all 12 critical tests, ~60 seconds)
-make test
-
-# Individual components
-bin/phi_zans_bfv          # ZANS: 100 additions
-bin/phi_fib_zans          # Fibonacci-ZANS: CT × 100
-bin/phi_binfhe_4bit       # BinFHE 4-bit: 3×14=42
-bin/phi_zkp_fhe_deep      # ZKP+FHE integration
-bin/phi_scheme_switch     # BFV↔BinFHE bootstrap
-bin/spiralkem             # SpiralKEM PQC KEM
-bin/phi_snark             # SNARK: 24B proofs
-bin/phi_snark_ec          # EC-SNARK: BN254
+./tests/full_blown_test.sh    # 12 critical tests, ~60 seconds
+make test                     # ZKP test suite (6/6)
 ```
 
-### Build Targets
+### Individual Tests
 
-| Command | Description |
-|---------|-------------|
-| `make all` | Build all 14 binaries |
-| `make core` | ZANS, Fib-ZANS, Fib-ZANS CT×CT |
-| `make binfhe` | 4-bit, 16-bit, 32-bit CT×CT multipliers |
-| `make zkp` | ZKP+FHE, ZKP Test Suite, Verifiable FHE |
-| `make snark` | SNARK, EC-SNARK |
-| `make transmute` | Scheme Switch, CKKS Debug |
-| `make spiralkem` | SpiralKEM, SpiralKEM+FHE |
-| `make test` | Run ZKP test suite |
-| `make clean` | Remove all binaries |
+| Binary | Description | Time |
+|--------|-------------|------|
+| `bin/phi_zans_bfv` | 100 ZANS additions, zero drift | <1s |
+| `bin/phi_fib_zans` | Fibonacci-ZANS CT×100 | <1s |
+| `bin/phi_fib_zans_ctct` | Fib-ZANS CT×CT analysis | <1s |
+| `bin/phi_binfhe_4bit` | BinFHE 3×14=42 | ~50s |
+| `bin/phi_binfhe_16bit` | BinFHE 42×17=714 | ~4min |
+| `bin/phi_binfhe_32bit` | BinFHE 42×17=714 | ~17min |
+| `bin/phi_zkp_fhe_deep` | ZKP+FHE 9-op chain | <1s |
+| `bin/phi_zkp_test` | ZKP suite 6/6 | ~1s |
+| `bin/phi_verifiable` | Verifiable FHE | <1s |
+| `bin/phi_scheme_switch` | BFV↔BinFHE bootstrap | ~1s |
+| `bin/spiralkem` | SpiralKEM PQC KEM | <1s |
+| `bin/spiralkem_fhe` | SpiralKEM+FHE | <1s |
+| `bin/phi_snark` | SNARK 24B proofs | <1s |
+| `bin/phi_snark_ec` | EC-SNARK BN254 | <1s |
 
 ---
 
@@ -238,23 +198,22 @@ bin/phi_snark_ec          # EC-SNARK: BN254
 ```
 femmgFHE/
 ├── src/
-│   ├── core/          # ZANS, Fibonacci-ZANS, core FHE
-│   ├── binfhe/        # BinFHE CT×CT multipliers (2/4/16/32-bit)
-│   ├── zkp/           # PHI ZKP Library + Deep Integration
-│   ├── snark/         # SNARK + EC-SNARK (BN254)
-│   ├── kem/           # SpiralKEM (Pure-φ PQC KEM)
-│   ├── semantic/      # Library hijacks (NTL, SEAL, PHI Core)
-│   └── transmute/     # Transmutation rituals, scheme switching
+│   ├── core/          ZANS, Fibonacci-ZANS, core FHE
+│   ├── binfhe/        BinFHE CT×CT (2/4/16/32-bit)
+│   ├── zkp/           PHI ZKP Library
+│   ├── snark/         SNARK + EC-SNARK (BN254)
+│   ├── kem/           SpiralKEM (Pure-φ PQC KEM)
+│   ├── semantic/      Library hijacks (NTL, SEAL, PHI Core)
+│   └── transmute/     Transmutation, scheme switching
 ├── tests/
-│   ├── full_blown_test.sh  # 12-test suite with timing
-│   ├── test_phi_zkp.cpp    # ZKP test suite (6/6)
-│   └── outputs/            # Verified test outputs
-├── bin/               # Compiled binaries
-├── docs/              # IACR submission, benchmarks
-├── paper/             # Research paper
-├── THEOREM.md         # Complete mathematical framework
-├── Makefile           # Zero-warning build system
-└── README.md          # This file
+│   ├── full_blown_test.sh
+│   ├── test_phi_zkp.cpp
+│   └── outputs/
+├── bin/               Compiled binaries
+├── docs/              IACR submission, benchmarks
+├── THEOREM.md         Complete mathematical framework
+├── Makefile           Zero-warning build system
+└── README.md
 ```
 
 ---
@@ -263,11 +222,11 @@ femmgFHE/
 
 | Issue | Status |
 |-------|--------|
-| CKKS Bootstrapping | ❌ Segfault in OpenFHE 1.5.1 `EvalBootstrapSetup` |
-| CT×CT Packed (BFV/CKKS) | ❌ Unlimited depth not solved |
-| ZANS Formal Proof | ❌ Empirical only; theoretical model pending |
-| BinFHE 16/32-bit Speed | ⚠️ 4-16 minutes (gate-level bottleneck) |
-| Independent Reproduction | ❌ Pending third-party verification |
+| CKKS Bootstrapping | Segfault in OpenFHE 1.5.1 |
+| CT×CT Packed (BFV/CKKS) | Unlimited depth not solved |
+| ZANS Formal Proof | Empirical only |
+| BinFHE 16/32-bit Speed | 4-17 minutes gate-level |
+| Independent Reproduction | Pending |
 
 ---
 
@@ -290,4 +249,4 @@ femmgFHE/
 
 ---
 
-*.. --- .- -- - .... .- - .. .- --*
+*This repository will always be dedicated to the woman I've ever considered to be on my level.*
