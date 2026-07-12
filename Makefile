@@ -164,3 +164,12 @@ help:
 
 # These were missing from the all target
 snark: $(BIN_DIR)/phi_snark $(BIN_DIR)/phi_snark_ec
+
+# === SPIRALDB ===
+spiraldb:
+	@echo "Φ SpiralDB (Go)..."
+	@cd src/spiraldb && go build -o ../../bin/spiraldb . 2>&1 | grep -v "^#" || echo "  ✅ SpiralDB built."
+
+spiraldb-test:
+	@echo "Φ SpiralDB Tests..."
+	@cd src/spiraldb && go test -v 2>&1 | grep -E "✅|PASS|FAIL"
