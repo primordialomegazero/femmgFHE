@@ -25,7 +25,7 @@ BIN_DIR = bin
 .PHONY: all clean test audit help
 
 # Default: build everything that works without SEAL
-all: core binfhe zkp transmute spiralkem
+all: core binfhe zkp snark transmute spiralkem
 
 # === GROUP TARGETS ===
 
@@ -33,7 +33,7 @@ core: $(BIN_DIR)/phi_zans_bfv $(BIN_DIR)/phi_fib_zans $(BIN_DIR)/phi_fib_zans_ct
 binfhe: $(BIN_DIR)/phi_binfhe_4bit $(BIN_DIR)/phi_binfhe_16bit $(BIN_DIR)/phi_binfhe_32bit
 zkp: $(BIN_DIR)/phi_zkp_fhe_deep $(BIN_DIR)/phi_zkp_test $(BIN_DIR)/phi_verifiable
 snark: $(BIN_DIR)/phi_snark $(BIN_DIR)/phi_snark_ec
-transmute: $(BIN_DIR)/phi_scheme_switch $(BIN_DIR)/phi_ckks_debug
+transmute: $(BIN_DIR)/phi_scheme_switch $(BIN_DIR)/phi_ckks_workaround
 spiralkem: $(BIN_DIR)/spiralkem $(BIN_DIR)/spiralkem_fhe
 
 # === CORE FHE ===
@@ -94,10 +94,10 @@ $(BIN_DIR)/phi_scheme_switch: src/transmute/phi_scheme_switch_bootstrap.cpp
 	@mkdir -p $(BIN_DIR)
 	@$(CXX) $(CXXFLAGS) -o $@ $< $(INCLUDES) $(LIBS) $(RPATH) 2>&1 | grep -E "error:|✅" || echo "  ✅ Scheme Switch built."
 
-$(BIN_DIR)/phi_ckks_debug: src/transmute/phi_ckks_bootstrap_debug.cpp
-	@echo "Φ CKKS Debug..."
+$(BIN_DIR)/phi_ckks_workaround: src/transmute/phi_ckks_workaround.cpp
+	@echo "Φ CKKS Manual Refresh..."
 	@mkdir -p $(BIN_DIR)
-	@$(CXX) $(CXXFLAGS) -o $@ $< $(INCLUDES) $(LIBS) $(RPATH) 2>&1 | grep -E "error:|✅" || echo "  ✅ CKKS Debug built."
+	@$(CXX) $(CXXFLAGS) -o $@ $< $(INCLUDES) $(LIBS) $(RPATH) 2>&1 | grep -E "error:|✅" || echo "  ✅ CKKS Manual Refresh built."
 
 # === SPIRALKEM ===
 

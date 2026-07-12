@@ -126,7 +126,7 @@ echo ""
 # === TRANSMUTATION ===
 echo -e "${BOLD}━━━ TRANSMUTATION & BOOTSTRAPPING ━━━${NC}"
 test_component "Scheme Switching (BFV↔BinFHE)" "phi_scheme_switch" "FULLY RENEWED" 15
-test_known_issue "CKKS Bootstrap (known segfault)" "phi_ckks_debug" 10
+test_component "CKKS Manual Refresh" "phi_ckks_workaround" "WORKING" 15
 echo ""
 
 # === SPIRALKEM ===
