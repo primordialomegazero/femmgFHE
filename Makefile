@@ -175,3 +175,13 @@ $(BIN_DIR)/phi_zans_noise_proof: src/core/phi_zans_noise_proof.cpp
 	@mkdir -p $(BIN_DIR)
 	@$(CXX) $(CXXFLAGS) -o $@ $< $(INCLUDES) $(LIBS) $(RPATH) 2>&1 | grep -E "error:" || echo "  ✅ ZANS Noise Proof built."
 
+
+# SpiralDB with CGO bridge
+spiraldb-bridge:
+	@echo "Φ Building SpiralDB CGO Bridge..."
+	cd src/spiraldb && bash build_bridge.sh
+	cd src/spiraldb && CGO_ENABLED=1 go build -o ../../bin/spiraldb_fhe .
+	@echo "✅ SpiralDB with real FHE built: bin/spiraldb_fhe"
+
+spiraldb-bridge-test:
+	cd src/spiraldb && CGO_ENABLED=1 go test -v .

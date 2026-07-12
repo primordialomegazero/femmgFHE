@@ -172,3 +172,44 @@ else
     echo -e "${BOLD}╚══════════════════════════════════════════════╝${NC}"
 fi
 echo ""
+
+# ============================================
+# SPIRALDB TESTS (v2.0)
+# ============================================
+test_spiraldb() {
+    echo -e "${BLUE}━━━ SPIRALDB v2.0 ━━━${NC}"
+    
+    # SpiralDB non-deterministic test
+    echo -ne "${CYAN}  [$((++TOTAL))] SpiralDB Non-Deterministic... ${NC}"
+    if [ -f "$BIN_DIR/spiraldb" ]; then
+        timeout 10 $BIN_DIR/spiraldb 2>&1 | grep -q "VERIFIED" && {
+            echo -e "${GREEN}✅ PASSED${NC}"
+            PASSED=$((PASSED + 1))
+        } || {
+            echo -e "${RED}❌ FAILED${NC}"
+            FAILED=$((FAILED + 1))
+        }
+    else
+        echo -e "${YELLOW}⏭️  SKIPPED (binary not found)${NC}"
+        SKIPPED=$((SKIPPED + 1))
+    fi
+    
+    # SpiralDB Go tests (if available)
+    echo -ne "${CYAN}  [$((++TOTAL))] SpiralDB Go Tests... ${NC}"
+    if [ -d "src/spiraldb" ] && command -v go &> /dev/null; then
+        cd src/spiraldb && CGO_ENABLED=1 go test -v . -timeout 120s 2>&1 | grep -q "PASS" && {
+            echo -e "${GREEN}✅ PASSED${NC}"
+            PASSED=$((PASSED + 1))
+        } || {
+            echo -e "${RED}❌ FAILED${NC}"
+            FAILED=$((FAILED + 1))
+        }
+        cd - > /dev/null
+    else
+        echo -e "${YELLOW}⏭️  SKIPPED${NC}"
+        SKIPPED=$((SKIPPED + 1))
+    fi
+}
+
+# Call SpiralDB tests
+test_spiraldb
