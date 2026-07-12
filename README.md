@@ -281,6 +281,19 @@ femmgFHE/
 └── README.md
 ```
 
+
+🧪 Experimental Tests (Breakthroughs)
+
+| Binary | Description | Key Result |
+|--------|-------------|------------|
+| bin/phi_ukuk_zans_deep | UK×UK 6 strategies | Best: Scalar Reset = 11 steps, noise=1 |
+| bin/phi_ukuk_micro_steps | UK×UK tiny multipliers | ×2 + 3× Reset = **27 steps!** |
+| bin/phi_zans_sub_div_test | Subtraction & Division | Both UNLIMITED via ZANS |
+| bin/phi_zans_10M_noise | 10M ZANS noise tracking | noise ≡ 1.0, zero drift |
+| bin/phi_zans_ctct_decomposed | CT×CT scalar decomp | noise=1 vs UK×UK noise=2 |
+
+Run demo: `./run_breakthrough_demo.sh`
+
 ⚠️ Known Limitations
 
 | Issue | Status |
