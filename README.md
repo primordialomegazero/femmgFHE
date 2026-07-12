@@ -10,7 +10,7 @@
 [![PQC](https://img.shields.io/badge/PQC-Ready-purple.svg)](https://csrc.nist.gov/projects/post-quantum-cryptography)
 [![SpiralDB](https://img.shields.io/badge/SpiralDB-Non--Deterministic-orange.svg)](./src/spiraldb/)
 
-**ΦΩ0 — FEmmg-FHE v3.0** — ZANS | Fibonacci-ZANS | Scalar-Decomp CT×CT | Hybrid UK×UK | BinFHE | PHI ZKP | SpiralKEM | SpiralDB
+**ΦΩ0 — FEmmg-FHE v3.1** — ZANS | Fibonacci-ZANS | Scalar-Decomp CT×CT | Hybrid UK×UK | BinFHE | PHI ZKP | SpiralKEM | SpiralDB
 
 📌 What Is This?
 FEmmg-FHE is a comprehensive Fully Homomorphic Encryption framework with seven integrated systems:
@@ -25,8 +25,6 @@ FEmmg-FHE is a comprehensive Fully Homomorphic Encryption framework with seven i
 | PHI ZKP | Zero-Knowledge | Sigma, NIZK, SNARK, EC-SNARK |
 | SpiralKEM | Post-Quantum KEM | 128B ciphertext (97% smaller) |
 | SpiralDB | Encrypted Database | Non-deterministic FHE storage |
-| **Subtraction** | **Arithmetic** | **UNLIMITED via negative addition + ZANS** |
-| **Scalar Division** | **Arithmetic** | **UNLIMITED via modular inverse × Fib-ZANS** |
 | **Subtraction** | **Arithmetic** | **UNLIMITED via negative addition + ZANS** |
 | **Scalar Division** | **Arithmetic** | **UNLIMITED via modular inverse × Fib-ZANS** |
 
@@ -133,10 +131,8 @@ ZANS Enc(0) stabilization has been empirically verified across **four independen
 | 2 | **Microsoft SEAL 4.3** | BFV | ✅ 1000 ops (9 bits lost) | <10 ops | >100× |
 | 3 | **IBM HElib** | BGV | ✅ 1000 ops (perfect) | 100+ ops | >10× |
 | 4 | **TFHE** | LWE | ✅ 50 ops (stable) | 50+ ops | ~1× (auto-bootstrap) |
-| **5** | **All Operations** | **Addition, Subtraction, Scalar Mult, Scalar Div** | **UNLIMITED (noise ≡ 1.0)** |
-| **5** | **All Operations** | **Addition, Subtraction, Scalar Mult, Scalar Div** | **UNLIMITED (noise ≡ 1.0)** |
+| **5** | **All Operations** | **Addition, Scalar Mult, Scalar Div** | **UNLIMITED (noise ≡ 1.0)** |
 
-**Conclusion:** ZANS is a **library-independent, scheme-independent** breakthrough in FHE noise management.
 
 🏗️ System Architecture
 
