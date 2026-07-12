@@ -166,3 +166,12 @@ help:
 	@echo "║  make help       — This help                 ║"
 	@echo "╚══════════════════════════════════════════════╝"
 	@echo ""
+
+
+
+# === ZANS 10M TEST ===
+$(BIN_DIR)/phi_zans_noise_proof: src/core/phi_zans_noise_proof.cpp
+	@echo "Φ ZANS Noise Proof..."
+	@mkdir -p $(BIN_DIR)
+	@$(CXX) $(CXXFLAGS) -o $@ $< $(INCLUDES) $(LIBS) $(RPATH) 2>&1 | grep -E "error:" || echo "  ✅ ZANS Noise Proof built."
+
