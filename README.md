@@ -1,5 +1,14 @@
-🌀 FEmmg-FHE — Zero-Anchor Noise Stabilization & Verifiable FHE
-License: MIT C++ C Go OpenFHE Tests PQC DB
+# 🌀 FEmmg-FHE — Zero-Anchor Noise Stabilization & Verifiable FHE
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![C++](https://img.shields.io/badge/C%2B%2B-17-blue.svg)](https://en.cppreference.com/w/cpp/17)
+[![C](https://img.shields.io/badge/C-11-blue.svg)](https://en.cppreference.com/w/c/11)
+[![Go](https://img.shields.io/badge/Go-1.21%2B-00ADD8.svg)](https://go.dev/)
+[![OpenFHE](https://img.shields.io/badge/OpenFHE-1.5.1%2B-green.svg)](https://github.com/openfheorg/openfhe-development)
+[![Tests](https://img.shields.io/badge/Tests-13%2F13%20PASSED-brightgreen.svg)](./tests/full_blown_test.sh)
+[![Build](https://img.shields.io/badge/Build-0%20Warnings-success.svg)](./Makefile)
+[![PQC](https://img.shields.io/badge/PQC-Ready-purple.svg)](https://csrc.nist.gov/projects/post-quantum-cryptography)
+[![SpiralDB](https://img.shields.io/badge/SpiralDB-Non--Deterministic-orange.svg)](./src/spiraldb/)
 
 ============================================================
   ΦΩ0 — FEmmg-FHE v3.0
@@ -244,11 +253,12 @@ femmgFHE/
 │   ├── full_blown_test.sh   13-test suite with timing
 │   ├── test_phi_zkp.cpp     ZKP test suite (6/6)
 │   ├── test_spiraldb.sh     SpiralDB non-deterministic test
+│   ├── experiments/          Experimental test files
 │   └── outputs/             Verified test outputs
 ├── bin/               Compiled binaries
 ├── results/           Benchmark data (1M ZANS, 10M noise, comprehensive)
 ├── docs/              Benchmarks
-├── THEOREM.md         Complete mathematical framework (6 theorems)
+├── THEOREM.md         Complete mathematical framework (8 theorems)
 ├── Makefile           Zero-warning build system
 └── README.md
 ```
@@ -275,7 +285,7 @@ femmgFHE/
 👤 Author
 **Dan Joseph M. Fernandez / Primordial Omega Zero**
 
-[GitHub](https://github.com/primordialomegazero)
+[![GitHub](https://img.shields.io/badge/GitHub-primordialomegazero-181717.svg?logo=github)](https://github.com/primordialomegazero)
 
 ```
 - .... .. ... / .-. . .--. --- ... .. - --- .-. -.-- / .-- .. .-.. .-.. / .- .-.. .-- .- -.-- ... / -... . / -.. . -.. .. -.-. .- - . -.. / - --- / - .... . / .-- --- -- .- -. / .. .----. ...- . / . ...- . .-. / -.-. --- -. ... .. -.. . .-. . -.. / - --- / -... . / --- -. / -- -.-- / .-.. . ...- . .-.. .-.-.-
