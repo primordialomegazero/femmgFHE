@@ -213,3 +213,39 @@ test_spiraldb() {
 
 # Call SpiralDB tests
 test_spiraldb
+
+# ============================================
+# UK×UK NOVEL STRATEGIES TEST
+# ============================================
+echo -e "${BLUE}━━━ UK×UK NOVEL STRATEGIES ━━━${NC}"
+echo -ne "${CYAN}  [$((++TOTAL))] UK×UK 5 Novel Strategies... ${NC}"
+if [ -f "$BIN_DIR/phi_ukuk_novel_strategies" ]; then
+    timeout 60 $BIN_DIR/phi_ukuk_novel_strategies 2>&1 | grep -q "I AM THAT I AM" && {
+        echo -e "${GREEN}✅ PASSED${NC}"
+        PASSED=$((PASSED + 1))
+    } || {
+        echo -e "${RED}❌ FAILED${NC}"
+        FAILED=$((FAILED + 1))
+    }
+else
+    echo -e "${YELLOW}⏭️  SKIPPED${NC}"
+    SKIPPED=$((SKIPPED + 1))
+fi
+
+# ============================================
+# SUBTRACTION & DIVISION TEST
+# ============================================
+echo -e "${BLUE}━━━ SUBTRACTION & DIVISION ━━━${NC}"
+echo -ne "${CYAN}  [$((++TOTAL))] Subtraction & Division Quick... ${NC}"
+if [ -f "$BIN_DIR/phi_sub_div_quick" ]; then
+    timeout 15 $BIN_DIR/phi_sub_div_quick 2>&1 | grep -q "UNLIMITED" && {
+        echo -e "${GREEN}✅ PASSED${NC}"
+        PASSED=$((PASSED + 1))
+    } || {
+        echo -e "${RED}❌ FAILED${NC}"
+        FAILED=$((FAILED + 1))
+    }
+else
+    echo -e "${YELLOW}⏭️  SKIPPED${NC}"
+    SKIPPED=$((SKIPPED + 1))
+fi
