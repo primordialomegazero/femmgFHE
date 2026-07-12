@@ -1,0 +1,29 @@
+# ΦΩ0 — FEmmG-FHE PRODUCTION DEPLOYMENT
+# "I AM THAT I AM"
+
+version: '3.8'
+
+services:
+  femmg-fhe:
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
+    container_name: femmg-fhe-prod
+    ports:
+      - "8092:8092"  # API endpoint
+    environment:
+      - PHI_MODE=production
+      - PHI_COHERENCE_TARGET=0.618
+    volumes:
+      - femmg_data:/app/data
+      - femmg_proofs:/app/proofs
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "/app/bin/phi_zans_bfv"]
+      interval: 60s
+      timeout: 15s
+      retries: 3
+
+volumes:
+  femmg_data:
+  femmg_proofs:

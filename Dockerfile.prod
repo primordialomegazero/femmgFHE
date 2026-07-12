@@ -1,0 +1,82 @@
+# ΦΩ0 — FEmmG-FHE PRODUCTION DOCKER IMAGE
+# Multi-stage build for minimal size
+# "I AM THAT I AM"
+
+FROM ubuntu:22.04 AS builder
+
+# Install build dependencies
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    cmake \
+    g++ \
+    gcc \
+    libssl-dev \
+    git \
+    wget \
+    && rm -rf /var/lib/apt/lists/*
+
+# Build OpenFHE from source (if not already available)
+# For production, we'd use the pre-built OpenFHE
+# COPY openfhe-development /opt/openfhe
+# RUN cd /opt/openfhe && mkdir build && cd build && cmake .. && make -j4 && make install
+
+WORKDIR /app
+
+# Copy source code
+COPY src/ ./src/
+COPY tests/ ./tests/
+
+# Build all production binaries
+RUN g++ -std=c++17 -O2 -o bin/phi_zans_bfv src/core/phi_zans_bfv.cpp \
+    -I/usr/local/include/openfhe -I/usr/local/include/openfhe/core \
+    -I/usr/local/include/openfhe/pke -I/usr/local/include/openfhe/binfhe \
+    -L/usr/local/lib -lOPENFHEcore -lOPENFHEpke -lOPENFHEbinfhe \
+    -Wl,-rpath,/usr/local/lib && \
+    echo "Φ ZANS built."
+
+RUN g++ -std=c++17 -O2 -o bin/phi_fib_zans src/core/phi_fib_zans.cpp \
+    -I/usr/local/include/openfhe -I/usr/local/include/openfhe/core \
+    -I/usr/local/include/openfhe/pke -I/usr/local/include/openfhe/binfhe \
+    -L/usr/local/lib -lOPENFHEcore -lOPENFHEpke -lOPENFHEbinfhe \
+    -Wl,-rpath,/usr/local/lib && \
+    echo "Φ Fib-ZANS built."
+
+RUN g++ -std=c++17 -O2 -o bin/phi_binfhe_4bit src/binfhe/phi_binfhe_4bit.cpp \
+    -I/usr/local/include/openfhe -I/usr/local/include/openfhe/core \
+    -I/usr/local/include/openfhe/pke -I/usr/local/include/openfhe/binfhe \
+    -L/usr/local/lib -lOPENFHEcore -lOPENFHEpke -lOPENFHEbinfhe \
+    -Wl,-rpath,/usr/local/lib && \
+    echo "Φ BinFHE 4-bit built."
+
+RUN g++ -std=c++17 -O2 -o bin/phi_zkp_fhe_deep src/zkp/phi_zkp_fhe_deep.cpp \
+    -I/usr/local/include/openfhe -I/usr/local/include/openfhe/core \
+    -I/usr/local/include/openfhe/pke -I/usr/local/include/openfhe/binfhe \
+    -L/usr/local/lib -lOPENFHEcore -lOPENFHEpke -lOPENFHEbinfhe \
+    -Wl,-rpath,/usr/local/lib && \
+    echo "Φ ZKP+FHE built."
+
+RUN gcc -std=c11 -O2 -o bin/spiralkem src/kem/phi_kem.c src/kem/test_spiralkem_real.c \
+    -lssl -lcrypto -lm && \
+    echo "Φ SpiralKEM built."
+
+# Runtime stage
+FROM ubuntu:22.04
+
+RUN apt-get update && apt-get install -y \
+    libssl3 \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Copy built binaries and libraries
+COPY --from=builder /app/bin/ /app/bin/
+COPY --from=builder /usr/local/lib/libOPENFHE* /usr/local/lib/
+COPY --from=builder /usr/lib/x86_64-linux-gnu/libssl* /usr/lib/x86_64-linux-gnu/
+COPY --from=builder /usr/lib/x86_64-linux-gnu/libcrypto* /usr/lib/x86_64-linux-gnu/
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --retries=3 \
+    CMD /app/bin/phi_zans_bfv 2>&1 | grep -q "Op 100: 42" || exit 1
+
+# Default command: run full audit
+CMD ["sh", "-c", "echo 'ΦΩ0 — FEmmG-FHE Production Container' && echo '' && echo 'Available commands:' && ls -la bin/ && echo '' && echo 'ΦΩ0 — I AM THAT I AM'"]
