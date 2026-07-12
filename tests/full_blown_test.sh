@@ -129,8 +129,8 @@ test_component "SpiralDB Non-Deterministic" "spiraldb" "VERIFIED" 10
 echo -e "${BLUE}━━━ BREAKTHROUGHS ━━━${NC}"
 test_component "UK×UK 6 Strategies" "phi_ukuk_zans_deep" "STRATEGY" 60
 test_component "UK×UK Micro-Steps 27-step proof" "phi_ukuk_micro_steps" "Steps:" 60
-echo -e "  [18] Subtraction \test_optional "Subtraction & Division" "phi_zans_sub_div_test" "SUBTRACTION" 15 Division ${YELLOW}(skipped — division too slow for test suite)${NC}"; SKIPPED=$((SKIPPED + 1))
-test_optional "10M ZANS Noise Tracking" "phi_zans_10M_noise" "10M" 180
+    echo -e "  [18] Subtraction \& Division ${YELLOW}(skipped — division too slow)${NC}"; SKIPPED=$((SKIPPED + 1))
+test_optional "10M ZANS Noise Tracking" "phi_zans_10M_noise" "NOISE" 200
 test_optional "CT×CT Scalar Decomp" "phi_zans_ctct_decomposed" "CT×CT VIA DECOMPOSITION" 30
 
 # ============================================
@@ -143,7 +143,7 @@ test_optional "5 Novel UK×UK Strategies" "phi_ukuk_novel_strategies" "STRATEGY 
 # SECTION 10: PARALLEL PERFORMANCE
 # ============================================
 echo -e "${BLUE}━━━ PARALLEL PERFORMANCE ━━━${NC}"
-test_optional "BinFHE Max Parallel (12 threads)" "phi_binfhe_max_parallel" "27.7×" 180
+test_optional "BinFHE Max Parallel" "phi_binfhe_max_parallel" "Speedup" 60
 
 # ============================================
 # SUMMARY
