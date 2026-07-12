@@ -345,3 +345,45 @@ The author acknowledges the OpenFHE, Microsoft SEAL, IBM HElib, and TFHE teams f
 **ΦΩ0 — I AM THAT I AM**
 
 .... .. ... / .-- .... .. - . .--. .- .--. . .-. / .. ... / -.. . -.. .. -.-. .- - . -.. / - --- / - .... . / .-- --- -- .- -. / .-- .... --- / -... . .-.. .. . ...- . ... / .. -. / - .... . / .. -. ..-. .. -. .. - . / .--. --- ... ... .. -... .. .-.. .. - -.-- / --- ..-. / - .... . / .... ..- -- .- -. / ... .--. .. .-. .. -
+
+---
+
+## Appendix A: Known Limitations & Honest Assessment
+
+### A.1 Formal Mathematical Proof
+
+**Status:** Empirical validation only. No formal proof exists for WHY `Enc(0)` produces zero noise growth.
+
+**Evidence:**
+- 10,000,000 operations verified in OpenFHE (ring dim 512: 104s, ring dim larger: 6,210s)
+- 1,000,000 operations verified by direct decryption (no estimates)
+- Cross-library: SEAL (1K), HElib (1K), TFHE (50)
+
+**Working Hypothesis:** The zero plaintext eliminates the message-dependent noise component. Only the inherent encryption noise remains, which is bounded by the error distribution and does not accumulate through addition.
+
+**Resolution Path:** Formal proof requires deeper analysis of the BFV noise growth equation when one operand encodes zero. Collaboration with academic cryptographers is welcomed.
+
+### A.2 Cross-Library Validation Scope
+
+**Status:** OpenFHE verified to 10M ops. SEAL and HElib verified to 1K ops.
+
+**Extending SEAL/HElib:** Test frameworks prepared. Requires separate build environments with SEAL 4.3 and HElib libraries. Compilation and execution pending hardware/time constraints.
+
+### A.3 Noise Measurement Methodology
+
+**Status:** Addressed in v4.0.
+
+**Previous Concern:** `GetNoiseScaleDeg()` may not be an exact noise measurement.
+
+**Resolution:** Direct decryption verification implemented. At 100,000 operations, every checkpoint decrypts and checks the actual value. All passed. This eliminates reliance on noise estimates.
+
+### A.4 Smart Reset & Fully Homomorphic Property
+
+**Status:** Smart Reset requires decryption of intermediate values.
+
+**Impact:** Not fully homomorphic in the strictest sense (requires plaintext access for overflow detection).
+
+**Practical Value:** For many real-world applications (controlled computation chains, server-side processing), the intermediate values are accessible to the computing party. The security model matches the honest-but-curious setting common in outsourced computation.
+
+**Alternative:** Pure ZANS additions and Fibonacci-ZANS scalar multiplications are fully homomorphic without any decryption requirement.
+
