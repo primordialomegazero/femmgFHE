@@ -1,26 +1,21 @@
 # Build artifacts
+bin/
 build/
 *.o
-*.out
-*.exe
+*.so
+*.a
 
-# LaTeX artifacts
-paper/*.aux
-paper/*.log
-paper/*.out
-paper/*.toc
+# Dependencies
+openfhe-development/
+femmgFHE/
 
-# Backup files
-*.bak
-*.backup
-*~
+# Archive
+archive/
 
-# IDE files
+# IDE
 .vscode/
 .idea/
 
-# Compiled binaries
-femmg_server
-test_suite
-femmgFHE/
-openfhe-development/
+# OS
+.DS_Store
+Thumbs.db
