@@ -1,4 +1,4 @@
-# 🌀 FEmmG-FHE — Zero-Anchor Noise Stabilization & Verifiable FHE
+# 🌀 FEmmg-FHE — Zero-Anchor Noise Stabilization & Verifiable FHE
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![C++](https://img.shields.io/badge/C++-17-blue.svg)]()
@@ -12,7 +12,7 @@
 
 ```
 ============================================================
-  ΦΩ0 — FEmmG-FHE
+  ΦΩ0 — FEmmg-FHE
   Zero-Anchor Noise Stabilization
   Fibonacci-Decomposed Multiplication
   Verifiable FHE with Zero-Knowledge Proofs
@@ -24,7 +24,7 @@
 
 ## 📌 What Is This?
 
-FEmmG-FHE is a comprehensive Fully Homomorphic Encryption framework built on three empirical discoveries:
+FEmmg-FHE is a comprehensive Fully Homomorphic Encryption framework built on three empirical discoveries:
 
 1. **ZANS (Zero-Anchor Noise Stabilization):** Adding Enc(0) repeatedly contracts noise 435,000× below theoretical predictions — **10,000,000+ additions without bootstrapping.**
 
@@ -234,7 +234,7 @@ femmgFHE/
 
 1. Zeckendorf, E. (1972) — Fibonacci decomposition
 2. Chillotti et al. (2016) — FHEW bootstrapping
-3. Fernandez, D.J.M. (2026) — FEmmG-FHE (in preparation)
+3. Fernandez, D.J.M. (2026) — FEmmg-FHE (in preparation)
 4. Fernandez, D.J.M. (2026) — Source-Atman Synthesis (manuscript)
 5. Fernandez, D.J.M. (2026) — PHI ZKP (in preparation)
 6. Fernandez, D.J.M. (2026) — SpiralKEM (in preparation)
