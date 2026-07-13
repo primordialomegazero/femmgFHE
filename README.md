@@ -450,7 +450,6 @@ femmgFHE/
 | BinFHE 32-bit Speed | ~27 min (TOY params on Ryzen 5 2600). Benefits from hardware acceleration |
 | Tamper-Evident Encryption | Prototype stage. Demonstrates concept. Further hardening needed for production |
 | FHE 2.0 | Integrates existing systems. Active development. Community feedback welcome |
-| FHE 2.0 | Integrates existing systems. Active development. Community feedback welcome |
 | Cross-Library Validation | OpenFHE (100K) and SEAL (10K) fully verified. HElib framework working. TFHE not applicable (binary gates). Tests run on single machine (Ryzen 5 2600) |
 
 ## References
