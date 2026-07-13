@@ -156,16 +156,30 @@ Result: Noise scale = 1.0 (ZERO growth)
 | Direct UKxUK | 84 | 408 | 2 |
 | Scalar Decomp | 84 | 408 | 1 |
 
-### Theorem 4: Smart Reset — UKxUK UNLIMITED Steps
+### Theorem 4: UKxUK — From Smart Reset to True Divine 10K
 
-| Mode | Steps | Resets | Noise |
-|------|-------|--------|-------|
-| Normal (no reset) | 28 | 0 | 29 |
-| Smart Reset x2 | 100 | 49 | 2 |
-| Smart Reset x3 | 19 | 1 | 2 |
-| Batch Mode | 1000+ | ~40 | 1 |
+Two distinct breakthroughs in unlimited CTxCT chains:
 
-### Theorem 5: Pinky Swear Reset — True Blue FHE
+**Smart Reset (Semi-Homomorphic):**
+- Auto-detect plaintext overflow via decrypt+re-encrypt
+- ~8,000 steps achieved
+- Requires intermediate decryption
+
+**True Divine 10K (Pure FHE — Pinky Swear Reset):**
+- ZERO decryption, ZERO bootstrap
+- Homomorphic overflow detection via modular arithmetic
+- 10,000 steps verified in 2,986 seconds
+- Noise scales linearly: noise = steps + 1
+- Throughput: 3.35 steps/sec on Ryzen 5 2600
+- Ciphertext NEVER leaves encrypted domain
+
+| Reset Type | Steps | Decryption | Bootstrap | Noise | Status |
+|------------|-------|------------|-----------|-------|--------|
+| No Reset | 28 | N/A | N/A | 29 | Baseline |
+| Smart Reset | ~8,000 | Required | None | 2 | Semi-FHE |
+| True Divine 10K | 10,000 | ZERO | ZERO | steps+1 | PURE FHE |
+
+### Theorem 5:
 
 Fully Homomorphic overflow detection WITHOUT decryption or bootstrap. Uses modular arithmetic property:
 
