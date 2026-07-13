@@ -39,12 +39,12 @@ FEmmg-FHE is a comprehensive Fully Homomorphic Encryption framework with **22 in
 | Packed BFV | Packed FHE | 8192 slots, all ops, noise-free |
 | Key Manager | Security | Ephemeral Sessions, Forward Secrecy, Key Serialization |
 | HydraJWT | Authentication | 6-head phi-weighted Post-Quantum JWT |
-| Eternal ZANS | Eternal Encryption | Self-destructing entangled ciphertext, quantum observer effect |
-| Entangled ZANS | Quantum Entanglement | Correlated ciphertext pairs, collapse on tamper |
-| FHE 2.0 | Unified Framework | ALL 8 breakthroughs in ONE system, FINISH HIM! |
+| Eternal ZANS | Tamper-Proof Encryption | Self-destructing entangled ciphertext on wrong access attempt |
+| Entangled ZANS | Correlated Encryption | Ciphertext pairs with linked noise that cancels when combined |
+| FHE 2.0 | Unified Framework | Integrates ZANS, Pinky Swear, Quantum, Eternal, Golden Ratio into one system |
 | Fibonacci-Golden ZANS | Optimization | phi-guided threshold, +23.6% headroom |
 | Riemann-Golden ZANS | Number Theory | Riemann zeros + Golden Ratio connection to ZANS |
-| Quantum Random | True Randomness | Probabilistic emergent randomness from Enc(0) noise |
+| Quantum Random | Randomness Source | Probabilistic behavior from Enc(0) noise patterns |
 
 ## System Architecture
 
@@ -248,7 +248,7 @@ Two different CTxCT algorithms (3x ZANS vs 5x ZANS) obfuscated via Multilinear M
 ### Theorem 11: Eternal ZANS — Self-Destructing Entangled Ciphertext
 
 Entangled pair: Data CT + Guard CT. Wrong guard key triggers entangled destruction.
-Quantum observer effect in classical FHE.
+Analogous to quantum observer effect in classical setting.
 
 | Test | Result |
 |------|--------|
@@ -290,7 +290,7 @@ Riemann zeros on critical line 1/2 + it mirror ZANS noise anchor at 0.
 
 ### Theorem 15: FHE 2.0 — Unified Framework
 
-ALL 8 breakthroughs in ONE system. No bootstrapping. No decryption. No limits.
+Integrates 8 systems into one. Reduces need for bootstrapping. Practical for many use cases.
 
 | Capability | Status |
 |------------|--------|
@@ -328,7 +328,7 @@ Batch Mode: 1 keypair to 1000 shared secrets in 24.68ms (45 Mbps, all correct).
 | True Divine 10K | 3.35 steps/s | 16384 | 2,986s total |
 | iO x CTxCT 50-chain | 50/50 in 940s | 16384 | Random params |
 | Eternal ZANS | Self-destruct | 16384 | Entangled pair |
-| FHE 2.0 | All systems | 16384 | Unified framework |
+| FHE 2.0 | Integrated | 16384 | 8 systems combined |
 | SpiralKEM KeyGen | 166K/s | N/A | 128B ciphertext |
 
 ## Quick Start
@@ -418,12 +418,12 @@ femmgFHE/
 
 | Issue | Status |
 |-------|--------|
-| ZANS Formal Proof | Empirical: 10M ops, 4 libraries, direct decryption verified. Quantum superposition theory proposed |
-| Plaintext Modulus | 30-bit (1.07B max). phi-guided threshold (+23.6% headroom). Pinky Swear handles overflow |
-| BinFHE 32-bit Speed | ~27 min (TOY params on Ryzen 5 2600). FPGA/GPU target: <60s |
-| iO Multilinear Maps | GGH13-style GES. Flame Empress iO: 5/5. iO x CTxCT: 50/50. Formal reduction pending |
-| Eternal Encryption | Working prototype. Full quantum resistance pending formal verification |
-| FHE 2.0 | All 8 systems integrated. Production hardening ongoing |
+| ZANS Formal Proof | Empirical evidence: 10M ops across 4 libraries. Working theory: quantum-like superposition. Formal proof welcome |
+| Plaintext Modulus | 30-bit (1.07B max). phi-guided threshold gives +23.6% headroom. Pinky Swear provides overflow handling |
+| BinFHE 32-bit Speed | ~27 min (TOY params on Ryzen 5 2600). Benefits from hardware acceleration |
+| iO Multilinear Maps | GGH13-style GES implementation. Working demos (5/5 and 50/50). Formal security reduction pending |
+| Eternal Encryption | Prototype stage. Demonstrates concept. Further hardening needed for production |
+| FHE 2.0 | Integrates existing systems. Active development. Community feedback welcome |
 
 ## References
 
