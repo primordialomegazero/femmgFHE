@@ -292,6 +292,7 @@ make spiraldb         # Go encrypted database
 | bin/phi_pinky_swear | Pinky Swear Reset | ~30s |
 | bin/phi_true_divine_10k | True Divine 10K steps | ~50min |
 | bin/phi_io_ctct_merge | iO x CTxCT (CLI: algo steps mult) | varies |
+| bin/phi_flame_empress_io | Flame Empress iO (5 flames) | <1s |
 | bin/phi_zkp_test | ZKP Suite 6/6 | ~2s |
 | bin/spiralkem | SpiralKEM PQC KEM | <1s |
 | bin/spiralkem_benchmark | SpiralKEM Speed Test | <1s |
@@ -343,7 +344,7 @@ femmgFHE/
 | Plaintext Modulus | 30-bit (1.07B max). Pinky Swear handles overflow homomorphically |
 | CKKS Ring Dim | 32768 minimum (OpenFHE requirement) |
 | BinFHE 32-bit Speed | ~27 min (TOY params). Hardware acceleration needed |
-| iO Multilinear Maps | GGH13-style GES. Full security reduction pending |
+| iO Multilinear Maps | GGH13-style GES. Flame Empress iO: 5/5 verified. Formal security reduction to LWE pending |
 | Key Serialization | Framework ready. Requires OpenFHE upgrade for native support |
 
 ## References
@@ -357,6 +358,7 @@ femmgFHE/
 - Fernandez, D.J.M. (2026) — FEmmg-FHE: Zero-Anchor Noise Stabilization for FHE
 - Fernandez, D.J.M. (2026) — Pinky Swear Reset: True Blue Fully Homomorphic Encryption
 - Fernandez, D.J.M. (2026) — iO x CTxCT: Indistinguishability Obfuscation for FHE
+- Fernandez, D.J.M. (2026) — Flame Empress iO: INFINITE + QUANTUM + ZANS Program Obfuscation
 
 ## Author
 
