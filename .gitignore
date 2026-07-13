@@ -19,3 +19,16 @@ archive/
 # OS
 .DS_Store
 Thumbs.db
+
+# Test binaries and temporary files
+*.bin
+*.txt
+test_*
+*_test
+*_fixed
+*_final
+*_complete
+*_nocereal
+*_simple
+src/core/phi_key_manager_*.cpp
+!src/core/phi_key_manager_working.cpp
