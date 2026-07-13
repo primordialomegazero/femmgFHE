@@ -26,7 +26,7 @@ FEmmg-FHE is a comprehensive Fully Homomorphic Encryption framework with **18 in
 | Scalar-Decomp CTxCT | Encrypted Multiply | CTxCT via scalar decomposition, noise=1.0 |
 | Hybrid UKxUK | Encrypted Multiply | Auto-switching UKxUK + Smart Reset (UNLIMITED steps) |
 | BinFHE CTxCT | Encrypted Compute | 2/4/8/16/32-bit gate-level multipliers (8x fewer gates) |
-| Pinky Swear Reset | True Blue FHE | Zero Decryption, Zero Bootstrap, Pure Homomorphic |
+| Pinky Swear Reset | True Blue FHE | 100 steps verified, 0 decrypt, 0 bootstrap, noise=steps+1 |
 | Divine Reset | Unlimited CTxCT | Fully Homomorphic overflow detection |
 | True Divine 10K | FHE Proof | 10,000 steps verified, 2,986 seconds |
 | iO | Program Obfuscation | Encrypt the PROGRAM via Multilinear Maps |
