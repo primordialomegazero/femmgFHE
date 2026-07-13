@@ -347,7 +347,7 @@ git clone https://github.com/primordialomegazero/femmgFHE.git
 cd femmgFHE
 make all              # C++ components (50+ binaries)
 make spiraldb         # Go encrypted database
-./tests/full_blown_test.sh    # Full test suite (37 tests)
+./tests/full_blown_test.sh    # Full test suite (42 tests, 36/36 passed in FAST mode)
 ```
 
 ### Individual Tests
