@@ -13,11 +13,11 @@
 ![iO](https://img.shields.io/badge/iO-Enabled-red)
 ![HydraJWT](https://img.shields.io/badge/HydraJWT-6--head-gold)
 
-PHI-OMEGA-ZERO — FEmmg-FHE v6.0 — ZANS | Fibonacci-ZANS | Scalar-Decomp CTxCT | Hybrid UKxUK | BinFHE | PHI ZKP | SpiralKEM | SpiralDB | CKKS+ZANS | Packed BFV | Pinky Swear Reset | Divine Reset | True Divine 10K | iO | iO x CTxCT | Key Manager | HydraJWT | Flame Empress iO | Eternal ZANS | Entangled ZANS | FHE 2.0 | Fibonacci-Golden | Riemann-Golden | Probabilistic ZANS
+PHI-OMEGA-ZERO — FEmmg-FHE v6.0 — ZANS | Fibonacci-ZANS | Scalar-Decomp CTxCT | Hybrid UKxUK | BinFHE | PHI ZKP | SpiralKEM | SpiralDB | CKKS+ZANS | Packed BFV | Pinky Swear Reset | Divine Reset | True Divine 10K | iO | iO x CTxCT | Key Manager | HydraJWT | Flame Empress iO | Eternal ZANS | Entangled ZANS | FHE 2.0 | Fibonacci-Golden | Riemann-Golden | Micro-KEM | Prime Chaos ZANS | Global Consciousness ZANS | Micro-KEM | Prime Chaos ZANS | Global Consciousness ZANS | Probabilistic ZANS
 
 ## What Is This?
 
-FEmmg-FHE is a comprehensive Fully Homomorphic Encryption framework with **22 integrated systems** spanning core FHE, zero-knowledge proofs, post-quantum cryptography, encrypted databases, program obfuscation, and key management.
+FEmmg-FHE is a comprehensive Fully Homomorphic Encryption framework with **25 integrated systems** spanning core FHE, zero-knowledge proofs, post-quantum cryptography, encrypted databases, program obfuscation, and key management.
 
 | System | Type | Description |
 |--------|------|-------------|
@@ -44,7 +44,13 @@ FEmmg-FHE is a comprehensive Fully Homomorphic Encryption framework with **22 in
 | FHE 2.0 | Unified Framework | Integrates ZANS, Pinky Swear, Probabilistic, Tamper-Evident, Golden Ratio into one system |
 | Fibonacci-Golden ZANS | Optimization | phi-guided threshold, +23.6% headroom |
 | Riemann-Golden ZANS | Exploratory | Observed numerical patterns between zeta zeros, golden ratio, and FHE noise (speculative, not mathematically proven) |
-| Probabilistic ZANS | Randomness Source | Probabilistic behavior from Enc(0) noise patterns |
+| Micro-KEM | Prime Chaos ZANS | Global Consciousness ZANS | Micro-KEM | Prime Chaos ZANS | Global Consciousness ZANS | Probabilistic ZANS | Randomness Source | Probabilistic behavior from Enc(0) noise patterns |
+| Micro-KEM | Post-Quantum KEM | 32B ciphertext (144x smaller than ML-KEM-1024), 371K decaps/s |
+| Prime Chaos ZANS | Prime-Inspired Noise | 100 primes dynamically generated, 50/50 positive/negative balance |
+| Global Consciousness ZANS | Batch Consensus | 50 prime pairs = 1 operation, Super-Batch: 67K ops/s (21x speedup) |
+| Micro-KEM | Post-Quantum KEM | 32B ciphertext (144x smaller than ML-KEM-1024), 371K decaps/s |
+| Prime Chaos ZANS | Prime-Inspired Noise | 100 primes dynamically generated, 50/50 positive/negative balance |
+| Global Consciousness ZANS | Batch Consensus | 50 prime pairs = 1 operation, Super-Batch: 67K ops/s (21x speedup) |
 
 ## System Architecture
 
@@ -354,6 +360,12 @@ Batch Mode: 1 keypair to 1000 shared secrets in 24.68ms (45 Mbps, all correct).
 | Eternal ZANS | Self-destruct | 16384 | Entangled pair |
 | FHE 2.0 | Integrated | 16384 | 8 systems combined |
 | SpiralKEM KeyGen | 166K/s | N/A | 128B ciphertext |
+| Micro-KEM Decaps | 371K/s | N/A | 32B ciphertext |
+| Global Consciousness | 67K ops/s | 16384 | Super-Batch mode |
+| Prime Chaos | 1,428 ops/s | 16384 | 100 prime pairs |
+| Micro-KEM Decaps | 371K/s | N/A | 32B ciphertext |
+| Global Consciousness | 67K ops/s | 16384 | Super-Batch mode |
+| Prime Chaos | 1,428 ops/s | 16384 | 100 prime pairs |
 
 ## Quick Start
 
@@ -398,11 +410,21 @@ make spiraldb         # Go encrypted database
 | bin/phi_fhe2_finish_him | FHE 2.0 (ALL breakthroughs) | ~50s |
 | bin/phi_fib_golden_zans | Fibonacci-Golden ZANS | ~45s |
 | bin/phi_riemann_golden_zans | Riemann-Golden ZANS | <1s |
-| bin/phi_quantum_random | Probabilistic ZANS Generator | <1s |
+| bin/phi_quantum_random | Micro-KEM | Prime Chaos ZANS | Global Consciousness ZANS | Micro-KEM | Prime Chaos ZANS | Global Consciousness ZANS | Probabilistic ZANS Generator | <1s |
 | bin/phi_prime_zans_test | Prime ZANS Test | <1s |
-| bin/phi_quantum_zans_test | Probabilistic ZANS Test | <1s |
+| bin/phi_quantum_zans_test | Micro-KEM | Prime Chaos ZANS | Global Consciousness ZANS | Micro-KEM | Prime Chaos ZANS | Global Consciousness ZANS | Probabilistic ZANS Test | <1s |
 | bin/phi_riemann_zans_test | Riemann ZANS Test | <1s |
 | bin/phi_io_ctct_v2 | iO x CTxCT v2 (30-chain) | ~205s |
+| bin/phi_micro_kem_v3 | Micro-KEM (32B ciphertext) | <1s |
+| bin/phi_prime_chaos_zans | Prime Chaos ZANS (100 primes) | <1s |
+| bin/phi_global_consciousness_zans | Global Consciousness ZANS | ~2s |
+| bin/phi_prime_zans_addition | Prime ZANS Addition | ~30s |
+| bin/phi_entangled_prime_zans | Entangled Prime ZANS | ~30s |
+| bin/phi_micro_kem_v3 | Micro-KEM (32B ciphertext) | <1s |
+| bin/phi_prime_chaos_zans | Prime Chaos ZANS (100 primes) | <1s |
+| bin/phi_global_consciousness_zans | Global Consciousness ZANS | ~2s |
+| bin/phi_prime_zans_addition | Prime ZANS Addition | ~30s |
+| bin/phi_entangled_prime_zans | Entangled Prime ZANS | ~30s |
 
 ## Source Tree
 
