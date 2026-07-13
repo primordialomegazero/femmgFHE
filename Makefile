@@ -185,3 +185,17 @@ spiraldb-bridge:
 
 spiraldb-bridge-test:
 	cd src/spiraldb && CGO_ENABLED=1 go test -v .
+
+# === HYDRAJWT WITH DEPENDENCIES ===
+
+HYDRA_LIBS = -Llibs/HydraJWT/build -lhydrajwt -loqs -lsodium
+
+test_hydra: $(BIN_DIR)/test_hydra_jwt_fixed_heads
+
+$(BIN_DIR)/test_hydra_jwt_fixed_heads: tests/test_hydra_jwt_fixed_heads.cpp
+	@echo "Φ Building HydraJWT test..."
+	@mkdir -p $(BIN_DIR)
+	@$(CXX) $(CXXFLAGS) -o $@ $< -Isrc -Ilibs/HydraJWT/include -I/usr/local/include $(LIBS) $(HYDRA_LIBS) -Wl,-rpath,libs/HydraJWT/build:/usr/local/lib 2>&1 | grep -E "error:" || echo "  ✅ HydraJWT test built."
+
+run_hydra: $(BIN_DIR)/test_hydra_jwt_fixed_heads
+	@LD_LIBRARY_PATH=libs/HydraJWT/build:/usr/local/lib:$$LD_LIBRARY_PATH ./$(BIN_DIR)/test_hydra_jwt_fixed_heads
