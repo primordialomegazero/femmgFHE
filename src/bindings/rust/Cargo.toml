@@ -1,0 +1,8 @@
+[package]
+name = "femmg_fhe"
+version = "5.0.0"
+edition = "2021"
+
+[[bin]]
+name = "femmg_fhe"
+path = "src/main.rs"
