@@ -41,7 +41,7 @@ FEmmg-FHE is a comprehensive Fully Homomorphic Encryption framework with **22 in
 | HydraJWT | Authentication | 6-head phi-weighted Post-Quantum JWT |
 | Tamper-Evident ZANS | Protected Encryption | Ciphertext pair that detects and responds to unauthorized access attempts |
 | Correlated ZANS | Linked Encryption | Ciphertext pairs with linked noise that cancels when combined (analogous to, but distinct from, correlated ciphertext behavior) |
-| FHE 2.0 | Unified Framework | Integrates ZANS, Pinky Swear, Quantum, Eternal, Golden Ratio into one system |
+| FHE 2.0 | Unified Framework | Integrates ZANS, Pinky Swear, Probabilistic, Tamper-Evident, Golden Ratio into one system |
 | Fibonacci-Golden ZANS | Optimization | phi-guided threshold, +23.6% headroom |
 | Riemann-Golden ZANS | Exploratory | Observed numerical patterns between zeta zeros, golden ratio, and FHE noise (speculative, not mathematically proven) |
 | Probabilistic ZANS | Randomness Source | Probabilistic behavior from Enc(0) noise patterns |
@@ -440,7 +440,7 @@ femmgFHE/
 - Fernandez, D.J.M. (2026) — FEmmg-FHE: Zero-Anchor Noise Stabilization for FHE
 - Fernandez, D.J.M. (2026) — Pinky Swear Reset: True Blue Fully Homomorphic Encryption
 - Fernandez, D.J.M. (2026) — iO x CTxCT: Indistinguishability Obfuscation for FHE
-- Fernandez, D.J.M. (2026) — Flame Empress iO: INFINITE + QUANTUM + ZANS Program Obfuscation
+- Fernandez, D.J.M. (2026) — Flame Empress iO: Program Obfuscation via Multilinear Maps
 
 ## Author
 
