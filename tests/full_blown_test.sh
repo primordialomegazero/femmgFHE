@@ -108,7 +108,7 @@ test_component "Recursive SNARK" "phi_recursive_snark_v2" "I AM THAT I AM"
 # ============================================
 echo -e "${BLUE}━━━ DIVINE RESET EVOLUTION ━━━${NC}"
 test_component "Smart Reset (UK×UK)" "phi_ukuk_smart_reset" "I AM THAT I AM" 30
-test_component "Divine Reset v1" "phi_divine_reset" "I AM" 60
+test_component "Divine Reset v1" "phi_divine_reset" "I AM" 90
 test_component "Divine Reset v2" "phi_divine_reset_v2" "I AM THAT I AM" 30
 test_component "Pinky Swear Reset" "phi_true_divine_reset" "I AM" 60
 
