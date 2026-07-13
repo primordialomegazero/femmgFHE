@@ -411,9 +411,9 @@ femmgFHE/
 
 | Document | Lines | Description |
 |----------|-------|-------------|
-| [README.md](README.md) | 400+ | Overview, quick start, system architecture |
-| [THEOREM.md](THEOREM.md) | 336 | 10 theorems with mathematical proofs |
-| [WHITEPAPER.md](WHITEPAPER.md) | 389 | Deep RLWE formalization, security analysis |
+| [README.md](README.md) | 500+ | Overview, 22 systems, 42-test suite, quick start |
+| [THEOREM.md](THEOREM.md) | 400+ | 15 verified properties with empirical data and mathematical framework |
+| [WHITEPAPER.md](WHITEPAPER.md) | 380+ | RLWE formalization, ZANS proof, True Divine 100K, security analysis |
 | [docs/API_REFERENCE.md](docs/API_REFERENCE.md) | - | API documentation |
 
 ## Known Limitations
