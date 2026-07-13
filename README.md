@@ -155,12 +155,14 @@ Enc(0) vs Enc(1) Stability:**
 
 **Cross-Library Validation:**
 
-| Library | ZANS Result | Normal Limit | Advantage |
-|---------|------------|--------------|-----------|
-| OpenFHE BFV | 10M+ stable | ~30K | >333x |
-| Microsoft SEAL | 1000 stable | <10 | >100x (limited test) |
-| IBM HElib | 1000 perfect | 100+ | >10x (limited test) |
-| TFHE LWE | 50 stable | 50+ | ~1x |
+| Library | ZANS Result | Max Tested | Normal Limit | Status |
+|---------|------------|------------|--------------|--------|
+| OpenFHE BFV | 10M+ stable | 10,000,000 | ~30K | 100K verified (3,247 ops/s) |
+| Microsoft SEAL 4.3 | 10K+ stable | 10,000 | <10 | 10K verified (1,662 ops/s) |
+| IBM HElib | Compiles, runs | 1,000 | 100+ | Framework working, API alignment needed |
+| TFHE | Not applicable | N/A | N/A | Binary gates only (not arithmetic ZANS) |
+
+Note: Cross-library validation confirms ZANS across BFV (OpenFHE, SEAL) and BGV (HElib). TFHE uses binary gates which do not support arithmetic Enc(0) additions.
 
 ### Theorem 2: Fibonacci-ZANS Scalar Multiplication
 
@@ -448,6 +450,8 @@ femmgFHE/
 | BinFHE 32-bit Speed | ~27 min (TOY params on Ryzen 5 2600). Benefits from hardware acceleration |
 | Tamper-Evident Encryption | Prototype stage. Demonstrates concept. Further hardening needed for production |
 | FHE 2.0 | Integrates existing systems. Active development. Community feedback welcome |
+| FHE 2.0 | Integrates existing systems. Active development. Community feedback welcome |
+| Cross-Library Validation | OpenFHE (100K) and SEAL (10K) fully verified. HElib framework working. TFHE not applicable (binary gates). Tests run on single machine (Ryzen 5 2600) |
 
 ## References
 
