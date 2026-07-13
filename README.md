@@ -39,11 +39,11 @@ FEmmg-FHE is a comprehensive Fully Homomorphic Encryption framework with **22 in
 | Packed BFV | Packed FHE | 8192 slots, all ops, noise-free |
 | Key Manager | Security | Ephemeral Sessions, Forward Secrecy, Key Serialization |
 | HydraJWT | Authentication | 6-head phi-weighted Post-Quantum JWT |
-| Eternal ZANS | Tamper-Proof Encryption | Self-destructing entangled ciphertext on wrong access attempt |
-| Entangled ZANS | Correlated Encryption | Ciphertext pairs with linked noise that cancels when combined |
+| Tamper-Evident ZANS | Protected Encryption | Ciphertext pair that detects and responds to unauthorized access attempts |
+| Correlated ZANS | Linked Encryption | Ciphertext pairs with linked noise that cancels when combined (analogous to, but distinct from, quantum entanglement) |
 | FHE 2.0 | Unified Framework | Integrates ZANS, Pinky Swear, Quantum, Eternal, Golden Ratio into one system |
 | Fibonacci-Golden ZANS | Optimization | phi-guided threshold, +23.6% headroom |
-| Riemann-Golden ZANS | Number Theory | Riemann zeros + Golden Ratio connection to ZANS |
+| Riemann-Golden ZANS | Exploratory | Observed numerical patterns between zeta zeros, golden ratio, and FHE noise (speculative, not mathematically proven) |
 | Quantum Random | Randomness Source | Probabilistic behavior from Enc(0) noise patterns |
 
 ## System Architecture
@@ -104,15 +104,15 @@ graph TB
     SPIRALDB --> KEYMGR
 ```
 
-## Mathematical Breakthroughs
+## Verified Properties & Empirical Results
 
 ### Theorem 1: ZANS — Zero Noise Growth (10,000,000+ Verified)
 
-ZANS = Zero-Anchor Noise Stabilization: Adding Enc(0) to a ciphertext produces MINIMAL noise growth (noise stays at 1.0 for additions), enabling practically unlimited homomorphic additions without bootstrapping.
+ZANS = Zero-Anchor Noise Stabilization: Adding Enc(0) to a ciphertext keeps noise BOUNDED at baseline levels. Empirically verified stable across 10M+ operations. Enables practically unlimited additions without bootstrapping.
 
 ```
 Z(ct) = ct + Enc(0)
-Noise(Z^k(ct)) = Noise(ct)  for all k (empirically verified to 10,000,000+)
+Noise(Z^k(ct)) ≈ Noise(ct)  for all k tested (empirically verified to 10,000,000+)
 ```
 
 | Operations | Noise Scale | Drift | Status |
@@ -230,8 +230,8 @@ Two different CTxCT algorithms (3x ZANS vs 5x ZANS) obfuscated via Multilinear M
 **50-Chain Stress Test Results:**
 - 50/50 chains passed, 940 seconds
 - Random algorithms, random steps (5-29), random multipliers (2/3/4)
-- Output structures IDENTICAL (18 lines each)
-- Noise and timing INDISTINGUISHABLE
+- Output structures functionally equivalent (consistent format across all runs)
+- Noise and timing patterns consistent across algorithms
 
 ### Theorem 9: CKKS+ZANS — Noise-Free Approximate FHE
 
@@ -257,7 +257,7 @@ Analogous to quantum observer effect in classical setting.
 | Data destroyed | YES — Corrupted to garbage |
 | Eternal protection | SUCCESS |
 
-### Theorem 12: Entangled ZANS — Classical Quantum Entanglement
+### Theorem 12: Correlated ZANS — Linked Ciphertext Pairs (Entanglement Analog)
 
 Two ciphertexts with correlated noise. When combined, noise cancels perfectly.
 
@@ -265,7 +265,7 @@ Two ciphertexts with correlated noise. When combined, noise cancels perfectly.
 |----------------|--------|
 | ct_a = Enc(42) | Noise: 1 |
 | ct_b = Enc(-42) | Noise: 1 |
-| ct_a + ct_b | Value: 0, Noise: 1 — ENTANGLED COLLAPSE |
+| ct_a + ct_b | Value: 0, Noise: 1 — CORRELATED CANCELLATION |
 
 ### Theorem 13: Fibonacci-Golden ZANS — phi-Guided Optimization
 
@@ -418,13 +418,15 @@ femmgFHE/
 
 ## Known Limitations
 
-| Issue | Status |
-|-------|--------|
-| ZANS Formal Proof | Empirical evidence: 10M ops across 4 libraries. Working theory: quantum-like superposition. Formal proof welcome |
-| Plaintext Modulus | 30-bit (1.07B max). phi-guided threshold gives +23.6% headroom. Pinky Swear provides overflow handling |
+| Issue | Honest Assessment |
+|-------|-------------------|
+| ZANS Formal Proof | Empirically verified (10M ops, 4 libraries). Formal RLWE proof pending. Current docs use 'theorem' loosely — these are 'verified properties' not formal theorems |
+| 'Zero Noise' Terminology | Technically imprecise. Noise is BOUNDED not zero. Practically stable across 10M+ operations |
+| iO 'Indistinguishability' | Demonstration shows functional equivalence, not cryptographic indistinguishability. Formal security reduction pending |
+| Riemann-Golden Connection | Numerical coincidences observed. NOT a proven mathematical connection. Noted as curiosity only |
+| 'Quantum' Terminology | 'Superposition' and 'entanglement' are analogies, not literal quantum mechanics. Classical probabilistic behavior |
 | BinFHE 32-bit Speed | ~27 min (TOY params on Ryzen 5 2600). Benefits from hardware acceleration |
-| iO Multilinear Maps | GGH13-style GES implementation. Working demos (5/5 and 50/50). Formal security reduction pending |
-| Eternal Encryption | Prototype stage. Demonstrates concept. Further hardening needed for production |
+| Tamper-Evident Encryption | Prototype stage. Demonstrates concept. Further hardening needed for production |
 | FHE 2.0 | Integrates existing systems. Active development. Community feedback welcome |
 
 ## References
