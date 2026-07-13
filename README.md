@@ -155,14 +155,14 @@ Enc(0) vs Enc(1) Stability:**
 
 **Cross-Library Validation:**
 
-| Library | ZANS Result | Max Tested | Normal Limit | Status |
-|---------|------------|------------|--------------|--------|
-| OpenFHE BFV | 10M+ stable | 10,000,000 | ~30K | 100K verified (3,247 ops/s) |
-| Microsoft SEAL 4.3 | 10K+ stable | 10,000 | <10 | 10K verified (1,662 ops/s) |
-| IBM HElib | Compiles, runs | 1,000 | 100+ | Framework working, API alignment needed |
-| TFHE | Not applicable | N/A | N/A | Binary gates only (not arithmetic ZANS) |
+| Library | ZANS Additions | Max Tested | Normal Limit | CTxCT Multiplications | Status |
+|---------|---------------|------------|--------------|----------------------|--------|
+| OpenFHE BFV | 10M+ stable | 10,000,000 | ~30K | 100K (True Divine) | Verified (add: 96K/s, mult: 3/s) |
+| Microsoft SEAL 4.3 | 10K+ stable | 10,000 | <10 | Not tested | Verified (1,662 ops/s) |
+| IBM HElib | Compiles, runs | 1,000 | 100+ | Not tested | Framework working |
+| TFHE | Not applicable | N/A | N/A | Not applicable | Binary gates only |
 
-Note: Cross-library validation confirms ZANS across BFV (OpenFHE, SEAL) and BGV (HElib). TFHE uses binary gates which do not support arithmetic Enc(0) additions.
+Note: ZANS additions (Enc(0) + ct) keep noise bounded. True Divine CTxCT chain uses Pinky Swear overflow detection for unlimited encrypted multiplications. Different operations, both verified.
 
 ### Theorem 2: Fibonacci-ZANS Scalar Multiplication
 
@@ -442,15 +442,15 @@ femmgFHE/
 
 | Issue | Honest Assessment |
 |-------|-------------------|
-| ZANS Formal Proof | Empirically verified (10M ops, 4 libraries). Formal RLWE proof pending. Current docs use 'theorem' loosely — these are 'verified properties' not formal theorems |
-| 'Zero Noise' Terminology | Technically imprecise. Noise is BOUNDED not zero. Practically stable across 10M+ operations |
-| iO 'Indistinguishability' | Demonstration shows functional equivalence, not cryptographic indistinguishability. Formal security reduction pending |
+| ZANS Formal Proof | Empirically verified: 10M additions (OpenFHE), 10K additions (SEAL). Formal RLWE proof pending. These are 'verified properties' not formal theorems |
+| 'Zero Noise' Terminology | Technically imprecise. Noise is BOUNDED not zero. Practically stable across 10M+ addition operations |
+| Cross-Library Scope | OpenFHE: 10M additions + 100K multiplications verified. SEAL: 10K additions verified. HElib: Framework ready. TFHE: Not applicable (binary gates). All tests on Ryzen 5 2600 |
+| iO 'Indistinguishability' | Demonstration shows functional equivalence (50/50 chains, 5/5 flames), not cryptographic indistinguishability. Formal security reduction pending |
 | Riemann-Golden Connection | Numerical coincidences observed. NOT a proven mathematical connection. Noted as curiosity only |
-| 'Probabilistic/Correlated' Terminology | 'Probabilistic noise' and 'correlated ciphertexts' describe the actual behavior. These are classical probabilistic phenomena |
+| 'Probabilistic/Correlated' Terminology | 'Probabilistic noise' and 'correlated ciphertexts' describe actual classical behavior, not quantum phenomena |
 | BinFHE 32-bit Speed | ~27 min (TOY params on Ryzen 5 2600). Benefits from hardware acceleration |
 | Tamper-Evident Encryption | Prototype stage. Demonstrates concept. Further hardening needed for production |
 | FHE 2.0 | Integrates existing systems. Active development. Community feedback welcome |
-| Cross-Library Validation | OpenFHE (100K) and SEAL (10K) fully verified. HElib framework working. TFHE not applicable (binary gates). Tests run on single machine (Ryzen 5 2600) |
 
 ## References
 
