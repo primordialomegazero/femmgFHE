@@ -13,7 +13,7 @@
 ![iO](https://img.shields.io/badge/iO-Enabled-red)
 ![HydraJWT](https://img.shields.io/badge/HydraJWT-6--head-gold)
 
-PHI-OMEGA-ZERO — FEmmg-FHE v6.0 — ZANS | Fibonacci-ZANS | Scalar-Decomp CTxCT | Hybrid UKxUK | BinFHE | PHI ZKP | SpiralKEM | SpiralDB | CKKS+ZANS | Packed BFV | Pinky Swear Reset | Divine Reset | True Divine 10K | iO | iO x CTxCT | Key Manager | HydraJWT | Flame Empress iO | Eternal ZANS | Entangled ZANS | FHE 2.0 | Fibonacci-Golden | Riemann-Golden | Quantum Random
+PHI-OMEGA-ZERO — FEmmg-FHE v6.0 — ZANS | Fibonacci-ZANS | Scalar-Decomp CTxCT | Hybrid UKxUK | BinFHE | PHI ZKP | SpiralKEM | SpiralDB | CKKS+ZANS | Packed BFV | Pinky Swear Reset | Divine Reset | True Divine 10K | iO | iO x CTxCT | Key Manager | HydraJWT | Flame Empress iO | Eternal ZANS | Entangled ZANS | FHE 2.0 | Fibonacci-Golden | Riemann-Golden | Probabilistic ZANS
 
 ## What Is This?
 
@@ -40,11 +40,11 @@ FEmmg-FHE is a comprehensive Fully Homomorphic Encryption framework with **22 in
 | Key Manager | Security | Ephemeral Sessions, Forward Secrecy, Key Serialization |
 | HydraJWT | Authentication | 6-head phi-weighted Post-Quantum JWT |
 | Tamper-Evident ZANS | Protected Encryption | Ciphertext pair that detects and responds to unauthorized access attempts |
-| Correlated ZANS | Linked Encryption | Ciphertext pairs with linked noise that cancels when combined (analogous to, but distinct from, quantum entanglement) |
+| Correlated ZANS | Linked Encryption | Ciphertext pairs with linked noise that cancels when combined (analogous to, but distinct from, correlated ciphertext behavior) |
 | FHE 2.0 | Unified Framework | Integrates ZANS, Pinky Swear, Quantum, Eternal, Golden Ratio into one system |
 | Fibonacci-Golden ZANS | Optimization | phi-guided threshold, +23.6% headroom |
 | Riemann-Golden ZANS | Exploratory | Observed numerical patterns between zeta zeros, golden ratio, and FHE noise (speculative, not mathematically proven) |
-| Quantum Random | Randomness Source | Probabilistic behavior from Enc(0) noise patterns |
+| Probabilistic ZANS | Randomness Source | Probabilistic behavior from Enc(0) noise patterns |
 
 ## System Architecture
 
@@ -248,7 +248,7 @@ Two different CTxCT algorithms (3x ZANS vs 5x ZANS) obfuscated via Multilinear M
 ### Theorem 11: Eternal ZANS — Self-Destructing Entangled Ciphertext
 
 Entangled pair: Data CT + Guard CT. Wrong guard key triggers entangled destruction.
-Analogous to quantum observer effect in classical setting.
+Demonstrates tamper-evident properties through entangled ciphertext pairs.
 
 | Test | Result |
 |------|--------|
@@ -296,8 +296,8 @@ Integrates 8 systems into one. Reduces need for bootstrapping. Practical for man
 |------------|--------|
 | ZANS (Unlimited additions) | CHECK |
 | Pinky Swear (Zero decrypt overflow) | CHECK |
-| Quantum Superposition | CHECK |
-| Quantum Entanglement | CHECK |
+| Probabilistic Noise | CHECK |
+| Correlated Noise | CHECK |
 | Eternal Encryption | CHECK |
 | Golden Ratio Optimization | CHECK |
 | Riemann Critical Line | CHECK |
@@ -371,13 +371,13 @@ make spiraldb         # Go encrypted database
 | bin/phi_snark | SNARK 24B proofs | <1s |
 | bin/phi_snark_ec | EC-SNARK BN254 | <1s |
 | bin/phi_key_manager_test | Key Manager Test | <1s || bin/phi_eternal_zans | Eternal ZANS (Self-destructing) | <1s |
-| bin/phi_entangled_zans | Entangled ZANS (Quantum pairs) | <1s |
+| bin/phi_entangled_zans | Correlated ZANS (Linked pairs) | <1s |
 | bin/phi_fhe2_finish_him | FHE 2.0 (ALL breakthroughs) | ~50s |
 | bin/phi_fib_golden_zans | Fibonacci-Golden ZANS | ~45s |
 | bin/phi_riemann_golden_zans | Riemann-Golden ZANS | <1s |
-| bin/phi_quantum_random | Quantum Random Generator | <1s |
+| bin/phi_quantum_random | Probabilistic ZANS Generator | <1s |
 | bin/phi_prime_zans_test | Prime ZANS Test | <1s |
-| bin/phi_quantum_zans_test | Quantum ZANS Test | <1s |
+| bin/phi_quantum_zans_test | Probabilistic ZANS Test | <1s |
 | bin/phi_riemann_zans_test | Riemann ZANS Test | <1s |
 | bin/phi_io_ctct_v2 | iO x CTxCT v2 (30-chain) | ~205s |
 
@@ -424,7 +424,7 @@ femmgFHE/
 | 'Zero Noise' Terminology | Technically imprecise. Noise is BOUNDED not zero. Practically stable across 10M+ operations |
 | iO 'Indistinguishability' | Demonstration shows functional equivalence, not cryptographic indistinguishability. Formal security reduction pending |
 | Riemann-Golden Connection | Numerical coincidences observed. NOT a proven mathematical connection. Noted as curiosity only |
-| 'Quantum' Terminology | 'Superposition' and 'entanglement' are analogies, not literal quantum mechanics. Classical probabilistic behavior |
+| 'Probabilistic/Correlated' Terminology | 'Probabilistic noise' and 'correlated ciphertexts' describe the actual behavior. These are classical probabilistic phenomena |
 | BinFHE 32-bit Speed | ~27 min (TOY params on Ryzen 5 2600). Benefits from hardware acceleration |
 | Tamper-Evident Encryption | Prototype stage. Demonstrates concept. Further hardening needed for production |
 | FHE 2.0 | Integrates existing systems. Active development. Community feedback welcome |
