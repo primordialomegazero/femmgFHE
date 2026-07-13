@@ -209,6 +209,7 @@ Two distinct breakthroughs in unlimited CTxCT chains:
 | No Reset | 28 | N/A | N/A | 29 | Baseline |
 | Smart Reset | ~8,000 | Required | None | 2 | Semi-FHE |
 | True Divine 10K | 10,000 | ZERO | ZERO | steps+1 | PURE FHE |
+| True Divine 100K | 100,000 | ZERO | ZERO | steps+1 | PURE FHE |
 
 ### Theorem 5:
 
