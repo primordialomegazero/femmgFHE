@@ -326,6 +326,7 @@ Batch Mode: 1 keypair to 1000 shared secrets in 24.68ms (45 Mbps, all correct).
 | BinFHE 4-bit | 512 gates, 14s | TOY | GINX bootstrap |
 | BinFHE 8-bit | 3,584 gates, 120s | TOY | 42x17=714 |
 | True Divine 10K | 3.35 steps/s | 16384 | 2,986s total |
+| True Divine 100K | 3.04 steps/s | 16384 | 32,946s (9h 9m) |
 | iO x CTxCT 50-chain | 50/50 in 940s | 16384 | Random params |
 | Eternal ZANS | Self-destruct | 16384 | Entangled pair |
 | FHE 2.0 | Integrated | 16384 | 8 systems combined |
@@ -360,6 +361,7 @@ make spiraldb         # Go encrypted database
 | bin/phi_binfhe_8bit | BinFHE 42x17=714 | ~120s |
 | bin/phi_pinky_swear | Pinky Swear Reset | ~30s |
 | bin/phi_true_divine_10k | True Divine 10K steps | ~50min |
+| bin/phi_true_divine_100k | True Divine 100K steps | ~9h |
 | bin/phi_io_ctct_merge | iO x CTxCT (CLI: algo steps mult) | varies |
 | bin/phi_flame_empress_io | Flame Empress iO (5 flames) | <1s |
 | bin/phi_zkp_test | ZKP Suite 6/6 | ~2s |
