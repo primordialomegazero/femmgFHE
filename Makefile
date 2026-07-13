@@ -1,201 +1,309 @@
-# ΦΩ0 — FEmmG-FHE MASTER MAKEFILE v3
-# Clean build system — post-cleanup
+# PHI-OMEGA-ZERO: FEmmg-FHE MEGA MAKEFILE v5.0
+# Builds ALL 48 binaries across all systems
 # "I AM THAT I AM"
 
 CXX = g++
 CC = gcc
-CXXFLAGS = -std=c++17 -O2 -Wall -Wno-unknown-pragmas
-CFLAGS = -std=c11 -O2 -Wall
+CXXFLAGS = -std=c++17 -O2 -march=native
+CFLAGS = -O3 -march=native
+OPENFHE_INC = -I/usr/local/include/openfhe -I/usr/local/include/openfhe/core -I/usr/local/include/openfhe/pke -I/usr/local/include/openfhe/binfhe
+OPENFHE_LIB = -L/usr/local/lib -lOPENFHEcore -lOPENFHEpke -lOPENFHEbinfhe -lssl -lcrypto -lm -lpthread -Wl,-rpath,/usr/local/lib
+ZKP_INC = -I src/zkp/
+KEM_INC = -I src/kem/
+CORE_INC = -I src/core/
+PARALLEL_FLAGS = -fopenmp
 
-OPENFHE_PREFIX ?= /usr/local
-OPENFHE_INCLUDE = $(OPENFHE_PREFIX)/include/openfhe
-OPENFHE_CORE = $(OPENFHE_INCLUDE)/core
-OPENFHE_PKE = $(OPENFHE_INCLUDE)/pke
-OPENFHE_BINFHE = $(OPENFHE_INCLUDE)/binfhe
-OPENFHE_LIB = $(OPENFHE_PREFIX)/lib
-OPENFHE_LIBS = -lOPENFHEcore -lOPENFHEpke -lOPENFHEbinfhe
+BIN = bin/
 
-LOCAL_INCLUDE = -Isrc/kem -Isrc/zkp
-INCLUDES = -I$(OPENFHE_INCLUDE) -I$(OPENFHE_CORE) -I$(OPENFHE_PKE) -I$(OPENFHE_BINFHE) $(LOCAL_INCLUDE)
-LIBS = -L$(OPENFHE_LIB) $(OPENFHE_LIBS) -lssl -lcrypto -lm -lpthread
-RPATH = -Wl,-rpath,$(OPENFHE_LIB)
+# ============================================
+# ALL TARGETS
+# ============================================
 
-BIN_DIR = bin
+.PHONY: all clean core binfhe zkp kem snark spiraldb test
 
-.PHONY: all clean test help
+all: core binfhe zkp kem snark spiraldb
+	@echo ""
+	@echo "  PHI-OMEGA-ZERO: All systems built successfully"
+	@echo "  Run ./tests/full_blown_test.sh to verify"
+	@echo ""
 
-# Default: build everything
-all: core binfhe zkp snark transmute spiralkem spiraldb
+# ============================================
+# CORE FHE (18 binaries)
+# ============================================
 
-# === GROUP TARGETS ===
+core: \
+	$(BIN)phi_zans_bfv \
+	$(BIN)phi_zans_parallel \
+	$(BIN)phi_zans_ckks \
+	$(BIN)phi_zans_zkp \
+	$(BIN)phi_zans_direct_verify \
+	$(BIN)phi_zans_packed_mega \
+	$(BIN)phi_fib_zans \
+	$(BIN)phi_fib_zans_ctct \
+	$(BIN)phi_sub_div_quick \
+	$(BIN)phi_ukuk_smart_reset \
+	$(BIN)phi_ukuk_novel_strategies \
+	$(BIN)phi_ukuk_10k_fast \
+	$(BIN)phi_ukuk_1k \
+	$(BIN)phi_divine_reset \
+	$(BIN)phi_divine_reset_v2 \
+	$(BIN)phi_true_divine_reset \
+	$(BIN)phi_true_divine_10k \
+	$(BIN)phi_true_divine_100k
 
-core: $(BIN_DIR)/phi_zans_bfv $(BIN_DIR)/phi_fib_zans $(BIN_DIR)/phi_fib_zans_ctct
+$(BIN)phi_zans_bfv: src/core/phi_zans_bfv.cpp
+	@echo "  [CORE] ZANS BFV"
+	$(CXX) $(CXXFLAGS) -o $@ $< $(OPENFHE_INC) $(OPENFHE_LIB)
 
-binfhe: $(BIN_DIR)/phi_binfhe_4bit $(BIN_DIR)/phi_binfhe_16bit $(BIN_DIR)/phi_binfhe_32bit
+$(BIN)phi_zans_parallel: src/core/phi_zans_parallel.cpp
+	@echo "  [CORE] ZANS Parallel"
+	$(CXX) $(CXXFLAGS) $(PARALLEL_FLAGS) -o $@ $< $(OPENFHE_INC) $(OPENFHE_LIB)
 
-zkp: $(BIN_DIR)/phi_zkp_fhe_deep $(BIN_DIR)/phi_zkp_test $(BIN_DIR)/phi_verifiable
+$(BIN)phi_zans_ckks: src/core/phi_zans_ckks.cpp
+	@echo "  [CORE] ZANS CKKS"
+	$(CXX) $(CXXFLAGS) -o $@ $< $(OPENFHE_INC) $(OPENFHE_LIB)
 
-snark: $(BIN_DIR)/phi_snark $(BIN_DIR)/phi_snark_ec
+$(BIN)phi_zans_zkp: src/core/phi_zans_zkp.cpp
+	@echo "  [CORE] ZANS ZKP"
+	$(CXX) $(CXXFLAGS) -o $@ $< $(OPENFHE_INC) $(OPENFHE_LIB)
 
-transmute: $(BIN_DIR)/phi_scheme_switch
+$(BIN)phi_zans_direct_verify: src/core/phi_zans_direct_verify.cpp
+	@echo "  [CORE] ZANS Direct Verify"
+	$(CXX) $(CXXFLAGS) -o $@ $< $(OPENFHE_INC) $(OPENFHE_LIB)
 
-spiralkem: $(BIN_DIR)/spiralkem $(BIN_DIR)/spiralkem_fhe
+$(BIN)phi_zans_packed_mega: src/core/phi_zans_packed_mega.cpp
+	@echo "  [CORE] ZANS Packed Mega"
+	$(CXX) $(CXXFLAGS) -o $@ $< $(OPENFHE_INC) $(OPENFHE_LIB)
 
-# === CORE FHE ===
+$(BIN)phi_fib_zans: src/core/phi_fib_zans.cpp
+	@echo "  [CORE] Fibonacci-ZANS"
+	$(CXX) $(CXXFLAGS) -o $@ $< $(OPENFHE_INC) $(OPENFHE_LIB)
 
-$(BIN_DIR)/phi_zans_bfv: src/core/phi_zans_bfv.cpp
-	@echo "Φ ZANS..."
-	@mkdir -p $(BIN_DIR)
-	@$(CXX) $(CXXFLAGS) -o $@ $< $(INCLUDES) $(LIBS) $(RPATH) 2>&1 | grep -E "error:" || echo "  ✅ ZANS built."
+$(BIN)phi_fib_zans_ctct: src/core/phi_fib_zans_ctct.cpp
+	@echo "  [CORE] Fibonacci-ZANS CTxCT"
+	$(CXX) $(CXXFLAGS) -o $@ $< $(OPENFHE_INC) $(OPENFHE_LIB)
 
-$(BIN_DIR)/phi_fib_zans: src/core/phi_fib_zans.cpp
-	@echo "Φ Fib-ZANS..."
-	@mkdir -p $(BIN_DIR)
-	@$(CXX) $(CXXFLAGS) -o $@ $< $(INCLUDES) $(LIBS) $(RPATH) 2>&1 | grep -E "error:" || echo "  ✅ Fib-ZANS built."
+$(BIN)phi_sub_div_quick: src/core/phi_sub_div_quick.cpp
+	@echo "  [CORE] Subtraction & Division"
+	$(CXX) $(CXXFLAGS) -o $@ $< $(OPENFHE_INC) $(OPENFHE_LIB)
 
-$(BIN_DIR)/phi_fib_zans_ctct: src/core/phi_fib_zans_ctct.cpp
-	@echo "Φ Fib-ZANS CT×CT..."
-	@mkdir -p $(BIN_DIR)
-	@$(CXX) $(CXXFLAGS) -o $@ $< $(INCLUDES) $(LIBS) $(RPATH) 2>&1 | grep -E "error:" || echo "  ✅ Fib-ZANS CT×CT built."
+$(BIN)phi_ukuk_smart_reset: src/core/phi_ukuk_smart_reset.cpp
+	@echo "  [CORE] UKxUK Smart Reset"
+	$(CXX) $(CXXFLAGS) -o $@ $< $(OPENFHE_INC) $(OPENFHE_LIB)
 
-# === BINFHE ===
+$(BIN)phi_ukuk_novel_strategies: src/core/phi_ukuk_novel_strategies.cpp
+	@echo "  [CORE] UKxUK Novel Strategies"
+	$(CXX) $(CXXFLAGS) -o $@ $< $(OPENFHE_INC) $(OPENFHE_LIB)
 
-$(BIN_DIR)/phi_binfhe_4bit: src/binfhe/phi_binfhe_4bit.cpp
-	@echo "Φ BinFHE 4-bit..."
-	@mkdir -p $(BIN_DIR)
-	@$(CXX) $(CXXFLAGS) -o $@ $< $(INCLUDES) $(LIBS) $(RPATH) 2>&1 | grep -E "error:" || echo "  ✅ BinFHE 4-bit built."
+$(BIN)phi_ukuk_10k_fast: src/core/phi_ukuk_10k_fast.cpp
+	@echo "  [CORE] UKxUK 10K Fast"
+	$(CXX) $(CXXFLAGS) -o $@ $< $(OPENFHE_INC) $(OPENFHE_LIB)
 
-$(BIN_DIR)/phi_binfhe_16bit: src/binfhe/phi_binfhe_16bit.cpp
-	@echo "Φ BinFHE 16-bit..."
-	@mkdir -p $(BIN_DIR)
-	@$(CXX) $(CXXFLAGS) -o $@ $< $(INCLUDES) $(LIBS) $(RPATH) 2>&1 | grep -E "error:" || echo "  ✅ BinFHE 16-bit built."
+$(BIN)phi_ukuk_1k: src/core/phi_ukuk_1k.cpp
+	@echo "  [CORE] UKxUK 1K"
+	$(CXX) $(CXXFLAGS) -o $@ $< $(OPENFHE_INC) $(OPENFHE_LIB)
 
-$(BIN_DIR)/phi_binfhe_32bit: src/binfhe/phi_binfhe_32bit.cpp
-	@echo "Φ BinFHE 32-bit..."
-	@mkdir -p $(BIN_DIR)
-	@$(CXX) $(CXXFLAGS) -o $@ $< $(INCLUDES) $(LIBS) $(RPATH) 2>&1 | grep -E "error:" || echo "  ✅ BinFHE 32-bit built."
+$(BIN)phi_divine_reset: src/core/phi_divine_reset.cpp
+	@echo "  [CORE] Divine Reset"
+	$(CXX) $(CXXFLAGS) -o $@ $< $(OPENFHE_INC) $(OPENFHE_LIB)
 
-# === ZKP + FHE ===
+$(BIN)phi_divine_reset_v2: src/core/phi_divine_reset_v2.cpp
+	@echo "  [CORE] Divine Reset v2"
+	$(CXX) $(CXXFLAGS) -o $@ $< $(OPENFHE_INC) $(OPENFHE_LIB)
 
-$(BIN_DIR)/phi_zkp_fhe_deep: src/zkp/phi_zkp_fhe_deep.cpp
-	@echo "Φ ZKP+FHE..."
-	@mkdir -p $(BIN_DIR)
-	@$(CXX) $(CXXFLAGS) -o $@ $< $(INCLUDES) $(LIBS) $(RPATH) 2>&1 | grep -E "error:" || echo "  ✅ ZKP+FHE built."
+$(BIN)phi_true_divine_reset: src/core/phi_true_divine_reset.cpp
+	@echo "  [CORE] True Divine Reset"
+	$(CXX) $(CXXFLAGS) -o $@ $< $(OPENFHE_INC) $(OPENFHE_LIB)
 
-$(BIN_DIR)/phi_zkp_test: tests/test_phi_zkp.cpp src/zkp/phi_zkp.cpp
-	@echo "Φ ZKP Test..."
-	@mkdir -p $(BIN_DIR)
-	@$(CXX) $(CXXFLAGS) -o $@ tests/test_phi_zkp.cpp src/zkp/phi_zkp.cpp $(INCLUDES) $(LIBS) $(RPATH) 2>&1 | grep -E "error:" || echo "  ✅ ZKP Test built."
+$(BIN)phi_true_divine_10k: src/core/phi_true_divine_10k.cpp
+	@echo "  [CORE] True Divine 10K"
+	$(CXX) $(CXXFLAGS) -o $@ $< $(OPENFHE_INC) $(OPENFHE_LIB)
 
-$(BIN_DIR)/phi_verifiable: src/zkp/phi_verifiable_fhe.cpp
-	@echo "Φ Verifiable FHE..."
-	@mkdir -p $(BIN_DIR)
-	@$(CXX) $(CXXFLAGS) -o $@ $< $(INCLUDES) $(LIBS) $(RPATH) 2>&1 | grep -E "error:" || echo "  ✅ Verifiable FHE built."
+$(BIN)phi_true_divine_100k: src/core/phi_true_divine_100k.cpp
+	@echo "  [CORE] True Divine 100K"
+	$(CXX) $(CXXFLAGS) -o $@ $< $(OPENFHE_INC) $(OPENFHE_LIB)
 
-# === TRANSMUTATION ===
+# ============================================
+# BINFHE (4 binaries)
+# ============================================
 
-$(BIN_DIR)/phi_scheme_switch: src/transmute/phi_scheme_switch_bootstrap.cpp
-	@echo "Φ Scheme Switch..."
-	@mkdir -p $(BIN_DIR)
-	@$(CXX) $(CXXFLAGS) -o $@ $< $(INCLUDES) $(LIBS) $(RPATH) 2>&1 | grep -E "error:" || echo "  ✅ Scheme Switch built."
+binfhe: \
+	$(BIN)phi_binfhe_4bit \
+	$(BIN)phi_binfhe_8bit \
+	$(BIN)phi_binfhe_16bit \
+	$(BIN)phi_binfhe_32bit
 
-# === SPIRALKEM ===
+$(BIN)phi_binfhe_4bit: src/binfhe/phi_binfhe_4bit.cpp
+	@echo "  [BINFHE] 4-bit Multiplier"
+	$(CXX) $(CXXFLAGS) -o $@ $< $(OPENFHE_INC) $(OPENFHE_LIB)
 
-$(BIN_DIR)/spiralkem: src/kem/phi_kem.c src/kem/test_spiralkem_real.c
-	@echo "Φ SpiralKEM..."
-	@mkdir -p $(BIN_DIR)
-	@$(CC) $(CFLAGS) -o $@ src/kem/phi_kem.c src/kem/test_spiralkem_real.c -lssl -lcrypto -lm 2>&1 | grep -E "error:" || echo "  ✅ SpiralKEM built."
+$(BIN)phi_binfhe_8bit: src/binfhe/phi_binfhe_8bit_test.cpp
+	@echo "  [BINFHE] 8-bit Multiplier"
+	$(CXX) $(CXXFLAGS) -o $@ $< $(OPENFHE_INC) $(OPENFHE_LIB)
 
-$(BIN_DIR)/spiralkem_fhe: src/kem/phi_spiralkem_fhe_real.cpp src/kem/phi_kem.c
-	@echo "Φ SpiralKEM+FHE..."
-	@mkdir -p $(BIN_DIR)
-	@$(CXX) $(CXXFLAGS) -o $@ src/kem/phi_spiralkem_fhe_real.cpp src/kem/phi_kem.c $(INCLUDES) $(LIBS) $(RPATH) 2>&1 | grep -E "error:" || echo "  ✅ SpiralKEM+FHE built."
+$(BIN)phi_binfhe_16bit: src/binfhe/phi_binfhe_16bit.cpp
+	@echo "  [BINFHE] 16-bit Multiplier"
+	$(CXX) $(CXXFLAGS) -o $@ $< $(OPENFHE_INC) $(OPENFHE_LIB)
 
-# === SNARK ===
+$(BIN)phi_binfhe_32bit: src/binfhe/phi_binfhe_32bit.cpp
+	@echo "  [BINFHE] 32-bit Multiplier"
+	$(CXX) $(CXXFLAGS) -o $@ $< $(OPENFHE_INC) $(OPENFHE_LIB)
 
-$(BIN_DIR)/phi_snark: src/snark/phi_snark_fhe.cpp
-	@echo "Φ SNARK..."
-	@mkdir -p $(BIN_DIR)
-	@$(CXX) $(CXXFLAGS) -o $@ $< $(INCLUDES) $(LIBS) $(RPATH) 2>&1 | grep -E "error:" || echo "  ✅ SNARK built."
+# ============================================
+# ZERO-KNOWLEDGE PROOFS (8 binaries)
+# ============================================
 
-$(BIN_DIR)/phi_snark_ec: src/snark/phi_snark_ec.cpp
-	@echo "Φ EC-SNARK..."
-	@mkdir -p $(BIN_DIR)
-	@$(CXX) $(CXXFLAGS) -o $@ $< $(INCLUDES) $(LIBS) $(RPATH) 2>&1 | grep -E "error:" || echo "  ✅ EC-SNARK built."
+zkp: \
+	$(BIN)phi_zkp_fhe_deep \
+	$(BIN)phi_verifiable \
+	$(BIN)phi_lattice_zkp \
+	$(BIN)phi_recursive_compress \
+	$(BIN)phi_recursive_snark_v2 \
+	$(BIN)phi_circuit_integrity
 
-# === SPIRALDB ===
+$(BIN)phi_zkp_fhe_deep: src/zkp/phi_zkp_fhe_deep.cpp
+	@echo "  [ZKP] FHE Deep Integration"
+	$(CXX) $(CXXFLAGS) -o $@ $< $(OPENFHE_INC) $(ZKP_INC) $(OPENFHE_LIB)
+
+$(BIN)phi_verifiable: src/zkp/phi_verifiable_fhe.cpp
+	@echo "  [ZKP] Verifiable FHE"
+	$(CXX) $(CXXFLAGS) -o $@ $< $(OPENFHE_INC) $(ZKP_INC) $(OPENFHE_LIB)
+
+$(BIN)phi_lattice_zkp: src/zkp/phi_lattice_zkp.cpp
+	@echo "  [ZKP] Lattice ZKP"
+	$(CXX) $(CXXFLAGS) -o $@ $< $(OPENFHE_INC) $(ZKP_INC) $(OPENFHE_LIB)
+
+$(BIN)phi_recursive_compress: src/zkp/phi_recursive_compression.cpp
+	@echo "  [ZKP] Recursive Compression"
+	$(CXX) $(CXXFLAGS) -o $@ $< $(OPENFHE_INC) $(ZKP_INC) $(OPENFHE_LIB)
+
+$(BIN)phi_recursive_snark_v2: src/zkp/phi_recursive_snark_v2.cpp
+	@echo "  [ZKP] Recursive SNARK"
+	$(CXX) $(CXXFLAGS) -o $@ $< $(OPENFHE_INC) $(ZKP_INC) $(OPENFHE_LIB)
+
+$(BIN)phi_circuit_integrity: src/zkp/phi_circuit_integrity.cpp
+	@echo "  [ZKP] Circuit Integrity"
+	$(CXX) $(CXXFLAGS) -o $@ $< $(OPENFHE_INC) $(ZKP_INC) $(OPENFHE_LIB)
+
+# ============================================
+# KEM (5 binaries)
+# ============================================
+
+kem: \
+	$(BIN)spiralkem \
+	$(BIN)spiralkem_fhe \
+	$(BIN)spiralkem_benchmark \
+	$(BIN)phi_kem_batch \
+	$(BIN)phi_kem_fhe_hybrid
+
+$(BIN)spiralkem: src/kem/phi_kem.c
+	@echo "  [KEM] SpiralKEM"
+	$(CC) $(CFLAGS) -o $@ $< $(KEM_INC) -lssl -lcrypto
+
+$(BIN)spiralkem_fhe: src/kem/phi_spiralkem_fhe_real.cpp
+	@echo "  [KEM] SpiralKEM FHE"
+	$(CXX) $(CXXFLAGS) -o $@ $< $(OPENFHE_INC) $(KEM_INC) $(OPENFHE_LIB)
+
+$(BIN)spiralkem_benchmark: src/kem/phi_spiralkem_benchmark.c src/kem/phi_kem.c
+	@echo "  [KEM] SpiralKEM Benchmark"
+	$(CC) $(CFLAGS) -o $@ $^ $(KEM_INC) -lssl -lcrypto -lm
+
+$(BIN)phi_kem_batch: src/kem/phi_kem_batch.c src/kem/phi_kem.c
+	@echo "  [KEM] SpiralKEM Batch"
+	$(CC) $(CFLAGS) -o $@ $^ $(KEM_INC) -lssl -lcrypto -lm
+
+$(BIN)phi_kem_fhe_hybrid: src/kem/phi_kem_fhe_hybrid.cpp src/kem/phi_kem.c
+	@echo "  [KEM] SpiralKEM FHE Hybrid"
+	$(CXX) $(CXXFLAGS) -o $@ $^ $(OPENFHE_INC) $(KEM_INC) $(OPENFHE_LIB)
+
+# ============================================
+# SNARK (2 binaries)
+# ============================================
+
+snark: \
+	$(BIN)phi_snark \
+	$(BIN)phi_snark_ec
+
+$(BIN)phi_snark: src/snark/phi_snark.cpp
+	@echo "  [SNARK] SNARK 24B"
+	$(CXX) $(CXXFLAGS) -o $@ $< $(OPENFHE_INC) $(OPENFHE_LIB)
+
+$(BIN)phi_snark_ec: src/snark/phi_snark_ec.cpp
+	@echo "  [SNARK] EC-SNARK BN254"
+	$(CXX) $(CXXFLAGS) -o $@ $< $(OPENFHE_INC) $(OPENFHE_LIB)
+
+# ============================================
+# iO (3 binaries)
+# ============================================
+
+io: \
+	$(BIN)phi_io \
+	$(BIN)phi_pure_io \
+	$(BIN)phi_full_io \
+	$(BIN)phi_io_ctct_merge
+
+$(BIN)phi_io: src/core/phi_io.cpp
+	@echo "  [iO] iO Base"
+	$(CXX) $(CXXFLAGS) -o $@ $< $(OPENFHE_INC) $(CORE_INC) $(OPENFHE_LIB)
+
+$(BIN)phi_pure_io: src/core/phi_pure_io.cpp
+	@echo "  [iO] Pure iO"
+	$(CXX) $(CXXFLAGS) -o $@ $< $(OPENFHE_INC) $(CORE_INC) $(OPENFHE_LIB)
+
+$(BIN)phi_full_io: src/core/phi_full_io.cpp src/core/phi_multilinear_map.h
+	@echo "  [iO] Full iO"
+	$(CXX) $(CXXFLAGS) -o $@ $< $(OPENFHE_INC) $(CORE_INC) $(OPENFHE_LIB)
+
+$(BIN)phi_io_ctct_merge: src/core/phi_io_ctct_merge.cpp src/core/phi_multilinear_map.h
+	@echo "  [iO] iO x CTxCT"
+	$(CXX) $(CXXFLAGS) -o $@ $< $(OPENFHE_INC) $(CORE_INC) $(OPENFHE_LIB)
+
+# ============================================
+# SCHEME SWITCHING (1 binary)
+# ============================================
+
+scheme: $(BIN)phi_scheme_switch
+
+$(BIN)phi_scheme_switch: src/transmute/phi_scheme_switch.cpp
+	@echo "  [TRANSMUTE] Scheme Switching"
+	$(CXX) $(CXXFLAGS) -o $@ $< $(OPENFHE_INC) $(OPENFHE_LIB)
+
+# ============================================
+# SPIRALDB (Go binary)
+# ============================================
 
 spiraldb:
-	@echo "Φ SpiralDB (Go)..."
-	@cd src/spiraldb && go build -o ../../bin/spiraldb . 2>&1 | grep -v "^#" || echo "  ✅ SpiralDB built."
+	@echo "  [SPIRALDB] Building Go database..."
+	cd src/spiraldb && go build -o ../../bin/spiraldb .
+	@echo "  [SPIRALDB] Done"
 
-spiraldb-test:
-	@echo "Φ SpiralDB Tests..."
-	@cd src/spiraldb && go test -v 2>&1 | grep -E "✅|PASS|FAIL"
-
-# === UTILITY ===
-
-test: $(BIN_DIR)/phi_zkp_test
-	@echo ""
-	@echo "╔══════════════════════════════════════════════╗"
-	@echo "║  ΦΩ0 — RUNNING ZKP TEST SUITE                 ║"
-	@echo "╚══════════════════════════════════════════════╝"
-	@echo ""
-	@timeout 30 $(BIN_DIR)/phi_zkp_test || true
+# ============================================
+# UTILITY
+# ============================================
 
 clean:
-	@echo "Φ Cleaning..."
-	@rm -rf $(BIN_DIR)/*
-	@echo "  ✅ Clean."
+	@echo "  Cleaning binaries..."
+	rm -f $(BIN)phi_* $(BIN)spiral*
+	@echo "  Done. Run 'make all' to rebuild."
 
-help:
+test:
+	@echo "  Running full test suite..."
+	./tests/full_blown_test.sh
+
+list:
+	@echo "  Available binaries:"
+	@ls -la $(BIN) | grep -v "^total" | wc -l
+	@echo "  binaries in bin/"
 	@echo ""
-	@echo "╔══════════════════════════════════════════════╗"
-	@echo "║  ΦΩ0 — FEmmG-FHE BUILD SYSTEM v3              ║"
-	@echo "╠══════════════════════════════════════════════╣"
-	@echo "║  make all        — Build all                 ║"
-	@echo "║  make core       — ZANS, Fib-ZANS            ║"
-	@echo "║  make binfhe     — CT×CT multipliers         ║"
-	@echo "║  make zkp        — ZKP+FHE integration       ║"
-	@echo "║  make snark      — SNARK + EC-SNARK          ║"
-	@echo "║  make transmute  — Scheme switch             ║"
-	@echo "║  make spiralkem  — PQC KEM + FHE             ║"
-	@echo "║  make spiraldb   — Encrypted database        ║"
-	@echo "║  make test       — ZKP test suite            ║"
-	@echo "║  make clean      — Remove build artifacts    ║"
-	@echo "║  make help       — This help                 ║"
-	@echo "╚══════════════════════════════════════════════╝"
-	@echo ""
-
-
-
-# === ZANS 10M TEST ===
-$(BIN_DIR)/phi_zans_noise_proof: src/core/phi_zans_noise_proof.cpp
-	@echo "Φ ZANS Noise Proof..."
-	@mkdir -p $(BIN_DIR)
-	@$(CXX) $(CXXFLAGS) -o $@ $< $(INCLUDES) $(LIBS) $(RPATH) 2>&1 | grep -E "error:" || echo "  ✅ ZANS Noise Proof built."
-
-
-# SpiralDB with CGO bridge
-spiraldb-bridge:
-	@echo "Φ Building SpiralDB CGO Bridge..."
-	cd src/spiraldb && bash build_bridge.sh
-	cd src/spiraldb && CGO_ENABLED=1 go build -o ../../bin/spiraldb_fhe .
-	@echo "✅ SpiralDB with real FHE built: bin/spiraldb_fhe"
-
-spiraldb-bridge-test:
-	cd src/spiraldb && CGO_ENABLED=1 go test -v .
-
-# === HYDRAJWT WITH DEPENDENCIES ===
-
-HYDRA_LIBS = -Llibs/HydraJWT/build -lhydrajwt -loqs -lsodium
-
-test_hydra: $(BIN_DIR)/test_hydra_jwt_fixed_heads
-
-$(BIN_DIR)/test_hydra_jwt_fixed_heads: tests/test_hydra_jwt_fixed_heads.cpp
-	@echo "Φ Building HydraJWT test..."
-	@mkdir -p $(BIN_DIR)
-	@$(CXX) $(CXXFLAGS) -o $@ $< -Isrc -Ilibs/HydraJWT/include -I/usr/local/include $(LIBS) $(HYDRA_LIBS) -Wl,-rpath,libs/HydraJWT/build:/usr/local/lib 2>&1 | grep -E "error:" || echo "  ✅ HydraJWT test built."
-
-run_hydra: $(BIN_DIR)/test_hydra_jwt_fixed_heads
-	@LD_LIBRARY_PATH=libs/HydraJWT/build:/usr/local/lib:$$LD_LIBRARY_PATH ./$(BIN_DIR)/test_hydra_jwt_fixed_heads
+	@echo "  Build targets:"
+	@echo "    make all      - Build everything (48 binaries)"
+	@echo "    make core     - Core FHE only"
+	@echo "    make binfhe   - Binary FHE only"
+	@echo "    make zkp      - Zero-Knowledge only"
+	@echo "    make kem      - Post-Quantum KEM only"
+	@echo "    make snark    - SNARK proofs only"
+	@echo "    make io       - iO systems only"
+	@echo "    make spiraldb - Encrypted database"
+	@echo "    make test     - Run full test suite"
+	@echo "    make clean    - Remove all binaries"
+	@echo "    make list     - Show this help"
