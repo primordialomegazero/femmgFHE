@@ -13,11 +13,11 @@
 ![iO](https://img.shields.io/badge/iO-Enabled-red)
 ![HydraJWT](https://img.shields.io/badge/HydraJWT-6--head-gold)
 
-PHI-OMEGA-ZERO — FEmmg-FHE v5.0 — ZANS | Fibonacci-ZANS | Scalar-Decomp CTxCT | Hybrid UKxUK | BinFHE | PHI ZKP | SpiralKEM | SpiralDB | CKKS+ZANS | Packed BFV | Pinky Swear Reset | Divine Reset | True Divine 10K | iO | iO x CTxCT | Key Manager | HydraJWT | Flame Empress iO
+PHI-OMEGA-ZERO — FEmmg-FHE v6.0 — ZANS | Fibonacci-ZANS | Scalar-Decomp CTxCT | Hybrid UKxUK | BinFHE | PHI ZKP | SpiralKEM | SpiralDB | CKKS+ZANS | Packed BFV | Pinky Swear Reset | Divine Reset | True Divine 10K | iO | iO x CTxCT | Key Manager | HydraJWT | Flame Empress iO | Eternal ZANS | Entangled ZANS | FHE 2.0 | Fibonacci-Golden | Riemann-Golden | Quantum Random
 
 ## What Is This?
 
-FEmmg-FHE is a comprehensive Fully Homomorphic Encryption framework with **18 integrated systems** spanning core FHE, zero-knowledge proofs, post-quantum cryptography, encrypted databases, program obfuscation, and key management.
+FEmmg-FHE is a comprehensive Fully Homomorphic Encryption framework with **22 integrated systems** spanning core FHE, zero-knowledge proofs, post-quantum cryptography, encrypted databases, program obfuscation, and key management.
 
 | System | Type | Description |
 |--------|------|-------------|
@@ -262,6 +262,8 @@ Batch Mode: 1 keypair to 1000 shared secrets in 24.68ms (45 Mbps, all correct).
 | BinFHE 8-bit | 3,584 gates, 120s | TOY | 42x17=714 |
 | True Divine 10K | 3.35 steps/s | 16384 | 2,986s total |
 | iO x CTxCT 50-chain | 50/50 in 940s | 16384 | Random params |
+| Eternal ZANS | Self-destruct | 16384 | Entangled pair |
+| FHE 2.0 | All systems | 16384 | Unified framework |
 | SpiralKEM KeyGen | 166K/s | N/A | 128B ciphertext |
 
 ## Quick Start
@@ -318,7 +320,7 @@ femmgFHE/
 │   ├── spiraldb/      Non-deterministic encrypted database (Go + CGO)
 │   ├── integration/   HydraJWT + libsodium-schnorr
 │   └── bindings/      Python + Rust native bindings
-├── tests/             Full test suite v5.0 + iO CTxCT test scripts
+├── tests/             Full test suite v6.0 + iO CTxCT test scripts
 ├── bin/               Compiled binaries (50+)
 ├── results/           Benchmark data (1M, 10M ZANS)
 ├── docs/              Documentation, results CSV, API reference
