@@ -21,17 +21,17 @@ FEmmg-FHE is a comprehensive Fully Homomorphic Encryption framework with **18 in
 
 | System | Type | Description |
 |--------|------|-------------|
-| ZANS | FHE Optimization | UNLIMITED additions without bootstrapping (10M+ verified) |
+| ZANS | FHE Optimization | Practically unlimited additions without bootstrapping (10M+ verified) |
 | Fibonacci-ZANS | Scalar Math | O(log phi N) decomposition via Zeckendorf, noise=1.0 |
 | Scalar-Decomp CTxCT | Encrypted Multiply | CTxCT via scalar decomposition, noise=1.0 |
-| Hybrid UKxUK | Encrypted Multiply | Auto-switching UKxUK + Smart Reset (UNLIMITED steps) |
+| Hybrid UKxUK | Encrypted Multiply | Auto-switching UKxUK + Smart Reset (practically unlimited, ~8K tested) |
 | BinFHE CTxCT | Encrypted Compute | 2/4/8/16/32-bit gate-level multipliers (8x fewer gates) |
-| Pinky Swear Reset | True Blue FHE | 100 steps verified, 0 decrypt, 0 bootstrap, noise=steps+1 |
+| Pinky Swear Reset | True Blue FHE | 100 steps, 0 decrypt, 0 bootstrap, noise=steps+1 (linear, stable) |
 | Divine Reset | Unlimited CTxCT | Fully Homomorphic overflow detection |
 | True Divine 10K | FHE Proof | 10,000 steps verified, 2,986 seconds |
 | iO | Program Obfuscation | Encrypt the PROGRAM via Multilinear Maps |
 | iO x CTxCT | Ultimate Privacy | Obfuscated unlimited encrypted multiplication |
-| Flame Empress iO | God-Level iO | 5 algebraic identities, INFINITE + QUANTUM + ZANS |
+| Flame Empress iO | Program Obfuscation | 5 programs, 100% identical I/O, uniform structure, formal reduction pending |
 | PHI ZKP | Zero-Knowledge | 11 systems: Sigma, NIZK, SNARK, Recursive, Solidity |
 | SpiralKEM | Post-Quantum KEM | 128B ciphertext (97.2% smaller), 166K keygen/s |
 | SpiralDB | Encrypted Database | Non-deterministic FHE, Homomorphic Queries, Persistence |
@@ -102,7 +102,7 @@ graph TB
 
 ### Theorem 1: ZANS — Zero Noise Growth (10,000,000+ Verified)
 
-ZANS = Zero-Anchor Noise Stabilization: Adding Enc(0) to a ciphertext produces ZERO noise growth, enabling unlimited homomorphic additions without bootstrapping.
+ZANS = Zero-Anchor Noise Stabilization: Adding Enc(0) to a ciphertext produces MINIMAL noise growth (noise stays at 1.0 for additions), enabling practically unlimited homomorphic additions without bootstrapping.
 
 ```
 Z(ct) = ct + Enc(0)
@@ -115,6 +115,8 @@ Noise(Z^k(ct)) = Noise(ct)  for all k (empirically verified to 10,000,000+)
 | 1,000,000 | 1.0 | 0.000 | PASSED |
 | 5,000,000 | 1.0 | 0.000 | PASSED |
 | 10,000,000 | 1.0 | 0.000 | PASSED (104s, 96K ops/s) |
+
+**Note on 10M Runs:** Fast run uses ring dim 512 (TOY/insecure parameters for speed). Full run uses larger ring dim. Both confirm ZANS stability. For production, use ring dim >= 16384.
 
 **Two Independent 10M Runs:**
 - Fast run: Ring dim 512, 104s, noise = 1.0
@@ -130,8 +132,8 @@ Noise(Z^k(ct)) = Noise(ct)  for all k (empirically verified to 10,000,000+)
 | Library | ZANS Result | Normal Limit | Advantage |
 |---------|------------|--------------|-----------|
 | OpenFHE BFV | 10M+ stable | ~30K | >333x |
-| Microsoft SEAL | 1000 stable | <10 | >100x |
-| IBM HElib | 1000 perfect | 100+ | >10x |
+| Microsoft SEAL | 1000 stable | <10 | >100x (limited test) |
+| IBM HElib | 1000 perfect | 100+ | >10x (limited test) |
 | TFHE LWE | 50 stable | 50+ | ~1x |
 
 ### Theorem 2: Fibonacci-ZANS Scalar Multiplication
