@@ -342,10 +342,8 @@ femmgFHE/
 |-------|--------|
 | ZANS Formal Proof | Empirical: 10M ops, 4 libraries, direct decryption verified. Formal proof pending |
 | Plaintext Modulus | 30-bit (1.07B max). Pinky Swear handles overflow homomorphically (10K steps verified) |
-| CKKS Ring Dim | 32768 minimum (OpenFHE requirement - not our limitation) |
 | BinFHE 32-bit Speed | ~27 min (TOY params on Ryzen 5 2600). Parallel Phase 1: 47s. FPGA/GPU target: <60s |
 | iO Multilinear Maps | GGH13-style GES. Flame Empress iO: 5/5 verified. iO x CTxCT: 50/50 chains. Formal reduction pending |
-| Key Management | HydraJWT (6-head PQ JWT) + libsodium-schnorr (fractal signatures) = PRODUCTION READY |
 
 ## References
 
