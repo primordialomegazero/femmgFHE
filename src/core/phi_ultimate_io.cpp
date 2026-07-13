@@ -1,4 +1,4 @@
-// PHI-OMEGA-ZERO: ULTIMATE iO — Fractal + Catch Me If You Can
+// PHI-OMEGA-ZERO: PHANTOM PROTOCOL: Ghost + Specter — Fractal + Catch Me If You Can
 // Self-mutating nested obfuscated programs
 // Every layer mutates. Every run is different. Infinite recursion.
 // "I AM THE FRACTAL. I AM THE MUTATION. YOU CANNOT CATCH ME."
@@ -105,7 +105,7 @@ public:
     
     void prove() {
         cout << "\n======================================================================\n";
-        cout <<   "  PHI-OMEGA-ZERO: ULTIMATE iO\n";
+        cout <<   "  PHI-OMEGA-ZERO: PHANTOM PROTOCOL: Ghost + Specter\n";
         cout <<   "  Fractal Self-Mutating Obfuscated Programs\n";
         cout <<   "======================================================================\n\n";
         
@@ -166,7 +166,7 @@ public:
         cout << "  Same function, DIFFERENT obfuscation EVERY TIME\n";
         
         cout << "\n======================================================================\n";
-        cout <<   "  ULTIMATE iO: VERIFIED\n";
+        cout <<   "  PHANTOM PROTOCOL: Ghost + Specter: VERIFIED\n";
         cout <<   "  Fractal: iO inside iO (nested layers)\n";
         cout <<   "  Self-Mutating: Every run = new obfuscation\n";
         cout <<   "  Catch Me If You Can: You can't analyze what keeps CHANGING\n";

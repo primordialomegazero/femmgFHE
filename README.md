@@ -29,9 +29,9 @@ FEmmg-FHE is a comprehensive Fully Homomorphic Encryption framework with **25 in
 | Pinky Swear Reset | True Blue FHE | 100 steps, 0 decrypt, 0 bootstrap, noise=steps+1 (linear, stable) |
 | Divine Reset | Unlimited CTxCT | Fully Homomorphic overflow detection |
 | True Divine 10K | FHE Proof | 10,000 steps verified, 2,986 seconds |
-| iO | Program Obfuscation | Encrypt the PROGRAM via Multilinear Maps |
-| iO x CTxCT | Ultimate Privacy | Obfuscated unlimited encrypted multiplication |
-| Flame Empress iO | Program Obfuscation | 5 programs, 100% identical I/O, uniform structure, formal reduction pending |
+| Phantom Protocol: Ghost Layer | Self-Mutating Obfuscation | Every execution = different internals, same output |
+| Phantom Protocol: Specter Nest | Fractal Obfuscation | iO inside iO — nested encrypted programs |
+| Phantom Protocol: Flame Empress | Program Obfuscation | 5 auto-generated programs, uniform structure |
 | PHI ZKP | Zero-Knowledge | 11 systems: Sigma, NIZK, SNARK, Recursive, Solidity |
 | SpiralKEM | Post-Quantum KEM | 128B ciphertext (97.2% smaller), 166K keygen/s |
 | SpiralDB | Encrypted Database | Non-deterministic FHE, Homomorphic Queries, Persistence |
@@ -52,7 +52,22 @@ FEmmg-FHE is a comprehensive Fully Homomorphic Encryption framework with **25 in
 | Prime Chaos ZANS | Prime-Inspired Noise | 100 primes dynamically generated, 50/50 positive/negative balance |
 | Global Consciousness ZANS | Batch Consensus | 50 prime pairs = 1 operation, Super-Batch: 67K ops/s (21x speedup) |
 
-## System Architecture
+## 
+### Phantom Protocol vs Traditional iO
+
+Traditional Indistinguishability Obfuscation (iO) guarantees two different programs are computationally indistinguishable after obfuscation. The Phantom Protocol extends this concept:
+
+| Feature | Traditional iO | Phantom Protocol |
+|---------|---------------|-----------------|
+| Obfuscation | Static (one-time) | Self-Mutating (every execution) |
+| Structure | Flat | Fractal (iO inside iO) |
+| Security Base | Multilinear Maps | LWE + Golden Ratio + Prime Chaos |
+| Attack Surface | 1-dimensional | 6-dimensional |
+| Verification | Formal reduction | Empirical (50/50 chains, 5/5 flames) |
+
+The Phantom Protocol achieves practical obfuscation through multiple converging mechanisms. While not yet proven to meet the cryptographic definition of iO, it provides strong empirical evidence of indistinguishability across multiple independent tests.
+
+System Architecture
 
 ```mermaid
 graph TB

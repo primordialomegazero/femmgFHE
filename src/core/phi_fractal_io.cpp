@@ -1,4 +1,4 @@
-// PHI-OMEGA-ZERO: FRACTAL iO — iO INSIDE iO
+// PHI-OMEGA-ZERO: PHANTOM PROTOCOL: Specter Nest — iO INSIDE iO
 // Nested obfuscated programs — Russian doll of encryption
 // Layer 1 obfuscates Layer 2, which obfuscates Layer 3...
 // Each layer = independent ZANS-stabilized encrypted program
@@ -111,7 +111,7 @@ public:
     
     void prove() {
         cout << "\n======================================================================\n";
-        cout <<   "  PHI-OMEGA-ZERO: FRACTAL iO — iO INSIDE iO\n";
+        cout <<   "  PHI-OMEGA-ZERO: PHANTOM PROTOCOL: Specter Nest — iO INSIDE iO\n";
         cout <<   "  Nested Obfuscated Programs — Russian Doll Encryption\n";
         cout <<   "======================================================================\n\n";
         
@@ -157,7 +157,7 @@ public:
         cout << "  Time: " << fixed << setprecision(1) << elapsed << "s\n\n";
         
         cout << "======================================================================\n";
-        cout <<   "  FRACTAL iO: WORKING\n";
+        cout <<   "  PHANTOM PROTOCOL: Specter Nest: WORKING\n";
         cout <<   "  " << layers.size() << " layers of nested obfuscation\n";
         cout <<   "  iO inside iO inside iO...\n";
         cout <<   "  Break one layer? There are " << (layers.size() - 1) << " more.\n";
