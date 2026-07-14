@@ -482,3 +482,18 @@ verify_all_final: verify_final verify_noise_final verify_zans_final
 	@echo "╔══════════════════════════════════════════════════════╗"
 	@echo "║     ✅ ALL TESTS COMPLETE                            ║"
 	@echo "╚══════════════════════════════════════════════════════╝"
+
+# Prime Chaos ZANS v2
+$(BIN)phi_prime_chaos_zans_v2: src/core/phi_prime_chaos_zans_v2.cpp
+	@echo "  [CORE] Prime Chaos ZANS v2"
+	$(CXX) $(CXXFLAGS) -o $@ $< $(OPENFHE_INC) $(OPENFHE_LIB)
+
+# Transmutation Window
+$(BIN)phi_transmutation_window: src/core/phi_transmutation_window.cpp
+	@echo "  [CORE] Transmutation Window"
+	$(CXX) $(CXXFLAGS) -o $@ $< $(OPENFHE_INC) $(OPENFHE_LIB)
+
+# Verifiable FHE v2
+$(BIN)phi_verifiable_fhe_v2: src/core/phi_verifiable_fhe_v2.cpp
+	@echo "  [CORE] Verifiable FHE v2"
+	$(CXX) $(CXXFLAGS) -o $@ $< $(OPENFHE_INC) $(OPENFHE_LIB) -lssl -lcrypto
