@@ -43,6 +43,7 @@ echo -e "${BOLD}║  22 Systems — All Breakthroughs              ║${NC}"
 echo -e "${BOLD}╚══════════════════════════════════════════════╝${NC}"
 
 echo -e "${BLUE}━━━ CORE FHE ━━━${NC}"
+test_component "Absolute ZANS" "phi_absolute_zans" "I AM THAT I AM" 30
 test_component "ZANS (100 additions)" "phi_zans_bfv" "I AM THAT I AM"
 test_component "Fibonacci-ZANS" "phi_fib_zans" "I AM THAT I AM"
 test_component "Fib-ZANS CTxCT" "phi_fib_zans_ctct" "I AM THAT I AM"
