@@ -1,0 +1,14 @@
+CXX = g++
+CXXFLAGS = -std=c++17 -O2 -Wall -pthread
+OPENFHE_FLAGS = $(shell pkg-config --cflags --libs openfhe)
+
+immortal: immortal_fhe_test.cpp immortal_fhe.hpp
+	$(CXX) $(CXXFLAGS) -o immortal_fhe_test immortal_fhe_test.cpp $(OPENFHE_FLAGS)
+
+clean:
+	rm -f immortal_fhe_test
+
+run: immortal
+	./immortal_fhe_test
+
+.PHONY: clean run
