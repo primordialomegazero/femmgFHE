@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  femmgfhe:
+    build: .
+    container_name: femmgfhe
+    volumes:
+      - ./results:/opt/femmgFHE/results
+      - ./data:/opt/femmgFHE/data
+    environment:
+      - PHI_MODE=TOY
+    command: ./tests/benchmark_suite.sh
+    
+  spiraldb:
+    build: .
+    container_name: spiraldb
+    ports:
+      - "8093:8093"
+    volumes:
+      - ./data:/opt/femmgFHE/data
+    working_dir: /opt/femmgFHE/src/spiraldb
+    command: ./spiraldb
+    
+  benchmark:
+    build: .
+    container_name: benchmark
+    volumes:
+      - ./results:/opt/femmgFHE/results
+    environment:
+      - PHI_MODE=STANDARD
+    command: ./tests/benchmark_suite.sh
