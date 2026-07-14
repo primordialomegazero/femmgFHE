@@ -144,8 +144,8 @@ Standard Fujisaki-Okamoto-style transform:
 | Noise growth | Polynomial | Polynomial | Reset | **φ⁻¹ Contraction** |
 | Bootstrapping | Required | Required | Required | **None** |
 | Depth | Bounded | Bounded | Unlimited | **Unlimited** |
-| Security basis | Ring-LWE | Ring-LWE | Torus-LWE | **Chaos + MQ** |
-| Quantum resistance | Lattice | Lattice | Lattice | **Chaos + MQ** |
+| Security basis | Ring-LWE | Ring-LWE | Torus-LWE | **Lattice-based + Symmetric** |
+| Quantum resistance | Lattice | Lattice | Lattice | **Lattice-based + Symmetric** |
 | IND-CCA2 | No | No | No | **Yes (MAC)** |
 | Floating-point | No | Yes | No | **Yes (Full IEEE)** |
 

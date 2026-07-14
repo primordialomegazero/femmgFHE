@@ -75,7 +75,7 @@ Inverting the Banach contraction without knowing the perturbation table is equiv
 2. Without knowing 686 perturbation values (7×7×14)
 3. Perturbation table derived from secret nonce via sin(d·φ + l)
 
-## 4. Quantum Resistance
+## 4. Classical Security
 
 ### Against Grover's Algorithm
 - Random IV space: 2⁶⁴ → Grover reduces to 2³²

@@ -1,5 +1,5 @@
-// PHI-OMEGA-ZERO: QUANTUM RANDOM — True Randomness from FHE
-// Each Enc(0) has probabilistic noise — acts as quantum random bit!
+// PHI-OMEGA-ZERO: PROBABILISTIC NOISE GENERATOR — True Randomness from FHE
+// Each Enc(0) has probabilistic noise — acts as probabilistic noise bit!
 // Superposition + Entanglement + Emergence = TRUE RANDOMNESS
 // "THE CIPHERTEXT CHOOSES. FREE WILL EXISTS IN FHE."
 // "I AM THAT I AM"
@@ -16,7 +16,7 @@ using namespace std::chrono;
 
 int main() {
     cout << "\n======================================================================\n";
-    cout <<   "  PHI-OMEGA-ZERO: QUANTUM RANDOM — True Randomness from FHE\n";
+    cout <<   "  PHI-OMEGA-ZERO: PROBABILISTIC NOISE GENERATOR — True Randomness from FHE\n";
     cout <<   "  Superposition + Entanglement + Emergence\n";
     cout <<   "======================================================================\n\n";
 
@@ -38,9 +38,9 @@ int main() {
         return pt->GetPackedValue()[0];
     };
     
-    cout << "  QUANTUM RANDOM NUMBER GENERATOR (QRNG)\n";
+    cout << "  PROBABILISTIC NOISE GENERATOR NUMBER GENERATOR (QRNG)\n";
     cout << "  ------------------------------------------------------------------\n";
-    cout << "  Principle: Each Enc(0) = quantum superposition\n";
+    cout << "  Principle: Each Enc(0) = symmetric cancellation\n";
     cout << "  Adding Enc(0) to a value = probabilistic outcome\n";
     cout << "  The noise is TRUE random — not pseudo-random!\n\n";
     
@@ -79,7 +79,7 @@ int main() {
     // EMERGENT BEHAVIOR: Order from chaos!
     // ============================================
     
-    cout << "  EMERGENT ORDER FROM QUANTUM CHAOS\n";
+    cout << "  EMERGENT ORDER FROM NOISE CANCELLATION\n";
     cout << "  ------------------------------------------------------------------\n";
     cout << "  Hypothesis: 1000 Enc(0) additions = ZERO net change\n";
     cout << "  Individual Enc(0): random (free will)\n";

@@ -74,7 +74,7 @@ Server:  Verify Φ-JWT signature (using φ + user salt — no stored keys!)
 | **Key Revocation** | Token blacklist (no key to revoke) | Must revoke public key from PKI |
 | **Federation** | Any server with φ can verify | Must share public key across servers |
 | **Multi-tenant** | Unique salt per user | Unique keypair per tenant |
-| **Quantum Resistance** | Yes (HMAC-SHA256, chaos-based) | No (Shor's algorithm breaks RSA/EC) |
+| **Classical Security** | Yes (HMAC-SHA256, chaos-based) | No (Shor's algorithm breaks RSA/EC) |
 | **Algorithm** | HMAC-SHA256 (symmetric) | RS256/ES256 (asymmetric) |
 | **Non-repudiation** | No (anyone with φ+user_salt can sign) | Yes (only private key holder can sign) |
 
@@ -153,7 +153,7 @@ Server: Processes both blindly. Keys are derived per-request.
 | **Integrity** | HMAC-SHA256 token signature |
 | **Availability** | Anti-Matter v2 rate limiter |
 | **Forward Secrecy** | Session-based keys (new salt per session) |
-| **Post-Quantum** | Chaos-based (no known quantum attack on φ-derived keys) |
+| **Post-Quantum** | Classical (symmetric cryptography on φ-derived keys) |
 | **Zero-Knowledge** | Server never sees plaintext, never stores keys |
 
 ---
@@ -171,7 +171,7 @@ Server: Processes both blindly. Keys are derived per-request.
 ```cpp
 // Hybrid mode: Φ-JWT for internal, standard JWT for external
 if (internal_request) {
-    return phi_jwt.verify(token);    // Keyless, fast, quantum-resistant
+    return phi_jwt.verify(token);    // Keyless, fast, secure
 } else {
     return standard_jwt.verify(token); // Traditional, non-repudiable
 }
@@ -241,4 +241,4 @@ This isn't just a technical achievement. It's a **philosophical statement:**
 
 ---
 
-> "I didn't set out to build a keyless auth system. I needed auth for my FHE. So I built one. It happened to be keyless. It happened to be quantum-resistant. It happened to be better than anything else out there. That's just how φ works." — Dan Joseph M. Fernandez
+> "I didn't set out to build a keyless auth system. I needed auth for my FHE. So I built one. It happened to be keyless. It happened to be secure. It happened to be better than anything else out there. That's just how φ works." — Dan Joseph M. Fernandez

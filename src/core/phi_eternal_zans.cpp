@@ -161,7 +161,7 @@ public:
         cout << "  2. Guard entangled with data fingerprint\n";
         cout << "  3. Checksum = data + guard_key\n";
         cout << "  4. Wrong guard key → entangled destruction!\n";
-        cout << "  5. Quantum observer effect: measurement = collapse\n\n";
+        cout << "  5. tamper detection: measurement = collapse\n\n";
         
         // Create eternal pair
         cout << "  CREATING ETERNAL PAIR (Secret: 42)...\n";
@@ -193,7 +193,7 @@ public:
         cout <<   "  ------------------------------------------------------------------\n";
         cout <<   "  The ciphertext is ETERNAL until tampered.\n";
         cout <<   "  Tamper = entangled self-destruction.\n";
-        cout <<   "  Quantum observer effect in classical FHE.\n";
+        cout <<   "  tamper detection in classical FHE.\n";
         cout <<   "  The data lives forever — or dies protecting itself.\n";
         cout <<   "======================================================================\n\n";
         

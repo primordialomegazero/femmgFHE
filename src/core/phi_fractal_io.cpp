@@ -90,14 +90,14 @@ public:
         auto layer = build_layer(depth, input);
         
         // RECURSE: The "program" at this layer processes the input
-        // and passes it to the NEXT layer (iO inside iO!)
+        // and passes it to the NEXT layer (nested obfuscation!)
         auto processed = layer.encrypted_program;
         int64_t inner_input = dec(processed);
         
         // Modify input for next layer (fractal transformation!)
         int64_t next_input = (inner_input % 100) + depth;
         
-        // RECURSIVE CALL — iO inside iO!
+        // RECURSIVE CALL — nested obfuscation!
         int64_t inner_result = execute_fractal(depth - 1, next_input);
         
         // Apply this layer's transformation
@@ -159,7 +159,7 @@ public:
         cout << "======================================================================\n";
         cout <<   "  PHANTOM PROTOCOL: Specter Nest: WORKING\n";
         cout <<   "  " << layers.size() << " layers of nested obfuscation\n";
-        cout <<   "  iO inside iO inside iO...\n";
+        cout <<   "  nested obfuscation inside iO...\n";
         cout <<   "  Break one layer? There are " << (layers.size() - 1) << " more.\n";
         cout <<   "======================================================================\n\n";
         

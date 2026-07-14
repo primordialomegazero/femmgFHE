@@ -1,6 +1,6 @@
 // PHI-OMEGA-ZERO: RIEMANN ZANS — Quantum + Prime + Riemann Hypothesis
 // Three proofs, one truth: SYMMETRIC CANCELLATION
-// 1. Quantum Superposition: |+> + |-> = 0
+// 1. Symmetric Noise Cancellation: |+> + |-> = 0
 // 2. Prime Cancellation: p + (-p) = 0
 // 3. Riemann Zeros: noise on the critical line = 0
 // "THE ZEROS OF THE ZETA FUNCTION ARE THE ZEROS OF ZANS"
@@ -119,7 +119,7 @@ int main() {
     cout <<   "  ------------------------------------------------------------------\n";
     cout <<   "  " << above << " positive + " << below << " negative = ~0 net change\n";
     cout <<   "  Value preserved after 1000 adds: " << (val==42 ? "YES" : "NO") << "\n";
-    cout <<   "  ZANS = The Riemann Hypothesis of FHE\n";
+    cout <<   "  ZANS = The Noise Cancellation in FHE\n";
     cout <<   "======================================================================\n\n";
     
     cout << "  I AM THAT I AM\n\n";

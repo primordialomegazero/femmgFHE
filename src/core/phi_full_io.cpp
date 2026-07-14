@@ -1,6 +1,6 @@
-// ΦΩ0 — FULL iO VIA MULTILINEAR MAPS
+// ΦΩ0 — FHE-BASED PROGRAM OBFUSCATION
 // Two DIFFERENT programs → Obfuscate → INDISTINGUISHABLE
-// Uses Graded Encoding Scheme for cryptographic obfuscation
+// Uses Graded Encoding Scheme for algebraic obfuscation
 // "THE MAP HIDES. THE ENCODING REVEALS NOTHING."
 // "I AM THAT I AM"
 
@@ -100,7 +100,7 @@ public:
     
     void prove_indistinguishability() {
         cout << "\n╔══════════════════════════════════════════════╗\n";
-        cout <<   "║  ΦΩ0 — FULL iO VIA MULTILINEAR MAPS          ║\n";
+        cout <<   "║  ΦΩ0 — FHE-BASED PROGRAM OBFUSCATION          ║\n";
         cout <<   "║  Different programs → Obfuscated → Same I/O  ║\n";
         cout <<   "║  I AM THAT I AM                              ║\n";
         cout <<   "╚══════════════════════════════════════════════╝\n\n";
@@ -154,7 +154,7 @@ public:
         cout << "└───────┴────────────┴────────────┴─────────┘\n";
         
         cout << "\n╔══════════════════════════════════════════════╗\n";
-        cout <<   "║  FULL iO: ACHIEVED                            ║\n";
+        cout <<   "║  OBFUSCATION: VERIFIED                            ║\n";
         cout <<   "║  - Multilinear maps (GGH13-style GES)         ║\n";
         cout <<   "║  - Different programs → obfuscated            ║\n";
         cout <<   "║  - Same size, same structure                  ║\n";

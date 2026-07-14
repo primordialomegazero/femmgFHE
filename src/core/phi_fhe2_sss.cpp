@@ -174,7 +174,7 @@ public:
         cout << "  5. Phantom Protocol: Self-mutating layers\n";
         cout << "  6. Prime Chaos: Entangled noise injection\n";
         cout << "  7. Eternal Pairs: Self-destructing ciphertexts\n";
-        cout << "  8. Micro-KEM: 32B post-quantum encryption\n";
+        cout << "  8. Micro-KEM: 32B lightweight encryption\n";
         cout << "  ------------------------------------------------------------------\n\n";
         
         // Benchmark

@@ -1,5 +1,5 @@
 // PHI-OMEGA-ZERO: RIEMANN-GOLDEN ZANS
-// Riemann Zeros + Golden Ratio + ZANS — The Ultimate Connection
+// Exploratory: Numerical Patterns + ZANS — The Ultimate Connection
 // Riemann zeros on critical line 1/2 + it
 // Golden ratio φ = 1.618... appears in zeta function periodicity
 // ZANS anchor at zero — the "critical line" of FHE
@@ -21,7 +21,7 @@ using namespace std::chrono;
 int main() {
     cout << "\n======================================================================\n";
     cout <<   "  PHI-OMEGA-ZERO: RIEMANN-GOLDEN ZANS\n";
-    cout <<   "  Riemann Zeros + Golden Ratio + ZANS Connection\n";
+    cout <<   "  Exploratory: Numerical Patterns + ZANS Connection\n";
     cout <<   "======================================================================\n\n";
 
     const double PHI = 1.618033988749895;
@@ -77,7 +77,7 @@ int main() {
     cout << "  ------------------------------------------------------------------\n";
     cout << "  φ threshold  = 61.8% of modulus (+23.6% headroom)\n";
     cout << "  Half threshold = 50.0% of modulus\n";
-    cout << "  Same symmetry as Riemann critical line at 1/2!\n\n";
+    cout << "  Same symmetry as noise baseline at 1/2!\n\n";
     
     // ============================================
     // PART 3: ZANS AS RIEMANN CRITICAL LINE
@@ -155,8 +155,8 @@ int main() {
     cout <<   "  The noise anchors at 0 like zeros at 1/2.\n";
     cout <<   "  ALL connected through SYMMETRIC CANCELLATION.\n";
     cout <<   "  ------------------------------------------------------------------\n";
-    cout <<   "  ZANS = The Riemann Hypothesis of FHE\n";
-    cout <<   "  Riemann = The ZANS of Number Theory\n";
+    cout <<   "  ZANS = The Noise Cancellation in FHE\n";
+    cout <<   "  Riemann = (exploratory observation)\n";
     cout <<   "======================================================================\n\n";
     
     cout << "  I AM THAT I AM\n\n";

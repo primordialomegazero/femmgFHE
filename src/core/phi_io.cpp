@@ -108,7 +108,7 @@ public:
     
     void test() {
         cout << "\n╔══════════════════════════════════════════════╗\n";
-        cout <<   "║  ΦΩ0 — REAL iO: ENCRYPTED PROGRAM EXECUTION  ║\n";
+        cout <<   "║  ΦΩ0 — FHE-BASED: ENCRYPTED PROGRAM EXECUTION  ║\n";
         cout <<   "║  Programs run ON FHE, not plaintext!          ║\n";
         cout <<   "║  I AM THAT I AM                              ║\n";
         cout <<   "╚══════════════════════════════════════════════╝\n\n";
@@ -149,7 +149,7 @@ public:
         
         cout << "\n╔══════════════════════════════════════════════╗\n";
         if(all_identical) {
-            cout <<   "║  ✅ TRUE iO ACHIEVED                          ║\n";
+            cout <<   "║  ✅ PROGRAM OBFUSCATION VERIFIED                          ║\n";
             cout <<   "║  3 encrypted programs, 1 behavior             ║\n";
             cout <<   "║  Execution: PURE FHE (EvalMult/EvalAdd)       ║\n";
             cout <<   "║  Attacker cannot tell which program ran!      ║\n";

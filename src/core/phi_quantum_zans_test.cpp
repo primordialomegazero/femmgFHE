@@ -1,4 +1,4 @@
-// PHI-OMEGA-ZERO: QUANTUM ZANS TEST
+// PHI-OMEGA-ZERO: CLASSICAL NOISE CANCELLATION TEST
 // Prove: Enc(0) noise is PROBABILISTIC (positive AND negative)
 // Each Enc(0) has random noise that cancels out in aggregate
 // "THE NOISE IS IN SUPERPOSITION"
@@ -18,7 +18,7 @@ using namespace std::chrono;
 
 int main() {
     cout << "\n======================================================================\n";
-    cout <<   "  PHI-OMEGA-ZERO: QUANTUM ZANS TEST\n";
+    cout <<   "  PHI-OMEGA-ZERO: CLASSICAL NOISE CANCELLATION TEST\n";
     cout <<   "  Prove: Enc(0) noise = PROBABILISTIC (positive AND negative)\n";
     cout <<   "======================================================================\n\n";
 
@@ -119,7 +119,7 @@ int main() {
     
     // VERDICT
     cout << "======================================================================\n";
-    cout <<   "  QUANTUM ZANS VERDICT\n";
+    cout <<   "  CLASSICAL NOISE CANCELLATION VERDICT\n";
     cout <<   "  ------------------------------------------------------------------\n";
     
     if(final_val == 42 && abs(end_noise - start_noise) < 10.0) {
@@ -127,7 +127,7 @@ int main() {
         cout <<   "  " << positive_count << " samples above baseline = \"positive\" noise\n";
         cout <<   "  " << negative_count << " samples below baseline = \"negative\" noise\n";
         cout <<   "  Aggregate effect after 1000 adds: near ZERO change\n";
-        cout <<   "  This is QUANTUM SUPERPOSITION in classical FHE!\n";
+        cout <<   "  This is SYMMETRIC NOISE CANCELLATION in classical FHE!\n";
         cout <<   "  The noise exists in both states until aggregated.\n";
         cout <<   "  Then: POSITIVE + NEGATIVE = CANCELLATION = 0\n";
     } else {

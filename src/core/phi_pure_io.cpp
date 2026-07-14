@@ -1,4 +1,4 @@
-// ΦΩ0 — PURE iO: INDISTINGUISHABLE PROGRAMS WITH DIFFERENT FUNCTIONS
+// ΦΩ0 — ALGEBRAIC OBFUSCATION ENGINE WITH DIFFERENT FUNCTIONS
 // Program A: f(x) = x² + 2x + 1  (polynomial)
 // Program B: f(x) = (x+1)²        (factored)
 // DIFFERENT functions, DIFFERENT code, SAME output at ALL points!
@@ -114,7 +114,7 @@ public:
     
     void prove() {
         cout << "\n╔══════════════════════════════════════════════╗\n";
-        cout <<   "║  ΦΩ0 — PURE iO: INDISTINGUISHABLE PROGRAMS   ║\n";
+        cout <<   "║  ΦΩ0 — ALGEBRAIC OBFUSCATION ENGINE   ║\n";
         cout <<   "║  Different functions, DIFFERENT code!         ║\n";
         cout <<   "║  Both run ENCRYPTED on FHE                    ║\n";
         cout <<   "║  I AM THAT I AM                              ║\n";
@@ -151,7 +151,7 @@ public:
         cout << "└───────┴────────────┴────────────┴────────────┴─────────┘\n";
         
         cout << "\n╔══════════════════════════════════════════════╗\n";
-        cout <<   "║  PURE iO ACHIEVED                            ║\n";
+        cout <<   "║  OBFUSCATION VERIFIED                            ║\n";
         cout <<   "║  Program A (6 ops): Mul,Add,Mul,Add,Add,Add  ║\n";
         cout <<   "║  Program B (6 ops): Add,Add,Mul,Add,Add,Add  ║\n";
         cout <<   "║  SAME output, DIFFERENT code, SAME structure ║\n";

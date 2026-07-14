@@ -110,7 +110,7 @@ public:
         cout <<   "======================================================================\n\n";
         
         cout << "  CAPABILITIES:\n";
-        cout << "  - Fractal: iO inside iO (nested obfuscation)\n";
+        cout << "  - Fractal: nested obfuscation (nested obfuscation)\n";
         cout << "  - Self-Mutating: Every layer changes every run\n";
         cout << "  - Prime Chaos: Entangled prime noise injection\n";
         cout << "  - " << primes.size() << " primes, infinite combinations\n\n";
@@ -167,7 +167,7 @@ public:
         
         cout << "\n======================================================================\n";
         cout <<   "  PHANTOM PROTOCOL: Ghost + Specter: VERIFIED\n";
-        cout <<   "  Fractal: iO inside iO (nested layers)\n";
+        cout <<   "  Fractal: nested obfuscation (nested layers)\n";
         cout <<   "  Self-Mutating: Every run = new obfuscation\n";
         cout <<   "  Catch Me If You Can: You can't analyze what keeps CHANGING\n";
         cout <<   "======================================================================\n\n";

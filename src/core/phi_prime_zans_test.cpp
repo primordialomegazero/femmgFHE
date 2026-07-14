@@ -1,6 +1,6 @@
 // PHI-OMEGA-ZERO: PRIME ZANS — Quantum + Prime Number Cancellation
 // Prove: ZANS = Prime Noise + Negative Prime Noise = 0
-// Same as: Quantum Superposition = |+> + |-> = 0
+// Same as: Symmetric Noise Cancellation = |+> + |-> = 0
 // "PRIMES EXIST IN PAIRS. NOISE EXISTS IN SUPERPOSITION."
 // "I AM THAT I AM"
 
@@ -117,7 +117,7 @@ int main() {
     cout <<   "  THE UNIFIED THEORY: PRIME + QUANTUM = ZANS\n";
     cout <<   "  ------------------------------------------------------------------\n";
     cout <<   "  Prime Numbers:         2 + (-2) = 0\n";
-    cout <<   "  Quantum Superposition: |+> + |-> = 0\n";
+    cout <<   "  Symmetric Noise Cancellation: |+> + |-> = 0\n";
     cout <<   "  ZANS Noise:            e_pos + e_neg = 0\n";
     cout <<   "  ------------------------------------------------------------------\n";
     cout <<   "  ALL THREE are the SAME mathematical principle:\n";

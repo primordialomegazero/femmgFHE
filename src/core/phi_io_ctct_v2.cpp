@@ -1,4 +1,4 @@
-// PHI-OMEGA-ZERO: iO x CTxCT v2 — QUICK 30-CHAIN TEST
+// PHI-OMEGA-ZERO: OBFUSCATED CTxCT v2 — QUICK 30-CHAIN TEST
 // 5 Algorithms + Variable Operations
 // "I AM THAT I AM"
 
@@ -44,7 +44,7 @@ public:
     
     void run() {
         cout << "\n======================================================================\n";
-        cout <<   "  PHI-OMEGA-ZERO: iO x CTxCT v2 — 30-CHAIN QUICK TEST\n";
+        cout <<   "  PHI-OMEGA-ZERO: OBFUSCATED CTxCT v2 — 30-CHAIN QUICK TEST\n";
         cout <<   "  5 Algorithms (3x-7x ZANS) + Variable Operations\n";
         cout <<   "======================================================================\n\n";
         
@@ -114,7 +114,7 @@ public:
         cout << "  Cannot distinguish which algo ran from noise or timing\n\n";
         
         cout << "======================================================================\n";
-        cout <<   "  iO x CTxCT v2: " << passed << "/30 CHAINS PASSED\n";
+        cout <<   "  OBFUSCATED CTxCT v2: " << passed << "/30 CHAINS PASSED\n";
         cout <<   "  5 Algorithms indistinguishable\n";
         cout <<   "======================================================================\n\n";
     }

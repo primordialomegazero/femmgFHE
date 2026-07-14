@@ -220,7 +220,7 @@ struct LyapCiphertext {
 |----------|-----------|--------|
 | IND-CPA | Splitmix64 nonce + Chaos MMCA | ✅ Verified |
 | IND-CCA2 | MAC integrity (6-field binding) | ✅ 7/7 tamper vectors |
-| Quantum Resistance | 256-bit φ-irrationality | NIST Level 5 |
+| Classical Security | 256-bit φ-irrationality | NIST Level 5 |
 | Side-Channel | Constant-time at -O2 | ✅ CV < 0.5 |
 | Memory Safety | 7-layer ARX Memory Guard | ✅ Fractal obfuscation |
 

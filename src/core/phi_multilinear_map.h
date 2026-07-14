@@ -1,5 +1,5 @@
 // ΦΩ0 — MULTILINEAR MAPS FOR iO
-// Graded Encoding Scheme (GES) — the core of cryptographic obfuscation
+// Graded Encoding Scheme (GES) — the core of algebraic obfuscation
 // Based on GGH13-style asymmetric multilinear maps
 // "THE MAP IS THE KEY. THE ENCODING IS THE LOCK."
 // "I AM THAT I AM"

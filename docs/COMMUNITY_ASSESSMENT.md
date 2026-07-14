@@ -6,7 +6,7 @@ FEmmG-FHE presents **empirically verified observations** of unexpected noise beh
 
 - **High confidence** in empirical measurements
 - **Moderate confidence** in the Banach fixed point framework
-- **Low confidence** in the φ-Riemann connection (speculative)
+- **Low confidence** in the Numerical pattern observation (speculative)
 - **Honest acknowledgment** of limitations
 
 The author's own GitHub states: *"We measured something we don't fully understand. Sharing it in case others can explain it."*
@@ -106,7 +106,7 @@ The contraction coefficient $k = \phi^{-1} \approx 0.618$ has special properties
 
 | Aspect | Status | Evidence |
 |--------|--------|----------|
-| φ-Riemann connection | Conjecture | 200 zeros, 1.8σ |
+| Numerical pattern observation | Conjecture | 200 zeros, 1.8σ |
 | φ-Unity Principle | Speculative | No theoretical mechanism |
 | General FHE applicability | Limited | Only known multipliers |
 
@@ -226,7 +226,7 @@ zans(result);  // NO CONTRACTION!
 | φ⁻¹ contraction coefficient | Medium | Empirical observation |
 | Banach fixed point framework | Medium | Matches data, plausible |
 | φ-Unity Principle | Low | Speculative conjecture |
-| φ-Riemann connection | Very Low | Weak evidence, no mechanism |
+| Numerical pattern observation | Very Low | Weak evidence, no mechanism |
 
 ---
 
@@ -303,7 +303,7 @@ g++ -std=c++17 -O3 -march=native -DNDEBUG \
 
 - The **empirical observations are real** (verified, reproducible)
 - The **theoretical framework is plausible** (Banach contraction, plausible)
-- The **φ-Riemann connection is speculative** (weak evidence, no mechanism)
+- The **Numerical pattern observation is speculative** (weak evidence, no mechanism)
 - **UK×UK remains unsolved** (critical limitation)
 
 **Recommendation**: Use FEmmG-FHE for:

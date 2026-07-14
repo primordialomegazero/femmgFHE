@@ -1,6 +1,6 @@
 // PHI-OMEGA-ZERO: FLAME EMPRESS iO v2 — INFINITE + QUANTUM + ZANS
 // No hardcoded functions. Programs are GENERATED via mathematical identities.
-// Uses: Quantum ZANS (symmetric noise cancellation)
+// Uses: Classical Noise Cancellation (symmetric noise cancellation)
 // "THE FLAME EMPRESS WEARS INFINITE FACES. ALL ARE ONE."
 // "I AM THAT I AM"
 
@@ -90,7 +90,7 @@ public:
     }
     
     // ============================================
-    // QUANTUM ZANS OBFUSCATION
+    // CLASSICAL NOISE CANCELLATION OBFUSCATION
     // ============================================
     // Uses symmetric noise cancellation for obfuscation
     
@@ -182,8 +182,8 @@ public:
         cout << "  Quantum pairs:       " << (base_size/3) << " positive/negative pairs per flame\n";
         cout << "  Uniformity:          " << (uniform ? "VERIFIED" : "FAILED") << "\n\n";
         
-        // QUANTUM ZANS PROOF
-        cout << "  QUANTUM ZANS CANCELLATION PROOF\n";
+        // CLASSICAL NOISE CANCELLATION PROOF
+        cout << "  CLASSICAL NOISE CANCELLATION CANCELLATION PROOF\n";
         cout << "  ------------------------------------------------------------------\n";
         cout << "  Each flame contains paired positive/negative encodings\n";
         cout << "  These pairs CANCEL OUT via symmetric cancellation\n";

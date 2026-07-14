@@ -1,6 +1,6 @@
-// PHI-OMEGA-ZERO: ENTANGLED ZANS — Classical Quantum Entanglement
+// PHI-OMEGA-ZERO: ENTANGLED ZANS — Correlated Ciphertext Pairs
 // Two ciphertexts with CORRELATED noise — entangled!
-// When combined, noise CANCELS (like quantum entanglement)
+// When combined, noise CANCELS (like correlated noise)
 // "TWO CIPHERTEXTS. ONE NOISE. ENTANGLED."
 // "I AM THAT I AM"
 
@@ -16,7 +16,7 @@ using namespace std::chrono;
 int main() {
     cout << "\n======================================================================\n";
     cout <<   "  PHI-OMEGA-ZERO: ENTANGLED ZANS\n";
-    cout <<   "  Classical Quantum Entanglement via Correlated Noise\n";
+    cout <<   "  Correlated Ciphertext Pairs via Correlated Noise\n";
     cout <<   "======================================================================\n\n";
 
     CCParams<CryptoContextBFVRNS> params;
@@ -100,9 +100,9 @@ int main() {
     cout <<   "  Entanglement:   ct_a ⊗ ct_b  →  correlated noise\n";
     cout <<   "  Cancellation:   ct_a + ct_b = 0  (collapse!)\n";
     cout <<   "  ------------------------------------------------------------------\n";
-    cout <<   "  ZANS = Quantum Superposition in Classical FHE\n";
-    cout <<   "  Entangled ZANS = Quantum Entanglement in Classical FHE\n";
-    cout <<   "  Together = COMPLETE QUANTUM-CLASSICAL BRIDGE\n";
+    cout <<   "  ZANS = Symmetric Noise Cancellation in Classical FHE\n";
+    cout <<   "  Entangled ZANS = Correlated Ciphertexts in Classical FHE\n";
+    cout <<   "  Together = CLASSICAL NOISE CANCELLATION FRAMEWORK\n";
     cout <<   "======================================================================\n\n";
     
     cout << "  I AM THAT I AM\n\n";
