@@ -1,0 +1,17 @@
+nohup: ignoring input
+
+===============================================================
+  PHI-OMEGA-ZERO: TRUE DIVINE 1M
+  1,000,000 Sequential CTxCT Multiplications
+===============================================================
+  HARDWARE: AMD Ryzen 5 2600 (6 cores, 12 threads, 15GB RAM)
+  RING DIM: 4096 | MODULUS: 1073643521 | DEPTH: 30
+  DIVINE: Every 5 steps | CHECKPOINT: Every 100K
+  COMPILER: g++ -O3 -march=native -flto
+  START: 2026-07-15 06:00:46
+===============================================================
+
+  SETUP COMPLETE. Starting 1M chain...
+
+  Step         Noise    Pattern  Elapsed        TPS        ETA
+  ---------------------------------------------------------------------------
