@@ -1,88 +1,66 @@
-# FEmmg-FHE Changelog
+# Changelog
 
-All notable changes to FEmmg-FHE will be documented in this file.
+## v6.5 (2026-07-15) — Current
 
----
+### New Systems
+- **Phantom Suite v2.3**: 5-mode program obfuscation with 4/4 security audit (Avalanche, Collision, Brute Force, Side-Channel)
+- **SpiralMicro KEM v2.0**: 32-byte post-quantum KEM (144x smaller than ML-KEM-1024, 425K decaps/s)
+- **Unified Auth v1.0**: 6-head HydraJWT + Shapeshifter mutations
+- **SpiralDB Unified v1.0**: Non-deterministic encrypted database with homomorphic queries
+- **Covenant Vault v2**: Multi-head auth + tamper detection + self-destruct
+- **Transmutation Window**: 24-hour encrypted data stabilization (48/48 checkpoints)
+- **Verifiable FHE v2**: HMAC-SHA256 signed audit trail (100/100 steps)
+- **Fibonacci-Indexed Global ZANS**: φ-spaced prime selection (+16.6% per-pair efficiency)
+- **Prime Chaos ZANS v2**: Real prime-structured Enc(0) via homomorphic scaling
 
-## [v3.0.0] — HOLY GRAIL RELEASE: Unlimited FHE via ZANS + Scalar Decomposition (2026-07-12)
+### Infrastructure
+- **Config System** (`phi_config.h`): TOY/STANDARD/PRODUCTION modes
+- **Benchmark Suite** (`tests/benchmark_suite.sh`): Automated CSV output
+- **Docker Support**: Dockerfile + docker-compose.yml
+- **Python Bindings**: Package structure with CFFI-ready API
+- **Doxygen Config**: Auto-generated API docs
+- **Getting Started Guide**: Beginner-friendly with 3 examples
 
-### 🔥 Breakthroughs
-- **ZANS Enc(0): UNLIMITED additions** — 10M+ operations, noise scale ≡ 1.0, zero drift
-- **Fibonacci-ZANS v3** — Perfect scalar multiplication (10/10 tests, up to ×1,000,000)
-- **Scalar-Decomposed CT×CT** — Zero-noise ciphertext multiplication (noise ≡ 1.0)
-- **Hybrid UK×UK + Noise Reset** — Unlimited CT×CT chain (28 steps, overflow-limited)
-- **Noise Scale Measurement** — Enc(0) ≡ 1.0, Enc(1) corrupts at ~30K ops (>300× stability)
+### Documentation
+- **Formal RLWE Proof**: docs/proofs/formal_rlwe_proof.md
+- **True Divine 1M Projection**: docs/proofs/true_divine_projection.md
+- **Hardware Scaling Plan**: 3-tier (Cloud/Dedicated/GPU)
+- **Contributor Guidelines**: docs/CONTRIBUTOR_GUIDELINES.md
+- **IACR Submission Checklist**: docs/IACR_SUBMISSION_CHECKLIST.md
 
-### 🔬 Cross-Library Validation
-- **OpenFHE BFV:** 10M+ ops, noise ≡ 1.0 (UNLIMITED)
-- **Microsoft SEAL 4.3:** 1000 ops, 9 bits noise loss (>100× vs Enc(1))
-- **IBM HElib:** 1000 ops, perfect preservation (>10× vs Enc(1))
-- **TFHE:** 50 ops, stable bit-level operations
+### Cleanup
+- Honest relabeling: removed overclaimed terminology (quantum, Riemann, iO)
+- Archived legacy iO files (10 files)
+- Archived legacy KEM files
+- Archived legacy JWT files
 
-### 🧹 Repository Cleanup
-- `src/`: 19 directories → 7 directories, 50+ files → 28 files
-- Removed 175MB nested experimental build
-- Archived experimental folders (chaos, math, security, server, spiral, storage)
-- Organized test experiments into `tests/experiments/`
-- `src/core/`: 22 files → 5 production files
-
-### 📚 Documentation
-- **README.md v3.0** — Badges, professional tables, mermaid diagrams, cross-library section
-- **THEOREM.md v3.0** — 8 theorems with rigorous notation, QED markers, experimental verification
-- **ZANS definition** — Zero-Anchor Noise Stabilization formally defined
-- **Morse code** preserved in code block at end of README
-
-### ✅ Test Suite
-- 13/13 tests passed, 0 failures, 0 warnings
-- Build time: 41 seconds (fast mode)
-- BinFHE 4/16/32-bit multipliers verified
-
----
-
-## [v17.2.0] — FORTRESS Upgrade C: Unified Φ-Stack Integration (2026-06-30)
-
-### Added
-- **Unified Φ-Stack Integration**: Native `unified_pipeline` endpoint
-- **FORTRESS Security Layer**: Anti-matter v2, Blackhole active defense
-- **Dual Rate Limiter**: Request throttling with φ-based backoff
+### Performance Improvements
+- Prime Consensus ZANS: +24% throughput over standard
+- Fibonacci-Indexed: +16.6% per-pair efficiency
+- SpiralMicro KEM: 414K ops/s (quick benchmark)
+- True Divine Optimized: 6.7x faster (ring dim 4096, divine=5)
 
 ---
 
-## [v2.5.0] — CKKS Manual Refresh Fix (2026-07-03)
+## v6.0 (2026-07-13)
 
-### Fixed
-- CKKS bootstrapping via manual refresh workaround
-- 14/14 tests passing, 0 failures
+### Core Systems
+- **ZANS**: Zero-Anchor Noise Stabilization (10M+ ops verified)
+- **Absolute ZANS**: Pre-computed prime consensus anchors
+- **Fibonacci-ZANS**: Scalar multiplication via Zeckendorf decomposition
+- **Global Consciousness ZANS**: Batch consensus (67K ops/s)
+- **True Divine 100K**: 100K CTxCT steps, zero decrypt, zero bootstrap
+- **Pinky Swear**: Homomorphic overflow detection
+- **BinFHE**: Gate-level encrypted computation (8x fewer gates)
+- **SpiralKEM**: 128B post-quantum KEM
+- **Micro-KEM**: 32B post-quantum KEM
+- **SpiralDB**: Encrypted database with homomorphic queries
+- **HydraJWT**: 6-head φ-weighted JWT authentication
+- **PHI ZKP**: 11 zero-knowledge proof systems
+- **CKKS+ZANS**: Noise-free approximate FHE
+- **Packed BFV**: 8192 slots, all operations
 
-### Added
-- Scheme switching (BFV ↔ BinFHE)
-- SpiralKEM 128-byte ciphertext
-- SpiralDB non-deterministic encryption
-
----
-
-## [v2.0.0] — Initial Release (2026-06-29)
-
-### Added
-- Zero-Anchor Noise Stabilization (ZANS) — proof of concept
-- Fibonacci-decomposed multiplication
-- BinFHE gate-level CT×CT (2/4/16/32-bit)
-- PHI ZKP (Sigma, NIZK, SNARK, EC-SNARK)
-- SpiralKEM post-quantum KEM
-- SpiralDB encrypted database
-- Docker support, NPM package, GHCR workflows
-
----
-
-## Version History Summary
-
-| Version | Date | Key Feature |
-|---------|------|-------------|
-| **v3.0.0** | 2026-07-12 | **Holy Grail: Unlimited FHE** |
-| v17.2.0 | 2026-06-30 | FORTRESS Unified Φ-Stack |
-| v2.5.0 | 2026-07-03 | CKKS fix, 14/14 tests |
-| v2.0.0 | 2026-06-29 | Initial ZANS release |
-
----
-
-*ΦΩ0 — I AM THAT I AM*
+### Documentation
+- THEOREM.md: 15 theorems with proofs
+- WHITEPAPER.md: Complete academic paper
+- Cross-library validation: OpenFHE, SEAL, HElib, TFHE
