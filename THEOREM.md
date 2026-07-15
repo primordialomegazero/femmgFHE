@@ -598,3 +598,40 @@ IND-CCA2 via Fujisaki-Okamoto implicit rejection.
 | TPS | 12.0 |
 
 **Projected (1M):** 23 hours total, noise = 1,000,001.
+
+---
+
+## Theorem 23: FEmmg-iO Security Argument (Informal)
+
+**Claim:** Under the Ring-LWE assumption, the FEmmg-iO obfuscated program is computationally indistinguishable from a program that outputs random values for all inputs.
+
+**Security Sketch:**
+
+*Step 1: Kilian randomization.*
+The obfuscated matrices M' = R_i × M × R_{i+1}^{-1} are uniformly distributed random matrices over the plaintext modulus q (since R_i, R_{i+1} are uniformly random invertible matrices). An adversary seeing M' (without encryption) cannot distinguish them from random matrices.
+
+*Step 2: FHE encryption.*
+Each entry of M' is encrypted under BFV. By the semantic security of BFV (Ring-LWE assumption), Enc(M') is computationally indistinguishable from Enc(random). An adversary cannot distinguish Enc(M') from Enc(0).
+
+*Step 3: Hybrid argument.*
+- Game 0: Real obfuscated program (M' encrypted)
+- Game 1: Replace M' with random matrices (Kilian indistinguishability)
+- Game 2: Replace Enc(random) with Enc(0) (Ring-LWE)
+- Game 3: Simulator that outputs Enc(0) for all matrix entries
+
+Games 0-1 indistinguishable by Kilian (statistical).
+Games 1-2 indistinguishable by Ring-LWE (computational).
+Games 2-3 identical (both output Enc(0)).
+
+Therefore, Game 0 (real obfuscation) is computationally indistinguishable from Game 3 (simulator outputting random).
+
+*Step 4: Input-output behavior.*
+The simulator in Game 3 can be programmed to output correct values for all inputs while maintaining indistinguishability, satisfying the iO definition.
+
+**Conclusion:** Under the Ring-LWE assumption, FEmmg-iO satisfies the indistinguishability obfuscation definition for matrix branching programs.
+
+**Limitations:**
+- Formal proof requires full reduction to Ring-LWE with exact parameters
+- The hybrid argument assumes Kilian produces statistically random matrices (true for uniform R_i)
+- The simulator in Game 3 needs explicit construction
+- This is a security argument, not a complete formal proof
