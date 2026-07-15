@@ -1,0 +1,38 @@
+nohup: ignoring input
+
+===============================================================
+  PHI-OMEGA-ZERO: SEAL ZANS 10M — DETAILED CHECKPOINTS
+  10,000,000 Sequential ZANS Additions on Microsoft SEAL 4.3
+===============================================================
+  HARDWARE: AMD Ryzen 5 2600 (6 cores, 12 threads, 15GB RAM)
+  LIBRARY: Microsoft SEAL 4.3 | BFV Scheme
+  POLY MODULUS DEGREE: 8192 | PLAINTEXT MODULUS: 786433
+  CHECKPOINT: Every 1M steps
+  COMPILER: g++ -O2 -march=native
+  START: 2026-07-16 06:29:33
+===============================================================
+
+  SETUP COMPLETE. Starting 10M ZANS chain...
+
+  Step         Noise    Pattern  Elapsed        TPS        ETA
+  ---------------------------------------------------------------------------
+     1000000     127.0     START  0h2m30s    6666.7         0h22m
+     2000000     126.0        OK  0h5m0s    6666.7         0h20m
+     3000000     125.0        OK  0h7m31s    6651.9         0h17m
+     4000000     125.0        OK  0h10m2s    6644.5         0h15m
+     5000000     124.0        OK  0h12m32s    6648.9         0h12m
+     6000000     124.0        OK  0h15m2s    6651.9         0h10m
+     7000000     124.0        OK  0h17m32s    6654.0         0h7m
+     8000000     124.0        OK  0h20m1s    6661.1         0h5m
+     9000000     124.0        OK  0h22m32s    6656.8         0h2m
+    10000000     123.0        OK  0h25m1s    6662.2         0h0m
+
+===========================================================================
+  SEAL ZANS 10M — COMPLETE
+  Steps: 10000000 | Final Noise Budget: 123 bits
+  Value: 42 (expected: 42)
+  Pattern: DRIFT DETECTED
+  Time: 0.4 hours
+  Completed: 2026-07-16 06:54:35
+===========================================================================
+
