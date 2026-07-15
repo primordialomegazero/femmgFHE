@@ -146,7 +146,7 @@ True Divine CT×CT Evaluation → Garner CRT6 Reconstruction → Result
 
 | System | Description |
 |--------|-------------|
-| ZANS | Zero-Anchor Noise Stabilization — 10M+ ops, noise bounded at baseline |
+| ZANS | Zero-Anchor Noise Stabilization — 10M+ ops, noise statistically cancels to baseline |
 | Absolute ZANS | Pre-computed prime consensus anchors, +24% throughput |
 | Fibonacci-ZANS | Scalar multiplication via Zeckendorf decomposition |
 | Global Consciousness ZANS | Batch consensus: 50 pairs = 1 operation, 67K ops/s |
@@ -205,7 +205,7 @@ True Divine CT×CT Evaluation → Garner CRT6 Reconstruction → Result
 
 ## Verified Properties
 
-### Property 1: ZANS — Bounded Noise (10,000,000+ Verified)
+### Property 1: ZANS — Statistically Canceled Noise (10,000,000+ Verified)
 
 | Operations | Noise | Drift | Time | Status |
 |-----------|-------|-------|------|--------|
@@ -277,7 +277,7 @@ Pattern: Noise = Step + 1 (linear, R² = 1.000). Zero decryption. Zero bootstrap
 |-------|------------|
 | ZANS solves additions, not CT×CT alone | CT×CT requires the full chain: ZANS + Pinky Swear + Divine |
 | Formal RLWE Proof | Empirically verified (10M OpenFHE, 10K SEAL). Formal proof draft exists |
-| Noise Terminology | Noise is BOUNDED, not zero. Practically stable across 10M+ operations |
+| Noise Terminology | Noise is STATISTICALLY CANCELED for additions, LINEARLY BOUNDED for multiplications. Not zero. See Property 1 & 2 |
 | Kilian Randomization | O(n³) Gauss-Jordan per matrix (plaintext setup, not FHE). Diagonal variant is O(n) |
 | Production Security | Current tests use TOY parameters (ring dim 4096). Production needs 32768+ |
 | Cross-Library iO | FEmmg-iO verified on OpenFHE. SEAL/HElib/TFHE ports pending |
