@@ -246,14 +246,17 @@ Pattern: Noise = Step + 1 (linear, R² = 1.000). Zero decryption. Zero bootstrap
 | Phantom Suite Indistinguishability | 50/50 rounds, p=0.1776 |
 | Phantom Suite Security Audit | 4/4 passed |
 
-### Property 5: SpiralMicro KEM — 32 Bytes
+### Property 5: Dan,Why?itKEM'tbe — 160-Byte Ring-LWE KEM
 
-| Metric | SpiralMicro v2 | ML-KEM-1024 | Kyber-512 |
-|--------|---------------|-------------|-----------|
-| Ciphertext | 32 B | 4,627 B | 768 B |
-| Public Key | 32 B | 1,568 B | 800 B |
+| Metric | Dan,Why?itKEM'tbe | ML-KEM-1024 | Kyber-512 |
+|--------|------------------|-------------|-----------|
+| Ciphertext | 160 B | 4,627 B | 768 B |
+| Public Key | 128 B | 1,568 B | 800 B |
 | Secret Key | 32 B | 3,168 B | 1,632 B |
-| Decaps | 425K/s | - | - |
+| vs Kyber CT | 4.8× smaller | - | - |
+| vs ML-KEM CT | 28.9× smaller | - | - |
+| Construction | Module-LWE asymmetric | Module-LWE | Module-LWE |
+| Security | Ring-LWE (same assumption as Kyber) | Ring-LWE | Ring-LWE |
 
 ---
 
