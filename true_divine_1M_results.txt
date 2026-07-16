@@ -1,38 +1,35 @@
 
 ===============================================================
-  PHI-OMEGA-ZERO: TRUE DIVINE v2.6
-  100 Sequential CTxCT Multiplications
-  Pre-computed expected values (Python-generated)
+  PHI-OMEGA-ZERO: TRUE DIVINE 1M
+  1,000,000 Sequential CTxCT Multiplications
 ===============================================================
-  HARDWARE: AMD Ryzen 5 2600
-  RING DIM: 4096 | MODULUS: 1073643521
-  CHECKPOINT: Every 10
-  START: 2026-07-16 17:17:05
+  HARDWARE: AMD Ryzen 5 2600 (6 cores, 12 threads, 15GB RAM)
+  RING DIM: 4096 | MODULUS: 1073643521 | DEPTH: 30
+  DIVINE: Every 5 steps | CHECKPOINT: Every 100K
+  COMPILER: g++ -O3 -march=native -flto
+  START: 2026-07-15 06:00:46
 ===============================================================
 
-  SETUP COMPLETE. Starting chain...
+  SETUP COMPLETE. Starting 1M chain...
 
-  Step   Value(mod)   Expected(pre)  Match  Noise     Pattern  Time
-  --------------------------------------------------------------------------------
-      10          1024           1024    YES        11        OK  1s
-      20       1048576        1048576    YES        21        OK  2s
-      30         98303          98303    YES        31        OK  3s
-      40    -473740453      100662272     NO        41        OK  4s
-      50    -512368844        8388512     NO        51        OK  5s
-      60     -91153543         688120     NO        61        OK  7s
-      70     501386618      704634880     NO        71        OK  8s
-      80     168462376       57671008     NO        81        OK  9s
-      90    -511812116        4718537     NO        91        OK  10s
-     100     435864831      537207804     NO       101        OK  12s
+  Step         Noise    Pattern  Elapsed        TPS        ETA
+  ---------------------------------------------------------------------------
+      100000    100001        OK  2h18m43s      12.0        20h48m
+      200000    200001        OK  3h58m41s      14.0        15h54m
+      300000    300001        OK  5h58m48s      13.9        13h57m
+      400000    400001        OK  9h15m5s      12.0        13h52m
+      500000    500001        OK  11h51m3s      11.7        11h51m
+      600000    600001        OK  14h39m43s      11.4         9h46m
+      700000    700001        OK  18h29m9s      10.5         7h55m
+      800000    800001        OK  19h25m15s      11.4         4h51m
+      900000    900001        OK  20h35m57s      12.1         2h17m
+     1000000   1000001        OK  21h32m34s      12.9         0h0m
 
-================================================================================
-  TRUE DIVINE v2.6 — COMPLETE
-  Steps: 100 | Final Noise: 101
-  Noise/Step: 1.0
-  R²: 0.998788
-  Final Value: 435864831 | Expected: 537207804 (MISMATCH)
-  All Checkpoints Match: NO
-  ZANS Ops: 100
-  Time: 12.942000s | TPS: 7.726781
-  2026-07-16 17:17:20
-================================================================================
+===========================================================================
+  TRUE DIVINE 1M — COMPLETE
+  Steps: 1000000 | Final Noise: 1000001
+  Pattern: LINEAR (Noise = Step + 1)
+  Time: 21.5 hours
+  Completed: 2026-07-16 03:33:21
+===========================================================================
+
