@@ -1,0 +1,33 @@
+
+===============================================================
+  OpenFHE BFV ZANS 10M — DETAILED CHECKPOINTS
+  10,000,000 Sequential ZANS Additions on OpenFHE BFV
+===============================================================
+  HARDWARE: AMD Ryzen 5 2600 | RING DIM: 8192
+  PLAINTEXT MODULUS: 786433 | CHECKPOINT: Every 1M
+===============================================================
+
+  SETUP COMPLETE. Starting 10M ZANS chain...
+
+  Step         Noise      Pattern  Elapsed        TPS        ETA
+  ---------------------------------------------------------------------------
+     1000000       1.0     START  0h3m10s      5263         0h28m
+     2000000       1.0        OK  0h6m28s      5155         0h25m
+     3000000       1.0        OK  0h9m55s      5042         0h23m
+     4000000       1.0        OK  0h13m18s      5013         0h19m
+     5000000       1.0        OK  0h16m37s      5015         0h16m
+     6000000       1.0        OK  0h19m48s      5051         0h13m
+     7000000       1.0        OK  0h23m8s      5043         0h9m
+     8000000       1.0        OK  0h26m23s      5054         0h6m
+     9000000       1.0        OK  0h29m41s      5053         0h3m
+    10000000       1.0        OK  0h32m32s      5123         0h0m
+
+===========================================================================
+  OpenFHE BFV ZANS 10M — COMPLETE
+  Steps: 10000000 | Final Noise: 1
+  Value: 42 (expected: 42)
+  Pattern: STABLE
+  Time: 32 min
+  Status: PASSED
+===========================================================================
+

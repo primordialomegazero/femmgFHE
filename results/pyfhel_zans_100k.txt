@@ -1,0 +1,14 @@
+Running 100000 ZANS additions...
+  10000  1.9s  5374 ops/s
+  20000  3.8s  5330 ops/s
+  30000  5.6s  5343 ops/s
+  40000  7.5s  5332 ops/s
+  50000  9.4s  5321 ops/s
+  60000  11.8s  5102 ops/s
+  70000  13.7s  5111 ops/s
+  80000  15.6s  5123 ops/s
+  90000  17.5s  5143 ops/s
+  100000  19.4s  5161 ops/s
+COMPLETE: 100000 ops in 19.4s
+Result: 42 (expected: 42)
+Status: PASSED

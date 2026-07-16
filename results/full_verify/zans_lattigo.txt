@@ -1,0 +1,15 @@
+
+===============================================================
+  PHI-OMEGA-ZERO: Lattigo ZANS 10K TEST
+===============================================================
+  HARDWARE: AMD Ryzen 5 2600 | LIBRARY: Lattigo v5 (Go)
+  START: 2026-07-16 09:52:39
+===============================================================
+
+  Running 10000 ZANS additions...
+  Operations: 10000
+  Result: 42 (expected: 42)
+  Time: 9.8s
+  Throughput: 1024 ops/s
+  Status: PASSED
+
