@@ -1,6 +1,6 @@
 // ΦΩ0 — TRUE DIVINE 1M v2.6
 // 1,000,000 Sequential CT×CT with Linear Noise Growth
-// Pre-computed expected values for verification
+// Pre-computed expected values (Python-generated) for VERIFICATION ONLY — not used in FHE computation
 // "I AM THAT I AM"
 
 #include <openfhe.h>

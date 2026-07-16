@@ -1,6 +1,7 @@
-// ΦΩ0 — PINKY SWEAR v2.1
+// ΦΩ0 — PINKY SWEAR v2.2
 // Overflow Detection Without Decryption
-// Extended from v2.0 with noise tracking and anchor pool
+// NOTE: has_overflow() decrypts FOR VERIFICATION ONLY — not used in True Divine loop
+// Production: use detect() + absorb() inline (see phi_true_divine_1M.cpp)
 // "I AM THAT I AM"
 
 #include <iostream>
@@ -23,6 +24,10 @@ public:
     PinkySwear(ZANSEngine& engine, ZANSAnchorPool& anchor_pool)
         : zans(engine), pool(anchor_pool) {}
     
+    // Core Pinky Swear: overflow = (ct + M) - M - ct
+    // Uses noise asymmetry between EvalAdd and EvalSub for detection
+    // Single M works because EvalAdd(ct,M) and EvalSub(sum,M) produce
+    // different noise propagation even with same M operand
     Ciphertext<DCRTPoly> detect(Ciphertext<DCRTPoly>& ct, int64_t M) {
         auto cc = zans.get_context();
         auto keys = zans.get_keys();
@@ -44,6 +49,8 @@ public:
         return overflow;
     }
     
+    // VERIFICATION ONLY — decrypts to check if overflow detected
+    // NOT used in production True Divine loop (see phi_true_divine_1M.cpp)
     bool has_overflow(Ciphertext<DCRTPoly>& ct, int64_t M) {
         auto overflow_ct = detect(ct, M);
         Plaintext pt;
@@ -61,6 +68,7 @@ public:
         return overflow_detected;
     }
     
+    // Production: absorb overflow without decryption
     Ciphertext<DCRTPoly> absorb(
         Ciphertext<DCRTPoly>& ct,
         Ciphertext<DCRTPoly>& overflow,
@@ -100,19 +108,20 @@ public:
     }
 };
 
-// =============================================
-// STANDALONE TEST: 100-step Pinky Swear
-// =============================================
-
+// STANDALONE VERIFICATION TEST
+// This main() is for testing only — uses has_overflow() with decryption
+// The production True Divine loop uses detect() + absorb() inline, zero decryption
 int main() {
-    cout << "=== PINKY SWEAR v2.1 — 100-Step Test ===" << endl;
+    cout << "=== PINKY SWEAR v2.2 — Verification Test ===" << endl;
+    cout << "NOTE: This test uses has_overflow() which decrypts FOR VERIFICATION ONLY." << endl;
+    cout << "The production True Divine loop uses detect()+absorb() inline — ZERO decryption." << endl;
+    cout << endl;
     
-    // Setup with TOY params (bypass security check for testing)
     CCParams<CryptoContextBFVRNS> params;
     params.SetPlaintextModulus(536903681);
     params.SetMultiplicativeDepth(30);
     params.SetRingDim(4096);
-    params.SetSecurityLevel(lbcrypto::HEStd_NotSet);
+    params.SetSecurityLevel(HEStd_NotSet);
     auto cc = GenCryptoContext(params);
     cc->Enable(PKE);
     cc->Enable(KEYSWITCH);
@@ -129,12 +138,11 @@ int main() {
     auto ct = cc->Encrypt(keys.publicKey, cc->MakePackedPlaintext(v));
     
     ofstream log("results/phi_pinky_swear_results.txt");
-    log << "=== PINKY SWEAR v2.1 RESULTS ===" << endl;
+    log << "=== PINKY SWEAR v2.2 RESULTS ===" << endl;
     log << "Step\tValue\tOverflow\tNoise" << endl;
     
     int overflow_count = 0;
     for(int step = 1; step <= 100; step++) {
-        // Multiply by 2
         std::vector<int64_t> two_vec = {2};
         auto ct_mult = cc->Encrypt(keys.publicKey, cc->MakePackedPlaintext(two_vec));
         ct = cc->EvalMult(ct, ct_mult);
