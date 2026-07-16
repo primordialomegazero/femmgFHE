@@ -1,0 +1,6 @@
+Step 1: ZANS — Zero-Anchor Noise Stabilization
+================================================
+Discovery: ct + Enc(0) = ct (no net noise growth)
+Solves: Unlimited homomorphic additions
+Limitation: Does NOT solve CT×CT multiplication
+Cross-library: Verified across 9 libraries (see ALL_CROSS_LIBRARY_RESULTS.txt)

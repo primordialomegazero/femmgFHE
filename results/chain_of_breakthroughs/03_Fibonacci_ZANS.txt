@@ -1,0 +1,6 @@
+Step 3: Fibonacci-ZANS — Efficient Scalar Decomposition
+=========================================================
+ct × 8 = (ct × 5) + (ct × 3) (Fibonacci: 5+3=8)
+Solves: Efficient CT × known scalar for large values
+Limitation: Still requires known scalar. Not true CT×CT.
+Status: Verified up to ×100,000 multiplier

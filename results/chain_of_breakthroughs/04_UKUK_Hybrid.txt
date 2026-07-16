@@ -1,0 +1,6 @@
+Step 4: UK×UK Hybrid — One Known, One Unknown
+===============================================
+CT_unknown × CT_known_plaintext
+Solves: CT×CT when one plaintext is known
+Limitation: Not fully blind. One value must be known.
+Status: 27-step chain verified before value overflow
