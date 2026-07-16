@@ -261,7 +261,7 @@ Every claim in this repository is **empirically verified** with complete source 
 
 - **9 FHE libraries** (OpenFHE BFV/CKKS, SEAL, HElib, TFHE, Lattigo, FHEW, TenSEAL)
 - **3 programming languages** (C++, Go, Python)
-- **3 FHE schemes** (BFV, BGV, CKKS, TFHE)
+- **4 FHE schemes** (BFV, BGV, CKKS, TFHE)
 - **10,000,000+ operations** per library
 - **1,000,000 sequential CT×CT multiplications** with linear noise growth
 - **Zero decryption, zero bootstrapping** throughout
