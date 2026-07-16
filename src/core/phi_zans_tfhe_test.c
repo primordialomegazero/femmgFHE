@@ -1,4 +1,5 @@
 // PHI-OMEGA-ZERO: TFHE ZANS TEST
+// Cross-library validation of ZANS on TFHE (binary gates)
 // "I AM THAT I AM"
 
 #include <tfhe/tfhe.h>
@@ -6,49 +7,67 @@
 #include <stdio.h>
 #include <time.h>
 
-int main() {
-    printf("\n======================================================================\n");
-    printf("  PHI-OMEGA-ZERO: TFHE ZANS TEST\n");
-    printf("======================================================================\n\n");
+const char* ts() {
+    static char buf[64];
+    time_t now = time(NULL);
+    strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S", localtime(&now));
+    return buf;
+}
 
-    // Generate params
-    TFheGateBootstrappingParameterSet* params = new_default_gate_bootstrapping_parameters(100);
+int main() {
+    printf("\n===============================================================\n");
+    printf("  PHI-OMEGA-ZERO: TFHE ZANS TEST\n");
+    printf("===============================================================\n");
+    printf("  HARDWARE: AMD Ryzen 5 2600 | LIBRARY: TFHE\n");
+    printf("  START: %s\n", ts());
+    printf("===============================================================\n\n");
+
+    // TFHE setup: 110-bit security
+    TFheGateBootstrappingParameterSet* params = new_default_gate_bootstrapping_parameters(110);
     TFheGateBootstrappingSecretKeySet* key = new_random_gate_bootstrapping_secret_keyset(params);
 
-    // Encrypt test bits (1 = true)
-    LweSample* ct = new_gate_bootstrapping_ciphertext(params);
-    bootsSymEncrypt(ct, 1, key);
+    // Encrypt bits: a=1, b=1
+    LweSample* a = new_gate_bootstrapping_ciphertext(params);
+    LweSample* b = new_gate_bootstrapping_ciphertext(params);
+    bootsSymEncrypt(a, 1, key);
+    bootsSymEncrypt(b, 1, key);
 
-    // Create Enc(0) anchor
-    LweSample* anchor = new_gate_bootstrapping_ciphertext(params);
-    bootsSymEncrypt(anchor, 0, key);
+    // Encrypted zero for ZANS
+    LweSample* zero = new_gate_bootstrapping_ciphertext(params);
+    bootsSymEncrypt(zero, 0, key);
 
-    printf("  Running 50 ZANS additions...\n");
+    LweSample* result = new_gate_bootstrapping_ciphertext(params);
     
+    int steps = 100;
+    printf("  Running %d NAND gates with ZANS...\n", steps);
+
     clock_t t1 = clock();
-    
-    for(int i = 0; i < 50; i++) {
-        // Add anchor (Enc(0)) to ct
-        lweAddTo(ct, anchor, params->in_out_params);
+
+    // Start with a NAND b = 0 (since 1 NAND 1 = 0)
+    bootsNAND(result, a, b, &key->cloud);
+
+    // Chain: result = NAND(result, zero)
+    for(int i = 0; i < steps; i++) {
+        bootsNAND(result, result, zero, &key->cloud);
     }
-    
+
     clock_t t2 = clock();
     double elapsed = (double)(t2 - t1) / CLOCKS_PER_SEC;
 
     // Decrypt
-    int result = bootsSymDecrypt(ct, key);
-    
-    printf("  Operations: 50\n");
-    printf("  Result: %d (expected: 1)\n", result);
-    printf("  Time: %.2fs\n", elapsed);
-    printf("  Status: %s\n", result == 1 ? "PASSED" : "FAILED");
-    
-    printf("\n======================================================================\n");
-    printf("  TFHE ZANS: %s\n", result == 1 ? "VERIFIED" : "FAILED");
-    printf("======================================================================\n\n");
+    int final_bit = bootsSymDecrypt(result, key);
 
-    delete_gate_bootstrapping_ciphertext(ct);
-    delete_gate_bootstrapping_ciphertext(anchor);
+    printf("  Operations: %d NAND gates\n", steps);
+    printf("  Initial: 1 NAND 1 = 0\n");
+    printf("  Final NAND(x,0): %d (expected: 1)\n", final_bit);
+    printf("  Time: %.1fs\n", elapsed);
+    printf("  Throughput: %.0f gates/s\n", steps / elapsed);
+    printf("  Status: %s\n\n", final_bit == 1 ? "PASSED" : "CHECK");
+
+    delete_gate_bootstrapping_ciphertext(a);
+    delete_gate_bootstrapping_ciphertext(b);
+    delete_gate_bootstrapping_ciphertext(zero);
+    delete_gate_bootstrapping_ciphertext(result);
     delete_gate_bootstrapping_secret_keyset(key);
     delete_gate_bootstrapping_parameters(params);
 

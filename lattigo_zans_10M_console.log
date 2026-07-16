@@ -1,0 +1,37 @@
+nohup: ignoring input
+
+===============================================================
+  PHI-OMEGA-ZERO: Lattigo ZANS 10M — DETAILED CHECKPOINTS
+  10,000,000 Sequential ZANS Additions on Lattigo v5 (Go)
+===============================================================
+  HARDWARE: AMD Ryzen 5 2600 (6 cores, 12 threads, 15GB RAM)
+  LIBRARY: Lattigo v5 (Go) | BGV Scheme
+  RING: 2^13=8192 | PLAINTEXT: 65537
+  CHECKPOINT: Every 1M steps
+  START: 2026-07-16 07:19:23
+===============================================================
+
+  SETUP COMPLETE. Starting 10M ZANS chain...
+
+  Step         Noise    Pattern  Elapsed        TPS        ETA
+  -----------------------------------------------------------------------
+     1000000        4.0      START  0h2m15s     7375.6          0h20m
+     2000000        4.0         OK  0h4m33s     7303.0          0h18m
+     3000000        4.0         OK  0h6m49s     7325.9          0h15m
+     4000000        4.0         OK  0h9m8s     7298.9          0h13m
+     5000000        4.0         OK  0h11m23s     7314.1          0h11m
+     6000000        4.0         OK  0h13m42s     7297.2          0h9m
+     7000000        4.0         OK  0h16m0s     7284.9          0h6m
+     8000000        4.0         OK  0h18m15s     7303.0          0h4m
+     9000000        4.0         OK  0h20m33s     7295.6          0h2m
+    10000000        4.0         OK  0h22m49s     7302.8          0h0m
+
+=======================================================================
+  Lattigo ZANS 10M — COMPLETE
+  Steps: 10000000 | Final Level: 4
+  Value: 42 (expected: 42)
+  Pattern: STABLE
+  Time: 0.4 hours
+  Completed: 2026-07-16 07:42:16
+=======================================================================
+

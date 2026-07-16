@@ -40,11 +40,11 @@ int main() {
     Ciphertext anchor;
     encryptor.encrypt(zero_pt, anchor);
 
-    cout << "  Running 10,000 ZANS additions...\n";
+    cout << "  Running 10,000,000 ZANS additions...\n";
     
     auto t1 = high_resolution_clock::now();
     
-    for(int i = 0; i < 10000; i++) {
+    for(int i = 0; i < 10000000; i++) {
         evaluator.add_inplace(ct, anchor);
     }
     
@@ -55,10 +55,10 @@ int main() {
     Plaintext result;
     decryptor.decrypt(ct, result);
     
-    cout << "  Operations: 10,000\n";
+    cout << "  Operations: 10,000,000\n";
     cout << "  Result: " << result.to_string() << " (expected: 42)\n";
     cout << "  Time: " << fixed << setprecision(1) << elapsed << "s\n";
-    cout << "  Throughput: " << fixed << setprecision(0) << (10000.0/elapsed) << " ops/s\n";
+    cout << "  Throughput: " << fixed << setprecision(0) << (10000000.0/elapsed) << " ops/s\n";
     cout << "  Status: " << (result.to_string() == "42" ? "PASSED" : "FAILED") << "\n";
     
     cout << "\n======================================================================\n";
