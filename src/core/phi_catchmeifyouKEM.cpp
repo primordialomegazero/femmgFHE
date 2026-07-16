@@ -1,4 +1,4 @@
-// Dan,Why?itKEM'tbe — The 3-bit alien KEM
+// catchmeifyouKEM — The 3-bit alien KEM
 // N=128 K=2, b=3b signed, c2=3b unsigned
 // PK=128B SK=32B CT=160B
 #include <openssl/rand.h>
@@ -53,7 +53,7 @@ vector<vector<int64_t>> decomp_c2(const uint8_t*in){
 
 void h(const uint8_t*in,size_t len,uint8_t*out){EVP_MD_CTX*ctx=EVP_MD_CTX_new();EVP_DigestInit_ex(ctx,EVP_sha3_256(),NULL);EVP_DigestUpdate(ctx,in,len);EVP_DigestFinal_ex(ctx,out,NULL);EVP_MD_CTX_free(ctx);}
 
-class DanWhyItKEMtbe{
+class catchmeifyouKEM{
 public:
     void keygen(uint8_t*pk,uint8_t*sk){
         RAND_bytes(sk,SK_BYTES);uint8_t sa[SEED_BYTES];RAND_bytes(sa,SEED_BYTES);memcpy(pk,sa,SEED_BYTES);
@@ -86,7 +86,7 @@ public:
     }
 
     void run(){
-        cout<<"\n  Dan,Why?itKEM'tbe v2.1: b="<<COMP_B<<"b signed, c2="<<COMP_C2<<"b unsigned\n";
+        cout<<"\n  catchmeifyouKEM v2.1: b="<<COMP_B<<"b signed, c2="<<COMP_C2<<"b unsigned\n";
         cout<<"  N="<<N<<" K="<<K<<" PK="<<PK_BYTES<<"B SK="<<SK_BYTES<<"B CT="<<CT_BYTES<<"B\n";
         cout<<"  vs Kyber-512: "<<fixed<<setprecision(1)<<(100.0*CT_BYTES/768)<<"% | vs ML-KEM-1024: "<<(100.0*CT_BYTES/4627)<<"%\n\n";
         uint8_t pk[PK_BYTES],sk[SK_BYTES],ct[CT_BYTES],ss1[SS_BYTES],ss2[SS_BYTES];
@@ -100,4 +100,4 @@ public:
     }
 };
 
-int main(){DanWhyItKEMtbe k;k.run();return 0;}
+int main(){catchmeifyouKEM k;k.run();return 0;}

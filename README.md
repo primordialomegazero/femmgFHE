@@ -186,11 +186,11 @@ This is the holy grail of cryptography. FEmmg-iO achieves this using the FHE bre
 
 ---
 
-## Post-Quantum KEM — Dan,Why?itKEM'tbe
+## Post-Quantum KEM — catchmeifyouKEM
 
 Real Ring-LWE asymmetric Key Encapsulation Mechanism with aggressive 3-bit compression.
 
-| Metric | Dan,Why?itKEM'tbe | Kyber-512 | ML-KEM-1024 |
+| Metric | catchmeifyouKEM | Kyber-512 | ML-KEM-1024 |
 |--------|------------------|-----------|-------------|
 | Ciphertext | **160 B** | 768 B | 4,627 B |
 | Public Key | **128 B** | 800 B | 1,568 B |
@@ -233,7 +233,7 @@ Real Ring-LWE asymmetric Key Encapsulation Mechanism with aggressive 3-bit compr
 
 | System | Description |
 |--------|-------------|
-| Dan,Why?itKEM'tbe | 160B Module-LWE KEM, smallest asymmetric PQ-KEM |
+| catchmeifyouKEM | 160B Module-LWE KEM, smallest asymmetric PQ-KEM |
 | SpiralDB Unified | Encrypted SUM, AVG, COUNT, RANGE on ciphertexts |
 | Unified Auth | 6-head HydraJWT + Shapeshifter mutations |
 | Verifiable FHE v2 | HMAC-SHA256 signed audit trail |
@@ -250,7 +250,7 @@ Real Ring-LWE asymmetric Key Encapsulation Mechanism with aggressive 3-bit compr
 | ZANS noise is statistically canceled | Not zero. Practically stable across 10M+ operations |
 | FEmmg-iO decrypts at final output | Computation is fully homomorphic. Single decrypt at end |
 | Kilian O(n³) setup | Plaintext preprocessing. Not in FHE evaluation loop |
-| Dan,Why?itKEM'tbe N=128 | ~80-bit PQ. Bump to N=256 for 128-bit (CT=320B) |
+| catchmeifyouKEM N=128 | ~80-bit PQ. Bump to N=256 for 128-bit (CT=320B) |
 | Production security | Ring dim 4096 is TOY. Production needs 32768+ |
 | CKKS 10M pending | 100K verified at 228K ops/s. 10M in progress |
 
