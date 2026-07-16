@@ -8,6 +8,7 @@ build/
 # Dependencies
 openfhe-development/
 femmgFHE/
+SEAL/
 
 # Archive
 archive/
@@ -22,7 +23,6 @@ Thumbs.db
 
 # Test binaries and temporary files
 *.bin
-*.txt
 test_*
 *_test
 *_fixed
@@ -33,4 +33,26 @@ test_*
 src/core/phi_key_manager_*.cpp
 !src/core/phi_key_manager_working.cpp
 
-# Exceptions — cross-library validation results MUST be tracked
+# Stray logs and console output
+*.log
+*.csv
+ckks_zans_*
+helib_zans_*
+seal_zans_*
+lattigo_zans_*
+*.tar.gz
+*.zip
+*.bak
+main
+immortal_fhe*
+Dockerfile.*
+docker-compose*.yml
+Doxyfile
+Makefile.backup
+Makefile.immortal
+README.md.bak
+check_openfhe.sh
+create_release.sh
+run_breakthrough_demo.sh
+run_immortal.sh
+test_io_ctct_*
