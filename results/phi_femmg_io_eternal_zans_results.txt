@@ -1,0 +1,15 @@
+
+  FEmmg-iO: Eternal ZANS — Guard Key Tamper Detection
+  Correct key: Full True Divine (noise controlled)
+  Wrong key: Raw CTxCT (noise explodes, output corrupts)
+  Date: 2026-07-16 10:19:25
+
+  -----------------------------------------------------------------
+         x      Key0      Key1            Output          Expected
+  -----------------------------------------------------------------
+         2        OK        OK                27                27  OK  | Both keys correct
+         2     WRONG        OK         402616336                27  TAMPERED  | Wrong inner key -> noise in Enc(y) -> corrupts outer
+         2        OK     WRONG         178940525                27  TAMPERED  | Wrong outer key -> raw multiplies -> noise explodes
+         2     WRONG     WRONG               -51                27  TAMPERED  | Both keys wrong
+  -----------------------------------------------------------------
+

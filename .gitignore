@@ -32,3 +32,5 @@ test_*
 *_simple
 src/core/phi_key_manager_*.cpp
 !src/core/phi_key_manager_working.cpp
+
+# Exceptions — cross-library validation results MUST be tracked

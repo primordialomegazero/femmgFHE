@@ -1,0 +1,18 @@
+
+  FEmmg-iO: Fractal — Program Within Program
+  Layer 0: f(x)=x+1 (direct FHE)
+  Layer 1: g(y)=y^3 (Barrington, matrix entries = Enc(y))
+  Encrypted value flows from Layer 0 to Layer 1 matrix
+  Date: 2026-07-16 09:46:05
+
+  -------------------------------------------------------
+         x          Fractal iO            Expected
+-------------------------------------------------------
+         0                   1                   1  OK
+         1                   8                   8  OK
+         2                  27                  27  OK
+         3                  64                  64  OK
+         5                 216                 216  OK
+-------------------------------------------------------
+  Result: ALL CORRECT
+
