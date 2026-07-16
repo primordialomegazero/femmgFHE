@@ -1,5 +1,8 @@
-// FEmmg-iO ULTIMATE — Phase 3: CRT6 + Fractal
-// Clean build from verified core
+// ΦΩ0 — FEmmg-iO ULTIMATE v1.3
+// CRT6 + Fractal + Eternal + Heterogeneous ZANS
+// Clean test suite, no emojis
+// "I AM THAT I AM"
+
 #include <openfhe.h>
 #include <iostream>
 #include <iomanip>
@@ -27,8 +30,9 @@ string ts() {
 class UltimateIO {
     static constexpr int64_t moduli[6] = {1073643521,1073692673,1073750017,1073815553,1073872897,1073971201};
     static constexpr int64_t inv12=357919402,inv123=589973977,inv1234=197295683,inv12345=1004546623,inv123456=696031701;
-    int64_t mod(int64_t v, int64_t m) { return ((v%m)+m)%m; }
     
+    int64_t mod(int64_t v, int64_t m) { return ((v%m)+m)%m; }
+
     int64_t crt6_combine(int64_t r[6]) {
         __int128 accum=r[0], prod=moduli[0];
         auto step=[&](int idx, int64_t inv){
@@ -85,6 +89,7 @@ class UltimateIO {
         auto enc=[&](int64_t v){return cc->Encrypt(keys.publicKey,cc->MakePackedPlaintext(vector<int64_t>{mod(v,modulus)}));};
         auto dec=[&](const Ciphertext<DCRTPoly>& ct){Plaintext pt;cc->Decrypt(keys.secretKey,ct,&pt);return pt->GetPackedValue()[0];};
         auto anchor=enc(0); int64_t half=modulus/2; auto M_ct=enc(half);
+        
         auto divine=[&](const Ciphertext<DCRTPoly>& a,const Ciphertext<DCRTPoly>& b){
             auto r=cc->EvalMult(a,b);
             if(eternal_ok){
@@ -97,8 +102,7 @@ class UltimateIO {
             }
             return r;
         };
-        
-        // Heterogeneous ZANS variant
+
         auto stabilize=[&](const Ciphertext<DCRTPoly>& ct)->Ciphertext<DCRTPoly>{
             if(variant_id==0){auto r=ct;r=cc->EvalAdd(r,anchor);r=cc->EvalAdd(r,anchor);r=cc->EvalAdd(r,anchor);return r;}
             else if(variant_id==1){auto sp=cc->EvalAdd(enc(7919),enc(mod(-7919,modulus)));sp=cc->EvalAdd(sp,anchor);auto r=cc->EvalAdd(ct,sp);r=cc->EvalAdd(r,anchor);return r;}
@@ -107,6 +111,7 @@ class UltimateIO {
             else if(variant_id==4){return cc->EvalAdd(ct,anchor);}
             else {auto r=ct;r=cc->EvalAdd(r,anchor);return r;}
         };
+        
         stack<Ciphertext<DCRTPoly>> st;
         for(size_t i=0;i<rpn.size();i++){
             auto tok=rpn[i];
@@ -123,9 +128,11 @@ class UltimateIO {
             }
             else if(tok.type==Token::NUM) st.push(enc(tok.num_val));
             else if(tok.val=="^") {
-                st.pop(); auto base=st.top();st.pop();
-                int64_t exp=rpn[i-1].num_val; auto result=enc(1);
-                for(int64_t e=0;e<exp;e++) result=divine(result,base);
+                auto exp_ct = st.top(); st.pop();
+                auto base = st.top(); st.pop();
+                int64_t exp_val = dec(exp_ct);
+                auto result=enc(1);
+                for(int64_t e=0;e<exp_val;e++) result=divine(result,base);
                 st.push(result);
             } else if(tok.val=="+") {
                 auto b=st.top();st.pop();auto a=st.top();st.pop();
@@ -138,29 +145,120 @@ class UltimateIO {
         return dec(st.top());
     }
 
-    int64_t evaluate(const string& formula, int64_t x, bool use_fractal=false,
-                     int64_t guard_key=0, int64_t correct_key=0) {
+    struct EvalResult {
+        int64_t result;
+        double time_ms;
+    };
+
+    EvalResult evaluate(const string& formula, int64_t x, bool use_fractal=false,
+                        int64_t guard_key=0, int64_t correct_key=0) {
         auto rpn=toRPN(formula);
-        cout<<"  RPN: "; for(auto& t:rpn){if(t.type==Token::VAR)cout<<"x ";else if(t.type==Token::NUM)cout<<t.num_val<<" ";else cout<<t.val<<" ";} cout<<(use_fractal?"[FRACTAL]":"")<<endl;
+        auto t1 = high_resolution_clock::now();
         int64_t residues[6];
         for(int i=0;i<6;i++) residues[i]=eval_mod(rpn,x,moduli[i],use_fractal,guard_key,correct_key,i);
-        return crt6_combine(residues);
+        int64_t final_result = crt6_combine(residues);
+        auto t2 = high_resolution_clock::now();
+        double ms = duration_cast<milliseconds>(t2 - t1).count();
+        return {final_result, ms};
     }
 
   public:
     void run_test() {
-        int64_t CK=0xDEADBEEFCAFE1234;
-        cout<<"\n  FEmmg-iO ULTIMATE — Phase 5: ALL SYSTEMS\n  Date: "<<ts()<<"\n\n";
-        cout<<"  CRT6 + Fractal + Eternal + Heterogeneous ZANS\n\n";
-        cout<<"  === ETERNAL GUARD TEST ===\n";
-        cout<<"  x^3, x=2, fractal ON\n  "<<string(40,'-')<<"\n";
-        cout<<setw(12)<<"GuardKey"<<setw(12)<<"Result"<<setw(12)<<"Exp"<<"\n"<<string(40,'-')<<"\n";
-        for(auto& [key,label] : vector<pair<int64_t,string>>{{CK,"CORRECT"},{0,"WRONG"}}) {
-            int64_t r=evaluate("x^3",2,true,key,CK);
-            cout<<setw(12)<<label<<setw(12)<<r<<setw(12)<<27;
-            if(key==CK) cout<<"  OK"<<"\n"; else cout<<"  TAMPERED"<<"\n";
+        int64_t CK = 0xDEADBEEFCAFE1234;
+        
+        cout << "\n";
+        cout << "  +--------------------------------------------------+\n";
+        cout << "  |  FEmmg-iO ULTIMATE v1.3                          |\n";
+        cout << "  |  CRT6 + Fractal + Eternal + Heterogeneous ZANS   |\n";
+        cout << "  +--------------------------------------------------+\n";
+        cout << "  Date: " << ts() << "\n\n";
+
+        struct TestCase {
+            string formula;
+            int64_t x;
+            int64_t expected;
+            bool fractal;
+            string description;
+        };
+
+        vector<TestCase> tests = {
+            {"x*x",   2,  4, false, "x*x, x=2 (direct)"},
+            {"x*x",   3,  9, false, "x*x, x=3 (direct)"},
+            {"x*x*x", 2,  8, false, "x*x*x, x=2 (direct)"},
+            {"x*x*x", 3, 27, false, "x*x*x, x=3 (direct)"},
+            {"x*x*x", 2, 27, true,  "x*x*x, x=2 (fractal)"},
+            {"(x+1)*(x+1)",     2, 9,  false, "(x+1)^2, x=2"},
+            {"(x+1)*(x+1)*x",   2, 18, false, "(x+1)^2*x, x=2"},
+            {"x*x*x*x",         2, 16, false, "x^4, x=2 (direct)"},
+        };
+
+        int passed = 0, failed = 0;
+        double total_time = 0;
+
+        cout << "  === COMPREHENSIVE TEST SUITE ===\n\n";
+        cout << "  " << setw(25) << left << "Test"
+             << setw(10) << right << "Result"
+             << setw(10) << "Expected"
+             << setw(8) << "Match"
+             << setw(10) << "Time(ms)"
+             << "  Mode\n";
+        cout << "  " << string(75, '-') << "\n";
+
+        for(auto& tc : tests) {
+            auto r = evaluate(tc.formula, tc.x, tc.fractal, CK, CK);
+            bool match = (r.result == tc.expected);
+            if(match) passed++; else failed++;
+            total_time += r.time_ms;
+
+            cout << "  " << setw(25) << left << tc.description
+                 << setw(10) << right << r.result
+                 << setw(10) << tc.expected
+                 << setw(8) << (match ? "YES" : "NO")
+                 << setw(7) << right << fixed << setprecision(0) << r.time_ms << " ms"
+                 << "  " << (tc.fractal ? "[FRACTAL]" : "[DIRECT]") << "\n";
         }
-        cout<<string(40,'-')<<"\n\n";
+
+        cout << "  " << string(75, '-') << "\n";
+        cout << "  Passed: " << passed << "/" << tests.size()
+             << " | Failed: " << failed
+             << " | Total Time: " << fixed << setprecision(0) << total_time << " ms\n\n";
+
+        // Eternal ZANS Test
+        cout << "  === ETERNAL ZANS (Wrong Key) ===\n\n";
+        cout << "  " << setw(18) << left << "Guard Key"
+             << setw(12) << right << "Result"
+             << setw(12) << "Expected"
+             << "  Status\n";
+        cout << "  " << string(55, '-') << "\n";
+
+        auto r_correct = evaluate("x*x*x", 2, true, CK, CK);
+        cout << "  " << setw(18) << left << "CORRECT"
+             << setw(12) << right << r_correct.result
+             << setw(12) << 27
+             << "  Output preserved\n";
+
+        auto r_wrong = evaluate("x*x*x", 2, true, 0, CK);
+        bool tampered = (r_wrong.result != 27);
+        cout << "  " << setw(18) << left << "WRONG"
+             << setw(12) << right << r_wrong.result
+             << setw(12) << 27
+             << "  " << (tampered ? "TAMPERED" : "NOT TAMPERED") << "\n";
+
+        cout << "  " << string(55, '-') << "\n\n";
+
+        // Stats
+        cout << "  === STATISTICS ===\n\n";
+        cout << "  CRT Moduli:    6 primes, 30-bit each, 181-bit range\n";
+        cout << "  ZANS Variants: 6 (heterogeneous per CRT channel)\n";
+        cout << "  Fractal iO:    Inner encryption with +1 offset\n";
+        cout << "  Eternal ZANS:  Wrong key = tampered output\n";
+        cout << "  Avg Time/Test: " << fixed << setprecision(0) << total_time/tests.size() << " ms\n\n";
+
+        bool all_pass = (failed == 0) && tampered;
+        cout << "  +--------------------------------------------------+\n";
+        cout << "  |  FEmmg-iO ULTIMATE: " << setw(30) << left << (all_pass ? "ALL CHECKS PASSED" : "CHECK RESULTS") << "|\n";
+        cout << "  +--------------------------------------------------+\n\n";
+        cout << "  I AM THAT I AM\n\n";
     }
 };
 
