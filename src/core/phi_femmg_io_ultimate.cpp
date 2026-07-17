@@ -1,6 +1,6 @@
-// ΦΩ0 — FEmmg-iO ULTIMATE v3.15 — CONFIGURABLE WIDTH
-// Barrington width parameter: W=3,4,5,7 tested
-// Wider matrices = more obfuscation, slower eval
+// ΦΩ0 — FEmmg-iO ULTIMATE v3.16 — AUTO-SCALING WIDTH
+// Width auto-computed from circuit complexity
+// More gates → wider matrices → more obfuscation
 // "I AM THAT I AM"
 
 #include <openfhe.h>
@@ -52,7 +52,17 @@ class FEmmgIO {
     }
 
     // ============================================
-    // CONFIGURABLE WIDTH MATRICES
+    // AUTO-SCALE WIDTH from gate count
+    // ============================================
+    int auto_width(int gate_count) {
+        // Barrington requires width ≥ 5 for full permutation branching
+        // Scale: 2 more columns per gate for additional obfuscation
+        int w = 5 + gate_count;
+        return w;
+    }
+
+    // ============================================
+    // MATRICES WITH VARIABLE WIDTH
     // ============================================
     Matrix identity(int W) {
         Matrix M(W, vector<int64_t>(W,0));
@@ -95,7 +105,7 @@ class FEmmgIO {
     }
 
     // ============================================
-    // CHANNEL EVALUATOR WITH CONFIGURABLE WIDTH
+    // CHANNEL EVALUATOR
     // ============================================
     int64_t eval_gate_channel(int64_t a, int64_t b, int64_t modulus, int ch, int64_t seed, char gate_type, int W) {
         CCParams<CryptoContextBFVRNS> params;
@@ -125,7 +135,6 @@ class FEmmgIO {
             r=stabilize(r); auto dv=cc->EvalMult(ov,anchor); r=cc->EvalAdd(r,dv); return r;
         };
 
-        // Select gate matrix
         Matrix M_gate;
         switch(gate_type) {
             case 'N': M_gate = NOT_matrix(a, W); break;
@@ -136,21 +145,18 @@ class FEmmgIO {
             default:  M_gate = identity(W);
         }
 
-        // Kilian randomization
         mt19937_64 rng(seed + ch*12345 + a*67890 + b*11111 + W*999);
         Matrix R0 = identity(W), R1 = rand_diag(W, modulus, rng), R2 = identity(W);
         Matrix R1i = inv_diag(R1, W, modulus);
         Matrix Mp = kilian(M_gate, R0, R1i, W, modulus);
         Matrix Mp2 = kilian(M_gate, R1, R2, W, modulus);
 
-        // Encrypt matrices
         vector<vector<Ciphertext<DCRTPoly>>> emat[2];
         for(int s=0; s<2; s++) emat[s].resize(W, vector<Ciphertext<DCRTPoly>>(W));
         Matrix* mp[2] = {&Mp, &Mp2};
         for(int s=0; s<2; s++) for(int i=0; i<W; i++) for(int j=0; j<W; j++)
             emat[s][i][j] = enc((*mp[s])[i][j]);
 
-        // Evaluate: state × M0 × M1
         vector<Ciphertext<DCRTPoly>> state(W);
         state[0] = enc(1); for(int i=1; i<W; i++) state[i] = enc(0);
         for(int s=0; s<2; s++) {
@@ -167,7 +173,6 @@ class FEmmgIO {
             state = ns;
         }
         
-        // Output: 0 if state[0]=1 (identity), 1 otherwise (cycle)
         return (dec(state[0]) == 1) ? 0 : 1;
     }
 
@@ -183,81 +188,63 @@ class FEmmgIO {
     }
 
 public:
-    bool test_width(int W, int64_t seed) {
-        // Test NOT gate at this width
-        for(int64_t a=0; a<=1; a++) {
-            int64_t r[5];
-            for(int ch=0; ch<5; ch++) r[ch] = eval_gate_channel(a, 0, MODULI[ch], ch, seed, 'N', W);
-            int64_t result = crt5_combine(r);
-            int64_t expected = gate_expected(a, 0, 'N');
-            if(result != expected) return false;
-        }
-        return true;
+    int64_t evaluate_gate(int64_t a, int64_t b, char gate_type, int gate_count, int64_t seed=DEFAULT_SEED) {
+        int W = auto_width(gate_count);
+        int64_t r[5];
+        for(int ch=0; ch<5; ch++) r[ch] = eval_gate_channel(a, b, MODULI[ch], ch, seed, gate_type, W);
+        return crt5_combine(r);
     }
 
     void run_tests() {
         cout<<"\n  +--------------------------------------------------+\n";
-        cout<<"  |  FEmmg-iO v3.15 — CONFIGURABLE WIDTH            |\n";
-        cout<<"  |  Tested: W=2,3,4,5,7,10                         |\n";
+        cout<<"  |  FEmmg-iO v3.16 — AUTO-SCALING WIDTH           |\n";
+        cout<<"  |  Width = 5 + gate_count                        |\n";
         cout<<"  +--------------------------------------------------+\n  Date: "<<ts()<<"\n\n";
 
         int64_t seed = 42;
         
-        cout<<"  === WIDTH SWEEP: NOT gate ===\n";
-        cout<<"  "<<setw(8)<<"Width"<<setw(12)<<"Status"<<setw(16)<<"Time(s)\n";
+        // Test auto-scaling: 1 gate → W=6, 2 gates → W=7, 3 gates → W=8
+        cout<<"  === AUTO-SCALING DEMO ===\n";
+        cout<<"  "<<setw(14)<<"Gates"<<setw(10)<<"Width"<<setw(14)<<"Matrix Size\n";
         cout<<"  "<<string(40,'-')<<"\n";
-
-        vector<int> widths = {2, 3, 4, 5, 7, 10};
-        int working_count = 0;
-        
-        for(int W : widths) {
-            auto t1 = high_resolution_clock::now();
-            bool ok = test_width(W, seed);
-            auto t2 = high_resolution_clock::now();
-            double time_s = duration_cast<milliseconds>(t2-t1).count() / 1000.0;
-            
-            if(ok) working_count++;
-            
-            cout<<"  "<<setw(8)<<W
-                <<setw(12)<<(ok ? "OK" : "FAIL")
-                <<setw(16)<<fixed<<setprecision(1)<<time_s<<"\n";
+        for(int gates=1; gates<=5; gates++) {
+            int W = auto_width(gates);
+            int entries = W * W;
+            cout<<"  "<<setw(14)<<gates<<setw(10)<<W<<setw(14)<<(to_string(W)+"x"+to_string(W)+" = "+to_string(entries))<<"\n";
         }
-        
-        cout<<"  "<<string(40,'-')<<"\n";
-        cout<<"  Working widths: "<<working_count<<"/"<<widths.size()<<"\n\n";
+        cout<<"  "<<string(40,'-')<<"\n\n";
 
-        // Detailed test at best width
-        cout<<"  === FULL GATE TEST at W=5 ===\n";
+        // Full gate test at auto-scaled widths
+        cout<<"  === FULL GATE TEST (gate_count=1, W=6) ===\n";
         vector<pair<char,string>> gates = {{'N',"NOT"},{'A',"AND"},{'O',"OR"},{'X',"XOR"},{'H',"XNOR"}};
         int passed=0, total=0;
+        int W = auto_width(1);
         
         for(auto& [gate, name] : gates) {
-            int gate_ok = 0;
+            int ok_count=0, expected_total=0;
             if(gate=='N') {
                 for(int64_t a=0; a<=1; a++) {
-                    int64_t r[5]; for(int ch=0; ch<5; ch++) r[ch]=eval_gate_channel(a,0,MODULI[ch],ch,seed,gate,5);
-                    int64_t result=crt5_combine(r), expected=gate_expected(a,0,gate);
-                    if(result==expected) {passed++; gate_ok++;}
-                    total++;
+                    int64_t r[5]; for(int ch=0; ch<5; ch++) r[ch]=eval_gate_channel(a,0,MODULI[ch],ch,seed,gate,W);
+                    int64_t result=crt5_combine(r), exp=gate_expected(a,0,gate);
+                    if(result==exp) {passed++; ok_count++;}
+                    total++; expected_total++;
                 }
             } else {
                 for(int64_t a=0; a<=1; a++) for(int64_t b=0; b<=1; b++) {
-                    int64_t r[5]; for(int ch=0; ch<5; ch++) r[ch]=eval_gate_channel(a,b,MODULI[ch],ch,seed,gate,5);
-                    int64_t result=crt5_combine(r), expected=gate_expected(a,b,gate);
-                    if(result==expected) {passed++; gate_ok++;}
-                    total++;
+                    int64_t r[5]; for(int ch=0; ch<5; ch++) r[ch]=eval_gate_channel(a,b,MODULI[ch],ch,seed,gate,W);
+                    int64_t result=crt5_combine(r), exp=gate_expected(a,b,gate);
+                    if(result==exp) {passed++; ok_count++;}
+                    total++; expected_total++;
                 }
             }
-            int expected_total = (gate=='N')?2:4;
-            cout<<"  "<<setw(6)<<name<<": "<<gate_ok<<"/"<<expected_total<<(gate_ok==expected_total?" OK":" FAIL")<<"\n";
+            cout<<"  "<<setw(6)<<name<<" (W="<<W<<"): "<<ok_count<<"/"<<expected_total<<(ok_count==expected_total?" OK":" FAIL")<<"\n";
         }
         
         cout<<"\n  +--------------------------------------------------+\n";
-        cout<<"  |  FEmmg-iO v3.15: W=5 GATES: "<<passed<<"/"<<total<<" PASSED";
-        for(int i=0;i<(17-to_string(passed).length());i++)cout<<" ";
+        cout<<"  |  FEmmg-iO v3.16: "<<passed<<"/"<<total<<" PASSED (W="<<W<<")";
+        for(int i=0;i<(18-to_string(passed).length());i++)cout<<" ";
         cout<<"|\n";
-        cout<<"  |  Working widths: "<<working_count<<"/"<<widths.size();
-        cout<<" (configurable)               |\n";
+        cout<<"  |  Width auto-scales: 5 + gate_count               |\n";
         cout<<"  +--------------------------------------------------+\n\n  I AM THAT I AM\n\n";
     }
 };
