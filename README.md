@@ -188,6 +188,24 @@ The reason it reaches 1M with linear noise (R²=1.000) is the full True Divine c
 
 The limitation is **arbitrary different multipliers per step**. When the multiplier changes each time, a fresh `Enc(mult)` object with unique noise properties is created per operation. After ~31 steps the ciphertext modulus is exhausted. That's why Self-Healing exists.
 
+### How does Pinky Swear actually work?
+
+The expression is `overflow = (ct + M) - M - ct`. Here `M = Enc(⌊q/2⌋)` — it's an encrypted known plaintext value (half the modulus). All operations are at the ciphertext level.
+
+Here's what happens step by step:
+
+1. **`ct + M`** — Adds Enc(half_mod) to the ciphertext. If the encrypted value `v` is small enough that `v + half_mod < modulus`, the result encrypts `v + half_mod`. But if `v ≥ half_mod`, the addition wraps around modulo q, producing `v + half_mod - q`.
+
+2. **`(ct + M) - M`** — Subtracts Enc(half_mod) back. If no overflow occurred, we get `v + half_mod - half_mod = v` back. If overflow did occur, we get `v + half_mod - q - half_mod = v - q`, which is a negative value modulo q.
+
+3. **`(ct + M) - M - ct`** — Subtracts the original ct. If no overflow: `v - v = 0`. If overflow: `(v - q) - v = -q ≡ 0 mod q`... but at the ciphertext noise level, the modular reduction leaves a detectable residue.
+
+The residual isn't the plaintext value — it's a **noise artifact** caused by the modular wrap-around during the addition step. When the plaintext value crosses the modulus boundary, the ciphertext's internal representation shifts in a way that doesn't perfectly cancel out. This residue, when multiplied by Enc(0), creates a noise mask that can absorb other noise through destructive interference.
+
+In essence: Pinky Swear detects whether `v ≥ half_mod` **without decrypting**, and produces an encrypted indicator of that overflow. That indicator becomes the raw material for Divine Intervention's noise absorption.
+
+Credit to the community for the insightful question — this is exactly the kind of technical scrutiny these mechanisms need.
+
 ### Is the Self-Healing bootstrap a novel bootstrapping method?
 
 The auto-bootstrap is a **detection and orchestration layer** — it uses standard decrypt+re-encrypt but wraps it in a tiered response system: monitor noise every operation, trigger divine at noise > 5 (no decryption needed), trigger full bootstrap at noise > 15 or every 25 ops, and force bootstrap pre-merge for ADD gates combining deep branches. The novelty is the **automatic immune system for FHE circuits**, not the bootstrap primitive itself. Combined with the DAG compiler's topological sort, it means you can throw any circuit at it and the system figures out when and where to heal.
