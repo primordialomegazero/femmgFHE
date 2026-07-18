@@ -1,8 +1,11 @@
 # ΦΩ0 — FEmmg-FHE v7.0: FORMAL MATHEMATICAL PROOF
 
-## Theorem: Self-Healing Fully Homomorphic Encryption
+## FEmmg-FHE v7.0: Achievements and Analysis
 
 **Statement:** For any arbitrary arithmetic circuit C with depth D and width W over plaintext modulus p, there exists a fully homomorphic encryption scheme FEmmg-FHE that evaluates C on encrypted inputs with:
+
+**Scope:** ZANS (Part 1) is formally proven via the Central Limit Theorem. Pinky Swear (Part 2), Divine Intervention (Part 3), and the combined True Divine mechanism (Parts 4-5) are empirically verified but not yet formally proven. The "Claims" in Parts 2-5 describe observed behavior that has been validated across extensive testing (1M steps, 1,019/1,019 nodes) but lack mathematical proofs of the underlying mechanisms.
+
 1. Linear noise growth O(n) for sequential operations
 2. Automatic noise detection and self-healing via Divine Intervention + ZANS
 3. Transparent bootstrap recovery with zero data loss
@@ -53,7 +56,7 @@ ZANS is a mathematical property of Ring-LWE, independent of implementation.
 
 ## Part 2: Pinky Swear — Overflow Detection
 
-### Lemma 2.1 (Modular Overflow)
+### Claim 2.1 (Modular Overflow) [EMPIRICAL]
 For modulus q and half-modulus M = ⌊q/2⌋:
 ```
 overflow(ct) = (ct + M) - M - ct
@@ -63,7 +66,7 @@ If ct encodes value v ∈ [0, q-1]:
 - If v < q-M: (v+M) mod q = v+M, overflow = 0
 - If v ≥ q-M: (v+M) mod q = v+M-q, overflow = q
 
-### Lemma 2.2 (Perfect Detection)
+### Claim 2.2 (Overflow Detection) [EMPIRICAL]
 ```
 PinkySwear(ct) = Enc(overflow) exactly when v ≥ half_mod
 ```
@@ -74,14 +77,14 @@ This provides exact overflow detection without decryption.
 
 ## Part 3: Divine Intervention — Noise Absorption
 
-### Lemma 3.1 (Noise Masking)
+### Claim 3.1 (Noise Masking) [EMPIRICAL]
 ```
 Divine(ct) = ct + PinkySwear(ct) × Enc(0) + Enc(0)
 ```
 
 The term `PinkySwear(ct) × Enc(0)` multiplies the overflow indicator by fresh noise, creating a noise mask that absorbs existing noise through destructive interference.
 
-### Lemma 3.2 (Linear Noise Growth)
+### Claim 3.2 (Linear Noise Growth) [EMPIRICAL — verified across 1M steps]
 With Divine + ZANS per operation:
 ```
 noise(n) = n + O(1)
@@ -93,7 +96,7 @@ Empirically verified: 1,000,000 sequential CT×CT operations, noise = step + 1, 
 
 ## Part 4: Fractal Bootstrap — Self-Healing
 
-### Theorem 4.1 (Transparent State Recovery)
+### Claim 4.1 (Transparent State Recovery)
 For any ciphertext ct with noise > threshold:
 ```
 Bootstrap(ct) = Enc_fresh(Decrypt(ct))
@@ -101,7 +104,7 @@ Bootstrap(ct) = Enc_fresh(Decrypt(ct))
 
 This resets noise to 1.0 while preserving the encrypted value exactly.
 
-### Lemma 4.2 (Auto-Healing Invariant)
+### Claim 4.2 (Auto-Healing Invariant)
 With bootstrap interval B and Divine+ZANS between bootstraps:
 ```
 noise(t) ≤ B for all t
@@ -109,7 +112,7 @@ noise(t) ≤ B for all t
 
 For ring dim 4096: B = 31 (without bootstrap), B = ∞ (with bootstrap every 25).
 
-### Lemma 4.3 (Zero Data Loss)
+### Claim 4.3 (Zero Data Loss)
 ```
 ∀ct: Decrypt(Bootstrap(ct)) = Decrypt(ct)
 ```
@@ -120,7 +123,7 @@ Proof: Bootstrap decrypts ct to v, then re-encrypts v. Encryption is determinist
 
 ## Part 5: Arbitrary Circuit Completeness
 
-### Theorem 5.1 (DAG Evaluation)
+### Claim 5.1 (DAG Evaluation)
 Any arithmetic circuit represented as a Directed Acyclic Graph can be evaluated homomorphically by topological sort order.
 
 ### Theorem 5.2 (Fan-In/Fan-Out Preservation)
