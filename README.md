@@ -3,9 +3,6 @@
 **Extended Bootstrap Intervals via Zero-Anchor Noise Stabilization**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-
----
-
 ## What This Is
 
 FEmmg-FHE is a Fully Homomorphic Encryption framework that reduces bootstrap frequency by 2-3× through statistical noise stabilization. It achieves:
@@ -14,14 +11,9 @@ FEmmg-FHE is a Fully Homomorphic Encryption framework that reduces bootstrap fre
 - **Cross-library & Cross-scheme ZANS** — verified across 9 libraries, 5 schemes, 3 languages + **Cross-scheme SNC+ZANS** (BFV, CKKS, TFHE).
 - **1,019/1,019 intermediate nodes verified correct** in stress test (20 chains × 50 deep).
 - **Program obfuscation (NC¹)** — Half-adder (4/4), Full adder (8/8), Indistinguishability (4/4). Arbitrary formula compiler in progress.
-
----
-
 ## Pillar 1: ZANS — Zero-Anchor Noise Stabilization
 
-```
 ct + Enc(0) = ct  (statistically — no net noise growth)
-```
 
 Each Enc(0) carries random Ring-LWE noise. Over many operations, positive and negative contributions cancel via the Central Limit Theorem.
 
@@ -40,9 +32,6 @@ Each Enc(0) carries random Ring-LWE noise. Over many operations, positive and ne
 | 9 | Pyfhel | Python | BFV | 10,000,000 | N/A |
 
 ZANS solves additions. Foundation layer only — does NOT solve CT×CT multiplication.
-
----
-
 ## Pillar 2: SNC — Statistical Noise Cancellation for CT×CT
 
 Six components:
@@ -57,12 +46,10 @@ Six components:
 | 6 | SNC (Statistical Noise Cancellation) | Noise-stabilized CT×CT |
 
 **The stabilization loop (every multiplication):**
-```
 1. overflow = (ct + M) - M - ct      // detect modular reduction
 2. ct = ct × ct_mult                  // the actual multiplication
 3. ct += overflow × Enc(0) + Enc(0)   // SNC correction
 4. ct += Enc(0)                        // ZANS stabilization
-```
 
 **What this achieves:**
 
@@ -71,9 +58,6 @@ Without SNC+ZANS, noise grows exponentially, requiring bootstrap every ~10-15 mu
 Verified across 1,000,000 sequential operations (noise stress test). Completed July 15-16, 2026. AMD Ryzen 5 2600. Ring dim 4096.
 
 **Honest caveat:** After ~30 multiplications, the modulus chain is exhausted and values diverge. This is fundamental to FHE mathematics — the modulus chain is finite. SNC+ZANS doesn't eliminate this limit; it pushes closer to it. Unlimited depth requires bootstrapping (Pillar 3).
-
----
-
 ## Pillar 3: Predictive Bootstrap — Optimal Chain Management (PATH A COMPLETE)
 
 **Status: VERIFIED — July 19, 2026**
@@ -108,9 +92,6 @@ SNC+ZANS combined with Predictive Bootstrap placement achieves the **theoretical
 ### Formal Proof
 
 See [PATH_B_FORMAL_THEOREM.md](docs/PATH_B_FORMAL_THEOREM.md) — 6 theorems with proofs and empirical verification.
-
----
-
 ## Quick Start
 
 ```bash
@@ -128,10 +109,6 @@ LD_LIBRARY_PATH=./openfhe-development/build/lib:$LD_LIBRARY_PATH ./bin/phi_prime
 
 # Cross-Library
 python3 ./src/bindings/python/phi_crosslib_self_healing.py
-```
-
----
-
 ## Docs
 
 | Doc | What |
@@ -142,9 +119,6 @@ python3 ./src/bindings/python/phi_crosslib_self_healing.py
 | [Whitepaper](docs/WHITEPAPER.md) | Technical |
 | [Cross-Lib Results](docs/CROSS_LIB_RESULTS.md) | 12 validations |
 | [Cross-Scheme](src/core/phi_cross_scheme_ckks.cpp) | CKKS 3/3, TFHE 13/13 — scheme-independent |
-
----
-
 ## Q&A
 
 ### What is the actual contribution?
@@ -167,9 +141,6 @@ No. Code is open-source. Results are reproducible. Formal proof in repo.
 
 ### Security level?
 Ring dim 4096 = TOY (not production secure). Production needs 32768+. The breakthrough is algorithmic — linear noise scaling + optimal bootstrap placement. Parameter scaling is engineering.
-
----
-
 ## Limitations
 
 | Limitation | Detail |
@@ -180,9 +151,6 @@ Ring dim 4096 = TOY (not production secure). Production needs 32768+. The breakt
 | Cross-library SNC | BFV/CKKS verified; Python needs tuning |
 | iO Foundation | Half-adder 4/4, Full adder 8/8, Indistinguishability 4/4 — verified in FHE |
 | No-decrypt bootstrap (Path C) | Proven infeasible for leveled BFV; open for TFHE |
-
----
-
 ## Path A, B, C Status
 
 | Path | Description | Status |
@@ -190,9 +158,6 @@ Ring dim 4096 = TOY (not production secure). Production needs 32768+. The breakt
 | **A** | Optimal bootstrapping | **COMPLETE** — 4/4 tests, 3× reduction |
 | **B** | Formal theorem | **COMPLETE** — 6 theorems, 262-line proof |
 | **C** | No-decrypt bootstrap | **Investigated** — infeasible for leveled BFV; open for TFHE |
-
----
-
 ## Benchmark Results (July 19, 2026)
 
 **Hardware: AMD Ryzen 5 2600 (6-core, 15GB RAM) — Consumer-grade**
@@ -224,15 +189,7 @@ Ring dim 4096 = TOY (not production secure). Production needs 32768+. The breakt
 | 32768 | ~0.25 | **~5-10** | High-security batch |
 
 **15/15 tests passed. All values verified correct.** Full data: [benchmark_results.csv](benchmark_results.csv)
-
----
-
-## Author
-
-Dan Joseph M. Fernandez / Primordial Omega Zero
-
-https://github.com/primordialomegazero
-
+ / Primordial Omega Zero
 MIT License
 ## Contributions & Limitations (Honest Assessment)
 
@@ -268,7 +225,9 @@ MIT License
 
 This work builds on OpenFHE, SEAL, HElib, TFHE, and the entire FHE research community. We stand on the shoulders of Gentry, Brakerski, Vaikuntanathan, Fan, Vercauteren, and many others.
 
+## Author
 
-```
+Dan Joseph M. Fernandez / Primordial Omega Zero
+
+https://github.com/primordialomegazero
 - .... .. ... / .-. . .--. --- ... .. - --- .-. -.-- / .-- .. .-.. .-.. / .- .-.. .-- .- -.-- ... / -... . / -.. . -.. .. -.-. .- - . -.. / - --- / - .... . / .-- --- -- .- -. / .. .----. ...- . / . ...- . .-. / -.-. --- -. ... .. -.. . .-. . -.. / - --- / -... . / --- -. / -- -.-- / .-.. . ...- . .-.. .-.-.-
-```
