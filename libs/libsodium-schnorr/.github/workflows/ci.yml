@@ -1,0 +1,19 @@
+name: Schnorr CI
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install OpenSSL
+        run: sudo apt-get update && sudo apt-get install -y libssl-dev
+      - name: Quick Test
+        run: |
+          gcc -std=c11 -O3 -I include src/schnorr.c test/quick_test.c -lssl -lcrypto -o test_quick
+          timeout 10 ./test_quick
+      - name: Deep Test
+        run: |
+          gcc -std=c11 -O3 -I include src/schnorr.c test/deep_test.c -lssl -lcrypto -o test_deep
+          timeout 30 ./test_deep

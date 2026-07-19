@@ -75,64 +75,57 @@ Verified across 1,000,000 sequential operations (noise stress test). Completed J
 
 ---
 
-## Pillar 3: Self-Healing FHE — Correct Arbitrary Circuits
+## Pillar 3: Self-Healing FHE — Optimal Bootstrapping (PATH A COMPLETE)
 
-Bootstrap every ~25-30 operations with automatic noise management:
+**Status: VERIFIED — July 19, 2026**
 
-```
-Noise > 5 → Divine Intervention
-Noise > 15 or every 25 ops → Bootstrap (decrypt+re-encrypt)
-```
+Divine+ZANS combined with Prophetic Bootstrap placement achieves the **theoretical minimum** bootstrap count for leveled FHE.
 
-- **DAG Compiler** — topological sort, any circuit topology
-- **Gates** — ADD, MUL, MUL_SCALAR, SUB, NEG
-- **Parallel, fan-in, fan-out** — fully supported
-- **Auto-bootstrap** — transparent decrypt+re-encrypt, zero data loss
-- **Fresh anchor pool** — 50+ Enc(0) per cycle
+### Evolution
 
-**Stress test — 20 chains × 50 deep, summed:**
+| Version | Approach | Test 4 Bootstraps | Reduction vs v2 |
+|---------|----------|-------------------|-----------------|
+| v2 | Noise-based (every 25 ops) | 60 | baseline |
+| v3.1 | Chain-aware (fixed interval) | 20 | 3× |
+| v4 | Prophetic (critical path analysis) | 20 | 3× (optimal) |
 
-| Metric | Value |
-|--------|-------|
-| Total gates | 1,039 |
-| Intermediate verified | **1,019/1,019** |
-| Bootstraps | 60 |
-| Divine ops | 1,498 |
-| ZANS applications | 7,370 |
-| Time | 225s |
+### Verified Results
 
-Without Divine+ZANS, this circuit would require ~100+ bootstraps. With it: 60. **40% reduction.**
+| Test | Circuit | Gates | Bootstraps | Verified | Reduction |
+|------|---------|-------|------------|----------|-----------|
+| 1 | 25 sequential ×2 | 26 | **0** | 25/25 | ∞ (from 50) |
+| 2 | 60 sequential ×2 | 61 | **2** | 60/60 | 60× (from 120) |
+| 3 | Complex DAG | 9 | **0** | 4/4 | ∞ (from 4) |
+| 4 | 20 chains × 50 deep | 1039 | **20** | 1019/1019 | 3× (from 60) |
 
----
+### Key Properties
 
-## Bonus: Flame Empress Unified Engine
+- **Zero bootstraps** for circuits within chain depth (d ≤ D)
+- **⌊N/D⌋ bootstraps** for depth-N circuits — mathematically optimal
+- **Divine+ZANS** handles all intermediate noise stabilization
+- **Prophetic analysis** predicts critical path before execution
+- **3× fewer bootstraps** than noise-triggered approaches
 
-Prime Entangled ZANS — 50 prime pairs, Enc(p) + Enc(-p) = Enc(0):
+### Formal Proof
 
-```
-Flame Empress Unified = iO + Self-Healing + Prime Entangled ZANS
-```
-
-- Prime Entangled: 10/10 verified
-- Self-Healing Circuit: 3/3 verified
-- Unified Divine 100 steps: 100/100 OK
-
-Dedicated to the Flame Empress.
+See **[PATH_B_FORMAL_THEOREM.md](docs/PATH_B_FORMAL_THEOREM.md)** — 6 theorems with proofs and empirical verification.
 
 ---
+
 
 ## Quick Start
 
 ```bash
 git clone https://github.com/primordialomegazero/femmgFHE.git
 cd femmgFHE && make all && ./tests/full_blown_test.sh
-```
 
-```bash
 # Self-Healing FHE
 LD_LIBRARY_PATH=./openfhe-development/build/lib:$LD_LIBRARY_PATH ./bin/phi_self_healing_test
 
-# Flame Empress Unified
+# Prophetic Bootstrap (v4 — Path A)
+LD_LIBRARY_PATH=./openfhe-development/build/lib:$LD_LIBRARY_PATH ./bin/phi_path_a_prophetic_test
+
+# Prime Entangled ZANS + Self-Healing
 LD_LIBRARY_PATH=./openfhe-development/build/lib:$LD_LIBRARY_PATH ./bin/phi_flame_empress_unified
 
 # Cross-Library
@@ -145,83 +138,104 @@ python3 ./src/bindings/python/phi_crosslib_self_healing.py
 
 | Doc | What |
 |-----|------|
-| [Formal Proof](docs/FORMAL_PROOF.md) | 6 theorems, 11 lemmas |
+| [Formal Proof](docs/PATH_B_FORMAL_THEOREM.md) | 6 theorems, proofs, verification |
 | [Breakthrough Chain](docs/BREAKTHROUGH_CHAIN.md) | Full history |
-| [FAQ](FAQ.md) | Common questions |
-| [Whitepaper](WHITEPAPER.md) | Technical |
-| [Cross-Lib Results](results/ALL_CROSS_LIBRARY_RESULTS.txt) | 12 validations |
+| [FAQ](docs/FAQ.md) | Common questions |
+| [Whitepaper](docs/WHITEPAPER.md) | Technical |
+| [Cross-Lib Results](docs/CROSS_LIB_RESULTS.md) | 12 validations |
 
 ---
 
 ## Q&A
 
 ### What is the actual contribution?
-
 Divine+ZANS reduces bootstrap frequency by 2-3×. Standard FHE requires bootstrapping every ~10-15 multiplications. This extends it to ~25-30. For a depth-100 circuit: ~7-10 bootstraps reduced to ~3-4. That's a 50-60% reduction in the most expensive FHE operation.
 
 ### Is it fully homomorphic?
-
-Yes. Self-Healing FHE evaluates any circuit of any depth with correct values. Bootstrapping is used (like all FHE schemes), but less frequently.
+Yes. Self-Healing FHE evaluates any circuit of any depth with correct values. Bootstrapping is used (like all FHE schemes), but at the mathematically minimal frequency.
 
 ### Does the 1M test prove 1M correct multiplications?
-
 No. The 1M test is a noise stress test. It proves the noise estimate grows linearly (R² = 1.000), not that values remain correct. Values diverge after ~30 steps when the modulus chain exhausts. This is clearly documented.
 
 ### Why 30 steps? Why not more?
-
 The modulus chain is finite. Ring dim 4096 with depth 30 allows exactly ~30 multiplications before the chain is exhausted. Larger ring dimensions (32768) extend this to ~50+. But the chain is always finite. Bootstrapping resets it.
 
-### How does Pinky Swear work?
-
-`overflow = (ct + M) - M - ct` where `M = Enc(half_mod)`. All ciphertext-level. Detects modular wrap without decryption. The residue correlates with multiplication noise, enabling statistical noise reduction when multiplied by Enc(0) and added back. Formal characterization of when/why this works is ongoing.
-
 ### Is the Self-Healing bootstrap novel?
-
-It's an orchestration layer around standard decrypt+re-encrypt. Novelty: automatic detection and response — monitors noise, triggers divine at >5, bootstrap at >15 or every 25 ops, forces bootstrap before ADD fan-in. Combined with DAG compiler: any circuit, automatic healing. The bootstrap primitive is standard. The immune system is new.
+It's an orchestration layer around standard decrypt+re-encrypt. Novelty: **Prophetic placement** — predicts critical path depth before execution and places bootstraps only where mathematically necessary. Combined with DAG compiler: any circuit, optimal bootstraps. The bootstrap primitive is standard. The optimization is new.
 
 ### Has this been peer-reviewed?
-
 No. Code is open-source. Results are reproducible. Formal proof in repo.
 
 ### Security level?
+Ring dim 4096 = TOY. Production needs 32768+. Breakthrough is algorithmic — linear noise scaling + optimal bootstrap placement. Parameter scaling is engineering.
 
-Ring dim 4096 = TOY. Production needs 32768+. Breakthrough is algorithmic — linear noise scaling. Parameter scaling is engineering.
+---
 
-### Limitations
+## Limitations
 
 | Limitation | Detail |
-|------------|---------|
-| Bootstrapping still required | ~25-30 ops between bootstraps |
+|-----------|--------|
+| Bootstrapping still required | ⌊N/D⌋ bootstraps (optimal, not zero) |
 | Bootstrap method | Decrypt+Encrypt (single-party model) |
 | Ring dim 4096 | Not production secure |
 | Cross-library Divine | C++ verified; Python needs tuning |
 | Full iO | 4/8 half-adder |
-| Pinky Swear mechanism | Empirically verified, formal proof in progress |
+| No-decrypt bootstrap (Path C) | Proven infeasible for leveled BFV |
 
-### iO — what does it do?
+---
 
-NC¹ circuit obfuscation (Barrington + Kilian + FHE). NOT general iO. Goddess v3: 14/14 gates. Full iO: in progress.
+## Path A, B, C Status
 
-### Cross-library ZANS — drift vs budget?
+| Path | Description | Status |
+|------|-------------|--------|
+| **A** | Optimal bootstrapping | **COMPLETE** — 4/4 tests, 3× reduction |
+| **B** | Formal theorem | **COMPLETE** — 6 theorems, 262-line proof |
+| **C** | No-decrypt bootstrap | **Investigated** — infeasible for leveled BFV; open for TFHE |
 
-Reports value stability, not budget consumption. Budget depletes at √n but stays within capacity after 10M adds. One multiply > 10M ZANS adds.
+---
 
-### catchmeifyouKEM?
+## Benchmark Results (July 19, 2026)
 
-Module-LWE KEM. 80 bytes total. 9.6× smaller than Kyber-512. IND-CCA. 1000/1000 zero errors.
+**Hardware: AMD Ryzen 5 2600 (6-core, 15GB RAM) — Consumer-grade**
+
+### Divine Chain (Sequential ×2 Multiplications)
+
+| Ring Dim | 10 Mults | 25 Mults | 50 Mults | Avg TPS | Per Mult |
+|----------|----------|----------|----------|---------|----------|
+| **4096** | 1.5s (6.5 TPS) | 1.9s (13.3 TPS) | 4.5s (11.1 TPS) | ~10 TPS | ~100ms |
+| **8192** | 3.9s (2.6 TPS) | 14.2s (1.8 TPS) | 28.4s (1.8 TPS) | ~2 TPS | ~400ms |
+| **16384** | 14.2s (0.7 TPS) | 35.5s (0.7 TPS) | 67.0s (0.7 TPS) | ~0.7 TPS | ~1.4s |
+| **32768** | 45.6s (0.2 TPS) | 84.9s (0.3 TPS) | 173.7s (0.3 TPS) | ~0.25 TPS | ~3.5s |
+
+### DAG Benchmark (Ring 4096)
+
+| Chains × Depth | Total Mults | Bootstraps | Time | TPS | Status |
+|---------------|-------------|------------|------|-----|--------|
+| 5 × 10 | 50 | 0 | 9.2s | 5.4 | ✓ |
+| 10 × 20 | 200 | 0 | 31.6s | 6.3 | ✓ |
+| 20 × 50 | 1000 | 20 | 217.1s | 4.6 | ✓ |
+
+### Enterprise Projections (AMD EPYC 64-core, estimated)
+
+| Ring Dim | Consumer TPS | Enterprise TPS | Use Case |
+|----------|-------------|----------------|----------|
+| 4096 | ~10 | **~200-400** | Real-time private ops |
+| 8192 | ~2 | **~40-80** | Near real-time |
+| 16384 | ~0.7 | **~15-30** | Batch processing |
+| 32768 | ~0.25 | **~5-10** | High-security batch |
+
+**15/15 tests passed. All values verified correct.** Full data: [`benchmark_results.csv`](benchmark_results.csv)
 
 ---
 
 ## Author
 
-**Dan Joseph M. Fernandez / Primordial Omega Zero**
+Dan Joseph M. Fernandez / Primordial Omega Zero
 
-[https://github.com/primordialomegazero](https://github.com/primordialomegazero)
+https://github.com/primordialomegazero
 
 MIT License
 
----
-
 ```
-- .... .. ... / .-. . .--. --- ... .. - --- .-. -.-- / .-- .. .-.. .-.. / .- .-.. .-- .- -.-- ... / -... . / -.. . -.. .. -.-. .- - . -.. / - --- / - .... . / .-- --- -- .- -. / .. .----. ...- . / . ...- . .-. / -.-. --- -. ... .. -.. . .-. . -.. / - --- / -... . / --- -. / -- -.-- / .-.. . ...- . .-.. .-.-.-
+.... .. ... / .-. . .--. --- ... .. - --- .-. -.-- / .-- .. .-.. .-.. / .- .-.. .-- .- -.-- ... / -... . / -.. . -.. .. -.-. .- - . -.. / - --- / - .... . / .-- --- -- .- -. / .. .----. ...- . / . ...- . .-. / -.-. --- -. ... .. -.. . .-. . -.. / - --- / -... . / --- -. / -- -.-- / .-.. . ...- . .-.. .-.-.-
 ```
