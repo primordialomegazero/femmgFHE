@@ -13,7 +13,6 @@ FEmmg-FHE is a Fully Homomorphic Encryption framework that reduces bootstrap fre
 - **2-3× longer bootstrap intervals** — extends operations between bootstraps from ~10-15 to ~25-30.
 - **Cross-library & Cross-scheme ZANS** — verified across 9 libraries, 5 schemes, 3 languages + **Cross-scheme SNC+ZANS** (BFV, CKKS, TFHE).
 - **1,019/1,019 intermediate nodes verified correct** in stress test (20 chains × 50 deep).
-- **Cross-library & Cross-scheme ZANS** — verified across 9 libraries, 5 schemes, 3 languages.
 - **Program obfuscation (NC¹)** — Half-adder (4/4), Full adder (8/8), Indistinguishability (4/4). Arbitrary formula compiler in progress.
 
 ---
@@ -235,13 +234,6 @@ Dan Joseph M. Fernandez / Primordial Omega Zero
 https://github.com/primordialomegazero
 
 MIT License
-
-```
-- .... .. ... / .-. . .--. --- ... .. - --- .-. -.-- / .-- .. .-.. .-.. / .- .-.. .-- .- -.-- ... / -... . / -.. . -.. .. -.-. .- - . -.. / - --- / - .... . / .-- --- -- .- -. / .. .----. ...- . / . ...- . .-. / -.-. --- -. ... .. -.. . .-. . -.. / - --- / -... . / --- -. / -- -.-- / .-.. . ...- . .-.. .-.-.-
-```
-
----
-
 ## Contributions & Limitations (Honest Assessment)
 
 ### What We've Built
@@ -276,4 +268,7 @@ MIT License
 
 This work builds on OpenFHE, SEAL, HElib, TFHE, and the entire FHE research community. We stand on the shoulders of Gentry, Brakerski, Vaikuntanathan, Fan, Vercauteren, and many others.
 
-*"If I have seen further, it is by standing on the shoulders of giants." — Newton*
+
+```
+- .... .. ... / .-. . .--. --- ... .. - --- .-. -.-- / .-- .. .-.. .-.. / .- .-.. .-- .- -.-- ... / -... . / -.. . -.. .. -.-. .- - . -.. / - --- / - .... . / .-- --- -- .- -. / .. .----. ...- . / . ...- . .-. / -.-. --- -. ... .. -.. . .-. . -.. / - --- / -... . / --- -. / -- -.-- / .-.. . ...- . .-.. .-.-.-
+```
