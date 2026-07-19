@@ -1,6 +1,6 @@
-# FEmmg-FHE v7.0 — Noise-Stabilized Fully Homomorphic Encryption
+# FEmmg-FHE v7.0 — Statistical Noise Cancellation for FHE
 
-**Extended Bootstrap Intervals via Statistical Noise Stabilization**
+**Extended Bootstrap Intervals via Zero-Anchor Noise Stabilization**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
@@ -10,8 +10,8 @@
 
 FEmmg-FHE is a Fully Homomorphic Encryption framework that reduces bootstrap frequency by 2-3× through statistical noise stabilization. It achieves:
 
-- **2-3× longer bootstrap intervals** — SNC+ZANS (Statistical Noise Cancellation) extends operations between bootstraps from ~10-15 to ~25-30.
-- **Arbitrary circuit evaluation** — any DAG topology, any depth, any operation mix, with automatic self-healing.
+- **2-3× longer bootstrap intervals** — extends operations between bootstraps from ~10-15 to ~25-30.
+- **Arbitrary circuit evaluation** — any DAG topology, any depth, any operation mix, with automatic correctness management.
 - **1,019/1,019 intermediate nodes verified correct** in stress test (20 chains × 50 deep).
 - **Cross-library ZANS** — verified across 9 libraries, 5 schemes, 3 languages.
 - **Program obfuscation (NC¹)** — Barrington + Kilian + FHE. In progress.
@@ -40,11 +40,11 @@ Each Enc(0) carries random Ring-LWE noise. Over many operations, positive and ne
 | 8 | TenSEAL | Python | BFV | 10,000,000 | N/A |
 | 9 | Pyfhel | Python | BFV | 10,000,000 | N/A |
 
-ZANS solves additions. Does NOT solve CT×CT multiplication. Foundation only.
+ZANS solves additions. Foundation layer only — does NOT solve CT×CT multiplication.
 
 ---
 
-## Pillar 2: True SNC CT×CT — Extended Bootstrap Intervals
+## Pillar 2: SNC — Statistical Noise Cancellation for CT×CT
 
 Six components:
 
@@ -54,38 +54,38 @@ Six components:
 | 2 | Repeated Addition | CT × small scalar |
 | 3 | Fibonacci-ZANS | CT × large scalar |
 | 4 | UK×UK Hybrid | CT × CT (one value known) |
-| 5 | Overflow Detection | Overflow detection without decryption |
-| 6 | True SNC | Noise-stabilized CT×CT |
+| 5 | Overflow Detection | Modular wrap detection without decryption |
+| 6 | SNC (Statistical Noise Cancellation) | Noise-stabilized CT×CT |
 
-**The loop (every step):**
+**The stabilization loop (every multiplication):**
 ```
-1. overflow = (ct + M) - M - ct
-2. ct = ct × ct_mult
-3. ct += overflow × Enc(0) + Enc(0)
-4. ct += Enc(0)
+1. overflow = (ct + M) - M - ct      // detect modular reduction
+2. ct = ct × ct_mult                  // the actual multiplication
+3. ct += overflow × Enc(0) + Enc(0)   // SNC correction
+4. ct += Enc(0)                        // ZANS stabilization
 ```
 
 **What this achieves:**
 
-Without SNC+ZANS (Statistical Noise Cancellation), noise grows exponentially, requiring bootstrap every ~10-15 multiplications. With SNC+ZANS (Statistical Noise Cancellation), noise grows linearly (R² = 1.000), extending the bootstrap interval to ~25-30 multiplications — a **2-3× reduction in bootstrap frequency.**
+Without SNC+ZANS, noise grows exponentially, requiring bootstrap every ~10-15 multiplications. With SNC+ZANS, noise grows linearly (R² = 1.000), extending the bootstrap interval to ~25-30 multiplications — a **2-3× reduction in bootstrap frequency.**
 
 Verified across 1,000,000 sequential operations (noise stress test). Completed July 15-16, 2026. AMD Ryzen 5 2600. Ring dim 4096.
 
-**Honest caveat:** After ~30 multiplications, the modulus chain is exhausted and values diverge. This is fundamental to FHE mathematics — the modulus chain is finite. SNC+ZANS (Statistical Noise Cancellation) doesn't eliminate this limit; it pushes closer to it. Unlimited depth requires bootstrapping (Pillar 3).
+**Honest caveat:** After ~30 multiplications, the modulus chain is exhausted and values diverge. This is fundamental to FHE mathematics — the modulus chain is finite. SNC+ZANS doesn't eliminate this limit; it pushes closer to it. Unlimited depth requires bootstrapping (Pillar 3).
 
 ---
 
-## Pillar 3: Self-Healing FHE — Optimal Bootstrapping (PATH A COMPLETE)
+## Pillar 3: Predictive Bootstrap — Optimal Chain Management (PATH A COMPLETE)
 
 **Status: VERIFIED — July 19, 2026**
 
-SNC+ZANS (Statistical Noise Cancellation) combined with Predictive Bootstrap placement achieves the **theoretical minimum** bootstrap count for leveled FHE.
+SNC+ZANS combined with Predictive Bootstrap placement achieves the **theoretical minimum** bootstrap count for leveled FHE.
 
 ### Evolution
 
 | Version | Approach | Test 4 Bootstraps | Reduction vs v2 |
 |---------|----------|-------------------|-----------------|
-| v2 | Noise-based (every 25 ops) | 60 | baseline |
+| v2 | Noise-triggered | 60 | baseline |
 | v3.1 | Chain-aware (fixed interval) | 20 | 3× |
 | v4 | Predictive (critical path analysis) | 20 | 3× (optimal) |
 
@@ -102,16 +102,15 @@ SNC+ZANS (Statistical Noise Cancellation) combined with Predictive Bootstrap pla
 
 - **Zero bootstraps** for circuits within chain depth (d ≤ D)
 - **⌊N/D⌋ bootstraps** for depth-N circuits — mathematically optimal
-- **SNC+ZANS (Statistical Noise Cancellation)** handles all intermediate noise stabilization
-- **Predictive analysis** predicts critical path before execution
+- SNC+ZANS handles all intermediate noise stabilization
+- Predictive analysis determines critical path before execution
 - **3× fewer bootstraps** than noise-triggered approaches
 
 ### Formal Proof
 
-See **[PATH_B_FORMAL_THEOREM.md](docs/PATH_B_FORMAL_THEOREM.md)** — 6 theorems with proofs and empirical verification.
+See [PATH_B_FORMAL_THEOREM.md](docs/PATH_B_FORMAL_THEOREM.md) — 6 theorems with proofs and empirical verification.
 
 ---
-
 
 ## Quick Start
 
@@ -125,7 +124,7 @@ LD_LIBRARY_PATH=./openfhe-development/build/lib:$LD_LIBRARY_PATH ./bin/phi_self_
 # Predictive Bootstrap (v4 — Path A)
 LD_LIBRARY_PATH=./openfhe-development/build/lib:$LD_LIBRARY_PATH ./bin/phi_path_a_predictive_test
 
-# Prime Entangled ZANS + Self-Healing
+# Prime Entangled ZANS
 LD_LIBRARY_PATH=./openfhe-development/build/lib:$LD_LIBRARY_PATH ./bin/phi_prime_entangled_zans
 
 # Cross-Library
@@ -149,25 +148,25 @@ python3 ./src/bindings/python/phi_crosslib_self_healing.py
 ## Q&A
 
 ### What is the actual contribution?
-SNC+ZANS (Statistical Noise Cancellation) reduces bootstrap frequency by 2-3×. Standard FHE requires bootstrapping every ~10-15 multiplications. This extends it to ~25-30. For a depth-100 circuit: ~7-10 bootstraps reduced to ~3-4. That's a 50-60% reduction in the most expensive FHE operation.
+SNC+ZANS reduces bootstrap frequency by 2-3×. Standard FHE bootstraps every ~10-15 multiplications. This extends to ~25-30. For a depth-100 circuit: ~7-10 bootstraps reduced to ~3-4 — a 50-60% reduction in the most expensive FHE operation.
 
 ### Is it fully homomorphic?
-Yes. Self-Healing FHE evaluates any circuit of any depth with correct values. Bootstrapping is used (like all FHE schemes), but at the mathematically minimal frequency.
+Yes. The system evaluates any circuit of any depth with correct values. Bootstrapping is used (like all FHE schemes), but at the mathematically minimal frequency.
 
 ### Does the 1M test prove 1M correct multiplications?
-No. The 1M test is a noise stress test. It proves the noise estimate grows linearly (R² = 1.000), not that values remain correct. Values diverge after ~30 steps when the modulus chain exhausts. This is clearly documented.
+No. The 1M test is a noise stress test. It proves noise grows linearly (R² = 1.000), not that values remain correct. Values diverge after ~30 steps when the modulus chain exhausts. This is clearly documented.
 
 ### Why 30 steps? Why not more?
-The modulus chain is finite. Ring dim 4096 with depth 30 allows exactly ~30 multiplications before the chain is exhausted. Larger ring dimensions (32768) extend this to ~50+. But the chain is always finite. Bootstrapping resets it.
+The modulus chain is finite. Ring dim 4096 with depth 30 allows ~30 multiplications before exhaustion. Larger ring dimensions (32768) extend to ~50+. The chain is always finite — bootstrapping resets it.
 
-### Is the Self-Healing bootstrap novel?
-It's an orchestration layer around standard decrypt+re-encrypt. Novelty: **Predictive placement** — predicts critical path depth before execution and places bootstraps only where mathematically necessary. Combined with DAG compiler: any circuit, optimal bootstraps. The bootstrap primitive is standard. The optimization is new.
+### Is the Predictive Bootstrap novel?
+It's an orchestration layer around standard decrypt+re-encrypt. **Novelty:** Predictive placement — analyzes critical path before execution, places bootstraps only where mathematically necessary. The bootstrap primitive is standard; the optimization is new.
 
 ### Has this been peer-reviewed?
 No. Code is open-source. Results are reproducible. Formal proof in repo.
 
 ### Security level?
-Ring dim 4096 = TOY. Production needs 32768+. Breakthrough is algorithmic — linear noise scaling + optimal bootstrap placement. Parameter scaling is engineering.
+Ring dim 4096 = TOY (not production secure). Production needs 32768+. The breakthrough is algorithmic — linear noise scaling + optimal bootstrap placement. Parameter scaling is engineering.
 
 ---
 
@@ -180,7 +179,7 @@ Ring dim 4096 = TOY. Production needs 32768+. Breakthrough is algorithmic — li
 | Ring dim 4096 | Not production secure |
 | Cross-library SNC | C++ verified; Python needs tuning |
 | Full iO | 4/8 half-adder |
-| No-decrypt bootstrap (Path C) | Proven infeasible for leveled BFV |
+| No-decrypt bootstrap (Path C) | Proven infeasible for leveled BFV; open for TFHE |
 
 ---
 
@@ -198,7 +197,7 @@ Ring dim 4096 = TOY. Production needs 32768+. Breakthrough is algorithmic — li
 
 **Hardware: AMD Ryzen 5 2600 (6-core, 15GB RAM) — Consumer-grade**
 
-### SNC Chain (Sequential ×2 Multiplications)
+### Sequential ×2 Multiplications
 
 | Ring Dim | 10 Mults | 25 Mults | 50 Mults | Avg TPS | Per Mult |
 |----------|----------|----------|----------|---------|----------|
@@ -224,7 +223,7 @@ Ring dim 4096 = TOY. Production needs 32768+. Breakthrough is algorithmic — li
 | 16384 | ~0.7 | **~15-30** | Batch processing |
 | 32768 | ~0.25 | **~5-10** | High-security batch |
 
-**15/15 tests passed. All values verified correct.** Full data: [`benchmark_results.csv`](benchmark_results.csv)
+**15/15 tests passed. All values verified correct.** Full data: [benchmark_results.csv](benchmark_results.csv)
 
 ---
 
