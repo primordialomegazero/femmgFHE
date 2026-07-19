@@ -33,7 +33,7 @@ int main() {
     int total_steps = 1000000;
     int checkpoint_interval = 100000;
 
-    ofstream log("true_divine_1M_results.txt");
+    ofstream log("snc_1M_results.txt");
 
     auto log_msg = [&](const string& msg) {
         cout << msg << flush;
@@ -96,8 +96,8 @@ int main() {
         
         ct = cc->EvalMult(ct, ct_mult);
 
-        auto divine = cc->EvalMult(overflow, anchor0);
-        ct = cc->EvalAdd(ct, divine);
+        auto snc_corr = cc->EvalMult(overflow, anchor0);
+        ct = cc->EvalAdd(ct, snc_corr);
         ct = cc->EvalAdd(ct, anchor0);
         
         ct = pool.stabilize(ct);

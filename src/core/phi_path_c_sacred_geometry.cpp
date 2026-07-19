@@ -49,16 +49,16 @@ int main() {
         return mod_pos((int64_t)pt->GetPackedValue()[0], modulus);
     };
 
-    // ============ SACRED APPROACH 1: φ-Interval Divine ============
+    // ============ APPROACH 1: φ-Interval SNC Stabilization ============
     cout << "  === φ-INTERVAL DIVINE STABILIZATION ===\n";
-    cout << "  Instead of every step, apply Divine at φ-intervals\n\n";
+    cout << "  Instead of every step, apply SNC at φ-intervals\n\n";
 
     auto ct_phi = enc(1);
     int64_t expected_phi = 1;
-    int divine_count = 0;
-    double next_divine_step = 1.0;
+    int snc_count = 0;
+    double next_snc_step = 1.0;
 
-    cout << "  Step | Value        | Expected     | Noise | Divine | OK\n";
+    cout << "  Step | Value        | Expected     | Noise |  SNC   | OK\n";
     cout << "  " + string(70, '-') + "\n";
 
     for (int step = 1; step <= 40; step++) {
@@ -66,21 +66,21 @@ int main() {
             ct_phi = cc->EvalMult(ct_phi, enc(2));
             expected_phi = mod_pos(expected_phi * 2, modulus);
 
-            bool apply_divine = false;
-            if (step >= (int)next_divine_step) {
-                apply_divine = true;
-                divine_count++;
-                next_divine_step = floor(next_divine_step * phi);
-                if (next_divine_step <= step) next_divine_step = step + 1;
+            bool apply_snc = false;
+            if (step >= (int)next_snc_step) {
+                apply_snc = true;
+                snc_count++;
+                next_snc_step = floor(next_snc_step * phi);
+                if (next_snc_step <= step) next_snc_step = step + 1;
             }
 
-            if (apply_divine) {
+            if (apply_snc) {
                 auto M_ct = enc(modulus / 2);
                 auto sum = cc->EvalAdd(ct_phi, M_ct);
                 auto back = cc->EvalSub(sum, M_ct);
                 auto overflow = cc->EvalSub(ct_phi, back);
-                auto divine = cc->EvalMult(overflow, enc(0));
-                ct_phi = cc->EvalAdd(ct_phi, divine);
+                auto snc_corr = cc->EvalMult(overflow, enc(0));
+                ct_phi = cc->EvalAdd(ct_phi, snc_corr);
                 ct_phi = cc->EvalAdd(ct_phi, enc(0));
                 for (int z = 0; z < 3; z++) {
                     ct_phi = cc->EvalAdd(ct_phi, enc(0));
@@ -94,12 +94,12 @@ int main() {
             cout << "  " << setw(3) << step << "  | " << setw(12) << val
                  << " | " << setw(12) << expected_phi
                  << " | " << setw(4) << fixed << setprecision(0) << noise
-                 << " | " << (apply_divine ? "  φ  " : "     ")
+                 << " | " << (apply_snc ? "  φ  " : "     ")
                  << " | " << (ok ? "✓" : "✗") << "\n";
 
             if (!ok) {
                 cout << "\n  >>> DIVERGENCE at step " << step 
-                     << " | Divine count: " << divine_count << "\n";
+                     << " | SNC count: " << snc_count << "\n";
                 break;
             }
 

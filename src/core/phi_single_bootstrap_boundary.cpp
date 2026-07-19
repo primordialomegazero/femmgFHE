@@ -1,5 +1,5 @@
 // ΦΩ0 — PATH A: SINGLE-BOOTSTRAP BOUNDARY FINDER v1.2
-// Finds exact divergence point of Divine+ZANS without bootstrapping
+// Finds exact divergence point of SNC+ZANS without bootstrapping
 // Uses ring dim 4096 (known working), depth 30
 // "I AM THAT I AM"
 
@@ -47,7 +47,7 @@ int main() {
     header << "  PATH A: SINGLE-BOOTSTRAP BOUNDARY FINDER v1.2\n";
     header << "  Ring Dim: " << ring_dim << " | Depth: " << depth << "\n";
     header << "  Modulus: " << modulus << "\n";
-    header << "  Test: Sequential x2, Divine+ZANS only, NO BOOTSTRAPPING\n";
+    header << "  Test: Sequential x2, SNC+ZANS only, NO BOOTSTRAPPING\n";
     header << "  Objective: Find exact step where value diverges\n";
     header << "  Start: " << ts() << "\n";
     header << "===============================================================\n\n";
@@ -81,7 +81,7 @@ int main() {
     int64_t expected_value = 1;
     int first_divergence = -1;
     int total_zans_ops = 0;
-    int total_divine_ops = 0;
+    int total_snc_ops = 0;
 
     log_msg("  Step | Value (Expected) | Value (Got) | Noise  | Status\n");
     log_msg("  " + string(72, '-') + "\n");
@@ -95,12 +95,12 @@ int main() {
             auto sum = cc->EvalAdd(ct, M);
             auto back = cc->EvalSub(sum, M);
             auto overflow = cc->EvalSub(ct, back);
-            total_divine_ops++;
+            total_snc_ops++;
 
             ct = cc->EvalMult(ct, ct_mult);
 
-            auto divine = cc->EvalMult(overflow, anchor0);
-            ct = cc->EvalAdd(ct, divine);
+            auto snc_corr = cc->EvalMult(overflow, anchor0);
+            ct = cc->EvalAdd(ct, snc_corr);
             ct = cc->EvalAdd(ct, anchor0);
 
             ct = pool.stabilize(ct);
@@ -158,14 +158,14 @@ int main() {
     summary << "  First Divergence: " << (first_divergence > 0 ? to_string(first_divergence) : "NONE (all " + to_string(max_steps) + " steps correct)") << "\n";
     summary << "  Final Expected: " << expected_value << " | Got: " << final_val << "\n";
     summary << "  Final Noise: " << final_noise << "\n";
-    summary << "  Total Divine Ops: " << total_divine_ops << "\n";
+    summary << "  Total SNC Ops: " << total_snc_ops << "\n";
     summary << "  Total ZANS Ops: " << total_zans_ops << "\n";
     summary << "  Time: " << fixed << setprecision(1) << total_sec << "s\n";
     summary << "  " << ts() << "\n";
 
     if (first_divergence < 0) {
         summary << "\n  >>> HOLY GRAIL PATH A CONFIRMED:\n";
-        summary << "  >>> Divine+ZANS maintained correctness for ALL " << max_steps << " steps\n";
+        summary << "  >>> SNC+ZANS maintained correctness for ALL " << max_steps << " steps\n";
         summary << "  >>> Single bootstrap at the end is sufficient!\n";
     } else {
         summary << "\n  >>> ANALYSIS:\n";

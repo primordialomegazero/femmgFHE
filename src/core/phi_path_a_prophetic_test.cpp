@@ -43,7 +43,7 @@ int main() {
     int total_v4_bootstraps = 0;
 
     cout << "\n  ┌──────────────────────────────────────────────────────────┐\n";
-    cout <<   "  │  COMPARISON: v3.1 (fixed interval) vs v4 (prophetic)      │\n";
+    cout <<   "  │  COMPARISON: v3.1 (fixed interval) vs v4 (predictive)      │\n";
     cout <<   "  └──────────────────────────────────────────────────────────┘\n";
 
     // ==========================================

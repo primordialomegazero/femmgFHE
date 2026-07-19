@@ -74,7 +74,7 @@ public:
         return 1073643521;
     }
 
-    BenchResult run_divine_chain(int num_mults) {
+    BenchResult run_snc_chain(int num_mults) {
         BenchResult r;
         r.ring_dim = ring_dim;
         r.depth = depth;
@@ -108,12 +108,12 @@ public:
             pt->SetLength(1);
             int64_t val = mod_pos((int64_t)pt->GetPackedValue()[0], modulus);
             auto fresh = cc->Encrypt(keys.publicKey, cc->MakePackedPlaintext(vector<int64_t>{val}));
-            // Divine stabilize the fresh ciphertext
+            // SNC stabilize the fresh ciphertext
             auto sum = cc->EvalAdd(fresh, M);
             auto back = cc->EvalSub(sum, M);
             auto overflow = cc->EvalSub(fresh, back);
-            auto divine = cc->EvalMult(overflow, anchor0);
-            fresh = cc->EvalAdd(fresh, divine);
+            auto snc_correction = cc->EvalMult(overflow, anchor0);
+            fresh = cc->EvalAdd(fresh, snc_correction);
             fresh = cc->EvalAdd(fresh, anchor0);
             for (int z = 0; z < 5; z++) fresh = pool.stabilize(fresh);
             return fresh;
@@ -130,13 +130,13 @@ public:
                 mults_since_bootstrap = 0;
             }
 
-            // Divine loop
+            // SNC loop (overflow detection + Enc(0) correction)
             auto sum = cc->EvalAdd(ct, M);
             auto back = cc->EvalSub(sum, M);
             auto overflow = cc->EvalSub(ct, back);
             ct = cc->EvalMult(ct, ct_mult);
-            auto divine = cc->EvalMult(overflow, anchor0);
-            ct = cc->EvalAdd(ct, divine);
+            auto snc_correction = cc->EvalMult(overflow, anchor0);
+            ct = cc->EvalAdd(ct, snc_correction);
             ct = cc->EvalAdd(ct, anchor0);
             ct = pool.stabilize(ct);
 
@@ -195,8 +195,8 @@ public:
                 auto back = cc->EvalSub(sum, M);
                 auto overflow = cc->EvalSub(chain_ct, back);
                 chain_ct = cc->EvalMult(chain_ct, ct_two);
-                auto divine = cc->EvalMult(overflow, anchor0);
-                chain_ct = cc->EvalAdd(chain_ct, divine);
+                auto snc_correction = cc->EvalMult(overflow, anchor0);
+                chain_ct = cc->EvalAdd(chain_ct, snc_correction);
                 chain_ct = cc->EvalAdd(chain_ct, anchor0);
                 chain_ct = pool.stabilize(chain_ct);
 
@@ -294,7 +294,7 @@ int main() {
             cout << "║\n";
 
             for (int mults : mult_counts) {
-                BenchResult r = bench.run_divine_chain(mults);
+                BenchResult r = bench.run_snc_chain(mults);
                 all_results.push_back(r);
                 print_result(r);
                 csv << r.ring_dim << "," << r.depth << "," << r.circuit_mults << ","

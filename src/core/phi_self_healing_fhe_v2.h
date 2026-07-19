@@ -37,9 +37,9 @@ string fhe_gate_str(FHEGateType g) {
 struct FHENode {
     int id; FHEGateType type; string name; int64_t value; vector<int> inputs;
     Ciphertext<DCRTPoly> ct; double noise_level; int bootstrap_count;
-    int divine_count; int zans_count; int64_t plaintext_result; bool verified;
+    int snc_count; int zans_count; int64_t plaintext_result; bool verified;
     FHENode() : id(-1), type(FHEGateType::INPUT), value(0), noise_level(0),
-                bootstrap_count(0), divine_count(0), zans_count(0),
+                bootstrap_count(0), snc_count(0), zans_count(0),
                 plaintext_result(0), verified(false) {}
 };
 
@@ -67,13 +67,13 @@ private:
     double BOOTSTRAP_NOISE = 15.0, DIVINE_NOISE = 5.0;
     int FORCE_BOOTSTRAP_EVERY = 25, op_counter = 0;
     
-    int total_gates, bootstrap_ops, divine_ops, zans_ops, pinky_ops, auto_heals;
+    int total_gates, bootstrap_ops, snc_ops, zans_ops, overflow_ops, auto_heals;
     
 public:
     SelfHealingFHE(CryptoContext<DCRTPoly> ctx, KeyPair<DCRTPoly> kp, int64_t mod, int pool=50)
         : cc(ctx), keys(kp), pool(ctx,kp,pool), modulus(mod), half_mod(mod/2),
-          total_gates(0), bootstrap_ops(0), divine_ops(0), zans_ops(0),
-          pinky_ops(0), auto_heals(0) {
+          total_gates(0), bootstrap_ops(0), snc_ops(0), zans_ops(0),
+          overflow_ops(0), auto_heals(0) {
         vector<int64_t> mv={half_mod}; M=cc->Encrypt(keys.publicKey,cc->MakePackedPlaintext(mv));
     }
     
@@ -85,7 +85,7 @@ public:
         Plaintext pt; cc->Decrypt(keys.secretKey,ct,&pt); pt->SetLength(1);
         int64_t val=mod_pos((int64_t)pt->GetPackedValue()[0],modulus);
         auto fresh=cc->Encrypt(keys.publicKey,cc->MakePackedPlaintext(vector<int64_t>{val}));
-        divine_ops++;
+        snc_ops++;
         auto anch=cc->Encrypt(keys.publicKey,cc->MakePackedPlaintext(vector<int64_t>{0}));
         auto s=cc->EvalAdd(fresh,M); auto b=cc->EvalSub(s,M); auto ov=cc->EvalSub(fresh,b);
         auto dv=cc->EvalMult(ov,anch); fresh=cc->EvalAdd(fresh,dv); fresh=cc->EvalAdd(fresh,anch);
@@ -96,8 +96,8 @@ public:
     Ciphertext<DCRTPoly> heal(const Ciphertext<DCRTPoly>& ct,int intensity=1){
         auto result=ct;
         for(int r=0;r<intensity;r++){
-            pinky_ops++; auto s=cc->EvalAdd(result,M); auto b=cc->EvalSub(s,M);
-            auto ov=cc->EvalSub(result,b); divine_ops++;
+            overflow_ops++; auto s=cc->EvalAdd(result,M); auto b=cc->EvalSub(s,M);
+            auto ov=cc->EvalSub(result,b); snc_ops++;
             auto anch=cc->Encrypt(keys.publicKey,cc->MakePackedPlaintext(vector<int64_t>{0}));
             auto dv=cc->EvalMult(ov,anch); result=cc->EvalAdd(result,dv); result=cc->EvalAdd(result,anch);
             for(int z=0;z<5;z++){zans_ops++;result=pool.stabilize(result);}
@@ -218,8 +218,8 @@ public:
         }
         cout<<"\n  ╔══════════════════════════════════════════════════╗\n";
         cout<<  "  ║   Gates:"<<setw(7)<<total_gates<<"  Verified:"<<setw(6)<<ver<<"/"<<tot<<"          ║\n";
-        cout<<  "  ║   Bootstraps:"<<setw(5)<<bootstrap_ops<<"  Divine:"<<setw(8)<<divine_ops<<"          ║\n";
-        cout<<  "  ║   ZANS:"<<setw(9)<<zans_ops<<"  Pinky:"<<setw(8)<<pinky_ops<<"          ║\n";
+        cout<<  "  ║   Bootstraps:"<<setw(5)<<bootstrap_ops<<"  SNC:"<<setw(8)<<snc_ops<<"          ║\n";
+        cout<<  "  ║   ZANS:"<<setw(9)<<zans_ops<<"  OVF:  "<<setw(8)<<overflow_ops<<"          ║\n";
         cout<<  "  ║   Result: "<<(ver==tot?"ALL VERIFIED":"FAILURES")<<"                        ║\n";
         cout<<  "  ╚══════════════════════════════════════════════════╝\n\n";
     }

@@ -132,7 +132,7 @@ int main() {
              << " | " << setw(7) << chain_val2 << "\n";
     }
 
-    // ============ FORENSICS: Pinky Swear deep analysis ============
+    // ============ FORENSICS: Overflow Detection deep analysis ============
     cout << "\n  === PINKY SWEAR DEEP ANALYSIS ===\n\n";
 
     // Test with a value that's near overflow AFTER many operations
@@ -146,13 +146,13 @@ int main() {
     }
     cout << "  After 5 ×2 mults: " << dec(pct) << " (level " << pct->GetLevel() << ")\n";
 
-    // Now Pinky Swear
+    // Now Overflow Detection
     auto M_ct = enc(half_mod);
     auto sum = cc->EvalAdd(pct, M_ct);
     auto back = cc->EvalSub(sum, M_ct);
     auto overflow = cc->EvalSub(pct, back);
 
-    cout << "  Pinky Swear:\n";
+    cout << "  Overflow Detection:\n";
     cout << "    pct:      " << dec(pct) << "\n";
     cout << "    M:        " << half_mod << "\n";
     cout << "    pct + M:  " << dec(sum) << "\n";

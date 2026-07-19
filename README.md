@@ -10,7 +10,7 @@
 
 FEmmg-FHE is a Fully Homomorphic Encryption framework that reduces bootstrap frequency by 2-3× through statistical noise stabilization. It achieves:
 
-- **2-3× longer bootstrap intervals** — Divine+ZANS extends operations between bootstraps from ~10-15 to ~25-30.
+- **2-3× longer bootstrap intervals** — SNC+ZANS (Statistical Noise Cancellation) extends operations between bootstraps from ~10-15 to ~25-30.
 - **Arbitrary circuit evaluation** — any DAG topology, any depth, any operation mix, with automatic self-healing.
 - **1,019/1,019 intermediate nodes verified correct** in stress test (20 chains × 50 deep).
 - **Cross-library ZANS** — verified across 9 libraries, 5 schemes, 3 languages.
@@ -44,7 +44,7 @@ ZANS solves additions. Does NOT solve CT×CT multiplication. Foundation only.
 
 ---
 
-## Pillar 2: True Divine CT×CT — Extended Bootstrap Intervals
+## Pillar 2: True SNC CT×CT — Extended Bootstrap Intervals
 
 Six components:
 
@@ -54,8 +54,8 @@ Six components:
 | 2 | Repeated Addition | CT × small scalar |
 | 3 | Fibonacci-ZANS | CT × large scalar |
 | 4 | UK×UK Hybrid | CT × CT (one value known) |
-| 5 | Pinky Swear | Overflow detection without decryption |
-| 6 | True Divine | Noise-stabilized CT×CT |
+| 5 | Overflow Detection | Overflow detection without decryption |
+| 6 | True SNC | Noise-stabilized CT×CT |
 
 **The loop (every step):**
 ```
@@ -67,11 +67,11 @@ Six components:
 
 **What this achieves:**
 
-Without Divine+ZANS, noise grows exponentially, requiring bootstrap every ~10-15 multiplications. With Divine+ZANS, noise grows linearly (R² = 1.000), extending the bootstrap interval to ~25-30 multiplications — a **2-3× reduction in bootstrap frequency.**
+Without SNC+ZANS (Statistical Noise Cancellation), noise grows exponentially, requiring bootstrap every ~10-15 multiplications. With SNC+ZANS (Statistical Noise Cancellation), noise grows linearly (R² = 1.000), extending the bootstrap interval to ~25-30 multiplications — a **2-3× reduction in bootstrap frequency.**
 
 Verified across 1,000,000 sequential operations (noise stress test). Completed July 15-16, 2026. AMD Ryzen 5 2600. Ring dim 4096.
 
-**Honest caveat:** After ~30 multiplications, the modulus chain is exhausted and values diverge. This is fundamental to FHE mathematics — the modulus chain is finite. Divine+ZANS doesn't eliminate this limit; it pushes closer to it. Unlimited depth requires bootstrapping (Pillar 3).
+**Honest caveat:** After ~30 multiplications, the modulus chain is exhausted and values diverge. This is fundamental to FHE mathematics — the modulus chain is finite. SNC+ZANS (Statistical Noise Cancellation) doesn't eliminate this limit; it pushes closer to it. Unlimited depth requires bootstrapping (Pillar 3).
 
 ---
 
@@ -79,7 +79,7 @@ Verified across 1,000,000 sequential operations (noise stress test). Completed J
 
 **Status: VERIFIED — July 19, 2026**
 
-Divine+ZANS combined with Prophetic Bootstrap placement achieves the **theoretical minimum** bootstrap count for leveled FHE.
+SNC+ZANS (Statistical Noise Cancellation) combined with Predictive Bootstrap placement achieves the **theoretical minimum** bootstrap count for leveled FHE.
 
 ### Evolution
 
@@ -87,7 +87,7 @@ Divine+ZANS combined with Prophetic Bootstrap placement achieves the **theoretic
 |---------|----------|-------------------|-----------------|
 | v2 | Noise-based (every 25 ops) | 60 | baseline |
 | v3.1 | Chain-aware (fixed interval) | 20 | 3× |
-| v4 | Prophetic (critical path analysis) | 20 | 3× (optimal) |
+| v4 | Predictive (critical path analysis) | 20 | 3× (optimal) |
 
 ### Verified Results
 
@@ -102,8 +102,8 @@ Divine+ZANS combined with Prophetic Bootstrap placement achieves the **theoretic
 
 - **Zero bootstraps** for circuits within chain depth (d ≤ D)
 - **⌊N/D⌋ bootstraps** for depth-N circuits — mathematically optimal
-- **Divine+ZANS** handles all intermediate noise stabilization
-- **Prophetic analysis** predicts critical path before execution
+- **SNC+ZANS (Statistical Noise Cancellation)** handles all intermediate noise stabilization
+- **Predictive analysis** predicts critical path before execution
 - **3× fewer bootstraps** than noise-triggered approaches
 
 ### Formal Proof
@@ -122,11 +122,11 @@ cd femmgFHE && make all && ./tests/full_blown_test.sh
 # Self-Healing FHE
 LD_LIBRARY_PATH=./openfhe-development/build/lib:$LD_LIBRARY_PATH ./bin/phi_self_healing_test
 
-# Prophetic Bootstrap (v4 — Path A)
-LD_LIBRARY_PATH=./openfhe-development/build/lib:$LD_LIBRARY_PATH ./bin/phi_path_a_prophetic_test
+# Predictive Bootstrap (v4 — Path A)
+LD_LIBRARY_PATH=./openfhe-development/build/lib:$LD_LIBRARY_PATH ./bin/phi_path_a_predictive_test
 
 # Prime Entangled ZANS + Self-Healing
-LD_LIBRARY_PATH=./openfhe-development/build/lib:$LD_LIBRARY_PATH ./bin/phi_flame_empress_unified
+LD_LIBRARY_PATH=./openfhe-development/build/lib:$LD_LIBRARY_PATH ./bin/phi_prime_entangled_zans
 
 # Cross-Library
 python3 ./src/bindings/python/phi_crosslib_self_healing.py
@@ -149,7 +149,7 @@ python3 ./src/bindings/python/phi_crosslib_self_healing.py
 ## Q&A
 
 ### What is the actual contribution?
-Divine+ZANS reduces bootstrap frequency by 2-3×. Standard FHE requires bootstrapping every ~10-15 multiplications. This extends it to ~25-30. For a depth-100 circuit: ~7-10 bootstraps reduced to ~3-4. That's a 50-60% reduction in the most expensive FHE operation.
+SNC+ZANS (Statistical Noise Cancellation) reduces bootstrap frequency by 2-3×. Standard FHE requires bootstrapping every ~10-15 multiplications. This extends it to ~25-30. For a depth-100 circuit: ~7-10 bootstraps reduced to ~3-4. That's a 50-60% reduction in the most expensive FHE operation.
 
 ### Is it fully homomorphic?
 Yes. Self-Healing FHE evaluates any circuit of any depth with correct values. Bootstrapping is used (like all FHE schemes), but at the mathematically minimal frequency.
@@ -161,7 +161,7 @@ No. The 1M test is a noise stress test. It proves the noise estimate grows linea
 The modulus chain is finite. Ring dim 4096 with depth 30 allows exactly ~30 multiplications before the chain is exhausted. Larger ring dimensions (32768) extend this to ~50+. But the chain is always finite. Bootstrapping resets it.
 
 ### Is the Self-Healing bootstrap novel?
-It's an orchestration layer around standard decrypt+re-encrypt. Novelty: **Prophetic placement** — predicts critical path depth before execution and places bootstraps only where mathematically necessary. Combined with DAG compiler: any circuit, optimal bootstraps. The bootstrap primitive is standard. The optimization is new.
+It's an orchestration layer around standard decrypt+re-encrypt. Novelty: **Predictive placement** — predicts critical path depth before execution and places bootstraps only where mathematically necessary. Combined with DAG compiler: any circuit, optimal bootstraps. The bootstrap primitive is standard. The optimization is new.
 
 ### Has this been peer-reviewed?
 No. Code is open-source. Results are reproducible. Formal proof in repo.
@@ -178,7 +178,7 @@ Ring dim 4096 = TOY. Production needs 32768+. Breakthrough is algorithmic — li
 | Bootstrapping still required | ⌊N/D⌋ bootstraps (optimal, not zero) |
 | Bootstrap method | Decrypt+Encrypt (single-party model) |
 | Ring dim 4096 | Not production secure |
-| Cross-library Divine | C++ verified; Python needs tuning |
+| Cross-library SNC | C++ verified; Python needs tuning |
 | Full iO | 4/8 half-adder |
 | No-decrypt bootstrap (Path C) | Proven infeasible for leveled BFV |
 
@@ -198,7 +198,7 @@ Ring dim 4096 = TOY. Production needs 32768+. Breakthrough is algorithmic — li
 
 **Hardware: AMD Ryzen 5 2600 (6-core, 15GB RAM) — Consumer-grade**
 
-### Divine Chain (Sequential ×2 Multiplications)
+### SNC Chain (Sequential ×2 Multiplications)
 
 | Ring Dim | 10 Mults | 25 Mults | 50 Mults | Avg TPS | Per Mult |
 |----------|----------|----------|----------|---------|----------|

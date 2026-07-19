@@ -23,7 +23,7 @@ int main() {
     cout << "\n  ╔══════════════════════════════════════════════════════════╗\n";
     cout <<   "  ║   ΦΩ0 — SELF-HEALING FHE v3: CHAIN-AWARE                 ║\n";
     cout <<   "  ║   Bootstrap ONLY on chain exhaustion                     ║\n";
-    cout <<   "  ║   Divine+ZANS for ALL intermediate operations             ║\n";
+    cout <<   "  ║   SNC+ZANS for ALL intermediate operations             ║\n";
     cout <<   "  ╚══════════════════════════════════════════════════════════╝\n";
 
     CCParams<CryptoContextBFVRNS> params;
@@ -201,7 +201,7 @@ int main() {
 
     if (passed == 4) {
         cout << "  ║   STATUS: PATH A — SINGLE-BOOTSTRAP FHE CONFIRMED        ║\n";
-        cout << "  ║   Divine+ZANS handles ALL intermediate ops                ║\n";
+        cout << "  ║   SNC+ZANS handles ALL intermediate ops                ║\n";
         cout << "  ║   Bootstrap ONLY on chain exhaustion                      ║\n";
         cout << "  ║   Circuits ≤ chain depth: ZERO bootstraps                 ║\n";
     }

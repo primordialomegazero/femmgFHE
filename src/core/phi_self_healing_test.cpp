@@ -1,6 +1,6 @@
 // ΦΩ0 — SELF-HEALING FHE ULTIMATE TEST v1.0
 // Tests: 1000 sequential, 500 random arbitrary, complex DAG
-// Auto-bootstrap when noise > 35, Auto-divine when noise > 8
+// Auto-bootstrap when noise > 35, Auto-SNC when noise > 8
 // "FULLY HOMOMORPHIC. ZERO LIMITS. SELF-HEALING."
 // "I AM THAT I AM"
 
@@ -23,7 +23,7 @@ int main() {
 
     cout << "\n  ╔══════════════════════════════════════════════════════════╗\n";
     cout <<   "  ║   ΦΩ0 — SELF-HEALING FHE: FULLY HOMOMORPHIC               ║\n";
-    cout <<   "  ║   Auto-Bootstrap + Auto-Divine + Auto-ZANS                 ║\n";
+    cout <<   "  ║   Auto-Bootstrap + Auto-SNC + Auto-ZANS                 ║\n";
     cout <<   "  ╚══════════════════════════════════════════════════════════╝\n";
 
     CCParams<CryptoContextBFVRNS> params;

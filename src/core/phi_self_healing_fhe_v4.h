@@ -1,7 +1,7 @@
 // ΦΩ0 — SELF-HEALING FHE ENGINE v4.0 — PATH A: PROPHETIC BOOTSTRAP
 // Predicts critical path depth before execution
 // Places bootstraps only where mathematically necessary
-// Divine+ZANS handles ALL intermediate stabilization
+// SNC (Statistical Noise Cancellation) handles ALL intermediate stabilization
 // "I SEE THE PATH BEFORE I WALK IT."
 // "I AM THAT I AM"
 
@@ -99,7 +99,7 @@ private:
 
     int total_gates = 0;
     int bootstrap_ops = 0;
-    int divine_ops = 0;
+    int snc_ops = 0;
     int zans_ops = 0;
 
     // Maximum multiplications before chain exhaustion
@@ -134,15 +134,15 @@ public:
     }
 
     // ============ DIVINE STABILIZE ============
-    Ciphertext<DCRTPoly> divine_stabilize(const Ciphertext<DCRTPoly>& ct) {
-        divine_ops++;
+    Ciphertext<DCRTPoly> snc_stabilize(const Ciphertext<DCRTPoly>& ct) {
+        snc_ops++;
 
-        // Pinky Swear
+        // Overflow Detection
         auto sum = cc->EvalAdd(ct, M);
         auto back = cc->EvalSub(sum, M);
         auto overflow = cc->EvalSub(ct, back);
 
-        // Divine correction
+        // SNC correction (overflow * Enc(0))
         auto correction = cc->EvalMult(overflow, anchor0);
         auto result = cc->EvalAdd(ct, correction);
         result = cc->EvalAdd(result, anchor0);
@@ -168,7 +168,7 @@ public:
         auto fresh = cc->Encrypt(keys.publicKey,
                                  cc->MakePackedPlaintext(vector<int64_t>{val}));
 
-        return divine_stabilize(fresh);
+        return snc_stabilize(fresh);
     }
 
     // ============ NODE MANAGEMENT ============
@@ -358,7 +358,7 @@ public:
                         keys.publicKey,
                         cc->MakePackedPlaintext(vector<int64_t>{node.value})
                     );
-                    node.ct = divine_stabilize(node.ct);
+                    node.ct = snc_stabilize(node.ct);
                     current_depth[node.id] = 0;
                     break;
                 }
@@ -367,7 +367,7 @@ public:
                     auto& a = node_map[node.inputs[0]];
                     auto& b = node_map[node.inputs[1]];
                     node.ct = cc->EvalAdd(a.ct, b.ct);
-                    node.ct = divine_stabilize(node.ct);
+                    node.ct = snc_stabilize(node.ct);
                     current_depth[node.id] = max(current_depth[node.inputs[0]],
                                                  current_depth[node.inputs[1]]);
                     break;
@@ -377,7 +377,7 @@ public:
                     auto& a = node_map[node.inputs[0]];
                     auto& b = node_map[node.inputs[1]];
                     node.ct = cc->EvalSub(a.ct, b.ct);
-                    node.ct = divine_stabilize(node.ct);
+                    node.ct = snc_stabilize(node.ct);
                     current_depth[node.id] = max(current_depth[node.inputs[0]],
                                                  current_depth[node.inputs[1]]);
                     break;
@@ -387,7 +387,7 @@ public:
                     auto& a = node_map[node.inputs[0]];
                     auto& b = node_map[node.inputs[1]];
                     node.ct = cc->EvalMult(a.ct, b.ct);
-                    node.ct = divine_stabilize(node.ct);
+                    node.ct = snc_stabilize(node.ct);
                     current_depth[node.id] = max(current_depth[node.inputs[0]],
                                                  current_depth[node.inputs[1]]) + 1;
                     break;
@@ -400,7 +400,7 @@ public:
                         cc->MakePackedPlaintext(vector<int64_t>{node.value})
                     );
                     node.ct = cc->EvalMult(a.ct, ct_s);
-                    node.ct = divine_stabilize(node.ct);
+                    node.ct = snc_stabilize(node.ct);
                     current_depth[node.id] = current_depth[node.inputs[0]] + 1;
                     break;
                 }
@@ -444,7 +444,7 @@ public:
         cout <<   "  ║   Gates: " << setw(7) << total_gates
              << "  Verified: " << setw(6) << ver << "/" << tot << "          ║\n";
         cout <<   "  ║   Bootstraps: " << setw(5) << bootstrap_ops
-             << "  Divine: " << setw(8) << divine_ops << "          ║\n";
+             << "  SNC:    " << setw(8) << snc_ops << "          ║\n";
         cout <<   "  ║   ZANS: " << setw(9) << zans_ops
              << "  Max Path: " << setw(5) << max_critical_path << "          ║\n";
         cout <<   "  ║   Threshold: " << setw(4) << MAX_CHAIN_MULTS
