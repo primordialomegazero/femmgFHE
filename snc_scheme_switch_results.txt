@@ -1,0 +1,11 @@
+  CKKS: ring=4096 depth=5 slots=16
+  FHEW: TOY security, GINX bootstrapping
+  Scheme switching: CKKS↔FHEW enabled
+
+  Starting computation...
+
+  Mults | Bootstraps | Value (CKKS)     | Expected       | Error % | TPS
+  --------------------------------------------------------------------------------
+      1 |          0 |            84.00 |           84.0 |   0.00% |   0.0
+      2 |          0 |           168.00 |          168.0 |   0.00% |   0.0
+      3 |          0 |           336.00 |          336.0 |   0.00% |   0.0
