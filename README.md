@@ -178,7 +178,7 @@ Ring dim 4096 = TOY (not production secure). Production needs 32768+. The breakt
 | Bootstrapping still required | ⌊N/D⌋ bootstraps (optimal, not zero) |
 | Bootstrap method | Decrypt+Encrypt (single-party model) |
 | Ring dim 4096 | Not production secure |
-| Cross-library SNC | C++ verified; Python needs tuning |
+| Cross-library SNC | BFV/CKKS verified; Python needs tuning |
 | iO Foundation | Half-adder 4/4, Full adder 8/8, Indistinguishability 4/4 — verified in FHE |
 | No-decrypt bootstrap (Path C) | Proven infeasible for leveled BFV; open for TFHE |
 
