@@ -11,9 +11,9 @@
 FEmmg-FHE is a Fully Homomorphic Encryption framework that reduces bootstrap frequency by 2-3× through statistical noise stabilization. It achieves:
 
 - **2-3× longer bootstrap intervals** — extends operations between bootstraps from ~10-15 to ~25-30.
-- **Arbitrary circuit evaluation** — any DAG topology, any depth, any operation mix, with automatic correctness management.
+- **Cross-library & Cross-scheme ZANS** — verified across 9 libraries, 5 schemes, 3 languages + **Cross-scheme SNC+ZANS** (BFV, CKKS, TFHE).
 - **1,019/1,019 intermediate nodes verified correct** in stress test (20 chains × 50 deep).
-- **Cross-library ZANS** — verified across 9 libraries, 5 schemes, 3 languages.
+- **Cross-library & Cross-scheme ZANS** — verified across 9 libraries, 5 schemes, 3 languages.
 - **Program obfuscation (NC¹)** — Half-adder (4/4), Full adder (8/8), Indistinguishability (4/4). Arbitrary formula compiler in progress.
 
 ---
@@ -142,6 +142,7 @@ python3 ./src/bindings/python/phi_crosslib_self_healing.py
 | [FAQ](docs/FAQ.md) | Common questions |
 | [Whitepaper](docs/WHITEPAPER.md) | Technical |
 | [Cross-Lib Results](docs/CROSS_LIB_RESULTS.md) | 12 validations |
+| [Cross-Scheme](src/core/phi_cross_scheme_ckks.cpp) | CKKS 3/3, TFHE 13/13 — scheme-independent |
 
 ---
 
