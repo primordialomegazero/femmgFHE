@@ -189,8 +189,8 @@ Ring dim 4096 = TOY (not production secure). Production needs 32768+. The breakt
 | 32768 | ~0.25 | **~5-10** | High-security batch |
 
 **15/15 tests passed. All values verified correct.** Full data: [benchmark_results.csv](benchmark_results.csv)
- / Primordial Omega Zero
-MIT License
+
+### MIT License
 ## Contributions & Limitations (Honest Assessment)
 
 ### What We've Built
