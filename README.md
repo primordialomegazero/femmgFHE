@@ -109,6 +109,7 @@ LD_LIBRARY_PATH=./openfhe-development/build/lib:$LD_LIBRARY_PATH ./bin/phi_prime
 
 # Cross-Library
 python3 ./src/bindings/python/phi_crosslib_self_healing.py
+```
 ## Docs
 
 | Doc | What |
