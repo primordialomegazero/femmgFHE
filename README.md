@@ -14,7 +14,7 @@ FEmmg-FHE is a Fully Homomorphic Encryption framework that reduces bootstrap fre
 - **Arbitrary circuit evaluation** — any DAG topology, any depth, any operation mix, with automatic correctness management.
 - **1,019/1,019 intermediate nodes verified correct** in stress test (20 chains × 50 deep).
 - **Cross-library ZANS** — verified across 9 libraries, 5 schemes, 3 languages.
-- **Program obfuscation (NC¹)** — Barrington + Kilian + FHE. In progress.
+- **Program obfuscation (NC¹)** — Half-adder (4/4), Full adder (8/8), Indistinguishability (4/4). Arbitrary formula compiler in progress.
 
 ---
 
@@ -178,7 +178,7 @@ Ring dim 4096 = TOY (not production secure). Production needs 32768+. The breakt
 | Bootstrap method | Decrypt+Encrypt (single-party model) |
 | Ring dim 4096 | Not production secure |
 | Cross-library SNC | C++ verified; Python needs tuning |
-| Full iO | 4/8 half-adder |
+| iO Foundation | Half-adder 4/4, Full adder 8/8, Indistinguishability 4/4 — verified in FHE |
 | No-decrypt bootstrap (Path C) | Proven infeasible for leveled BFV; open for TFHE |
 
 ---
