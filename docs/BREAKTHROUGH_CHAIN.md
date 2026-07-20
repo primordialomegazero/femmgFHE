@@ -21,14 +21,14 @@
 **Breakthrough 2: Repeated Addition** — CT × small scalar via repeated add+ZANS
 **Breakthrough 3: Fibonacci-ZANS** — CT × large scalar via Zeckendorf decomposition
 **Breakthrough 4: UK×UK Hybrid** — CT × CT with one known value
-**Breakthrough 5: Pinky Swear** — Overflow detection without decryption
+**Breakthrough 5: Overflow Detection** — Overflow detection without decryption
 ```
 overflow = (ct + M) - M - ct
 ```
 **Breakthrough 6: True Divine CT×CT** — Blind CT×CT with linear noise
 ```
 For each step:
-  1. Pinky Swear: overflow detection
+  1. Overflow Detection: overflow detection
   2. CT×CT Multiply
   3. Divine Intervention: ct += overflow × Enc(0) + Enc(0)
   4. ZANS: ct += Enc(0)
@@ -107,7 +107,7 @@ FEmmg-FHE v7.0 — Self-Healing FHE
 │   └── Foundation for everything
 │
 ├── Pillar 2: True Divine CT×CT (Multiplications)
-│   ├── Pinky Swear: Overflow detection
+│   ├── Overflow Detection: Overflow detection
 │   ├── Divine Intervention: Noise absorption
 │   ├── 1,000,000 sequential: Linear noise (R²=1.000)
 │   └── Zero decryption, zero bootstrapping (fixed multiplier)

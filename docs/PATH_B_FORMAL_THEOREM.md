@@ -9,9 +9,9 @@
 
 ## Abstract
 
-We prove that the Divine+ZANS stabilization system achieves the theoretical
+We prove that the SNC+ZANS stabilization system achieves the theoretical
 minimum bootstrap count for leveled Fully Homomorphic Encryption schemes.
-Divine+ZANS reduces bootstrap frequency by 3× through optimal modulus chain
+SNC+ZANS reduces bootstrap frequency by 3× through optimal modulus chain
 utilization, achieving zero bootstraps for circuits within the allocated depth
 and ⌊N/D⌋ bootstraps for depth-N circuits with chain limit D. All theorems
 are accompanied by empirical verification.
@@ -33,9 +33,9 @@ Bootstrapping (decrypt + re-encrypt) resets the modulus chain. Standard
 implementations bootstrap every ~8-10 multiplications due to exponential
 noise growth (noise ∝ c^N for c > 1).
 
-### 1.3 Divine+ZANS
+### 1.3 SNC+ZANS
 
-Divine+ZANS applies:
+SNC+ZANS applies:
 1. **ZANS (Zero-Anchor Noise Stabilization):** 5-7 fresh Enc(0) additions
    after each multiplication, producing statistical noise cancellation
    via the Central Limit Theorem.
@@ -51,7 +51,7 @@ noise thresholds.
 ## 2. Theorem 1: Linear Noise Growth
 
 **Statement:**  
-Divine+ZANS bounds noise growth to O(N) rather than O(c^N).
+SNC+ZANS bounds noise growth to O(N) rather than O(c^N).
 
 **Proof:**
 
@@ -71,7 +71,7 @@ Without ZANS: η_N ∝ c^N (exponential, c > 1)
 With ZANS: η_N ∝ N (linear)
 
 **Empirical verification:**  
-1,000,000 sequential multiplications with Divine+ZANS show noise = N + 1
+1,000,000 sequential multiplications with SNC+ZANS show noise = N + 1
 with R² = 1.000. ∎
 
 ---
@@ -80,7 +80,7 @@ with R² = 1.000. ∎
 
 **Statement:**  
 Any circuit with maximum multiplicative depth d_max ≤ D evaluates
-correctly with zero bootstraps under Divine+ZANS.
+correctly with zero bootstraps under SNC+ZANS.
 
 **Proof:**
 
@@ -115,7 +115,7 @@ bootstraps_required = ⌊N/D⌋
 ```
 
 This is minimal because:
-1. Divine+ZANS eliminates noise-triggered bootstraps
+1. SNC+ZANS eliminates noise-triggered bootstraps
 2. Bootstraps are placed exactly at chain exhaustion
 3. Fewer bootstraps would mean > D multiplications without reset,
    causing corruption
@@ -130,13 +130,13 @@ This is minimal because:
 ## 5. Theorem 4: Bootstrap Reduction Factor
 
 **Statement:**  
-Divine+ZANS reduces bootstrap frequency by 3× compared to
+SNC+ZANS reduces bootstrap frequency by 3× compared to
 noise-triggered bootstrapping.
 
 **Proof:**
 
-Without Divine+ZANS: bootstrap every ~8-10 mults (noise limit).
-With Divine+ZANS: bootstrap every D ≈ 25-30 mults (chain limit).
+Without SNC+ZANS: bootstrap every ~8-10 mults (noise limit).
+With SNC+ZANS: bootstrap every D ≈ 25-30 mults (chain limit).
 
 ```
 Reduction factor R = D / (noise_limit)
@@ -176,16 +176,16 @@ Divine, confirming φ-intervals are sufficient. ∎
 ## 7. Theorem 6: Source Completeness (Optimality)
 
 **Statement:**  
-Divine+ZANS achieves the theoretical minimum bootstrap count for
+SNC+ZANS achieves the theoretical minimum bootstrap count for
 leveled FHE. No algorithm can achieve fewer.
 
 **Proof:**
 
 For N multiplications and depth D:
 - Theoretical minimum bootstraps: ⌊N/D⌋ (first D mults use initial chain)
-- Divine+ZANS achieves: ⌊N/D⌋
+- SNC+ZANS achieves: ⌊N/D⌋
 
-Therefore Divine+ZANS is optimal. Any algorithm claiming fewer bootstraps
+Therefore SNC+ZANS is optimal. Any algorithm claiming fewer bootstraps
 would violate the modulus chain conservation law of leveled FHE. ∎
 
 ---
