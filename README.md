@@ -20,7 +20,7 @@ FEmmg-FHE is a collection of techniques that together make Fully Homomorphic Enc
 | **Cross-Library** | Same techniques on 7+ libraries | Compatibility | 17/17 scheme combos |
 | **TFHE Unlimited** | Built-in bootstrapping per gate | Correctness | 1M/1M gates |
 
-*Note on R²=1.000: This is a deterministic computation. Noise grows as exactly N+1 because each multiplication adds 1 to the noise scale degree. Not a statistical anomaly — expected behavior in leveled FHE.*
+*Note on R²=1.000: The noise scale degree grows deterministically as N+1 (each multiplication adds exactly 1). The underlying Enc(0) mechanism uses the Central Limit Theorem for statistical noise cancellation, but the measured metric is deterministic.*
 
 ---
 
@@ -34,7 +34,7 @@ FEmmg-FHE is a collection of techniques that together make Fully Homomorphic Enc
 │  LAYER 1: NOISE CONTROL                                   │
 │  ┌─────────────────────────────────────────────────────┐ │
 │  │ SNC+ZANS                                             │ │
-│  │ Adding fresh Enc(0) creates statistical cancellation │ │
+│  │ Adding fresh Enc(0) cancels noise through the Central Limit Theorem │ │
 │  │ R² = 1.000 across 1,000,000 operations               │ │
 │  │ Works on BFV, CKKS, TFHE, SEAL, HElib, Lattigo...   │ │
 │  └─────────────────────────────────────────────────────┘ │
