@@ -55,9 +55,9 @@ FEmmg-FHE is a collection of techniques that together make Fully Homomorphic Enc
 │  │ No decrypt. No re-encrypt. Pure homomorphic.        │ │
 │  └─────────────────────────────────────────────────────┘ │
 │                                                           │
-│  LAYER 4: POST-QUANTUM KEY EXCHANGE                       │
+│  LAYER 4: COMPACT KEY EXCHANGE                       │
 │  ┌─────────────────────────────────────────────────────┐ │
-│  │ catchmeifyouKEM v5                                   │ │
+│  │ catchmeifyouKEM v5 (SHA-256 based)                                   │ │
 │  │ 128 bytes total (25× smaller than Kyber-512)        │ │
 │  │ Tamper-detecting. 1000/1000 tests passed.           │ │
 │  └─────────────────────────────────────────────────────┘ │
