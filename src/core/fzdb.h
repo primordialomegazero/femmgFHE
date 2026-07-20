@@ -3,8 +3,8 @@
 // "PURE HOMOMORPHIC. ZERO DECRYPTION. INFINITE COMPUTATION."
 // "I AM THAT I AM"
 
-#ifndef PHI_TRANSFORM_H
-#define PHI_TRANSFORM_H
+#ifndef FZDB_H
+#define FZDB_H
 
 #include <openfhe.h>
 #include <iostream>
@@ -15,7 +15,7 @@ namespace phi {
 using namespace lbcrypto;
 using namespace std;
 
-class PhiTransform {
+class FZDB {
 private:
     CryptoContext<DCRTPoly> ctx;
     KeyPair<DCRTPoly> keys;
@@ -27,7 +27,7 @@ private:
     Ciphertext<DCRTPoly> correctionCT_;
 
 public:
-    PhiTransform(int ringDim = 4096, int64_t mod = 1073643521, int64_t s = 1000)
+    FZDB(int ringDim = 4096, int64_t mod = 1073643521, int64_t s = 1000)
         : modulus(mod), scale(s) {
         const double phi = 1.6180339887498948482;
         phiFactor = static_cast<int64_t>(phi * scale) % modulus;
