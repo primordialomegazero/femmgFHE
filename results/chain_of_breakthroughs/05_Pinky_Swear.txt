@@ -1,5 +1,0 @@
-Step 5: Pinky Swear — Homomorphic Overflow Detection
-=======================================================
-overflow = (ct + M) - M - ct (M = half plaintext modulus)
-Solves: Ciphertext detects its own overflow. Zero decryption.
-Status: 100 steps verified standalone (see results/phi_pinky_swear_results.txt)

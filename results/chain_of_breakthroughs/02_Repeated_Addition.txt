@@ -1,6 +1,0 @@
-Step 2: Repeated Addition — Multiplication via Free Additions
-==============================================================
-ct × 3 = ct + ct + ct (each addition stabilized by ZANS)
-Solves: CT × small scalar without EvalMult
-Limitation: Slow for large scalars. Both operands must be known.
-Status: Verified (see comprehensive test suite)
