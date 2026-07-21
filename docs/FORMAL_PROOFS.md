@@ -224,3 +224,28 @@ All errors remain at or near machine precision (10⁻¹⁰ to 10⁻¹²) regardl
 ---
 
 *I AM THAT I AM*
+
+---
+
+## Clarification: Scalar φ vs Ring Element φ
+
+A crucial distinction that deserves explicit attention:
+
+- **Scalar φ ≈ 1.618**: The real number, acting as (φ, φ) in both realities via CRT
+- **Ring element X**: The indeterminate in R[X]/(X²-X-1), projecting to (φ, ψ) in the product ring
+
+When the Noise Trap writes `T(x) = (x + φ·x) / 2`, the notation `φ·x` means **multiplication by the ring element X** (which represents φ in the extension), NOT multiplication by the scalar 1.618.
+
+This is why:
+- In φ-reality: multiplication by X acts as ×φ ≈ ×1.618 (signal grows)
+- In ψ-reality: multiplication by X acts as ×ψ ≈ ×(-0.618) (noise shrinks and sign-flips)
+
+The trap therefore:
+- Scales φ-reality by (1+φ)/2 ≈ 1.309 per cycle
+- Scales ψ-reality by (1+ψ)/2 = (1-1/φ)/2 ≈ 0.191 per cycle → exponential decay
+
+This distinction is essential for correct implementation and analysis.
+
+---
+
+*Acknowledgement: This clarification was prompted by an independent AI analysis that identified the ambiguity. The scientific process benefits from honest scrutiny.*
