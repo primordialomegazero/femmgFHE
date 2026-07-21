@@ -24,6 +24,10 @@ Thumbs.db
 # Test binaries and temporary files
 *.bin
 test_*
+!tests/test_phi_*
+!tests/test_snc_*
+!tests/test_v5_*
+!tests/test_blueprint.cpp
 *_test
 *_fixed
 *_final
