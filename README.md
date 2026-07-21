@@ -137,6 +137,21 @@ Full proofs with mathematical derivations: **[docs/FORMAL_PROOFS.md](docs/FORMAL
 
 ---
 
+## Limitations & Questions
+
+This is active research. We have documented known limitations and open questions honestly:
+
+→ **[Limitations & Q&A](docs/LIMITATIONS_AND_QA.md)**
+
+Key points:
+- The Noise Trap scaling factor derivation needs rigorous review
+- All benchmarks use TOY security parameters
+- No third-party verification yet
+- Signal scaling by φ^n per trap cycle requires careful management
+- φ-native cyclotomic rings (M%5=0) crash OpenFHE KeyGen — unresolved
+
+*"We don't claim to have solved everything. We claim to have found something worth solving."*
+
 ## License
 
 MIT License
