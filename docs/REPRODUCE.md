@@ -1,65 +1,106 @@
-# Reproducing FEmmg-FHE Results
+# Reproduction Guide
 
-## Requirements
-- Ubuntu 22.04 (WSL2 or native)
-- 16GB RAM minimum (32GB recommended for RingDim=32768)
-- OpenSSL development libraries
+How to reproduce the key results from scratch.
 
-## Build
+---
+
+## Prerequisites
+
+- Linux (Ubuntu 20.04+ or similar)
+- g++ with C++17 support
+- CMake 3.14+
+- 8+ GB RAM (16+ recommended)
+- 5+ GB free disk space
+
+---
+
+## Step 1: Clone and Build OpenFHE
+
 ```bash
 git clone https://github.com/primordialomegazero/femmgFHE.git
 cd femmgFHE
+
+# Build OpenFHE
+cd openfhe-development
+mkdir build && cd build
+cmake .. -DWITH_OPENMP=OFF -DWITH_NATIVEOPT=ON
+make -j$(nproc)
+cd ../..
+```
+
+---
+
+## Step 2: Build FEmmG Tests
+
+```bash
 make all
 ```
 
-## Core Benchmarks
+---
 
-### 1. Asymmetric Clean + Fibonacci Compression (1000+ mults)
+## Step 3: Run Key Tests
+
+### Complete System Demo (quick, ~2 min)
 ```bash
-LD_LIBRARY_PATH=./openfhe-development/build/lib:$LD_LIBRARY_PATH ./bin/test_phi_ultimate_v2
+LD_LIBRARY_PATH=./openfhe-development/build/lib:$LD_LIBRARY_PATH ./bin/test_phi_complete
 ```
-Expected: 1000 effective multiplications, error ~10⁻¹², noise ~10⁻⁵
 
-### 2. φ vs CKKS Bootstrapping (head-to-head)
+### Clean Cycle Isolation (~1 min)
 ```bash
-LD_LIBRARY_PATH=./openfhe-development/build/lib:$LD_LIBRARY_PATH ./bin/test_phi_vs_bootstrap
+LD_LIBRARY_PATH=./openfhe-development/build/lib:$LD_LIBRARY_PATH ./bin/test_phi_clean_cycle
 ```
-Expected: φ 2.2× faster, 1,000,000× more accurate
 
-### 3. Complex Circuit Stress Test
+### Bootstrap-Free Depth (~2 min)
 ```bash
-LD_LIBRARY_PATH=./openfhe-development/build/lib:$LD_LIBRARY_PATH ./bin/test_phi_stress
+LD_LIBRARY_PATH=./openfhe-development/build/lib:$LD_LIBRARY_PATH ./bin/test_phi_bootfree_v2
 ```
-Expected: 100 steps mixed ops, error ~10⁻¹³
 
-### 4. Pre-Scaling Compensation
+### Asymmetric Clean Ratio Sweep (~1 min)
 ```bash
-LD_LIBRARY_PATH=./openfhe-development/build/lib:$LD_LIBRARY_PATH ./bin/test_phi_prescale
+LD_LIBRARY_PATH=./openfhe-development/build/lib:$LD_LIBRARY_PATH ./bin/test_phi_asymmetric_clean
 ```
-Expected: Signal bounded at 1.3, normal explodes to 10¹²
 
-### 5. φ-LWE Post-Quantum KEM
+### Bootstrap + Recovery (~5 min)
 ```bash
-./bin/phi_kem_fixedA
+LD_LIBRARY_PATH=./openfhe-development/build/lib:$LD_LIBRARY_PATH ./bin/test_phi_unlimited
 ```
-Expected: 20/20 key exchanges passed, 3584 bytes total, ~150-bit security
 
-### 6. SNC Verification (negative result)
+### Gauntlet Stress Test (~30-60 min)
 ```bash
-LD_LIBRARY_PATH=./openfhe-development/build/lib:$LD_LIBRARY_PATH ./bin/test_snc_verify
+LD_LIBRARY_PATH=./openfhe-development/build/lib:$LD_LIBRARY_PATH ./bin/test_phi_gauntlet
 ```
-Expected: BARE=SNC=SNCx5 (no noise reduction effect)
 
-## Parameter Variations
-- RingDim=4096: Default (TOY)
-- RingDim=32768: `./bin/test_phi_32768`
-- HEStd_128_classic: RingDim=262144 (CPU-intensive)
+---
 
-## Known Issues
-- 12-bit KEM compression: pack/unpack lossless but decryption fails (under investigation)
-- 3×3 iO composed circuits: NAND gate works standalone, composition needs depth optimization
-- φ-CKKS cyclotomic rings: M%5=0 works at ILDCRTParams level, crashes OpenFHE KeyGen
+## Expected Results
 
-## Contact
-Dan Joseph M. Fernandez / Primordial Omega Zero
-https://github.com/primordialomegazero
+All tests should show:
+- **φ-error** growing linearly (not exponentially)
+- **ψ-noise** remaining flat at 10⁻¹²–10⁻¹⁵
+- **All status checks showing ✓** (no DIVERGED)
+
+If you see DIVERGED or CRASHED, check:
+1. OpenFHE build (re-run cmake + make)
+2. Available RAM (close other applications)
+3. Disk space (need ~2GB free for temporary files)
+
+---
+
+## Verification Checklist
+
+- [ ] `test_phi_complete` runs without errors
+- [ ] `test_phi_bootfree_v2` reaches 150+ multiplications
+- [ ] `test_phi_unlimited` completes 3+ bootstraps
+- [ ] ψ-noise stays below 10⁻⁶ in all tests
+- [ ] φ-error growth is linear (R² > 0.99)
+
+---
+
+## Troubleshooting
+
+| Problem | Solution |
+|---------|----------|
+| "Cannot open shared object file" | Check `LD_LIBRARY_PATH` |
+| "Decryption failed" during asymmetric clean | Reduce clean ratio or increase RingDim |
+| Out of memory | Reduce RingDim to 4096 |
+| Build errors | `make clean && make all` |

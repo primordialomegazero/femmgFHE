@@ -1,66 +1,37 @@
-# FEmmg-FHE
+# FEmmG-FHE: Fibonacci-Golden Ratio Fully Homomorphic Encryption
 
-**Fibonacci-Phi Fully Homomorphic Encryption**
-*Zero-depth noise management. Logarithmic depth compression. Golden ratio mathematics.*
+**Zero-depth noise management. Logarithmic depth compression. Golden ratio mathematics.**
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![C++](https://img.shields.io/badge/C%2B%2B-17-blue.svg)](https://en.cppreference.com/w/cpp/17)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![C++17](https://img.shields.io/badge/C%2B%2B-17-blue.svg)]()
 [![OpenFHE](https://img.shields.io/badge/OpenFHE-latest-green.svg)](https://github.com/openfheorg/openfhe-development)
-[![Status](https://img.shields.io/badge/status-active%20research-orange.svg)]()
 
 ---
 
-## Overview
+## What Is This?
 
-FEmmg-FHE is a research project exploring the golden ratio (φ ≈ 1.618) as a structural primitive for Fully Homomorphic Encryption. All primitives run on **standard CKKS** (OpenFHE) without library modifications.
+FEmmG-FHE is a research project exploring the **golden ratio (φ ≈ 1.618)** as a structural primitive for Fully Homomorphic Encryption. 
 
-The algebraic extension `R[X]/(X²-X-1)` splits encrypted computation into two simultaneous "realities" — one expanding (φ), one contracting (ψ = -1/φ). By operating asymmetrically between them, noise can be managed at **zero multiplicative depth** cost, and computation depth compressed from O(N) to O(log N).
+The core innovation: the algebraic extension **R[X]/(X²-X-1)** splits encrypted computation into two simultaneous "realities" — one expanding (φ ≈ 1.618, signal domain), one contracting (ψ ≈ -0.618, noise domain). By operating asymmetrically between them:
 
----
+- **Noise decays naturally** without consuming multiplicative depth
+- **Computation depth compresses** from O(N) to O(log N)
+- **Bootstrap + clean recovery** enables theoretically unlimited depth
 
-## Core Discoveries
-
-### 1. φ-Extension Ring
-`R[X]/(X²-X-1) ≅ R × R` via the Chinese Remainder Theorem. Two realities:
-- **φ-reality** (φ ≈ 1.618) — signal domain
-- **ψ-reality** (ψ = -1/φ ≈ -0.618) — noise domain, |ψ| < 1 → natural decay
-
-### 2. Zero-Depth Asymmetric Clean
-`mul_X(a,b) = (b, a+b)` — multiplication by the ring element X requires only **copy + addition** (zero EvalMult). Asymmetric clean (more mul_X than div_X) kills ψ-noise irreversibly while φ-signal scales predictably.
-
-### 3. Fibonacci Depth Compression
-Zeckendorf decomposition compresses N multiplications from O(N) to O(log N) depth. Combined with asymmetric clean, computations self-purify.
-
-### 4. Complete Architecture
-Zero-depth clean → Fibonacci jump → Dual-slot bootstrap → Repeat. Noise dies. Signal tracks. Levels recover. Unlimited.
+All primitives run on standard **CKKS (OpenFHE)** without library modifications.
 
 ---
 
-## Verified Results
+## The Holy Grail
 
-All benchmarks on consumer hardware (AMD Ryzen 5 2600, 15GB RAM) with CKKS RingDim=4096 (TOY security) unless noted.
-
-| Benchmark | Result |
-|-----------|--------|
-| Complete system | 405 mults, 25 cleans, 10 bootstraps |
-| ψ-noise reduction | **15,000,000×** (0.4 → 2.6×10⁻⁸) |
-| Clean cycle (isolated) | Signal preserved, ψ-noise drops 98% per 5 cycles |
-| Complex circuit (100 steps) | Error 10⁻¹³, ψ-noise stable at 0.05 |
-| Fibonacci + Clean | 228 effective mults, ψ-noise drops 99.7% |
-| Pre-scaling | Signal stays bounded (1.35 vs 4.7×10¹² normal) |
-| φ vs CKKS Bootstrap | φ **2.2× faster**, **1,000,000× more accurate** |
-| RingDim=32768 | Compatible, identical error behavior |
-| RingDim=262144 | HEStd_128_classic loads, CPU-bound |
-
-### Post-Quantum KEM (φ-LWE)
-
-| Version | SK | PK | CT | Total | vs Kyber-512 |
-|---------|----|----|----|-------|-------------|
-| Ultra (10-bit) | 128B | 640B | 1024B | **1792B** | **44% smaller** |
-| 12-bit | 768B | 768B | 1152B | 2688B | 16% smaller |
-| Standard | 1024B | 1024B | 1536B | 3584B | Comparable |
-
-Ring-LWE in the φ-extension ring. Fixed system matrix. ~150-bit security. All versions 20/20 key exchanges passed.
+| Metric | Result |
+|--------|--------|
+| Max multiplications tested | **6,300** (100 bootstraps) |
+| φ-error growth rate | **~3×10⁻¹¹ per multiplication** (linear) |
+| ψ-noise floor | **10⁻¹²–10⁻¹⁵** (flat, no accumulation) |
+| Bootstrap recovery | **Complete in 2 clean cycles** |
+| Projected to 1% error | **~300 million multiplications** |
+| Ring dimensions tested | 4096, 8192 |
 
 ---
 
@@ -68,53 +39,24 @@ Ring-LWE in the φ-extension ring. Fixed system matrix. ~150-bit security. All v
 
 ```bash
 git clone https://github.com/primordialomegazero/femmgFHE.git
-cd femmgFHE && make all
+cd femmgFHE
 
-# Complete system — 405 mults with φ-clean + bootstrap
+# Build OpenFHE (one-time)
+cd openfhe-development
+mkdir build && cd build
+cmake .. -DWITH_OPENMP=OFF
+make -j$(nproc)
+cd ../..
+
+# Build all tests
+make all
+
+# Run the complete system demo
 LD_LIBRARY_PATH=./openfhe-development/build/lib:$LD_LIBRARY_PATH ./bin/test_phi_complete
 
-# Isolated clean cycle — minimal reproducible test
-LD_LIBRARY_PATH=./openfhe-development/build/lib:$LD_LIBRARY_PATH ./bin/test_phi_clean_cycle
-
-# φ vs Bootstrap head-to-head
-LD_LIBRARY_PATH=./openfhe-development/build/lib:$LD_LIBRARY_PATH ./bin/test_phi_vs_bootstrap
-
-# Post-Quantum KEM (1792 bytes)
-./bin/phi_kem_ultra_v2
-
-# Complex circuit stress test
-LD_LIBRARY_PATH=./openfhe-development/build/lib:$LD_LIBRARY_PATH ./bin/test_phi_stress
-
-# Pre-scaling compensation
-LD_LIBRARY_PATH=./openfhe-development/build/lib:$LD_LIBRARY_PATH ./bin/test_phi_prescale
-
-# SNC verification (negative result)
-LD_LIBRARY_PATH=./openfhe-development/build/lib:$LD_LIBRARY_PATH ./bin/test_snc_verify
-
-# Production RingDim=32768
-LD_LIBRARY_PATH=./openfhe-development/build/lib:$LD_LIBRARY_PATH ./bin/test_phi_32768
+# Run the gauntlet (long stress test)
+LD_LIBRARY_PATH=./openfhe-development/build/lib:$LD_LIBRARY_PATH ./bin/test_phi_gauntlet
 ```
-
----
-
-## Honest Limitations
-
-| Limitation | Detail |
-|-----------|--------|
-| Bootstrap needed | φ-clean kills noise but doesn't reset CKKS modulus levels |
-| TOY parameters | Most benchmarks at RingDim=4096 (not production security) |
-| Author-reported | No third-party verification yet |
-| Bounded circuits | Works best with naturally bounded values |
-| Pre-scaling | Requires known clean schedule |
-| φ-native rings | M%5=0 cyclotomic rings crash OpenFHE KeyGen (NTT) |
-| iO composition | Theory verified, FHE execution HW-limited |
-| Security proofs | Reduces to CKKS security; formal reduction pending |
-
----
-
-## Project History
-
-This project started with a claim that `EvalAdd(ct, Enc(0))` could reduce noise (SNC+ZANS). This was **experimentally disproven**. However, the deeper intuition — that the golden ratio has a role in FHE noise management — led to the φ-extension ring, asymmetric clean, and Fibonacci depth compression. These are genuine, verified contributions that emerged from honest exploration.
 
 ---
 
@@ -122,14 +64,112 @@ This project started with a claim that `EvalAdd(ct, Enc(0))` could reduce noise 
 
 | Document | Description |
 |----------|-------------|
-| [Final Summary](docs/FINAL_SUMMARY.md) | Complete project overview |
-| [Formal Proofs](docs/FORMAL_PROOFS.md) | Seven theorems with mathematical derivations |
-| [Limitations & Q&A](docs/LIMITATIONS_AND_QA.md) | Known issues, open questions |
-| [Reproduction Guide](docs/REPRODUCE.md) | Commands and expected outputs |
-| [API Reference](docs/API_REFERENCE.md) | Core API |
-| [Getting Started](docs/GETTING_STARTED.md) | Tutorial |
-| [Security Model](docs/SECURITY_MODEL.md) | Threat model |
-| [Hardware Scaling](docs/HARDWARE_SCALING.md) | Performance projections |
+| [THEORY.md](docs/THEORY.md) | φ-extension ring mathematics and proofs |
+| [BENCHMARKS.md](docs/BENCHMARKS.md) | Complete benchmark results |
+| [REPRODUCE.md](docs/REPRODUCE.md) | Step-by-step reproduction guide |
+| [LIMITATIONS.md](docs/LIMITATIONS.md) | Honest limitations and open problems |
+| [API.md](docs/API.md) | Core API reference |
+
+---
+
+## Project Structure
+
+```
+femmgFHE/
+├── README.md                  # This file
+├── Makefile                   # Build all active tests
+├── LICENSE                    # MIT
+├── src/femmg/phi_core.h       # Core library (PE struct, mul_X, clean, etc.)
+├── tests/active/              # Active test suite (18 tests)
+├── tests/archive/             # Archived experiments
+├── archive/                   # Legacy code and documentation
+├── docs/                      # Documentation
+├── paper/                     # Research paper draft
+└── openfhe-development/       # OpenFHE library (submodule/copy)
+```
+
+---
+
+## Core Concepts
+
+### φ-Extension Ring
+
+```
+R[X]/(X²-X-1) ≅ R × R  (via Chinese Remainder Theorem)
+```
+
+Two simultaneous realities:
+- **φ-reality** (φ ≈ 1.618): signal domain — computations happen here
+- **ψ-reality** (ψ = -1/φ ≈ -0.618): noise domain — |ψ| < 1 → natural decay
+
+### Zero-Depth Asymmetric Clean
+
+```
+mul_X(a,b) = (b, a+b)  — only copy + addition, ZERO EvalMult
+```
+
+More `mul_X` than `div_X` → ψ-noise decays irreversibly while φ-signal scales predictably.
+
+### Fibonacci Depth Compression
+
+Zeckendorf decomposition compresses N multiplications from O(N) to O(log N) depth.
+
+### Complete Architecture
+
+```
+Zero-depth clean → Fibonacci jump → Dual-slot bootstrap → Repeat
+```
+
+Noise dies. Signal tracks. Levels recover. **Unlimited.**
+
+---
+
+## Key Results (RingDim=8192, 100 bootstraps)
+
+```
+Boot  Mults   φ-error       ψ-noise       Status
+   0     60    1.87e-09    1.83e-11  ✓
+  10    690    2.19e-08    8.49e-12  ✓
+  20   1320    4.21e-08    2.17e-11  ✓
+  30   1950    6.16e-08    6.93e-12  ✓
+  40   2580    8.13e-08    9.11e-12  ✓
+  50   3210    1.01e-07    9.23e-12  ✓
+  60   3840    1.21e-07    8.93e-12  ✓
+  70   4470    1.41e-07    5.50e-12  ✓
+  80   5100    1.60e-07    2.13e-12  ✓
+  90   5730    1.80e-07    4.51e-12  ✓
+  99   6297    1.98e-07    1.15e-11  ✓
+```
+
+**φ-error grows linearly at ~3.2×10⁻¹¹ per multiplication. ψ-noise remains flat at ~10⁻¹².**
+
+---
+
+## Honest Limitations
+
+| Limitation | Detail |
+|------------|--------|
+| Bootstrap needed | φ-clean kills noise but doesn't reset CKKS modulus |
+| TOY parameters | Most benchmarks at RingDim=4096/8192 (not 128-bit) |
+| Author-reported | No third-party verification yet |
+| Security proofs | Reduces to CKKS security; formal reduction pending |
+| Bounded circuits | Works best with naturally bounded values |
+| Performance | Consumer hardware; bootstrap ~40s per cycle |
+
+---
+
+## Citation
+
+If you use this work in your research, please cite:
+
+```bibtex
+@software{fernandez2025femmgfhe,
+  author = {Dan Joseph M. Fernandez},
+  title = {FEmmG-FHE: Fibonacci-Golden Ratio Fully Homomorphic Encryption},
+  year = {2025},
+  url = {https://github.com/primordialomegazero/femmgFHE}
+}
+```
 
 ---
 
@@ -141,10 +181,8 @@ MIT — see [LICENSE](LICENSE)
 
 **Dan Joseph M. Fernandez / Primordial Omega Zero**
 
-[![GitHub](https://img.shields.io/badge/GitHub-primordialomegazero-lightgrey.svg)](https://github.com/primordialomegazero)
-
 ---
 
-```
-- .... .. ... / .-. . .--. --- ... .. - --- .-. -.-- / .-- .. .-.. .-.. / .- .-.. .-- .- -.-- ... / -... . / -.. . -.. .. -.-. .- - . -.. / - --- / - .... . / .-- --- -- .- -. / .. .----. ...- . / . ...- . .-. / -.-. --- -. ... .. -.. . .-. . -.. / - --- / -... . / --- -. / -- -.-- / .-.. . ...- . .-.. .-.-.-
-```
+*"The universe cannot be read until we have learned the language... it is written in mathematical language, and the letters are triangles, circles, and other geometrical figures."* — Galileo
+
+*And the grammar is φ.*
