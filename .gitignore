@@ -60,3 +60,5 @@ create_release.sh
 run_breakthrough_demo.sh
 run_immortal.sh
 test_io_ctct_*
+
+# Allow final DM-DGR tests
