@@ -111,7 +111,7 @@ double correct_mul(double raw, double v1, double v2) {
 
 // N adds then 1 multiply
 double correct_add_then_mul(double raw, double sum_v, double vC, int N_adds) {
-    return raw - sum_v * PSI - N_adds * PSI * vC - N_adds * PSI2 + PSI - 0.5055728090;
+    return raw - sum_v * PSI - N_adds * PSI * vC - N_adds * PSI2 + PSI - PSI * (PSI + vC);
 }
 
 // M multiplies then 1 add
