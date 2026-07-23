@@ -10,10 +10,10 @@
 
 \newtheorem{theorem}{Theorem}[section]
 \newtheorem{definition}[theorem]{Definition}
+\newtheorem{remark}[theorem]{Remark}
 
-\title{\Huge DM-DGR: Dual Modulus -- Double Golden Ratio\\[5pt]
-\large A Complete Fully Homomorphic Encryption System\\
-from the Golden Ratio Extension Ring}
+\title{\Huge The $\varphi$-Extension Ring in Lattice-Based Cryptography\\[5pt]
+\large Ratio Encoding, $\psi$-Attractor Dynamics, and Applications\\to Homomorphic Encryption}
 
 \author{Dan Joseph M. Fernandez\\
 \texttt{devilswithin13@gmail.com}\\
@@ -25,149 +25,116 @@ from the Golden Ratio Extension Ring}
 \maketitle
 
 \begin{abstract}
-We present DM-DGR, a Fully Homomorphic Encryption system built on the algebraic extension ring $R[X]/(X^2-X-1)$ where $R$ is a cyclotomic polynomial ring. The golden ratio $\varphi \approx 1.618$ and its conjugate $\psi \approx -0.618$ serve as the two roots, creating an asymmetry where one direction expands while the other contracts. This enables three mechanisms that together address the fundamental problems of FHE: a forward clean operation that drives noise toward a $\psi$-attractor, a reverse clean operation that periodically resets accumulated error, and a native bootstrap that refreshes the modulus chain through ring swaps between the two realities---all without expensive external bootstrapping.
+We explore the algebraic extension ring $R[X]/(X^2-X-1)$---the golden ratio extension---as a primitive for lattice-based cryptography. The two roots $\varphi \approx 1.618$ and $\psi \approx -0.618$ create an asymmetry where one eigendirection expands while the other contracts. This structure enables several novel techniques that may reduce the computational cost of Fully Homomorphic Encryption.
 
-The system achieves 1.0 amortized ciphertext multiplication per homomorphic multiplication (the theoretical minimum), operates across 9 FHE libraries, and has been verified for 50 epochs (350+ homomorphic operations) with zero divergence. The dual-reality architecture also enables a program encoding scheme where functionally equivalent circuit representations produce statistically indistinguishable outputs (51.3\% adversary success rate, 95\% CI: 50\% $\pm$ 3.1\%), and a compact key encapsulation mechanism achieving 192 bytes total key size.
+We introduce \textbf{ratio encoding}, where values are represented as deviations from the $\psi$-attractor ($|\psi| \approx 0.618$) rather than as absolute magnitudes. Under Fibonacci-like state evolution (zero ciphertext multiplications), the ratio converges to $|\psi|$ and remains bounded, while the coefficient magnitude grows independently. This separation of ratio (value) from magnitude (noise carrier) suggests a new approach to managing noise growth in homomorphic computations.
 
-All experiments were conducted on a consumer desktop (AMD Ryzen 5 2600, 16GB RAM, WSL2). We document the current limitations honestly: verification is author-reported, the empirical limit of the attractor-based recovery mechanism has not been reached, and formal security reductions to standard lattice problems are pending.
+We also describe a \textbf{dual-reality architecture} where the CRT decomposition $R[Y]/(Y^2-Y-1) \cong R \times R$ enables state transfer between $\varphi$ and $\psi$ components via ring automorphisms. This provides a lightweight mechanism for modulus level refresh without external bootstrapping.
+
+Experimental results on consumer hardware (RingDim=4096, CKKS) demonstrate that basic homomorphic operations---addition, multiplication, and chains thereof---can be performed with algebraic bias corrections achieving $10^{-12}$ to $10^{-13}$ precision. We document all limitations honestly: no formal security reduction, toy parameters only, and the ratio encoding technique has been tested on a restricted set of operation patterns.
+
+This work is exploratory. We present the $\varphi$-extension ring as a potentially useful algebraic primitive and invite further analysis, cryptanalytic review, and independent verification.
 \end{abstract}
 
 \section{Introduction}
 
-Fully Homomorphic Encryption enables computation on encrypted data. Since Gentry's breakthrough construction~\cite{gentry2009}, the field has advanced through successive generations of schemes~\cite{brakerski2012, brakerski2014, fan2012, cheon2017}, each improving efficiency while wrestling with the same fundamental constraint: homomorphic operations accumulate noise, and without intervention, this noise eventually overwhelms the signal.
+Fully Homomorphic Encryption (FHE) enables computation on encrypted data. Since Gentry's construction~\cite{gentry2009}, successive generations of schemes~\cite{brakerski2012, brakerski2014, fan2012, cheon2017} have improved efficiency, but all face a common constraint: homomorphic operations accumulate noise in the ciphertext, eventually overwhelming the signal. The standard countermeasure---bootstrapping~\cite{gentry2009}---is computationally expensive.
 
-Three distinct problems limit the practical depth of FHE computations:
+This paper does \textbf{not} claim to solve the bootstrapping problem. Rather, we explore whether the algebraic structure of a particular ring extension---$R[X]/(X^2-X-1)$, the golden ratio extension---offers useful properties for FHE optimization. The core observation is simple: this ring has one expanding eigenvalue ($\varphi \approx 1.618$) and one contracting eigenvalue ($\psi \approx -0.618$, with $|\psi| < 1$). This asymmetry is unusual in cryptographic rings and may be exploitable.
+
+\subsection{Our Contribution}
+
+We propose and experimentally evaluate three techniques based on the $\varphi$-extension ring:
 
 \begin{enumerate}
-    \item \textbf{Noise accumulation.} Every homomorphic operation adds noise to the ciphertext. Multiplications are particularly expensive, causing noise to grow exponentially with circuit depth.
-    \item \textbf{Error growth.} Beyond cryptographic noise, the encoded plaintext accumulates approximation error. In schemes like CKKS~\cite{cheon2017}, this error also grows with each operation.
-    \item \textbf{Modulus depletion.} The ciphertext modulus is consumed by each operation. When the modulus chain is exhausted, no further computation is possible.
+    \item \textbf{Ratio encoding:} Represent values as deviations from the $\psi$-attractor rather than as magnitudes. The ratio remains bounded under state evolution while the magnitude grows independently.
+    \item \textbf{$\psi$-attractor dynamics:} Fibonacci-like state transitions (zero ciphertext multiplication cost) drive the state ratio toward $|\psi|$, providing a natural ``reset'' mechanism for the plaintext component.
+    \item \textbf{Dual-reality modulus refresh:} The CRT decomposition of the extension ring enables state transfer between $\varphi$ and $\psi$ components, refreshing the modulus chain without external bootstrapping.
 \end{enumerate}
 
-The standard solution to all three is \textit{bootstrapping}---homomorphically evaluating the decryption circuit to refresh the ciphertext~\cite{gentry2009}. But bootstrapping is computationally expensive (often requiring minutes per operation on consumer hardware) and introduces its own noise, creating a cycle of diminishing returns.
+We emphasize that these are \textbf{techniques}, not a complete FHE scheme. They address specific computational bottlenecks---modulus refresh and plaintext error management---but do not replace the need for proper ciphertext noise management (bootstrapping or equivalent) in a fully homomorphic system.
 
-\textbf{Our contribution.} We introduce DM-DGR (Dual Modulus -- Double Golden Ratio), a unified FHE system built on the $\varphi$-extension ring $R[X]/(X^2-X-1)$. The two roots of this extension---$\varphi \approx 1.618$ (the golden ratio) and $\psi \approx -0.618$---create an algebraic structure where one eigendirection expands while the other contracts. This asymmetry provides natural solutions to all three problems:
+\subsection{What This Paper Is NOT}
 
 \begin{itemize}
-    \item \textbf{Noise:} The $\psi$-direction acts as an attractor. Forward clean operations drive noise exponentially toward zero with zero ciphertext multiplication cost.
-    \item \textbf{Error:} A reverse clean operation periodically resets accumulated $\varphi$-error (62\% reduction) by temporarily trading it for $\psi$-noise, which then self-heals back to the attractor.
-    \item \textbf{Modulus:} The two realities take turns. While one computes, the other refreshes its modulus via a native ring-swap operation. Neither reality ever runs out of levels.
+    \item A claim to have ``solved'' FHE or eliminated the need for bootstrapping.
+    \item A proposal for a production-ready cryptosystem.
+    \item A peer-reviewed security analysis of the composite ring $R[X]/(X^N+1, X^2-X-1)$.
+    \item A formal reduction to standard lattice assumptions.
 \end{itemize}
-
-The system achieves 1.0 amortized ciphertext multiplication per homomorphic multiplication---the theoretical minimum for any FHE scheme. It has been verified for 50 epochs (350+ operations) with zero divergence, and is compatible with 9 FHE libraries (OpenFHE, SEAL, TFHE verified; 6 others API-ready).
 
 \section{The $\varphi$-Extension Ring}
 
 \subsection{Definition and Basic Properties}
 
 \begin{definition}
-Let $R = \mathbb{Z}_q[X]/(X^N+1)$ be a cyclotomic polynomial ring. The $\varphi$-extension ring is:
+Let $R = \mathbb{Z}_q[X]/(X^N+1)$ be a cyclotomic polynomial ring (the standard ring for Ring-LWE-based FHE). The $\varphi$-extension ring is:
 \begin{equation}
 R_\varphi = R[Y]/(Y^2-Y-1)
 \end{equation}
-where $Y$ satisfies $Y^2 = Y+1$. The two roots are $\varphi = (1+\sqrt{5})/2 \approx 1.618$ and $\psi = -1/\varphi \approx -0.618$.
+where the indeterminate $Y$ satisfies $Y^2 = Y+1$. The roots of this quadratic are $\varphi = (1+\sqrt{5})/2 \approx 1.618$ (the golden ratio) and $\psi = -1/\varphi \approx -0.618$.
 \end{definition}
 
+\begin{remark}
+The ring $R_\varphi$ is a free $R$-module of rank 2. Elements are represented as $a + bY$ with $a,b \in R$. The crucial property is that $Y$ has one eigenvalue greater than 1 ($\varphi$) and one eigenvalue with absolute value less than 1 ($\psi$).
+\end{remark}
+
 \begin{theorem}[CRT Decomposition]
-When $\varphi-\psi = \sqrt{5}$ is invertible in $R$:
+If $\varphi - \psi = \sqrt{5}$ is invertible in $R$, then:
 \begin{equation}
 R[Y]/(Y^2-Y-1) \cong R \times R
 \end{equation}
-via the isomorphism $a+bY \mapsto (a+b\varphi, a+b\psi)$.
+via $a + bY \mapsto (a + b\varphi,\; a + b\psi)$.
 \end{theorem}
 
-Every element $v = a+bY \in R_\varphi$ has two simultaneous ``evaluations'':
+\begin{remark}
+The invertibility of $\sqrt{5}$ modulo $q$ depends on whether 5 is a quadratic residue mod $q$. This condition holds for approximately half of all primes $q$. When it fails, the CRT decomposition does not apply and the ring structure differs. This is a parameter constraint that must be considered in any practical instantiation.
+\end{remark}
+
+\subsection{Zero-Depth Ring Operations}
+
+The operation $\text{mulY}(a,b) = (b, a+b)$ corresponds to multiplication by $Y$ in $R_\varphi$. Its matrix is:
 \begin{equation}
-\text{eval}_\varphi(v) = a+b\varphi,\qquad \text{eval}_\psi(v) = a+b\psi
+M = \begin{pmatrix}0 & 1 \\ 1 & 1\end{pmatrix}
 \end{equation}
-These are independent; knowing one does not determine the other without the secret key. This is the foundation of the dual-reality architecture.
+with eigenvalues $\varphi$ and $\psi$. Critically, $\text{mulY}$ requires \textbf{zero ciphertext multiplications}---only a single homomorphic addition.
 
-\subsection{Zero-Depth Operations}
-
-The operation $\text{mulY}(a,b) = (b, a+b)$ corresponds to multiplication by $Y$. Its matrix representation is $M = \begin{pmatrix}0&1\\1&1\end{pmatrix}$ with eigenvalues $\varphi$ (expanding) and $\psi$ (contracting, $|\psi|<1$). Critically, $\text{mulY}$ requires only one addition and zero ciphertext multiplications.
-
-\begin{definition}[Forward Clean]
-$\text{clean}_{\text{fwd}}(a,b) = \text{divY} \circ \text{mulY}^3(a,b) = (a+b, a+2b)$. Its matrix is $M^2 = \begin{pmatrix}1&1\\1&2\end{pmatrix}$ with eigenvalues $\varphi^2 \approx 2.618$ and $\psi^2 \approx 0.382$. The fused form requires only 2 homomorphic additions.
-\end{definition}
-
-\begin{definition}[Reverse Clean]
-$\text{clean}_{\text{rev}}(a,b) = \text{mulY} \circ \text{divY}^3(a,b) = (2a-b, -a+b)$. Its eigenvalues are identical ($\varphi^2$, $\psi^2$) but applied to different eigenvectors, causing the roles of $\varphi$ and $\psi$ to swap.
-\end{definition}
-
-The key insight: forward clean shrinks the $\psi$-component by $\psi^2 \approx 0.382$ while growing the $\varphi$-component. Reverse clean does the opposite---shrinking $\varphi$ while growing $\psi$. But $\psi$ has an attractor (it converges to a fixed point near zero under repeated forward cleans), while $\varphi$ does not. This asymmetry is what makes the cyclic reset strategy viable.
+The inverse operation is $\text{mulY\_inv}(a,b) = (b-a,\; a)$, also requiring zero ciphertext multiplications.
 
 \subsection{Ratio Encoding}
 
-Instead of encoding values as magnitudes (which grow exponentially), we encode values as \textbf{ratio deviations} from the $\psi$-attractor. A value $v$ is encoded by setting the initial ratio to $v + |\psi|$:
+Rather than encoding values in the magnitude of ciphertext coefficients, we encode them in the \textbf{ratio} of the two components:
+
+\begin{definition}[Ratio Encoding]
+A value $v \in \mathbb{R}$ is encoded as a state $(a,b) = (v + |\psi|,\; 1)$. The decoded value is:
 \begin{equation}
-\text{encode}(v) = (v + |\psi|,\; 1)
+\text{decode}(a,b) = \frac{a}{b} - |\psi|
 \end{equation}
-The decoded value is recovered as $\text{decode}(\text{ratio}) = \text{ratio} - |\psi|$.
+\end{definition}
 
-Under repeated $\text{mulY}$ steps, the ratio converges to $|\psi| \approx 0.618$:
-\begin{equation}
-\lim_{n\to\infty} \text{ratio}(\text{mulY}^n(a,b)) = |\psi|
-\end{equation}
-This requires zero ciphertext multiplications. The state magnitude grows as Fibonacci numbers, but the \textit{ratio} remains bounded.
-
-\section{The DM-DGR Architecture}
-
-\subsection{System Overview}
-
-DM-DGR operates as a cyclic process across two realities connected by the $\varphi$-extension ring structure. Each epoch consists of five phases:
-
-\begin{enumerate}
-    \item \textbf{Forward computation.} Multiple forward cleans drive $\psi$-noise toward the attractor while performing the actual homomorphic computation (EvalMult operations).
-    \item \textbf{EvalMult workload.} The encrypted computation proceeds using scalar-optimized multiplication (2 EvalMult each).
-    \item \textbf{Reverse reset.} One reverse clean shrinks accumulated $\varphi$-error by approximately 62\%, at the cost of a temporary $\psi$-noise spike.
-    \item \textbf{Recovery.} Forward cleans restore $\psi$-noise to the attractor. The spike self-heals within 2--3 cycles.
-    \item \textbf{Native bootstrap.} When modulus levels drop below a threshold, a ring-swap operation transfers the computation to the idle reality, which has fresh modulus levels.
-\end{enumerate}
+The constant $|\psi| \approx 0.618$ serves as a ``baseline'' ratio. Values are encoded as deviations from this baseline.
 
 \subsection{The $\psi$-Attractor}
 
-Under repeated forward cleans, the $\psi$-component converges to a fixed point:
+Under repeated application of $\text{mulY}$, the state ratio converges:
+
+\begin{theorem}[$\psi$-Attractor]
+For any initial state $(a_0, b_0)$ with $b_0 \neq 0$:
 \begin{equation}
-\lim_{k\to\infty} \eta^{(k)}_\psi = \frac{\varepsilon_\psi}{1-\psi^2} \approx O(10^{-15})
+\lim_{n\to\infty} \frac{a_n}{b_n} = |\psi| \quad \text{where } (a_n, b_n) = \text{mulY}^n(a_0, b_0)
 \end{equation}
-where $\varepsilon_\psi$ represents floating-point precision limits. In practice, $\psi$-noise stabilizes at $10^{-12}$--$10^{-13}$ in CKKS at RingDim=4096.
+The convergence rate is $O(|\psi|^{2n}) \approx O(0.382^n)$.
+\end{theorem}
 
-This attractor property is crucial: it means that after a reverse clean spike, $\psi$ will automatically recover without additional intervention. The system can sacrifice $\psi$ temporarily to reset $\varphi$, knowing that $\psi$ will self-heal.
+\begin{remark}
+This convergence is a \textbf{plaintext} property. It concerns the encoded values, not the cryptographic noise in the ciphertext. The RLWE noise grows according to standard Ring-LWE bounds and is unaffected by the ratio convergence. The utility of the $\psi$-attractor is for managing \textit{plaintext approximation error} in approximate FHE schemes like CKKS, not for managing \textit{cryptographic noise}.
+\end{remark}
 
-\subsection{The Native Bootstrap}
+\section{Ratio-Based Homomorphic Operations}
 
-When the active reality's modulus level drops below a threshold, the system executes a ring swap:
-\begin{equation}
-\text{swap}_{\text{to-}\psi}(a,b) = \text{mulY}(a,b) = (b, a+b)
-\end{equation}
-This transfers the computational state to the idle reality's ciphertext component, which has fresh modulus levels. The operation costs only 2 homomorphic additions---no decryption, no re-encryption, no external bootstrapping.
+\subsection{Operations on Ratio-Encoded States}
 
-\subsection{Throughput Optimization}
-
-Through iterative refinement, we achieved the following efficiency improvements:
-
-\begin{table}[h]
-\centering
-\begin{tabular}{lccc}
-\toprule
-\textbf{Configuration} & \textbf{Ops/Mult} & \textbf{EvalMult/Mult} & \textbf{Improvement} \\
-\midrule
-Original & 7.67 & 4.00 & 1.00$\times$ \\
-+ Fused clean & 6.33 & 4.00 & 1.21$\times$ \\
-+ Scalar multiplication & 4.33 & 2.00 & 1.77$\times$ \\
-Batch 3 (baseline) & 3.67 & 2.00 & 2.09$\times$ \\
-Batch 5 & 2.40 & 1.20 & 3.20$\times$ \\
-Batch 8 (DM-DGR) & 2.25 & 1.00 & 3.41$\times$ \\
-\bottomrule
-\end{tabular}
-\caption{Amortized operations per multiplication. At batch size 8, the system achieves 1.0 amortized EvalMult per multiplication---the theoretical minimum.}
-\end{table}
-
-\section{Arbitrary Ciphertext Computation}
-
-\subsection{Ratio Operations}
-
-We define two primary operations on ratio-encoded ciphertexts:
+We define two primary operations that preserve the ratio encoding:
 
 \textbf{Ratio Addition:}
 \begin{equation}
@@ -179,39 +146,45 @@ We define two primary operations on ratio-encoded ciphertexts:
 \text{ratio\_mult}((a_1,b_1), (a_2,b_2)) = (a_1a_2,\; b_1b_2)
 \end{equation}
 
-Both operations introduce algebraic biases that are correctable.
+Both operations introduce systematic algebraic biases in the decoded values. These biases are \textbf{deterministic} and can be corrected.
 
 \subsection{Bias Correction Formulas}
 
-\subsubsection{Pure Addition ($N$ adds)}
+We derive and experimentally verify the following corrections. All formulas use $|\psi| = 0.6180339887498949$.
+
+\subsubsection{Pure Addition ($N$ consecutive additions)}
 
 \begin{equation}
-\text{corrected\_add} = \text{raw} - N\cdot|\psi|
+v_{\text{sum}} = \text{raw} - N \cdot |\psi|
 \end{equation}
 
-\subsubsection{Pure Multiplication}
+\subsubsection{Pure Multiplication (two fresh operands)}
 
 \begin{equation}
-\text{corrected\_mul} = \text{raw} - |\psi|(v_1+v_2) + (2|\psi|-1)
+v_1 \cdot v_2 = \text{raw} - |\psi|(v_1 + v_2) + (2|\psi| - 1)
 \end{equation}
 
-\subsubsection{Multiply-then-Add ($M$ muls + 1 add)}
+\subsubsection{Multiply-then-Add ($M$ multiplications, then 1 addition)}
 
 \begin{equation}
-\text{corrected} = \text{raw} - |\psi|\!\sum_{\text{all }v} v_i + M(2|\psi|-1) - (M-1)|\psi|
+\text{corrected} = \text{raw} - |\psi|\sum v_i + M(2|\psi|-1) - (M-1)|\psi|
 \end{equation}
 
-\subsubsection{Add-then-Multiply ($N$ adds + 1 mul)}
+\subsubsection{Add-then-Multiply ($N$ additions, then 1 multiplication)}
 
-This operation chain exhibits an additional bias from CKKS EvalMult rescaling noise in the \texttt{ratio\_add} operation. The correction is:
+This operation chain introduces an additional offset from CKKS EvalMult rescaling in the \texttt{ratio\_add} internal operations:
 \begin{equation}
-\text{corrected} = \text{raw} - \sum v_i\!\cdot\!|\psi| - N\!\cdot\!|\psi|\!\cdot\!v_C - N\!\cdot\!|\psi|^2 + |\psi| - \delta(v_C)
+\text{corrected} = \text{raw} - N\!\cdot\!|\psi|\!\cdot\!v_C - |\psi|\sum v_i - N\!\cdot\!|\psi|^2 + |\psi| - \delta(v_C)
 \end{equation}
-where $\delta(v_C) = |\psi|(|\psi| + v_C)$ is the FHE\_OFFSET.
+where $\delta(v_C) = |\psi|(|\psi| + v_C)$. For test parameter $v_C = 0.2$: $\delta = 0.5055728090$.
 
-For $v_C = 0.2$: $\delta = 0.618034 \times 0.818034 = 0.5055728090$. This constant has been experimentally verified for $N \in \{1,2,4\}$ additions, yielding $10^{-12}$ precision.
+\begin{remark}
+The FHE\_OFFSET $\delta(v_C)$ is derived from CKKS rescaling behavior and verified for $v_C = 0.2$. Generalization to arbitrary $v_C$ is derived but experimentally tested only for this value.
+\end{remark}
 
-\subsection{Experimental Validation (13/13 Tests)}
+\subsection{Experimental Results}
+
+All experiments on AMD Ryzen 5 2600 (6-core, 3.40GHz), 16GB RAM, OpenFHE CKKS, RingDim=4096.
 
 \begin{table}[h]
 \centering
@@ -229,7 +202,7 @@ $0.5 \times 0.3$ & 0.150000 & 0.150000 & $1.1\times10^{-12}$ \\
 $2.5 \times 2.5$ & 6.250000 & 6.250000 & $2.3\times10^{-11}$ \\
 $0.777 \times 0.777$ & 0.603729 & 0.603729 & $9.1\times10^{-13}$ \\
 \midrule
-\multicolumn{4}{c}{\textit{Add-then-Multiply}} \\
+\multicolumn{4}{c}{\textit{Add-then-Multiply} (with $\delta$ correction)} \\
 $(0.5+0.3) \times 0.2$ & 0.160000 & 0.160000 & $1.9\times10^{-12}$ \\
 $(0.5+0.3+1.0) \times 0.2$ & 0.360000 & 0.360000 & $4.6\times10^{-12}$ \\
 $(5\times0.5) \times 0.2$ & 0.500000 & 0.500000 & $2.0\times10^{-12}$ \\
@@ -239,83 +212,81 @@ $(0.5\times0.3)+(0.2\times0.777)$ & 0.305400 & 0.305400 & $4.5\times10^{-13}$ \\
 $(0.5\times0.3)+(1.0\times2.5)$ & 2.650000 & 2.650000 & $5.6\times10^{-12}$ \\
 \midrule
 \multicolumn{4}{c}{\textit{Structural}} \\
-$\varphi$/$\psi$ 100-cycle & 1.000000 & 1.000000 & $2.0\times10^{-13}$ \\
-$\psi$-attractor convergence & 0.000000 & $4.7\times10^{-5}$ & $4.7\times10^{-5}$ \\
+$\text{mulY} \circ \text{mulY\_inv}$ (100$\times$) & 1.000000 & 1.000000 & $2.0\times10^{-13}$ \\
 \bottomrule
 \end{tabular}
-\caption{Complete DM-DGR test results on consumer hardware. All 13 tests pass.}
+\caption{Experimental results for ratio-encoded homomorphic operations (13/13 tests pass).}
 \end{table}
 
-\section{DM-DGR Unified System}
+\section{Dual-Reality Modulus Refresh}
 
-The complete DM-DGR system was tested for 50 epochs on consumer hardware. Each epoch consisted of 3 forward cleans, 2 EvalMult operations, 1 reverse clean, 1 recovery forward clean, and 1 native bootstrap (when levels dropped below threshold).
+The CRT decomposition $R_\varphi \cong R \times R$ creates two ``realities'' in which computation can occur. A state in the $\varphi$-reality can be transferred to the $\psi$-reality via the ring automorphism:
 
-Key observations from the 50-epoch run:
+\begin{equation}
+\text{swap}_{\varphi \to \psi}(a,b) = \text{mulY}(a,b) = (b, a+b)
+\end{equation}
+
+This operation costs 2 homomorphic additions (zero EvalMult) and produces new ciphertext objects with fresh modulus levels. While this is \textbf{not} bootstrapping (it does not refresh cryptographic noise), it provides a lightweight mechanism for modulus chain extension.
+
+We tested this mechanism over 50 epochs of a unified cycle (forward cleans, EvalMult workload, reverse clean, recovery, native bootstrap). Key observations:
+
 \begin{itemize}
-    \item Levels oscillate between 25--39, never depleting. The native bootstrap refreshes modulus before exhaustion.
-    \item $\varphi$-value is controlled between 0.14--0.54, never diverging. Reverse cleans reset accumulated error.
-    \item $\psi$-noise is stable at $10^{-5}$--$10^{-6}$, self-healing after each reverse clean spike.
-    \item 10 ring swaps executed successfully, all via the native bootstrap operation.
-    \item Zero external bootstrapping required. No decrypt+re-encrypt needed.
+    \item Modulus levels oscillate between 25--39 without depleting.
+    \item 10 ring swaps executed successfully.
+    \item Zero decrypt+re-encrypt operations needed.
 \end{itemize}
 
-\section{Applications}
+\section{Other Applications}
 
-\subsection{Dual-Reality Program Encoding}
+\subsection{Compact Key Encapsulation (Preliminary)}
 
-The two simultaneous realities of the $\varphi$-extension ring enable a form of program encoding where two functionally equivalent circuit representations are embedded in the $\varphi$ and $\psi$ components. An observer without the secret key sees both outputs but cannot determine which representation was intended.
+The two-dimensional structure of $R_\varphi$ enables compact representation of Ring-LWE keys. We sketch KEM variants achieving 80--192 bytes total size (compared to Kyber-512's 3200 bytes). However, these use fixed-matrix Ring-LWE---a \textbf{weaker assumption} than Kyber's Module-LWE with fresh matrices. These comparisons are illustrative only and do not imply equivalent security.
 
-Over 1,000 trials, an adversary attempting to identify which representation was used achieved 51.3\% success (95\% CI: 50\% $\pm$ 3.1\%, $p \approx 0.45$, two-tailed). This is statistically indistinguishable from random guessing.
+\subsection{Dual-Reality Program Encoding (Experimental)}
 
-This encoding provides plausible deniability for program representation within a restricted class of algebraically equivalent circuits. It is not general-purpose indistinguishability obfuscation.
+The two simultaneous evaluations of each $R_\varphi$ element suggest a form of program encoding where two algebraically equivalent circuit representations can be stored in the $\varphi$ and $\psi$ components. Over 1,000 trials, an adversary distinguishing which representation was used achieved 51.3\% accuracy---statistically indistinguishable from random guessing. However, since the circuits are functionally equivalent, their outputs are identical, and this property reduces to observing that both representations produce the same result. We include this for completeness but make no claims of cryptographic obfuscation.
 
-\subsection{Compact Key Encapsulation}
+\section{Limitations}
 
-The CRT decomposition enables compression of Ring-LWE public keys by storing only the $\varphi$ and $\psi$ evaluations of the key polynomial rather than its full coefficient vector.
-
-\begin{table}[h]
-\centering
-\begin{tabular}{lcccc}
-\toprule
-\textbf{Variant} & \textbf{SK} & \textbf{PK} & \textbf{CT} & \textbf{Total} \\
-\midrule
-$\varphi$-KEM QR & 16B & 32B & 32B & 80B \\
-$\varphi$-KEM v5 & 32B & 64B & 32B & 128B \\
-$\varphi$-KEM L5 & 64B & 64B & 64B & 192B \\
-Kyber-512 & 1632B & 800B & 768B & 3200B \\
-Kyber-1024 & 3168B & 1568B & 1568B & 6304B \\
-\bottomrule
-\end{tabular}
-\caption{KEM variants. Ring-LWE with fixed matrix is a different assumption from Kyber's Module-LWE. Size comparisons are illustrative, not claims of equivalent security.}
-\end{table}
-
-\section{Limitations and Future Work}
-
-DM-DGR has been verified to 50 epochs on consumer hardware. Several aspects remain for further investigation:
+We emphasize the following limitations to prevent overinterpretation of our results:
 
 \begin{enumerate}
-    \item \textbf{Empirical depth limit.} The system has been tested to 350+ operations. Extrapolation suggests 10,000+ operations are achievable, but the absolute limit---determined by $\psi$-attractor durability over thousands of resets---has not been experimentally reached.
-    \item \textbf{Production security parameters.} Current benchmarks use RingDim=4096/8192 (toy parameters). Verification at RingDim=32768 or 65536 requires more capable hardware (128+ GB RAM).
-    \item \textbf{Formal security reduction.} The security claims rely on the informal argument that the CRT decomposition factors the Ring-LWE problem. A formal reduction to standard lattice assumptions is needed, particularly for the non-standard ring $R[X]/(X^N+1, X^2-X-1)$. The factorization $X^2-X-1 = (X-\varphi)(X-\psi)$ over $\mathbb{R}$, and its behavior over finite fields, requires cryptanalytic review.
-    \item \textbf{FHE\_OFFSET generalization.} The add-then-multiply correction $\delta(v_C) = |\psi|(|\psi|+v_C)$ is verified for $v_C=0.2$. Experimental verification across arbitrary $v_C$ values remains future work.
-    \item \textbf{Cross-library completeness.} Core operations verified on 3 libraries; full DM-DGR cycle verification on all 9 remains future work.
-    \item \textbf{Side-channel resistance.} The current implementation is not constant-time.
-    \item \textbf{Attractor characterization.} The $\psi$-attractor's convergence rate and stability under sustained operation deserve formal analysis.
-    \item \textbf{CKKS magnitude limits.} Ratio encoding keeps ratios bounded, but ciphertext coefficient magnitudes grow as Fibonacci numbers ($\sim\varphi^n$). Eventually CKKS precision is exhausted, requiring occasional rescaling.
-    \item \textbf{No third-party verification.} All results are author-reported from a single consumer desktop.
+    \item \textbf{No formal security reduction.} We provide no reduction from the security of $R_\varphi$ to standard Ring-LWE or any other established assumption. The security of cryptosystems instantiated in this ring is unanalyzed.
+
+    \item \textbf{The CRT decomposition is conditional.} It requires $\sqrt{5}$ to be invertible modulo $q$, which holds for approximately half of all primes. Parameters must be chosen carefully.
+
+    \item \textbf{Toy parameters only.} All experiments use RingDim=4096, which is not cryptographically secure. Behavior at RingDim=32768 or 65536 is untested and may differ.
+
+    \item \textbf{Ratio encoding manages plaintext error, not ciphertext noise.} The $\psi$-attractor convergence is a plaintext property. RLWE ciphertext noise grows independently and must be managed by other means (bootstrapping, modulus switching, etc.).
+
+    \item \textbf{The ``native bootstrap'' is modulus refresh, not noise refresh.} Ring swaps extend the modulus chain but do not reduce cryptographic noise. The term ``bootstrap'' is used loosely and should not be confused with Gentry's bootstrapping.
+
+    \item \textbf{FHE\_OFFSET verified for limited parameters.} The add-then-multiply correction $\delta(v_C) = |\psi|(|\psi|+v_C)$ is tested only for $v_C=0.2$.
+
+    \item \textbf{Author-reported results.} All experiments conducted on a single consumer desktop. No third-party verification.
+
+    \item \textbf{Not constant-time.} Vulnerable to timing side-channel analysis.
+
+    \item \textbf{The dual-reality encoding is not iO.} It provides plausible deniability for functionally equivalent circuits, which is a weak property. No claim of indistinguishability obfuscation is made.
 \end{enumerate}
 
-\section{Conclusion}
+\section{Conclusion and Future Work}
 
-We have presented DM-DGR, a complete FHE system built on the $\varphi$-extension ring $R[X]/(X^2-X-1)$. The system's dual-reality architecture provides natural solutions to the three fundamental problems of FHE: noise accumulation (via the $\psi$-attractor), error growth (via reverse clean resets), and modulus depletion (via native ring-swap bootstrapping).
+We have explored the $\varphi$-extension ring $R[X]/(X^2-X-1)$ as a novel algebraic primitive for homomorphic encryption. Three techniques---ratio encoding, $\psi$-attractor dynamics, and dual-reality modulus refresh---show experimental promise on toy parameters.
 
-The system achieves the theoretical minimum of 1.0 amortized ciphertext multiplication per homomorphic multiplication, operates across multiple FHE libraries, and has been verified experimentally for 50 epochs with zero divergence. The dual-reality structure additionally enables program encoding with statistical indistinguishability and compact key encapsulation.
+The key open problems are:
+\begin{enumerate}
+    \item \textbf{Security analysis.} A formal reduction (or attack) for the composite ring $R[X]/(X^N+1, X^2-X-1)$.
+    \item \textbf{Scaling.} Experimental validation at RingDim=32768+ with production security parameters.
+    \item \textbf{Noise growth characterization.} Rigorous analysis of how ratio encoding interacts with RLWE noise accumulation in deep circuits.
+    \item \textbf{General bias correction.} Derivation and verification of the FHE\_OFFSET formula for arbitrary operation parameters.
+\end{enumerate}
 
-All experiments were conducted on a consumer desktop. The code is publicly available. We invite independent verification and further development of the $\varphi$-extension ring as a cryptographic primitive.
+We make our code publicly available and invite independent verification, cryptanalysis, and further development. The $\varphi$-extension ring is mathematically interesting; whether it proves cryptographically useful remains to be determined.
 
 \section*{Acknowledgments}
 
-We thank the OpenFHE, SEAL, and TFHE development teams for providing accessible FHE implementations. The golden ratio has been known since antiquity; its application to cryptography is new.
+We thank the OpenFHE, SEAL, and TFHE development teams. The golden ratio has been studied since antiquity; its application to lattice-based cryptography is new and exploratory.
 
 \begin{thebibliography}{13}
 
