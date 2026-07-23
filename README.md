@@ -194,18 +194,6 @@ All results are reproducible on this hardware. No cloud, no cluster, no special 
 
 ---
 
-## License
-
-MIT — see [LICENSE](LICENSE)
-
-## Author
-
-**Dan Joseph M. Fernandez / Primordial Omega Zero**
-
----
-
-```text
-```
-
 ```text
 - .... .. ... / .-. . .--. --- ... .. - --- .-. -.-- / .-- .. .-.. .-.. / .- .-.. .-- .- -.-- ... / -... . / -.. . -.. .. -.-. .- - . -.. / - --- / - .... . / .-- --- -- .- -. / .. .----. ...- . / . ...- . .-. / -.-. --- -. ... .. -.. . .-. . -.. / - --- / -... . / --- -. / -- -.-- / .-.. . ...- . .-.. .-.-.-
+```
