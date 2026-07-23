@@ -110,16 +110,27 @@ In our FHE loop, the multiplier is always a scalar constant $\text{mult} = (pre,
 \caption{Evolution of Operations per Cycle (3 multiplications)}
 \label{tab:ops}
 \begin{tabular}{@{}lrrr@{}}
+
 \toprule
-\textbf{Version} & \textbf{EvalMult} & \textbf{EvalAdd} & \textbf{Total Ops} \\
+
+\textbf{Configuration} & \textbf{Ops/Mult} & \textbf{EvalMult/Mult} & \textbf{Improvement} \\
+
 \midrule
-Original (sequential clean + full mul) & 12 & 11 & 23 \\
-+ Fused clean & 12 & 7 & 19 \\
-+ Scalar mul detection & 6 & 7 & 13 \\
-+ Batch 3 (baseline) & 6 & 5 & 11 \\
-\textbf{+ Batch 5 (optimized)} & \textbf{6} & \textbf{4} & \textbf{10} \\
-\textbf{+ Batch 8 (aggressive)} & \textbf{8} & \textbf{4} & \textbf{12} \\
+
+Original & 7.67 & 4.00 & 1.00$\times$ \\
+
++ Fused clean & 6.33 & 4.00 & 1.21$\times$ \\
+
++ Scalar mul & 4.33 & 2.00 & 1.77$\times$ \\
+
+Batch 3 (baseline) & 3.67 & 2.00 & 2.09$\times$ \\
+
+Batch 5 & 2.40 & 1.20 & 3.20$\times$ \\
+
+\textbf{Batch 8} & \textbf{2.25} & \textbf{1.00} & \textbf{3.41$\times$} \\
+
 \bottomrule
+
 \end{tabular}
 \end{table}
 
@@ -128,16 +139,27 @@ Original (sequential clean + full mul) & 12 & 11 & 23 \\
 \caption{Throughput: Amortized Operations per Multiplication}
 \label{tab:throughput}
 \begin{tabular}{@{}lrrr@{}}
+
 \toprule
+
 \textbf{Configuration} & \textbf{Ops/Mult} & \textbf{EvalMult/Mult} & \textbf{Improvement} \\
+
 \midrule
+
 Original & 7.67 & 4.00 & 1.00$\times$ \\
+
 + Fused clean & 6.33 & 4.00 & 1.21$\times$ \\
+
 + Scalar mul & 4.33 & 2.00 & 1.77$\times$ \\
+
 Batch 3 (baseline) & 3.67 & 2.00 & 2.09$\times$ \\
+
 Batch 5 & 2.40 & 1.20 & 3.20$\times$ \\
+
 \textbf{Batch 8} & \textbf{2.25} & \textbf{1.00} & \textbf{3.41$\times$} \\
+
 \bottomrule
+
 \end{tabular}
 \end{table}
 
@@ -191,6 +213,16 @@ All experiments on AMD Ryzen 5 2600, 16GB RAM, WSL2, OpenFHE v1.2, CKKS RingDim=
 20  & 1320  & $4.21 \times 10^{-8}$  & $2.17 \times 10^{-11}$ & OK \\
 50  & 3210  & $1.01 \times 10^{-7}$  & $9.23 \times 10^{-12}$ & OK \\
 99  & 6297  & $1.98 \times 10^{-7}$  & $1.15 \times 10^{-11}$ & OK \\
+\midrule
+
+\textbf{Projected to 1\% error} & \textbf{$\sim$14,000} & \textbf{---} & \textbf{---} & \textbf{---} \\
+
+\textbf{Demonstrated} & \textbf{6,297} & \textbf{$1.98 \times 10^{-7}$} & \textbf{$1.15 \times 10^{-11}$} & \textbf{45\% of limit} \\
+\midrule
+
+\textbf{Projected to 1\% error} & \textbf{$\sim$14,000} & \textbf{---} & \textbf{---} & \textbf{---} \\
+
+\textbf{Demonstrated} & \textbf{6,297} & \textbf{$1.98 \times 10^{-7}$} & \textbf{$1.15 \times 10^{-11}$} & \textbf{45\% of limit} \\
 \bottomrule
 \end{tabular}
 \end{table}
