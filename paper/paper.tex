@@ -154,7 +154,7 @@ All experiments on AMD Ryzen 5 2600, 16GB RAM, WSL2 on Windows 11, OpenFHE v1.2,
 
 \begin{table}[h]
 \centering
-\caption{100-Bootstrap Run (RingDim=8192, Clean=3:1)}
+\caption{99-Bootstrap Run (RingDim=8192, Clean=3:1)}
 \label{tab:stress}
 \begin{tabular}{@{}rrrrr@{}}
 \toprule
@@ -327,6 +327,8 @@ We document limitations honestly:
     \item \textbf{Cross-library verification is API-level only.} We verified that required operations exist across libraries, not full correctness of $\varphi$-transform under each library's encoding.
     \item \textbf{Not constant-time.} Current implementations are not hardened against side-channel attacks.
     \item \textbf{Bootstrap latency.} $\sim$40 seconds per bootstrap on consumer CPU.
+    \item \textbf{No formal security reduction.} The security of all three primitives relies on informal arguments reducing to RLWE hardness. Formal reductions to standard lattice problems have not been established. This is the most significant theoretical gap in the current work.
+
     \item \textbf{Zeckendorf compression scope.} Applies to exponentiation chains, not arbitrary sequential multiplications.
 \end{enumerate}
 
@@ -335,7 +337,7 @@ We document limitations honestly:
 We have explored the $\varphi$-extension ring $R[X]/(X^2-X-1)$ as a primitive for lattice-based cryptography. Our exploration yielded:
 
 \begin{itemize}
-    \item A noise attenuation technique for FHE that uses zero multiplication depth operations, enabling extended computation chains (demonstrated to 6,300 multiplications, projected to $\sim$14,000 practical limit)
+    \item A noise attenuation technique for FHE that uses zero multiplication depth operations, enabling extended computation chains (demonstrated to 6,297 multiplications, projected to $\sim$14,000 practical limit)
     \item A dual-reality program encoding that provides plausible deniability for evaluation strategy (not general iO)
     \item A compact KEM construction trading assumption strength for key size (192 bytes with RLWE + fixed A)
 \end{itemize}
