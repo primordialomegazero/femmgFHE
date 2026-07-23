@@ -91,7 +91,7 @@ Boot  Mults   φ-error       ψ-noise       Status
 
 ## What We Got Wrong (And Fixed)
 
-1. **Error growth:** Initially claimed "linear." It's exponential with a very small base. Corrected in paper v4.
+1. **Error growth:** Initially claimed "linear." It's exponential with a very small base. Corrected in the current version.
 2. **iO terminology:** Initially called our encoding "indistinguishability obfuscation." It's not. Renamed to "dual-reality program encoding."
 3. **Zeckendorf scope:** Initially implied general depth compression. Actually applies to exponentiation chains. Scoped correctly now.
 
@@ -183,7 +183,7 @@ No cloud. No server cluster. A mid-range gaming PC from 2018.
 
 ## Paper
 
-Full paper: `paper/paper.pdf` (9 pages, 16 references)
+Full paper: `paper/paper.tex` (compile with pdflatex)
 
 The paper documents all findings with complete mathematical derivations, experimental data, and honest limitations. We corrected significant errors between versions (see Section 1: "What We Did NOT Find").
 
