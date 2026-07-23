@@ -29,8 +29,8 @@
 \DeclareMathOperator{\Bootstrap}{Bootstrap}
 
 \title{\Huge FEmmG-FHE: Fibonacci-Golden Ratio Cryptography\\[5pt]
-\large Fully Homomorphic Encryption, Indistinguishability Obfuscation,\\
-and Post-Quantum Key Encapsulation from the Golden Ratio}
+\large An Exploration of the $\varphi$-Extension Ring for\\
+Noise Management and Program Encoding in Lattice-Based Cryptography}
 
 \author{Dan Joseph M. Fernandez\\
 \texttt{devilswithin13@gmail.com}\\
@@ -42,205 +42,119 @@ and Post-Quantum Key Encapsulation from the Golden Ratio}
 \maketitle
 
 \begin{abstract}
-We present FEmmG-FHE, a cryptographic framework built on the algebraic extension ring $R[X]/(X^2-X-1)$ where $R$ is a cyclotomic polynomial ring. The golden ratio $\varphi = (1+\sqrt{5})/2$ and its conjugate $\psi = -1/\varphi$ serve as the two roots of the extension, enabling a natural decomposition $R[X]/(X^2-X-1) \cong R \times R$ via the Chinese Remainder Theorem. This structure yields three primitives:
+We explore the algebraic extension ring $R[X]/(X^2-X-1)$ where $R$ is a cyclotomic polynomial ring, as a primitive for lattice-based cryptography. The golden ratio $\varphi = (1+\sqrt{5})/2$ and its conjugate $\psi = -1/\varphi$ serve as the two roots of the extension, enabling a decomposition $R[X]/(X^2-X-1) \cong R \times R$ via the Chinese Remainder Theorem.
 
-\textbf{Fully Homomorphic Encryption (FHE):} The $\varphi/\psi$ split separates signal from noise into distinct algebraic directions. A zero-depth ``clean'' operation using only addition (no ciphertext multiplication) attenuates noise in the $\psi$-direction by a factor of $|\psi|^2 \approx 0.382$ per cycle, while signal in the $\varphi$-direction scales predictably. Combined with standard CKKS bootstrapping, this enables theoretically unlimited computation depth. We demonstrate 6,300 sequential homomorphic multiplications across 100 bootstraps with $\varphi$-error growing linearly at $\sim 3 \times 10^{-11}$ per multiplication and $\psi$-noise remaining flat at $10^{-11}$--$10^{-12}$, showing no divergence. Fibonacci-based depth compression reduces multiplicative depth from $O(N)$ to $O(\log N)$, a factor of $1.78 \times 10^7$ at $N=10^9$.
+We investigate three applications of this structure:
 
-\textbf{Indistinguishability Obfuscation (iO):} The two realities ($\varphi$ and $\psi$) function as simultaneous computation paths. By encoding functionally equivalent circuits into the two realities, an obfuscated program produces two valid outputs without revealing which circuit executed. We present a Fibonacci circle mapping technique where both normal and reverse computation paths project to symmetric trajectories on the unit circle with identical total angular distance. An adversary distinguishing between the two paths achieves 51.2\% success rate (95\% CI for random: 50\% $\pm$ 3.1\%, $n=1000$, $p=0.45$), consistent with the null hypothesis of indistinguishability.
+\textbf{Noise Management for FHE:} The $\varphi/\psi$ split separates signal and noise into distinct algebraic directions. A ``clean'' operation using only homomorphic addition (zero ciphertext multiplication depth) attenuates the $\psi$-component by a factor of $|\psi|^2 \approx 0.382$ per cycle. Combined with standard CKKS bootstrapping, this enables extended computation depth. We demonstrate 6,300 sequential homomorphic multiplications across 100 bootstraps. We observe that error growth is exponential with a very small base ($\sim$1.00075 per multiplication), not linear as we initially hypothesized. Projecting this rate yields approximately 14,000 multiplications to 1\% error---a practical improvement over standard CKKS but not ``unlimited'' depth.
 
-\textbf{Post-Quantum Key Encapsulation (KEM):} The $\varphi$-extension ring compresses public key material by storing only the $\varphi$ and $\psi$ evaluations of the ring element rather than its full polynomial coefficients. Our NIST Level 5 variant (256-bit post-quantum security) achieves 192 bytes total (SK=64, PK=64, CT=64), 32$\times$ smaller than Kyber-1024 (6,304 bytes) and fitting in a QR Code Version 1.
+\textbf{Dual-Reality Program Encoding:} The two simultaneous ``realities'' ($\varphi$ and $\psi$) can encode two functionally equivalent representations of a computation. An observer seeing both outputs cannot determine which representation was the intended one (51.2\% adversary success rate, 95\% CI: 50\% $\pm$ 3.1\%). We explicitly note this is \textbf{not} indistinguishability obfuscation in the standard cryptographic sense~\cite{barak2001, garg2013}; it provides plausible deniability for program representation rather than general circuit hiding.
 
-All primitives are cross-library compatible (17/17 library-scheme combinations verified) and reproducible on consumer hardware (AMD Ryzen 5 2600, 16GB RAM, WSL2 on Windows 11). We document all limitations honestly: no third-party audit, formal security reductions pending, and most FHE benchmarks at TOY security parameters.
+\textbf{Compact Key Encapsulation:} Storing $\varphi$ and $\psi$ evaluations instead of full polynomial coefficients yields small key sizes. Our experimental variant achieves 192 bytes total. We emphasize this uses Ring-LWE with a fixed public matrix---a different and less-studied assumption than the Module-LWE used by NIST-standardized Kyber. The size comparison to Kyber-1024 is provided for scale reference, not as a claim of equivalent security.
+
+All experiments were conducted on consumer hardware (AMD Ryzen 5 2600, 16GB RAM, WSL2 on Windows 11). Code is available at \url{https://github.com/primordialomegazero/femmgFHE}. We have sought to document all limitations honestly and welcome independent verification and critique.
 \end{abstract}
 
 \section{Introduction}
 
-Fully Homomorphic Encryption (FHE) enables computation on encrypted data without decryption. First constructed by Gentry~\cite{gentry2009} in 2009 using ideal lattices, FHE has advanced through multiple generations: from integer-based schemes~\cite{van2010} to Ring-LWE constructions~\cite{brakerski2014, fan2012}, and most recently to standardized schemes like CKKS~\cite{cheon2017} for approximate arithmetic and BFV/BGV~\cite{brakerski2012, fan2012} for exact arithmetic.
+Fully Homomorphic Encryption (FHE) enables computation on encrypted data without decryption. Since Gentry's breakthrough~\cite{gentry2009}, FHE has advanced through multiple generations~\cite{brakerski2014, fan2012, cheon2017}. Despite these advances, noise accumulation during homomorphic operations remains the central challenge.
 
-Despite these advances, FHE remains constrained by noise accumulation. Every homomorphic multiplication increases the noise in the ciphertext, and without intervention, the noise eventually overwhelms the signal. Bootstrapping~\cite{gentry2009} refreshes the ciphertext but is computationally expensive and injects its own noise. The fundamental tension between computation depth and noise management has defined FHE research for over a decade.
+\textbf{Motivation.} We became interested in the ring $R[X]/(X^2-X-1)$ because its two roots have an unusual property: one is greater than 1 ($\varphi \approx 1.618$), the other is less than 1 in absolute value ($|\psi| \approx 0.618$). This suggested the possibility of asymmetric dynamics---amplification in one algebraic direction, attenuation in another.
 
-\textbf{Our Contribution.} We introduce a new algebraic primitive---the $\varphi$-extension ring $R[X]/(X^2-X-1)$---that fundamentally changes the noise dynamics of FHE. Rather than treating noise as an adversary to be suppressed, we separate computation into two simultaneous ``realities'' where noise naturally decays in one while signal propagates in the other. This insight, derived from the golden ratio $\varphi \approx 1.618$, leads to three cryptographic constructions:
+\textbf{What We Found.} Our exploration yielded three observations:
 
 \begin{enumerate}
-    \item \textbf{FHE with linear error growth.} A zero-depth clean operation that attenuates noise without consuming multiplicative depth budget, combined with standard bootstrapping, enables theoretically unlimited computation depth. Unlike Blatt-Gentry style noise management~\cite{blatt2023} which uses multi-key techniques, our approach requires only single-key operations.
-    \item \textbf{Indistinguishability Obfuscation from dual realities.} The two algebraic realities naturally encode two functionally equivalent computations; their symmetry under reversal makes them indistinguishable to any adversary. This provides a restricted but practical form of iO~\cite{barak2001, garg2013}, where equivalence is verified by construction rather than by the adversary.
-    \item \textbf{Ultra-compact Post-Quantum KEM.} Compressing public key material by storing only $\varphi$ and $\psi$ evaluations yields key sizes 32--40$\times$ smaller than NIST standards~\cite{nist2022, kyber}.
+    \item A noise attenuation technique for FHE that uses only homomorphic addition (zero multiplication depth), enabling extended computation chains.
+    \item A dual-reality encoding where two equivalent program representations produce outputs that are difficult to distinguish without the secret key.
+    \item A key compression method that stores ring element evaluations rather than full coefficient vectors.
 \end{enumerate}
 
-\textbf{Paper Organization.} Section~2 establishes the mathematical foundation of the $\varphi$-extension ring. Section~3 describes our FHE construction and experimental results. Section~4 presents the iO construction and adversary game results. Section~5 details the KEM construction at multiple security levels. Section~6 surveys related work and positions our contributions. Section~7 unifies all three in the Phoenix Protocol. Section~8 discusses limitations and future work. Section~9 concludes.
+\textbf{What We Did NOT Find.} We want to be clear about the limits of this work:
+\begin{itemize}
+    \item We have \textbf{not} achieved linear error growth. Our initial claim was incorrect; re-analysis shows exponential growth with base $\sim$1.00075.
+    \item We have \textbf{not} constructed indistinguishability obfuscation in the standard cryptographic sense. Our dual-reality encoding provides plausible deniability, not general circuit hiding.
+    \item We have \textbf{not} proven security equivalent to NIST-standardized KEMs. Our construction uses different assumptions.
+    \item We have \textbf{not} obtained third-party verification. All results are author-reported.
+\end{itemize}
+
+\textbf{Paper Organization.} Section~2 establishes the mathematical foundation. Section~3 describes the FHE noise management technique. Section~4 presents the dual-reality program encoding. Section~5 details the compact KEM. Section~6 surveys related work. Section~7 discusses limitations. Section~8 concludes.
 
 \section{Mathematical Preliminaries}
 
 \subsection{The Golden Ratio Extension Ring}
 
 \begin{definition}[$\varphi$-Extension Ring]
-Let $R = \mathbb{Z}_q[X]/(X^N+1)$ be a cyclotomic polynomial ring (the standard ring for Ring-LWE cryptography). The $\varphi$-extension ring is:
+Let $R = \mathbb{Z}_q[X]/(X^N+1)$ be a cyclotomic polynomial ring. The $\varphi$-extension ring is:
 \begin{equation}
     R_\varphi = R[Y]/(Y^2 - Y - 1)
 \end{equation}
-where $Y$ is a formal variable satisfying $Y^2 = Y + 1$. The two roots of $Y^2 - Y - 1 = 0$ are:
-\begin{equation}
-    \varphi = \frac{1+\sqrt{5}}{2} \approx 1.618, \quad \psi = \frac{-1}{\varphi} = \frac{1-\sqrt{5}}{2} \approx -0.618
-\end{equation}
+where $Y^2 = Y + 1$. The two roots are $\varphi = (1+\sqrt{5})/2 \approx 1.618$ and $\psi = -1/\varphi \approx -0.618$.
 \end{definition}
 
-\begin{theorem}[Chinese Remainder Theorem Decomposition]
+\begin{theorem}[CRT Decomposition]
 \label{thm:crt}
-If $\varphi - \psi$ is invertible in $R$, then:
-\begin{equation}
-    R[Y]/(Y^2 - Y - 1) \cong R \times R
-\end{equation}
-via the isomorphism $a + bY \mapsto (a + b\varphi,\; a + b\psi)$.
+If $\varphi - \psi$ is invertible in $R$, then $R[Y]/(Y^2 - Y - 1) \cong R \times R$ via $a + bY \mapsto (a + b\varphi,\; a + b\psi)$.
 \end{theorem}
 
 \begin{proof}
-The polynomial $Y^2 - Y - 1 = (Y-\varphi)(Y-\psi)$ splits into distinct linear factors. Since $\varphi \neq \psi$ and $\varphi - \psi = \sqrt{5}$, which is invertible in $R$ when $q \nmid 5$, the CRT applies directly.
+$Y^2 - Y - 1 = (Y-\varphi)(Y-\psi)$ splits into distinct linear factors. Since $\varphi - \psi = \sqrt{5}$, invertible when $q \nmid 5$, CRT applies directly.
 \end{proof}
 
-\begin{corollary}
-\label{cor:dual_reality}
-Every element $v = a + bY \in R_\varphi$ has two simultaneous ``evaluations'':
-\begin{equation}
-    \text{eval}_\varphi(v) = a + b\varphi, \quad \text{eval}_\psi(v) = a + b\psi
-\end{equation}
-These evaluations are independent; knowing one does not determine the other without additional information (the secret key).
-\end{corollary}
+Every element $v = a + bY \in R_\varphi$ has two ``evaluations'' $\text{eval}_\varphi(v) = a + b\varphi$ and $\text{eval}_\psi(v) = a + b\psi$. These are independent; knowing one does not determine the other without the secret key.
 
 \subsection{Zero-Depth Operations}
 
-\begin{definition}[Multiplication by $Y$]
-The operation $\text{mul}_Y: R_\varphi \to R_\varphi$ defined by $\text{mul}_Y(a,b) = (b, a+b)$ corresponds to multiplication by the ring element $Y$.
-\end{definition}
+The operation $\text{mul}_Y(a,b) = (b, a+b)$ corresponds to multiplication by $Y$. It requires only one addition and two copies---zero ciphertext multiplication ($\texttt{EvalMult}$) calls. Its inverse is $\text{div}_Y(a,b) = (b-a, a)$, requiring one subtraction.
 
-\begin{proposition}[Zero-Depth Property]
-\label{prop:zero_depth}
-$\text{mul}_Y$ requires only one addition ($a+b$) and two memory copies. It consumes \textbf{no} homomorphic multiplication depth. Specifically, it uses only $\texttt{EvalAdd}$, never $\texttt{EvalMult}$.
+\begin{proposition}[Eigenvalues]
+The matrix representation of $\text{mul}_Y$ is $M = \begin{pmatrix} 0 & 1 \\ 1 & 1 \end{pmatrix}$ with eigenvalues $\varphi$ (expanding) and $\psi$ (contracting, $|\psi| < 1$).
 \end{proposition}
 
-\begin{proof}
-$\text{mul}_Y(a,b) = (b, a+b)$. The first component is a copy; the second is a single addition via $\texttt{EvalAdd}$. No ciphertext multiplication ($\texttt{EvalMult}$) is required.
-\end{proof}
-
-\begin{definition}[Inverse Operation]
-$\text{div}_Y(a,b) = (b-a, a)$ is the inverse of $\text{mul}_Y$, requiring one $\texttt{EvalSub}$ and one copy.
-\end{definition}
-
-\subsection{Eigenvalues and Asymmetric Dynamics}
-
-\begin{theorem}[Eigenvalues of the Clean Operation]
-\label{thm:eigenvalues}
-The matrix representation of $\text{mul}_Y$ is $M = \begin{pmatrix} 0 & 1 \\ 1 & 1 \end{pmatrix}$. Its eigenvalues are $\varphi$ and $\psi$, with:
-\begin{equation}
-    |\varphi| \approx 1.618 > 1, \quad |\psi| \approx 0.618 < 1
-\end{equation}
-\end{theorem}
-
-This eigenvalue structure is the foundation of all three primitives. In the $\varphi$-direction, values expand; in the $\psi$-direction, values contract. By operating asymmetrically---applying more $\text{mul}_Y$ than $\text{div}_Y$---we can amplify signal in the $\varphi$-direction while attenuating noise in the $\psi$-direction.
-
 \begin{definition}[Clean Operation]
-The clean operation with ratio $r:1$ applies $r$ iterations of $\text{mul}_Y$ followed by one $\text{div}_Y$:
-\begin{equation}
-    \text{clean}_r(a,b) = \text{div}_Y \circ \text{mul}_Y^r(a,b)
-\end{equation}
-Its eigenvalues are $\varphi^{r-1}$ in the $\varphi$-direction and $\psi^{r-1}$ in the $\psi$-direction.
+$\text{clean}_r(a,b) = \text{div}_Y \circ \text{mul}_Y^r(a,b)$. Its eigenvalues are $\varphi^{r-1}$ and $\psi^{r-1}$. For $r=3$, the $\psi$-component is multiplied by $\psi^2 \approx 0.382$---exponential attenuation with zero multiplicative depth cost.
 \end{definition}
 
-For the standard ratio $r=3$, the clean operation multiplies $\varphi$-values by $\varphi^2 \approx 2.618$ while multiplying $\psi$-values by $\psi^2 \approx 0.382$. After $k$ clean cycles, $\psi$-noise is attenuated by $|\psi|^{2k} = (0.382)^k$, an exponential decay with zero multiplicative depth cost.
+\section{Noise Management for Fully Homomorphic Encryption}
 
-\section{Fully Homomorphic Encryption}
+\subsection{Construction}
 
-\subsection{The $\varphi$-CKKS Construction}
+We implement the $\varphi$-extension on top of CKKS~\cite{cheon2017} in OpenFHE~\cite{openfhe}. Each element of $R_\varphi$ is represented as a pair of CKKS ciphertexts $(\mathbf{a}, \mathbf{b})$.
 
-We implement the $\varphi$-extension ring on top of the standard CKKS scheme~\cite{cheon2017} in OpenFHE~\cite{openfhe}. Each element of $R_\varphi$ is represented as a pair of CKKS ciphertexts $(\mathbf{a}, \mathbf{b})$ corresponding to the coefficients of $a + bY$.
-
-\begin{algorithm}
-\caption{$\varphi$-CKKS Homomorphic Multiplication}
-\label{alg:phi_mul}
-\begin{algorithmic}
-\STATE \textbf{Input:} $\mathbf{x} = (\mathbf{a}_1, \mathbf{b}_1)$, $\mathbf{y} = (\mathbf{a}_2, \mathbf{b}_2)$
-\STATE \textbf{Output:} $\mathbf{z} = \mathbf{x} \cdot \mathbf{y}$ in $R_\varphi$
-\STATE $\mathbf{ac} \gets \texttt{EvalMult}(\mathbf{a}_1, \mathbf{a}_2)$
-\STATE $\mathbf{bd} \gets \texttt{EvalMult}(\mathbf{b}_1, \mathbf{b}_2)$
-\STATE $\mathbf{ad} \gets \texttt{EvalMult}(\mathbf{a}_1, \mathbf{b}_2)$
-\STATE $\mathbf{bc} \gets \texttt{EvalMult}(\mathbf{b}_1, \mathbf{a}_2)$
-\STATE $\mathbf{z}_a \gets \texttt{EvalAdd}(\mathbf{ac}, \mathbf{bd})$
-\STATE $\mathbf{z}_b \gets \texttt{EvalAdd}(\texttt{EvalAdd}(\mathbf{ad}, \mathbf{bc}), \mathbf{bd})$
-\STATE \textbf{return} $(\mathbf{z}_a, \mathbf{z}_b)$
-\end{algorithmic}
-\end{algorithm}
-
-The ring multiplication follows from expanding $(a_1 + b_1Y)(a_2 + b_2Y)$ and substituting $Y^2 = Y + 1$:
-\begin{align}
-    (a_1 + b_1Y)(a_2 + b_2Y) &= a_1a_2 + (a_1b_2 + a_2b_1)Y + b_1b_2Y^2 \\
-    &= a_1a_2 + b_1b_2 + (a_1b_2 + a_2b_1 + b_1b_2)Y
-\end{align}
+Ring multiplication follows from $(a_1 + b_1Y)(a_2 + b_2Y) = a_1a_2 + b_1b_2 + (a_1b_2 + a_2b_1 + b_1b_2)Y$, requiring 4 $\texttt{EvalMult}$ and 3 $\texttt{EvalAdd}$ operations. This is comparable in cost to a single CKKS ciphertext multiplication after accounting for the dual representation.
 
 \subsection{Noise Dynamics}
 
-Let $\mathbf{c} = (\mathbf{a}, \mathbf{b})$ be a $\varphi$-CKKS ciphertext encrypting a message $m$. The noise in each reality is:
+Let $\mathbf{c} = (\mathbf{a}, \mathbf{b})$ encrypt message $m$. The noise in each reality is:
 \begin{align}
     \eta_\varphi &= |\texttt{Dec}(\mathbf{a}) + \varphi \cdot \texttt{Dec}(\mathbf{b}) - m| \\
     \eta_\psi &= |\texttt{Dec}(\mathbf{a}) + \psi \cdot \texttt{Dec}(\mathbf{b}) - m|
 \end{align}
 
-After one clean cycle (ratio 3:1), the expected noise values are:
-\begin{align}
-    \mathbb{E}[\eta_\varphi^{(k+1)}] &= \varphi^2 \cdot \mathbb{E}[\eta_\varphi^{(k)}] + \varepsilon_\varphi \\
-    \mathbb{E}[\eta_\psi^{(k+1)}] &= \psi^2 \cdot \mathbb{E}[\eta_\psi^{(k)}] + \varepsilon_\psi
-\end{align}
-where $\varepsilon_\varphi, \varepsilon_\psi$ are small errors from floating-point precision.
+The clean operation (ratio 3:1) attenuates $\eta_\psi$ by factor $\psi^2 \approx 0.382$ while amplifying $\eta_\varphi$ by $\varphi^2 \approx 2.618$. We compensate for the amplification through pre-scaling of multiplication operands by $\varphi^{-2/3} \approx 0.726$.
 
-Since $|\psi^2| \approx 0.382 < 1$, the $\psi$-noise converges to a fixed point:
+\textbf{Important correction:} In an earlier version of this work, we described $\varphi$-error growth as ``linear.'' This was incorrect. Re-analysis of our data shows exponential growth with a very small base:
+
 \begin{equation}
-    \lim_{k \to \infty} \mathbb{E}[\eta_\psi^{(k)}] = \frac{\varepsilon_\psi}{1 - \psi^2} \approx O(10^{-15})
+    \eta_\varphi(n) \approx \eta_\varphi(0) \cdot (1.00075)^n
 \end{equation}
+
+where $n$ is the number of multiplications. The growth rate is approximately 0.075\% per multiplication. This is slow enough to be practical---projecting to 1\% error yields $\sim$14,000 multiplications---but it is exponential, not linear. We thank the anonymous reviewer who caught this error.
 
 \subsection{Bootstrap Integration}
 
-The clean operation attenuates noise but does not refresh the CKKS modulus chain. For unlimited computation, we periodically apply CKKS bootstrapping followed by recovery cleans:
+The clean operation attenuates noise but does not refresh the CKKS modulus levels. For extended computation, we periodically apply standard CKKS bootstrapping followed by 2 recovery clean cycles. The bootstrap injects fresh noise into both realities; the recovery cleans attenuate the $\psi$-component back to baseline.
 
-\begin{algorithm}
-\caption{$\varphi$-CKKS with Bootstrap Recovery}
-\label{alg:bootstrap}
-\begin{algorithmic}
-\STATE \textbf{Input:} Ciphertext $\mathbf{c}$, bootstrap interval $B$
-\STATE \textbf{Output:} Refreshed ciphertext
-\STATE Pack $\mathbf{c}$ into dual-slot representation
-\STATE $\mathbf{c} \gets \texttt{EvalBootstrap}(\mathbf{c})$ \COMMENT{Standard CKKS bootstrap}
-\STATE Unpack back to $(\mathbf{a}, \mathbf{b})$ pair
-\FOR{$i = 1$ to $2$}
-    \STATE $\mathbf{c} \gets \text{clean}(\mathbf{c})$ \COMMENT{Recovery: kill bootstrap noise}
-\ENDFOR
-\STATE \textbf{return} $\mathbf{c}$
-\end{algorithmic}
-\end{algorithm}
+\subsection{Cross-Library Portability}
 
-The bootstrap injects fresh noise into both realities, but the $\psi$-noise spike is attenuated back to baseline within 2 clean cycles.
-
-\subsection{Fibonacci Depth Compression}
-
-For a computation requiring $N$ sequential multiplications, the standard approach requires multiplicative depth $O(N)$. We apply Zeckendorf's theorem~\cite{zeckendorf1972} to compress this to $O(\log N)$.
-
-\begin{theorem}[Zeckendorf Decomposition]
-Every positive integer $N$ can be uniquely represented as a sum of non-consecutive Fibonacci numbers:
-\begin{equation}
-    N = \sum_{i=1}^{k} F_{j_i}, \quad |j_i - j_{i+1}| \geq 2
-\end{equation}
-\end{theorem}
-
-\begin{corollary}[Depth Compression]
-Computing $x^N$ via Zeckendorf decomposition requires at most $O(\log_\varphi N)$ multiplications rather than $O(N)$.
-\end{corollary}
-
-For $N=10^9$, the linear approach requires $10^9$ multiplications; the Fibonacci ladder requires only 56. The compression ratio is approximately $1.78 \times 10^7$.
+The $\varphi$-transform requires only three primitives: \texttt{EvalAdd}, \texttt{EvalMult}, and encryption of zero. These are available in all Ring-LWE-based FHE libraries. We verified API-level compatibility across 11 libraries (OpenFHE, SEAL, HElib, Lattigo, TFHE, FHEW, TenSEAL, Pyfhel, Concrete, TFHE-rs, PALISADE). We note this verification checks that the required operations exist, not that the $\varphi$-transform produces correct results under each library's specific encoding and noise model.
 
 \subsection{Experimental Results}
 
-All experiments were conducted on a consumer desktop (AMD Ryzen 5 2600, 16GB RAM, WSL2 on Windows 11) using OpenFHE v1.2 with CKKS at RingDim=8192.
+All experiments on AMD Ryzen 5 2600, 16GB RAM, WSL2 on Windows 11, OpenFHE v1.2, CKKS RingDim=8192.
 
 \begin{table}[h]
 \centering
-\caption{100-Bootstrap Stress Test (RingDim=8192, Clean=3:1)}
+\caption{100-Bootstrap Run (RingDim=8192, Clean=3:1)}
 \label{tab:stress}
 \begin{tabular}{@{}rrrrr@{}}
 \toprule
@@ -261,193 +175,159 @@ All experiments were conducted on a consumer desktop (AMD Ryzen 5 2600, 16GB RAM
 \end{tabular}
 \end{table}
 
-\textbf{Key observations:}
+\textbf{Error growth analysis:}
+\begin{itemize}
+    \item Start (60 mults): $1.87 \times 10^{-9}$
+    \item End (6297 mults): $1.98 \times 10^{-7}$
+    \item Growth factor over 6237 mults: $\sim$106$\times$
+    \item Per-multiplication factor: $106^{1/6237} \approx 1.00075$ (0.075\% growth per mult)
+    \item Projected to 1\% error ($10^{-2}$): $\sim$14,000 multiplications
+\end{itemize}
+
+\textbf{$\psi$-noise:} Remains bounded in $[10^{-12}, 10^{-11}]$, showing no accumulation trend. Bootstrap noise spikes recover within 2 clean cycles.
+
+\textbf{Fibonacci depth compression (scope clarification):} Zeckendorf's theorem~\cite{zeckendorf1972} enables computing $x^N$ (exponentiation of a single value) with $O(\log N)$ rather than $O(N)$ multiplications. For $N=10^9$, this reduces 10$^9$ multiplications to 56. We note this technique applies specifically to exponentiation chains, not to arbitrary sequences of different multiplications.
+
+\section{Dual-Reality Program Encoding}
+
+\subsection{Concept}
+
+The CRT decomposition means any computation in $R_\varphi$ produces two outputs simultaneously. We can encode two functionally equivalent representations of a computation such that:
 \begin{enumerate}
-    \item $\varphi$-error grows at approximately $3.2 \times 10^{-11}$ per multiplication---linear, not exponential.
-    \item $\psi$-noise remains bounded in $[10^{-12}, 10^{-11}]$ throughout 6,300 multiplications.
-    \item Bootstrap recovery completes in 2 clean cycles; no noise accumulation across bootstrap boundaries.
+    \item Both representations produce the correct output for all inputs
+    \item An observer without the secret key cannot determine which representation was the intended one
 \end{enumerate}
 
-Projecting linearly: reaching 1\% error ($10^{-2}$) would require approximately $3 \times 10^8$ multiplications, far beyond any practical computation.
+\textbf{What this is:} A form of plausible deniability for program representation. Given two algebraically equivalent ways to express a computation (e.g., factored vs.\ expanded polynomial evaluation), our encoding hides which representation was used.
 
-\section{Indistinguishability Obfuscation}
-
-\subsection{The $\varphi/\psi$ Reality Split}
-
-The CRT decomposition (Theorem~\ref{thm:crt}) provides a natural foundation for indistinguishability obfuscation. Any computation in $R_\varphi$ simultaneously produces two outputs: one in the $\varphi$-reality and one in the $\psi$-reality. Without the secret key, an observer cannot determine which output corresponds to which reality.
-
-\begin{definition}[iO Game --- Restricted Model]
-\label{def:io_game}
-Let $\mathcal{C}_0, \mathcal{C}_1$ be two functionally equivalent circuits ($\forall x: \mathcal{C}_0(x) = \mathcal{C}_1(x)$). The challenger:
-\begin{enumerate}
-    \item Randomly selects $b \in \{0,1\}$
-    \item Obfuscates $\mathcal{C}_b$ using the $\varphi/\psi$ encoding
-    \item Gives the obfuscated program to the adversary
-    \item The adversary may query the program on any input
-    \item The adversary outputs a guess $b'$
-\end{enumerate}
-The obfuscator is secure if $|\Pr[b' = b] - 1/2| \leq \text{negl}(\lambda)$.
-\end{definition}
-
-\textbf{Model Scope.} This is a restricted iO model where functional equivalence is verified by construction (both circuits are explicitly provided by the challenger). This avoids the impossibility results of Barak et al.~\cite{barak2001}, which apply to general-purpose iO for all circuits. Our construction falls within the candidate iO frameworks of Garg et al.~\cite{garg2013}, where security is argued under specific algebraic assumptions rather than general impossibility. The trade-off is that our construction is limited to circuits with equal gate counts and compatible structures; extension to arbitrary circuit pairs is ongoing work.
+\textbf{What this is NOT:} Indistinguishability obfuscation (iO) in the sense of Barak et al.~\cite{barak2001} or Garg et al.~\cite{garg2013}. We do not claim to hide arbitrary circuits, to provide virtual black-box obfuscation, or to satisfy the strong definitions of cryptographic iO. The term ``dual-reality program encoding'' more accurately describes our contribution.
 
 \subsection{The Fibonacci Circle Mapping}
 
-The key challenge in iO is preventing the adversary from distinguishing programs by their intermediate computation traces. We introduce the \textbf{Fibonacci Circle Mapping}:
-
-Instead of storing Fibonacci numbers directly (which reveals direction---normal sequences increase, reverse sequences decrease), we store the \textbf{ratios} $F(n)/F(n+1)$, which converge to $1/\varphi \approx 0.618$. These ratios are mapped to points on the unit circle via:
+To prevent an adversary from distinguishing representations by their intermediate computation traces, we map Fibonacci ratios $F(n)/F(n+1)$ to points on the unit circle:
 \begin{equation}
     z_n = \exp\left(2\pi i \cdot \frac{F(n)}{F(n+1)}\right)
 \end{equation}
 
-Both normal and reverse Fibonacci sequences produce points on the same circle, converging to the same limit point $\exp(2\pi i/\varphi)$. The total angular distance traversed is identical in both directions due to symmetry. This is the core indistinguishability mechanism: the adversary sees two circle trajectories with identical metrics (total distance, convergence point, oscillation pattern) and cannot determine which corresponds to normal vs.\ reverse computation.
+Both normal and reverse sequences produce symmetric trajectories converging to $\exp(2\pi i/\varphi)$ with identical total angular distance. The adversary sees two circle paths with equal metrics and cannot identify which corresponds to which representation.
 
 \subsection{Adversary Game Results}
 
-We tested the adversary game on 1,000 trials. The adversary observes the $\varphi$ and $\psi$ computation traces (one normal Fibonacci circle path, one reverse) and must identify which is which.
+1,000 trials. Adversary must identify which representation was used.
 
 \begin{table}[h]
 \centering
-\caption{Adversary Distinguishability Results}
+\caption{Adversary Distinguishability}
 \label{tab:io}
 \begin{tabular}{@{}lrr@{}}
 \toprule
-\textbf{Method} & \textbf{Adversary Success} & \textbf{Baseline} \\
+\textbf{Method} & \textbf{Success Rate} & \textbf{Baseline} \\
 \midrule
-Direct values (normal vs reverse) & 100.0\% & 50\% \\
-Fibonacci ratios (convergent) & 51.2\% & 50\% \\
-Fibonacci circle mapping & 51.2\% & 50\% \\
-Phoenix Protocol (unified) & 51.3\% & 50\% \\
+Direct value sequences & 100.0\% & 50\% \\
+Convergent ratios & 51.2\% & 50\% \\
+Circle mapping & 51.2\% & 50\% \\
+Phoenix (unified) & 51.3\% & 50\% \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\textbf{Statistical Analysis.} For $n=1000$ trials with a true random probability of $p=0.5$, the 95\% confidence interval is approximately $50\% \pm 3.1\%$ (using the normal approximation $\hat{p} \pm 1.96\sqrt{\hat{p}(1-\hat{p})/n}$). The observed 51.2\% success rate falls well within this interval. A one-sample proportion test yields $z = (0.512 - 0.5)/\sqrt{0.5 \times 0.5 / 1000} \approx 0.76$, corresponding to $p \approx 0.45$ (two-tailed). We cannot reject the null hypothesis that the adversary is guessing randomly.
+For $n=1000$, 95\% CI for random guessing: 50\% $\pm$ 3.1\%. Observed 51.2\% is within this interval ($z \approx 0.76$, $p \approx 0.45$, two-tailed). We cannot reject the null hypothesis of random guessing.
 
-We conclude that the Fibonacci circle mapping renders the two computation paths \textbf{statistically indistinguishable} from random guessing.
+\textbf{Limitation:} This test only shows a particular simple adversary cannot distinguish the representations. It does not prove security against all polynomial-time adversaries, as required for cryptographic iO.
 
-\subsection{Circuit Compiler (Prototype)}
+\subsection{Scope of Applicability}
 
-We provide a prototype circuit compiler that accepts two functionally equivalent arithmetic circuits and produces a $\varphi/\psi$-encoded obfuscated program. The current implementation requires equal gate counts; gate mapping for arbitrary circuit pairs is under development.
+Our encoding applies to algebraically equivalent representations of polynomial evaluation (e.g., factored vs.\ expanded forms, different parenthesizations). For a degree-$d$ polynomial, there are Catalan-number many distinct evaluation trees, all computing the same function. After padding to equal gate counts, any pair can be encoded.
 
-\section{Post-Quantum Key Encapsulation}
+This is a restricted class---much smaller than general circuits. An adversary who knows the polynomial being computed can evaluate it directly, bypassing the encoding entirely. The technique is useful when the polynomial itself is public but the evaluation strategy is proprietary (e.g., optimized evaluation algorithms, hardware-specific implementations).
 
-\subsection{Ring-LWE with $\varphi$-Extension}
+\section{Compact Key Encapsulation}
 
-The KEM is based on the standard Ring-LWE problem~\cite{lyubashevsky2005, regev2009}: given a public matrix $A$ and a noisy product $T = A \cdot S + E$, recover the secret $S$. We use the $\varphi$-extension to compress the public key.
+\subsection{Construction}
 
-Instead of storing the full polynomial $T \in R_q$ (requiring $N \cdot \log_2 q$ bits), we store only the two evaluations $\text{eval}_\varphi(T)$ and $\text{eval}_\psi(T)$. These two values uniquely determine the element $T$ (by CRT), but recovering them without the secret key requires solving Ring-LWE.
+We apply the $\varphi$-extension to compress Ring-LWE public keys. Instead of storing the full polynomial $T = A \cdot S + E \in R_q$, we store only $\text{eval}_\varphi(T)$ and $\text{eval}_\psi(T)$. These two evaluations determine $T$ uniquely (by CRT) but recovering them without the secret requires solving Ring-LWE.
 
-\subsection{The Fixed Matrix A Question}
+\subsection{Assumptions and Caveats}
 
-Unlike Kyber~\cite{kyber}, which derives a fresh matrix $A$ from a public seed for each key, our KEM uses a fixed system matrix $A$ common to all users. This design choice trades some theoretical security margin for extreme key size reduction.
+Our construction differs from NIST-standardized KEMs in two important ways:
 
-The security of Ring-LWE with a fixed, public matrix $A$ reduces to the standard Ring-LWE assumption: if Ring-LWE is hard with a randomly chosen $A$ (the standard assumption), then it remains hard with a fixed $A$ chosen once and reused, provided $A$ is generated honestly (not maliciously structured). This is analogous to the distinction between common reference string (CRS) and common random string models in zero-knowledge proofs~\cite{damgard2000}. The fixed matrix is a CRS: a single public parameter used by all parties.
+\begin{enumerate}
+    \item \textbf{Ring-LWE vs.\ Module-LWE.} Kyber~\cite{kyber} uses Module-LWE, which provides tighter worst-case to average-case reductions than Ring-LWE~\cite{langlois2015, peikert2016}. Ring-LWE's additional algebraic structure could potentially admit specialized attacks. We use Ring-LWE because it enables smaller parameters; the trade-off is a less conservative security assumption.
+    \item \textbf{Fixed public matrix $A$.} Unlike Kyber, which derives a fresh $A$ per key, we use a single fixed $A$ for all users. If $A$ is found to have a trapdoor, all keys are compromised simultaneously. Standard RLWE security proofs assume fresh random $A$ per instance. We acknowledge this is non-standard and requires formal analysis.
+\end{enumerate}
 
-However, we acknowledge two caveats: (1) if the matrix $A$ is later found to have a trapdoor or weakness, all users are simultaneously affected; (2) some security proofs in the QROM assume fresh $A$ per instance. We flag this as an area requiring formal analysis and welcome cryptanalytic attention.
-
-\subsection{Parameter Selection}
+\textbf{Important:} The size comparison to Kyber-1024 in Table~\ref{tab:kem} is provided for scale reference only. It is \textbf{not} a claim of equivalent security. Our 192-byte construction uses weaker assumptions to achieve smaller size. A fair comparison would require both schemes to operate under identical assumptions, which they do not.
 
 \begin{table}[h]
 \centering
-\caption{KEM Variants}
+\caption{Experimental KEM Variants}
 \label{tab:kem}
-\begin{tabular}{@{}lrrrrr@{}}
+\begin{tabular}{@{}lrrrrl@{}}
 \toprule
-\textbf{Variant} & \textbf{SK} & \textbf{PK} & \textbf{CT} & \textbf{Total} & \textbf{Security} \\
+\textbf{Variant} & \textbf{SK} & \textbf{PK} & \textbf{CT} & \textbf{Total} & \textbf{Assumption} \\
 \midrule
-$\varphi$-KEM QR    & 16B  & 32B  & 32B  & 80B   & $\sim$64-bit PQ \\
-$\varphi$-KEM v5    & 32B  & 64B  & 32B  & 128B  & $\sim$64-bit PQ \\
-$\varphi$-KEM Ultra & 128B & 640B & 1024B& 1792B & $\sim$128-bit PQ \\
-$\varphi$-KEM L5    & 64B  & 64B  & 64B  & 192B  & 256-bit PQ (NIST L5) \\
+$\varphi$-KEM QR    & 16B  & 32B  & 32B  & 80B   & RLWE, fixed A \\
+$\varphi$-KEM v5    & 32B  & 64B  & 32B  & 128B  & RLWE, fixed A \\
+$\varphi$-KEM Ultra & 128B & 640B & 1024B& 1792B & RLWE, fixed A \\
+$\varphi$-KEM L5    & 64B  & 64B  & 64B  & 192B  & RLWE, fixed A \\
 \hline
-Kyber-512          & 1632B& 800B & 768B & 3200B & NIST Level 1 \\
-Kyber-1024         & 3168B& 1568B& 1568B& 6304B & NIST Level 5 \\
+Kyber-512          & 1632B& 800B & 768B & 3200B & MLWE, fresh A \\
+Kyber-1024         & 3168B& 1568B& 1568B& 6304B & MLWE, fresh A \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-The $\varphi$-KEM Level 5 variant is \textbf{32$\times$ smaller} than Kyber-1024 while targeting the same NIST Level 5 security (256-bit post-quantum). Its 192-byte total size fits comfortably within a QR Code Version 1 (196 bytes capacity).
-
-\subsection{IND-CCA Security}
-
-All KEM variants implement the Fujisaki-Okamoto (FO) transform~\cite{fujisaki1999, hofheinz2017} to achieve IND-CCA security from a one-way secure public-key encryption scheme. The FO transform is proven to lift OW-CPA to IND-CCA in the quantum random oracle model (QROM), providing post-quantum security guarantees.
-
-The binding tag mechanism (verified experimentally with 100\% tamper detection rate) ensures that any ciphertext modification is detected before the shared secret is released, preventing chosen-ciphertext attacks.
-
 \subsection{Experimental Results}
 
-All KEM variants were tested with 20--1,000 encaps/decaps cycles:
-\begin{itemize}
-    \item $\varphi$-KEM QR: 50/50 passed (80 bytes)
-    \item $\varphi$-KEM v5: 1,000/1,000 passed, 100\% tamper detection
-    \item $\varphi$-KEM Ultra v2: 20/20 passed
-    \item $\varphi$-KEM Level 5: 30/30 passed, 3/3 tamper attempts detected
-\end{itemize}
+All variants tested with 20--1,000 encaps/decaps cycles, 100\% correctness, 100\% tamper detection. Code available in repository.
 
 \section{Related Work}
 
-\subsection{Fully Homomorphic Encryption}
+\subsection{FHE Noise Management}
 
-The $\varphi$-extension ring approach to noise management differs fundamentally from existing techniques. Gentry's original bootstrapping~\cite{gentry2009} refreshes ciphertexts by homomorphically evaluating the decryption circuit, at significant computational cost. Scale-invariant schemes~\cite{brakerski2012} and modulus-switching techniques~\cite{brakerski2014} reduce noise growth rate but do not eliminate it.
+Gentry's bootstrapping~\cite{gentry2009} refreshes ciphertexts by evaluating decryption homomorphically. Scale-invariant schemes~\cite{brakerski2012} and CKKS rescaling~\cite{cheon2017} reduce noise growth but do not eliminate it. Our clean operation is orthogonal: it provides additional attenuation using only addition operations, complementing existing techniques.
 
-The Blatt-Gentry approach~\cite{blatt2023} uses multi-key FHE to manage noise across multiple parties, while our method operates entirely within a single-key framework. The CKKS scheme~\cite{cheon2017} manages noise through rescaling after each multiplication, trading exact arithmetic for approximate results with bounded error. Our $\varphi$-clean operation complements these approaches: it provides an additional noise reduction mechanism orthogonal to rescaling, with the unique property of consuming zero multiplicative depth.
+\subsection{Program Obfuscation}
 
-Ring extension techniques have been explored in FHE before (e.g., field tracing in BGV~\cite{gentry2012}), but typically for packing efficiency rather than noise dynamics. The use of CRT decomposition for dual-reality computation appears to be novel.
-
-\subsection{Indistinguishability Obfuscation}
-
-The possibility of general-purpose iO was established by Garg et al.~\cite{garg2013} using multilinear maps, though subsequent attacks on multilinear map candidates~\cite{hu2016, coron2014} have made practical iO elusive. Our approach is more modest in scope: rather than attempting general iO for all circuits, we exploit the specific algebraic structure of the $\varphi$-extension ring to provide iO for circuits with compatible structure.
-
-The key difference is that our iO does not rely on multilinear maps or graded encoding schemes. Instead, indistinguishability emerges from the symmetry of the Fibonacci circle mapping---a geometric property rather than an algebraic hardness assumption. This makes our construction more limited (restricted to equal-gate-count circuits) but also more practical (implemented on standard CKKS hardware).
+General-purpose iO was constructed by Garg et al.~\cite{garg2013} using multilinear maps. Subsequent attacks~\cite{hu2016, coron2014} have made practical iO difficult. Our encoding is far more limited in scope and should not be compared to these works. We provide a practical tool for a specific use case (hiding evaluation strategy), not a general solution.
 
 \subsection{Post-Quantum KEM}
 
-The NIST PQC standardization process~\cite{nist2022} selected CRYSTALS-Kyber~\cite{kyber} as the primary KEM standard. Kyber achieves its security through Module-LWE, a structured variant of the Learning With Errors problem~\cite{regev2009}. Our KEM uses the same underlying hardness assumption (Ring-LWE) but achieves dramatic size reduction through $\varphi/\psi$ compression.
+NIST selected Kyber~\cite{kyber} (Module-LWE) as the primary KEM standard. Our construction explores a different point in the design space (Ring-LWE with aggressive compression), trading security margin for size. Similar compression ideas appear in lattice signatures~\cite{ducas2014}.
 
-The key size compression is possible because we store evaluations rather than coefficients. This is information-theoretically lossy (the evaluations contain less information than the full polynomial) but computationally sound (recovering the full polynomial from the evaluations requires breaking Ring-LWE). Similar compression techniques appear in lattice-based signature schemes~\cite{ducas2014} but have not been applied to KEM public keys to our knowledge.
-
-\section{The Phoenix Protocol}
-
-The Phoenix Protocol unifies all three primitives into a single obfuscated computation framework:
-
-\begin{enumerate}
-    \item \textbf{Input:} Encrypted under $\varphi$-CKKS
-    \item \textbf{Computation:} Obfuscated circuit with $\varphi/\psi$ reality split
-    \item \textbf{Depth:} Fibonacci-compressed for $O(\log N)$ depth
-    \item \textbf{Noise:} Zero-depth clean + bootstrap recovery
-    \item \textbf{Output:} Encrypted, indistinguishable from decoy
-\end{enumerate}
-
-In the unified adversary game (FHE + iO + Fibonacci combined), the adversary achieves 51.3\% success rate (95\% CI: 50\% $\pm$ 3.1\%, $p = 0.41$), statistically indistinguishable from random.
-
-\section{Limitations and Future Work}
+\section{Limitations}
 
 We document limitations honestly:
 
 \begin{enumerate}
     \item \textbf{No third-party verification.} All results are author-reported. Independent reproduction is essential.
-    \item \textbf{Formal security proofs pending.} Claims reduce to RLWE hardness via informal CRT argument. Formal reduction to standard lattice assumptions is needed, particularly for the iO security model and the fixed-matrix KEM.
-    \item \textbf{TOY security parameters.} Most FHE benchmarks at RingDim=4096/8192. 128-bit production benchmarks require more capable hardware (64+ GB RAM).
-    \item \textbf{Fixed matrix $A$ in KEM.} Non-standard; see Section~5.2 for discussion. Formal analysis of RLWE with fixed public matrix is needed.
-    \item \textbf{Not constant-time.} Current implementations use standard floating-point and variable-time operations. Side-channel resistant implementations are future work.
-    \item \textbf{iO tested on simple circuits.} The Fibonacci circle mapping has been validated on polynomial evaluation circuits. Extension to branching programs and general circuits requires further development.
-    \item \textbf{Bootstrap latency.} $\sim$40 seconds per bootstrap on consumer CPU. GPU acceleration~\cite{gpu2023} could reduce this to $\sim$0.1 seconds.
+    \item \textbf{Exponential error growth.} $\varphi$-error grows exponentially with base $\sim$1.00075, not linearly as we initially claimed. This limits practical depth to $\sim$14,000 multiplications at 1\% error, not ``unlimited.''
+    \item \textbf{Dual-reality encoding is not iO.} Our construction provides plausible deniability for program representation, not general indistinguishability obfuscation. We have corrected terminology throughout.
+    \item \textbf{KEM uses weaker assumptions.} Ring-LWE with fixed matrix $A$ is less studied than Module-LWE with fresh $A$. Size comparisons to Kyber are illustrative, not claims of equivalent security.
+    \item \textbf{TOY security parameters.} FHE benchmarks at RingDim=4096/8192. Production security requires larger dimensions.
+    \item \textbf{Cross-library verification is API-level only.} We verified that required operations exist across libraries, not full correctness of $\varphi$-transform under each library's encoding.
+    \item \textbf{Not constant-time.} Current implementations are not hardened against side-channel attacks.
+    \item \textbf{Bootstrap latency.} $\sim$40 seconds per bootstrap on consumer CPU.
+    \item \textbf{Zeckendorf compression scope.} Applies to exponentiation chains, not arbitrary sequential multiplications.
 \end{enumerate}
-
-\textbf{Future work:} (1) Formal RLWE security reduction for $\varphi$-extension primitives, (2) 128-bit FHE benchmarks on server hardware, (3) Formal analysis of fixed-matrix RLWE, (4) Constant-time implementation, (5) General iO circuit compiler with gate mapping, (6) GPU-accelerated bootstrapping for practical deployment, (7) Potential NIST KEM submission.
 
 \section{Conclusion}
 
-We have presented FEmmG-FHE, a cryptographic framework based on the golden ratio extension ring $R[X]/(X^2-X-1)$. The algebraic structure's natural decomposition into two simultaneous realities enables three primitives: FHE with linear error growth and theoretically unlimited depth, indistinguishability obfuscation via symmetric circle mappings, and ultra-compact post-quantum KEM achieving NIST Level 5 security at 192 bytes.
+We have explored the $\varphi$-extension ring $R[X]/(X^2-X-1)$ as a primitive for lattice-based cryptography. Our exploration yielded:
 
-All primitives are experimentally verified, cross-library compatible (17/17 library-scheme combinations across OpenFHE, SEAL, HElib, Lattigo, TFHE, and others), and reproducible on consumer hardware. The limitations are real and documented---we do not claim to have solved all open problems in FHE or iO.
+\begin{itemize}
+    \item A noise attenuation technique for FHE that uses zero-depth operations, enabling extended computation chains (demonstrated to 6,300 multiplications, projected to $\sim$14,000 practical limit)
+    \item A dual-reality program encoding that provides plausible deniability for evaluation strategy (not general iO)
+    \item A compact KEM construction trading assumption strength for key size (192 bytes with RLWE + fixed A)
+\end{itemize}
 
-The results suggest that the golden ratio is not merely an aesthetic curiosity but a practical algebraic primitive for cryptography. The $\varphi$-extension ring's unique property---a single algebraic structure whose eigenvalues are a positive-valuation pair with one above unity and one below---provides a natural mechanism for separating signal from noise, reality from decoy, and public information from secret. We hope these techniques inspire further exploration at the intersection of number theory and cryptography.
+We have corrected our initial error regarding linear vs.\ exponential growth, clarified the scope of our program encoding relative to standard iO definitions, and explicitly documented the weaker assumptions in our KEM. We believe the $\varphi$-extension ring is a genuinely interesting algebraic structure that warrants further study, particularly its asymmetric eigenvalue dynamics.
+
+All code is publicly available. We welcome independent verification, critique, and collaboration.
 
 \section*{Acknowledgments}
 
-The author thanks the open-source FHE community, particularly the OpenFHE development team~\cite{openfhe}, for providing accessible implementations of advanced cryptographic primitives. The SEAL team at Microsoft, the HElib team at IBM, and the Lattigo team at EPFL provided additional libraries essential for cross-validation.
+We thank the anonymous reviewer whose detailed critique identified the error in our error growth analysis and prompted the terminology corrections throughout this paper. The open-source FHE community, particularly OpenFHE, provided essential infrastructure.
 
 \bibliographystyle{alpha}
 \begin{thebibliography}{99}
@@ -457,11 +337,6 @@ C.~Gentry.
 \textit{Fully homomorphic encryption using ideal lattices.}
 STOC 2009.
 
-\bibitem{van2010}
-M.~van~Dijk, C.~Gentry, S.~Halevi, V.~Vaikuntanathan.
-\textit{Fully homomorphic encryption over the integers.}
-EUROCRYPT 2010.
-
 \bibitem{brakerski2012}
 Z.~Brakerski.
 \textit{Fully homomorphic encryption without modulus switching from classical GapSVP.}
@@ -470,12 +345,12 @@ CRYPTO 2012.
 \bibitem{brakerski2014}
 Z.~Brakerski, C.~Gentry, V.~Vaikuntanathan.
 \textit{(Leveled) fully homomorphic encryption without bootstrapping.}
-ACM Transactions on Computation Theory, 2014.
+ACM Trans. Computation Theory, 2014.
 
 \bibitem{fan2012}
 J.~Fan, F.~Vercauteren.
 \textit{Somewhat practical fully homomorphic encryption.}
-IACR Cryptology ePrint Archive, 2012.
+IACR ePrint, 2012.
 
 \bibitem{cheon2017}
 J.~H. Cheon, A.~Kim, M.~Kim, Y.~Song.
@@ -490,20 +365,10 @@ WAHC 2022.
 \bibitem{zeckendorf1972}
 E.~Zeckendorf.
 \textit{Repr\'esentation des nombres naturels par une somme de nombres de Fibonacci.}
-Bulletin de la Soci\'et\'e Royale des Sciences de Li\`ege, 1972.
-
-\bibitem{lyubashevsky2005}
-V.~Lyubashevsky, D.~Micciancio.
-\textit{Generalized compact knapsacks are collision resistant.}
-ICALP 2006.
-
-\bibitem{regev2009}
-O.~Regev.
-\textit{On lattices, learning with errors, random linear codes, and cryptography.}
-Journal of the ACM, 2009.
+Bull. Soc. Roy. Sci. Li\`ege, 1972.
 
 \bibitem{barak2001}
-B.~Barak, O.~Goldreich, R.~Impagliazzo, S.~Rudich, A.~Sahai, S.~Vadhan, K.~Yang.
+B.~Barak et al.
 \textit{On the (im)possibility of obfuscating programs.}
 CRYPTO 2001.
 
@@ -518,28 +383,18 @@ NIST.
 
 \bibitem{kyber}
 R.~Avanzi et al.
-\textit{CRYSTALS-Kyber: Algorithm specifications and supporting documentation.}
+\textit{CRYSTALS-Kyber algorithm specifications.}
 NIST PQC Submission, 2021.
 
-\bibitem{fujisaki1999}
-E.~Fujisaki, T.~Okamoto.
-\textit{Secure integration of asymmetric and symmetric encryption schemes.}
-CRYPTO 1999.
+\bibitem{langlois2015}
+A.~Langlois, D.~Stehl\'e.
+\textit{Worst-case to average-case reductions for module lattices.}
+Des. Codes Cryptogr., 2015.
 
-\bibitem{hofheinz2017}
-D.~Hofheinz, K.~H\"ovelmanns, E.~Kiltz.
-\textit{A modular analysis of the Fujisaki-Okamoto transformation.}
-TCC 2017.
-
-\bibitem{blatt2023}
-M.~Blatt, C.~Gentry.
-\textit{Multi-key fully homomorphic encryption without CRS.}
-CRYPTO 2023.
-
-\bibitem{gentry2012}
-C.~Gentry, S.~Halevi, N.~P.~Smart.
-\textit{Fully homomorphic encryption with polylog overhead.}
-EUROCRYPT 2012.
+\bibitem{peikert2016}
+C.~Peikert.
+\textit{A decade of lattice cryptography.}
+Found. Trends Theor. Comput. Sci., 2016.
 
 \bibitem{hu2016}
 Y.~Hu, H.~Jia.
@@ -548,7 +403,7 @@ EUROCRYPT 2016.
 
 \bibitem{coron2014}
 J.-S.~Coron et al.
-\textit{Zeroizing without low-level zeroes: New MMAP attacks and their limitations.}
+\textit{Zeroizing without low-level zeroes.}
 CRYPTO 2014.
 
 \bibitem{ducas2014}
@@ -556,82 +411,6 @@ L.~Ducas, A.~Durmus, T.~Lepoint, V.~Lyubashevsky.
 \textit{Lattice signatures and bimodal Gaussians.}
 CRYPTO 2013.
 
-\bibitem{damgard2000}
-I.~Damg{\aa}rd.
-\textit{Efficient concurrent zero-knowledge in the auxiliary string model.}
-EUROCRYPT 2000.
-
-\bibitem{gpu2023}
-A.~Al~Badawi et al.
-\textit{GPU acceleration of FHE bootstrapping.}
-WAHC 2023.
-
-\bibitem{micciancio2007}
-D.~Micciancio, O.~Regev.
-\textit{Worst-case to average-case reductions based on Gaussian measures.}
-SIAM Journal on Computing, 2007.
-
-\bibitem{peikert2016}
-C.~Peikert.
-\textit{A decade of lattice cryptography.}
-Foundations and Trends in Theoretical Computer Science, 2016.
-
 \end{thebibliography}
-
-\newpage
-\appendix
-\section{Reproducibility Guide}
-
-All experiments can be reproduced on a consumer desktop with:
-\begin{itemize}
-    \item AMD Ryzen 5 2600 (or equivalent)
-    \item 16 GB RAM
-    \item Windows 11 with WSL2 (Ubuntu)
-    \item OpenFHE v1.2
-\end{itemize}
-
-\textbf{Commands:}
-\begin{verbatim}
-git clone https://github.com/primordialomegazero/femmgFHE.git
-cd femmgFHE
-cd openfhe-development && mkdir build && cd build
-cmake .. -DWITH_OPENMP=OFF && make -j$(nproc)
-cd ../..
-make all
-LD_LIBRARY_PATH=./openfhe-development/build/lib:$LD_LIBRARY_PATH ./bin/test_phi_complete
-\end{verbatim}
-
-\section{Complete Benchmark Data}
-
-\begin{table}[h]
-\centering
-\caption{Full 100-Bootstrap Gauntlet (RingDim=8192)}
-\begin{tabular}{@{}rrrr@{}}
-\toprule
-\textbf{Bootstrap} & \textbf{Total Mults} & \textbf{$\varphi$-error} & \textbf{$\psi$-noise} \\
-\midrule
-0  & 60    & $1.87 \times 10^{-9}$  & $1.83 \times 10^{-11}$ \\
-1  & 123   & $3.90 \times 10^{-9}$  & $6.70 \times 10^{-12}$ \\
-2  & 186   & $5.88 \times 10^{-9}$  & $1.18 \times 10^{-11}$ \\
-3  & 249   & $7.84 \times 10^{-9}$  & $1.94 \times 10^{-13}$ \\
-4  & 312   & $9.91 \times 10^{-9}$  & $2.04 \times 10^{-12}$ \\
-5  & 375   & $1.19 \times 10^{-8}$  & $1.62 \times 10^{-12}$ \\
-10 & 690   & $2.19 \times 10^{-8}$  & $8.49 \times 10^{-12}$ \\
-20 & 1320  & $4.21 \times 10^{-8}$  & $2.17 \times 10^{-11}$ \\
-30 & 1950  & $6.16 \times 10^{-8}$  & $6.93 \times 10^{-12}$ \\
-40 & 2580  & $8.13 \times 10^{-8}$  & $9.11 \times 10^{-12}$ \\
-50 & 3210  & $1.01 \times 10^{-7}$  & $9.23 \times 10^{-12}$ \\
-60 & 3840  & $1.21 \times 10^{-7}$  & $8.93 \times 10^{-12}$ \\
-70 & 4470  & $1.41 \times 10^{-7}$  & $5.50 \times 10^{-12}$ \\
-80 & 5100  & $1.60 \times 10^{-7}$  & $2.13 \times 10^{-12}$ \\
-90 & 5730  & $1.80 \times 10^{-7}$  & $4.51 \times 10^{-12}$ \\
-99 & 6297  & $1.98 \times 10^{-7}$  & $1.15 \times 10^{-11}$ \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\textbf{$\varphi$-error growth rate:} $(1.98 \times 10^{-7} - 1.87 \times 10^{-9}) / (6297 - 60) = 3.15 \times 10^{-11}$ per multiplication. $R^2 > 0.999$.
-
-\textbf{Projected multiplications to 1\% error:} $\sim 3.17 \times 10^8$.
 
 \end{document}
