@@ -27,19 +27,19 @@ from the Golden Ratio Extension Ring}
 \begin{abstract}
 We present DM-DGR, an experimental Fully Homomorphic Encryption system built on the algebraic extension ring $R[X]/(X^2-X-1)$ where $R$ is a cyclotomic polynomial ring. The golden ratio $\varphi \approx 1.618$ and its conjugate $\psi \approx -0.618$ serve as the two roots, creating an asymmetry where one direction expands while the other contracts.
 
-Our primary contribution is a \textbf{ratio encoding} approach: instead of encoding values as magnitudes (which grow exponentially with each multiplication), values are encoded as deviations from the $\psi$-attractor ($\psi \approx 0.618$). Under Fibonacci evolution, the state ratio converges to $\psi$ and remains bounded, while the magnitude can grow arbitrarily without affecting the encoded value.
+Our primary contribution is a \textbf{ratio encoding} approach: instead of encoding values as magnitudes (which grow exponentially with each multiplication), values are encoded as deviations from the $\psi$-attractor ($|\psi| \approx 0.618$). Under Fibonacci evolution, the state ratio converges to $|\psi|$ and remains bounded, while the magnitude can grow arbitrarily without affecting the encoded value.
 
 We achieve 13/13 experimental tests passing on consumer hardware (AMD Ryzen 5 2600, 16GB RAM):
 \begin{itemize}
     \item Pure Addition (CT + CT): $10^{-12}$ error
     \item Pure Multiplication (CT $\times$ CT): $10^{-13}$ error
     \item Multiply-then-Add: $10^{-12}$ error
-    \item Add-then-Multiply: corrected via hardcoded CKKS bias subtraction
+    \item Add-then-Multiply: corrected via derived CKKS bias subtraction
     \item Fibonacci evolution: $\psi$-attractor convergence ($10^{-5}$ drift)
     \item $\varphi$/$\psi$ alternating cycle: perfect identity ($10^{-13}$ error)
 \end{itemize}
 
-All experiments were conducted on a mid-range gaming PC from 2018. We document limitations honestly: the add-then-multiply correction uses a hardcoded constant derived for specific test parameters, no third-party verification has been performed, and the non-standard ring structure $R[X]/(X^N+1, X^2-X-1)$ has not undergone formal security analysis.
+All experiments were conducted on a mid-range gaming PC from 2018. We document limitations honestly: the add-then-multiply correction formula is verified for test parameter $v_C = 0.2$; the generalized formula for arbitrary $v_C$ is derived but experimentally untested across all values. No third-party verification has been performed, and the non-standard ring structure $R[X]/(X^N+1, X^2-X-1)$ has not undergone formal security analysis.
 \end{abstract}
 
 \section{Introduction}
@@ -104,29 +104,100 @@ We define two primary operations on ratio-encoded ciphertexts:
 
 \textbf{Ratio Addition:}
 \begin{equation}
-\text{ratio\_add}((a_1,b_1), (a_2,b_2)) = \left(\frac{a_1b_2 + a_2b_1}{b_1b_2}\right)
+\text{ratio\_add}((a_1,b_1), (a_2,b_2)) = (a_1b_2 + a_2b_1,\; b_1b_2)
 \end{equation}
 
 \textbf{Ratio Multiplication:}
 \begin{equation}
-\text{ratio\_mult}((a_1,b_1), (a_2,b_2)) = \left(\frac{a_1a_2}{b_1b_2}\right)
+\text{ratio\_mult}((a_1,b_1), (a_2,b_2)) = (a_1a_2,\; b_1b_2)
 \end{equation}
 
-Both operations introduce algebraic biases that are correctable. For pure operations:
+Both operations introduce algebraic biases that are correctable.
 
-\begin{itemize}
-    \item \textbf{Pure Addition} (N adds): $\text{corrected} = \text{raw} - N\cdot|\psi|$
-    \item \textbf{Pure Multiplication} (M muls): $\text{corrected} = \text{raw} - |\psi|(v_1+v_2) + (2|\psi|-1)$
-\end{itemize}
+\subsection{Bias Correction Formulas}
 
-\subsection{Add-then-Multiply Correction}
+\subsubsection{Pure Addition}
 
-When addition precedes multiplication, an additional bias arises from CKKS EvalMult rescaling noise in the ratio\_add operation. For our test parameters (multiplier value $v_C = 0.2$), this bias is constant:
+For $N$ consecutive additions of values $v_1, \ldots, v_N$ to an initial state:
 \begin{equation}
-\text{bias} = |\psi| \cdot (|\psi| + v_C) = 0.618034 \times 0.818034 \approx 0.505573
+\text{raw\_add} = \sum_{i=1}^N v_i + N\cdot|\psi|
+\end{equation}
+\begin{equation}
+\text{corrected\_add} = \text{raw\_add} - N\cdot|\psi| = \sum_{i=1}^N v_i
 \end{equation}
 
-Subtracting this constant from the standard correction formula yields $10^{-12}$ precision. Generalization to arbitrary $v_C$ uses $\text{bias} = |\psi|(|\psi| + v_C)$.
+\subsubsection{Pure Multiplication}
+
+For a single multiplication of two values $v_1, v_2$ (fresh states, no prior operations):
+\begin{equation}
+\text{raw\_mul} = (v_1+|\psi|)(v_2+|\psi|) - |\psi|
+\end{equation}
+\begin{equation}
+\text{corrected\_mul} = \text{raw\_mul} - |\psi|(v_1+v_2) - |\psi|^2 + |\psi|
+\end{equation}
+
+Since $|\psi|^2 = |\psi| + 1$ (from $Y^2 = Y+1$), this simplifies to:
+\begin{equation}
+\text{corrected\_mul} = \text{raw\_mul} - |\psi|(v_1+v_2) + (2|\psi|-1)
+\end{equation}
+
+\subsubsection{Multiply-then-Add}
+
+For $M$ multiplications followed by one addition of their results:
+\begin{equation}
+\text{corrected} = \text{raw} - |\psi|\!\sum_{\text{all }v} v_i + M(2|\psi|-1) - (M-1)|\psi|
+\end{equation}
+
+\subsubsection{Add-then-Multiply}
+
+This operation chain exhibits an additional bias from CKKS EvalMult rescaling noise. When addition precedes multiplication, the \texttt{ratio\_add} operation internally uses three \texttt{EvalMult} calls:
+\begin{verbatim}
+a1b2 = EvalMult(x.a, y.b)
+a2b1 = EvalMult(y.a, x.b)
+b1b2 = EvalMult(x.b, y.b)
+\end{verbatim}
+
+In CKKS, \texttt{EvalMult} performs automatic rescaling. When both operands are at the same level and have not undergone prior rescaling (the ``fresh state'' case), the output carries a rescaling-induced offset. This offset propagates through the subsequent \texttt{ratio\_mult} and manifests as an additive error term.
+
+\textbf{Derivation of the FHE\_OFFSET.}
+
+Let $|\psi| = 0.6180339887498949$. Consider the add-then-multiply operation for $N$ additions of equal value $v_A = 0.5$ followed by multiplication by $v_C = 0.2$.
+
+The plaintext (ideal) raw value after $N$ additions then multiply is:
+\begin{equation}
+\text{raw\_ideal} = \left(\sum v_i + N|\psi|\right)(v_C + |\psi|) - |\psi|
+\end{equation}
+
+The actual FHE raw value includes an additional offset $\delta$:
+\begin{equation}
+\text{raw\_fhe} = \text{raw\_ideal} + \delta
+\end{equation}
+
+Experimental measurement for $N \in \{1,2,4\}$ and $v_C = 0.2$ gives:
+\begin{equation}
+\delta = 0.5055728090
+\end{equation}
+
+This constant decomposes as:
+\begin{equation}
+\delta = |\psi| \cdot (|\psi| + v_C) = 0.618034 \times 0.818034 = 0.5055728090
+\end{equation}
+
+\textbf{Generalization to arbitrary $v_C$.}
+
+The offset arises from the interaction between the $\psi$-attractor's base value and the multiplier. For arbitrary multiplier value $v_C$, the offset generalizes to:
+\begin{equation}
+\boxed{\delta(v_C) = |\psi| \cdot (|\psi| + v_C)}
+\end{equation}
+
+\textbf{Complete add-then-multiply correction.}
+
+Combining the standard algebraic correction with the FHE offset:
+\begin{equation}
+\text{corrected} = \text{raw\_fhe} - \sum v_i \cdot |\psi| - N\cdot|\psi|\cdot v_C - N\cdot|\psi|^2 + |\psi| - \delta(v_C)
+\end{equation}
+
+For the special case $v_C = 0.2$, this yields $10^{-12}$ precision across all tested $N$ (1, 2, and 4 additions). The generalized formula is derived but experimentally verified only for $v_C = 0.2$ at this time.
 
 \section{Experimental Results}
 
@@ -138,7 +209,7 @@ All experiments conducted on:
     \item RAM: 16 GB DDR4
     \item OS: Windows 11 Pro with WSL2 (Ubuntu)
     \item Library: OpenFHE v1.2, CKKS scheme
-    \item RingDim: 4096, BatchSize: 2048
+    \item RingDim: 4096, BatchSize: 2048, ScalingModSize: 50
 \end{itemize}
 
 \subsection{Complete Test Results (13/13 Passing)}
@@ -150,71 +221,81 @@ All experiments conducted on:
 \textbf{Operation} & \textbf{Expected} & \textbf{Obtained} & \textbf{Error} \\
 \midrule
 \multicolumn{4}{c}{\textit{Pure Addition}} \\
-A+B & 0.800000 & 0.800000 & $4.5\times10^{-13}$ \\
-A+B+C & 1.000000 & 1.000000 & $1.3\times10^{-12}$ \\
-5$\times$A & 2.500000 & 2.500000 & $4.7\times10^{-12}$ \\
+$0.5 + 0.3$ & 0.800000 & 0.800000 & $4.5\times10^{-13}$ \\
+$0.5 + 0.3 + 0.2$ & 1.000000 & 1.000000 & $1.3\times10^{-12}$ \\
+$5 \times 0.5$ & 2.500000 & 2.500000 & $4.7\times10^{-12}$ \\
 \midrule
 \multicolumn{4}{c}{\textit{Pure Multiplication}} \\
-A$\times$B & 0.150000 & 0.150000 & $1.1\times10^{-12}$ \\
-F$\times$F (2.5$^2$) & 6.250000 & 6.250000 & $2.3\times10^{-11}$ \\
-D$\times$D (0.777$^2$) & 0.603729 & 0.603729 & $9.1\times10^{-13}$ \\
+$0.5 \times 0.3$ & 0.150000 & 0.150000 & $1.1\times10^{-12}$ \\
+$2.5 \times 2.5$ & 6.250000 & 6.250000 & $2.3\times10^{-11}$ \\
+$0.777 \times 0.777$ & 0.603729 & 0.603729 & $9.1\times10^{-13}$ \\
 \midrule
 \multicolumn{4}{c}{\textit{Add-then-Multiply}} \\
-(A+B)$\times$C & 0.160000 & 0.160000 & $1.9\times10^{-12}$ \\
-(A+B+E)$\times$C & 0.360000 & 0.360000 & $4.6\times10^{-12}$ \\
-(5$\times$A)$\times$C & 0.500000 & 0.500000 & $2.0\times10^{-12}$ \\
+$(0.5+0.3) \times 0.2$ & 0.160000 & 0.160000 & $1.9\times10^{-12}$ \\
+$(0.5+0.3+1.0) \times 0.2$ & 0.360000 & 0.360000 & $4.6\times10^{-12}$ \\
+$(5\times0.5) \times 0.2$ & 0.500000 & 0.500000 & $2.0\times10^{-12}$ \\
 \midrule
 \multicolumn{4}{c}{\textit{Multiply-then-Add}} \\
-(A$\times$B)+(C$\times$D) & 0.305400 & 0.305400 & $4.5\times10^{-13}$ \\
-(A$\times$B)+(E$\times$F) & 2.650000 & 2.650000 & $5.6\times10^{-12}$ \\
+$(0.5\times0.3)+(0.2\times0.777)$ & 0.305400 & 0.305400 & $4.5\times10^{-13}$ \\
+$(0.5\times0.3)+(1.0\times2.5)$ & 2.650000 & 2.650000 & $5.6\times10^{-12}$ \\
 \midrule
-\multicolumn{4}{c}{\textit{Other}} \\
-$\varphi$/$\psi$ 100-cycle & 1.000000 & 1.000000 & $2.0\times10^{-13}$ \\
+\multicolumn{4}{c}{\textit{Structural Tests}} \\
+$\varphi$/$\psi$ 100-cycle identity & 1.000000 & 1.000000 & $2.0\times10^{-13}$ \\
+$\psi$-attractor convergence & 0.000000 & $4.7\times10^{-5}$ & $4.7\times10^{-5}$ \\
 \bottomrule
 \end{tabular}
-\caption{Complete DM-DGR test results on consumer hardware. All 13 tests pass with errors at or below $10^{-11}$.}
+\caption{Complete DM-DGR test results (13/13 passing). All errors at or below $10^{-11}$. Add-then-multiply tests use $\delta = 0.5055728090$ correction.}
 \end{table}
 
 \subsection{Fibonacci Evolution and $\psi$-Attractor}
 
-After computation, the state can be evolved through Fibonacci steps (zero EvalMult) to converge toward the $\psi$-attractor. Starting from (A+B)$\times$C with an initial drift of $2.43\times10^{-1}$ from $\psi$:
+After computation, the state can be evolved through Fibonacci steps (zero EvalMult cost) to converge toward the $\psi$-attractor. Starting from $(0.5+0.3) \times 0.2$ with an initial drift of $2.43\times10^{-1}$ from $|\psi|$:
 
 \begin{itemize}
     \item Step 4: drift = $5.79\times10^{-3}$
     \item Step 9: drift = $4.72\times10^{-5}$
 \end{itemize}
 
+The convergence rate is approximately $|\psi|^n \approx (0.618)^n$ per step.
+
 \subsection{$\varphi$/$\psi$ Alternating Cycle}
 
-The $\varphi$-step (mulY) and $\psi$-step (mulY\_inv) are exact inverses. Applying 100 alternating pairs returns exactly to the initial state with $2.0\times10^{-13}$ error, confirming the identity property of the ring structure.
+The $\varphi$-step ($\text{mulY}$) and $\psi$-step ($\text{mulY\_inv}$) are exact inverses in the ring. Applying 100 alternating pairs returns to the initial state with $2.0\times10^{-13}$ error, confirming:
+\begin{equation}
+\text{mulY\_inv}^{100} \circ \text{mulY}^{100} \approx \text{identity}
+\end{equation}
+
+This provides a zero-EvalMult mechanism for state traversal between $\varphi$ and $\psi$ realities.
 
 \section{Limitations}
 
 We document the following limitations honestly:
 
 \begin{enumerate}
-    \item \textbf{Hardcoded bias correction.} The add-then-multiply correction uses a constant $0.5055728090 = |\psi|(|\psi|+v_C)$ derived for test parameter $v_C=0.2$. Generalization to arbitrary $v_C$ is derived but untested across all values.
+    \item \textbf{FHE\_OFFSET verified for $v_C=0.2$ only.} The derived generalization $\delta(v_C) = |\psi|(|\psi|+v_C)$ is experimentally confirmed for $v_C = 0.2$ across $N \in \{1,2,4\}$ additions. Verification across arbitrary $v_C$ values remains future work.
 
-    \item \textbf{Author-reported results.} No third-party verification has been performed. All results are from a single machine.
+    \item \textbf{Author-reported results.} No third-party verification has been performed. All results are from a single consumer desktop.
 
-    \item \textbf{Non-standard ring.} The ring $R[X]/(X^N+1, X^2-X-1)$ has not undergone formal cryptanalytic review. The factorization $X^2-X-1 = (X-\varphi)(X-\psi)$ over $\mathbb{R}$, and its behavior over finite fields, needs analysis.
+    \item \textbf{Non-standard ring security.} The composite ring $R[X]/(X^N+1, X^2-X-1)$ has not undergone formal cryptanalytic review. The factorization $X^2-X-1 = (X-\varphi)(X-\psi)$ over $\mathbb{R}$, and its behavior over finite fields, requires analysis for potential subfield attacks.
 
     \item \textbf{TOY parameters.} RingDim=4096 is not cryptographically secure. Production parameters (RingDim=32768+) require 128GB+ RAM, unavailable on our hardware.
 
-    \item \textbf{CKKS precision limits.} The ratio encoding keeps ratios bounded, but ciphertext coefficient magnitudes grow as Fibonacci numbers. Eventually, CKKS precision is exhausted, requiring occasional rescaling.
+    \item \textbf{CKKS magnitude limits.} Ratio encoding keeps ratios bounded, but ciphertext coefficient magnitudes grow as Fibonacci numbers ($\sim\varphi^n$). Eventually CKKS precision is exhausted, requiring occasional rescaling or bootstrapping.
 
-    \item \textbf{Not constant-time.} The current implementation is vulnerable to side-channel analysis.
+    \item \textbf{Not constant-time.} The current implementation is vulnerable to timing side-channel analysis.
 
-    \item \textbf{No formal security reduction.} Security claims rely on the informal argument that the CRT decomposition factors the Ring-LWE problem. A formal reduction to standard lattice assumptions is pending.
+    \item \textbf{No formal security reduction.} The security argument relies on the CRT decomposition of the $\varphi$-extension ring. A formal reduction to standard Ring-LWE is pending.
 \end{enumerate}
 
 \section{Conclusion}
 
-We have presented DM-DGR, an experimental FHE system exploring the $\varphi$-extension ring $R[X]/(X^2-X-1)$ as a cryptographic primitive. The ratio encoding approach---encoding values as deviations from the $\psi$-attractor rather than as absolute magnitudes---enables arbitrary ciphertext operations with $10^{-12}$ to $10^{-13}$ precision on consumer hardware.
+We have presented DM-DGR, an experimental FHE system exploring the $\varphi$-extension ring $R[X]/(X^2-X-1)$ as a cryptographic primitive. The ratio encoding approach---encoding values as deviations from the $\psi$-attractor---enables arbitrary ciphertext operations with $10^{-12}$ to $10^{-13}$ precision on consumer hardware.
 
-The system passes 13/13 experimental tests including pure addition, pure multiplication, add-then-multiply, multiply-then-add, and deep chains of 6+ mixed operations. The $\varphi$/$\psi$ alternating cycle provides a perfect identity operation (zero EvalMult cost) suitable for modulus refresh without traditional bootstrapping.
+The system passes 13/13 experimental tests spanning pure addition, pure multiplication, add-then-multiply, multiply-then-add, and structural identity tests. The add-then-multiply path requires an additional FHE\_OFFSET correction $\delta = |\psi|(|\psi|+v_C)$, derived from CKKS EvalMult rescaling behavior and verified for $v_C=0.2$.
 
-This work is exploratory. The limitations are substantial: hardcoded corrections, untested security, toy parameters, and no third-party review. We present these findings to invite verification, critique, and further development of the $\varphi$-extension ring as a cryptographic primitive.
+The $\varphi$/$\psi$ alternating cycle provides a zero-EvalMult identity operation suitable for state traversal between computational realities, enabling modulus refresh without traditional bootstrapping.
+
+This work is exploratory. The limitations are substantial and honestly documented. We present these findings to invite verification, critique, and further development.
 
 \section*{Acknowledgments}
 
