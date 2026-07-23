@@ -14,7 +14,7 @@ FEmmG-FHE is a research project exploring the algebraic extension ring **R[X]/(X
 
 The two roots of X²-X-1 are φ ≈ 1.618 (the golden ratio) and ψ ≈ -0.618. One expands, one contracts. This asymmetry creates interesting dynamics that we apply to three problems.
 
-**This is exploratory work.** Some things worked. Some things didn't. We document both honestly.
+**This is exploratory work.** Some things worked (noise attenuation, 99-bootstrap run, 3.4× throughput). Some things didn't (initial linear error claim, initial iO framing, Zeckendorf scope). We document both honestly.
 
 ---
 
@@ -65,7 +65,7 @@ Compressing public key material by storing φ and ψ evaluations instead of full
 
 **What works:**
 - 192 bytes total (SK=64, PK=64, CT=64) for the Level 5 experimental variant
-- 30/30 encaps/decaps passed, 100% tamper detection
+- 30/30 encaps/decaps passed, 100% tamper detection (single machine, no network simulation)
 - Fits in QR Code Version 1 (196 bytes)
 
 **Important caveats:**
@@ -89,7 +89,7 @@ Boot  Mults   φ-error       ψ-noise       Status
   50   3210    1.01e-07    9.23e-12       OK
   99   6297    1.98e-07    1.15e-11       OK
 
-Projected to 1% error: ~14,000 mults
+Projected to 1% error: ~14,000 mults (assuming constant growth rate, no modulus depletion)
 Demonstrated: 6,297 (45% of projected limit)
 ```
 
