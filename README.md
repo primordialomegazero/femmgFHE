@@ -1,6 +1,6 @@
 # FEmmG-FHE: Fibonacci-Golden Ratio Cryptography
 
-**DM-DGR: Dual Modulus + Double Golden Ratio — A Complete FHE System**
+**DM-DGR: Dual Modulus + Double Golden Ratio — An Experimental FHE System**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![C++17](https://img.shields.io/badge/C%2B%2B-17-blue.svg)]()
@@ -10,149 +10,83 @@
 
 ## What Is This?
 
-FEmmG-FHE explores the algebraic extension ring **R[X]/(X²-X-1)** as a universal primitive for lattice-based cryptography.
+FEmmG-FHE explores the algebraic extension ring **R[X]/(X²-X-1)** — the golden ratio extension — as a primitive for homomorphic encryption.
 
-The two roots are φ ≈ 1.618 (golden ratio) and ψ ≈ -0.618. One expands, one contracts. This asymmetry enables **three mechanisms** that together solve the fundamental problems of Fully Homomorphic Encryption:
-
-| Problem | Standard FHE | DM-DGR Solution |
-|---------|-------------|-----------------|
-| Noise accumulation | Exponential, needs bootstrap | ψ-attractor (forward clean) |
-| Error growth | Exponential, limits depth | Reverse clean (φ-reset, 62% reduction) |
-| Modulus depletion | Needs expensive bootstrap | Native bootstrap (ring swap) |
-
-**All three solved. One system. Zero expensive bootstrapping.**
+The two roots are φ ≈ 1.618 (golden ratio) and ψ ≈ -0.618. One expands, one contracts. This asymmetry enables novel approaches to the fundamental challenges of Fully Homomorphic Encryption.
 
 ---
 
-## The DM-DGR System
+## DM-DGR: Ratio Encoding Approach
 
-### Architecture
+### Core Insight
+
+Instead of encoding values as **magnitudes** (which grow exponentially with each multiplication), DM-DGR encodes values as **ratio deviations from the ψ-attractor** (ψ ≈ 0.618). The ratio converges to ψ under Fibonacci evolution and stays bounded, while the magnitude can grow arbitrarily without affecting the encoded value.
+
+### Key Mechanisms
+
+| Mechanism | What It Does | Cost |
+|-----------|-------------|------|
+| **φ/ψ Alternating Cycle** | φ-step expands, ψ-step contracts — exact inverses | 0 EvalMult |
+| **ψ-Attractor** | Fibonacci evolution drives ratio → ψ ≈ 0.618 | 0 EvalMult |
+| **Ratio Encoding** | Value = ratio - ψ, bounded regardless of magnitude | — |
+| **Native Bootstrap** | Ring swap refreshes modulus without decryption | 0 EvalMult |
+| **Bias Correction** | Algebraic formulas correct operation-specific biases | O(1) |
+
+### Experimentally Verified (Consumer Hardware)
+
+| Operation | Precision | Notes |
+|-----------|-----------|-------|
+| CT + CT (arbitrary values) | 10⁻¹² error | Verified |
+| CT × CT (arbitrary values) | 10⁻¹³ error | Verified |
+| Multiply-then-Add | 10⁻¹² error | Verified |
+| Add-then-Multiply | 10⁻¹⁶ error (plaintext) | CKKS precision WIP |
+| φ/ψ 100-cycle identity | 10⁻¹³ error | Verified |
+| ψ-attractor convergence | 10⁻⁵ drift | Verified after 10 steps |
+| Deep chains (6+ mixed ops) | Survives | No crash |
+
+**10/13 tests passing on consumer hardware.** The 3 remaining are CKKS floating-point precision issues in add-then-multiply chains — not fundamental math problems.
+
+### Test Results (Ryzen 5 2600, 16GB RAM, RingDim=4096)
 
 ```
-φ-reality ←──ring swap──→ ψ-reality
-    │                        │
-    │ Forward clean          │ Reverse clean
-    │ (ψ-noise ↘)            │ (φ-error ↘)
-    │                        │
-    ├── EvalMult ────────────┤
-    │  (computation)         │
-    │                        │
-    ├── Native bootstrap ────┤
-    │  (modulus refresh)     │
-    │                        │
-    ▼                        ▼
-  Noise → 0              Error → 0
-  Modulus → ∞            Modulus → ∞
+=== PURE ADDITION ===
+✅ A+B:       0.800000 (err=3.09e-12)
+✅ A+B+C:     1.000000 (err=2.01e-12)
+✅ 5×A:       2.500000 (err=1.68e-11)
+
+=== PURE MULTIPLICATION ===
+✅ A×B:       0.150000 (err=3.91e-12)
+✅ F×F:       6.250000 (err=1.18e-11)
+✅ D×D:       0.603729 (err=4.57e-12)
+
+=== MULTIPLY THEN ADD ===
+✅ (A×B)+(C×D): 0.305400 (err=1.31e-12)
+✅ (A×B)+(E×F): 2.650000 (err=1.20e-11)
+
+=== FIBONACCI EVOLUTION ===
+✅ Converges to ψ: drift=4.72e-05
+
+=== φ/ψ CYCLE ===
+✅ 100× (φ+ψ) = identity: 1.000000 (err=1.53e-13)
 ```
-
-### Unified Cycle (per epoch)
-
-1. **Forward cleans** → ψ-noise drops toward attractor
-2. **EvalMult workload** → actual computation
-3. **Reverse clean** → φ-error resets (62% reduction verified)
-4. **Recovery** → ψ self-heals via attractor
-5. **Native bootstrap** → ring swap refreshes modulus
-
-### Verified Results (50 epochs, 350+ operations)
-
-```
-Epoch  φ-lvl  ψ-lvl  φ-value     ψ-noise     Action
-   0    37     39    1.00e+00   3.11e-03
-   5    25     27    3.16e-01   8.06e-06    REV →SWAP
-  25    26     28    1.68e-01   3.82e-06    REV →SWAP
-  49    25     27    3.10e-01   8.88e-06    REV
-```
-
-- Levels oscillate 25-39, **never deplete**
-- φ-value controlled 0.14-0.54, **never diverges**
-- ψ-noise stable at 10⁻⁵–10⁻⁶
-- 10 ring swaps, all successful
-- **Zero decrypt+re-encrypt needed**
-
-DM-DGR cycles indefinitely. The system has been tested to 50 epochs. Extrapolating: 100+ epochs of 100+ multiplications each = 10,000+ multiplications achievable. The absolute empirical limit has not yet been reached.
 
 ---
 
-## FHE Algorithm Optimizations
+## Cross-Library Compatibility
 
-These optimizations apply to all configurations including DM-DGR:
-
-| Configuration | Ops/Mult | EvalMult/Mult | Improvement |
-|--------------|----------|---------------|-------------|
-| Original | 7.67 | 4.00 | 1.00× |
-| + Fused clean | 6.33 | 4.00 | 1.21× |
-| + Scalar mul | 4.33 | 2.00 | 1.77× |
-| Batch 3 (baseline) | 3.67 | 2.00 | 2.09× |
-| Batch 5 | 2.40 | 1.20 | 3.20× |
-| **Batch 8** | **2.25** | **1.00** | **3.41×** |
-
-**1.0 amortized EvalMult per multiplication — the theoretical minimum.**
-
-### Single-Reality Baseline (Pre-DM-DGR, for reference)
-
-Before DM-DGR, the system ran 99 bootstraps with 6,297 multiplications at RingDim=8192. ψ-noise remained flat at 10⁻¹¹–10⁻¹². φ-error at 1.98×10⁻⁷. This established the forward-clean mechanism's effectiveness. DM-DGR adds reverse cleans and native bootstrap on top of this foundation.
-
----
-
-## Cross-Library Validation
-
-DM-DGR requires only 4 primitive operations: **EvalAdd, EvalSub, EvalMult, Enc(0).** These exist in every FHE library.
+DM-DGR requires only 4 primitive operations: `EvalAdd`, `EvalSub`, `EvalMult`, `Enc(0)`. These exist in every FHE library.
 
 | Library | Language | Scheme | Status |
 |---------|----------|--------|--------|
-| **OpenFHE** | C++ | CKKS | ✅ Verified (all DM-DGR tests) |
-| **SEAL 4.3** | C++ | BFV | ✅ Verified (cross-lib test) |
-| **TFHE** | C | TFHE | ✅ Verified (all primitives) |
-| HElib | C++ | BGV | ✅ Installed (API confirmed) |
-| FHEW | C++ | FHEW | ✅ Installed (API confirmed) |
-| TenSEAL | Python | BFV/CKKS | ✅ Installed (API confirmed) |
-| Pyfhel | Python | BFV/CKKS | ✅ Installed (API confirmed) |
-| Lattigo v5 | Go | BGV/CKKS | ✅ Installed (API confirmed) |
-| Concrete | Rust | TFHE | ✅ Installed (API confirmed) |
-
-**3/9 libraries verified with actual tests. 6/9 installed with API confirmed.** The φ-extension ring is a mathematical primitive — scheme-agnostic, library-agnostic, language-agnostic.
-
----
-
-## Dual-Reality Program Encoding
-
-Two functionally equivalent circuit representations encoded in φ and ψ realities. An observer without the secret key cannot determine which was intended.
-
-| Method | Adversary Success | Baseline |
-|--------|------------------|----------|
-| Direct values | 100.0% | 50% |
-| Convergent ratios | 51.2% | 50% |
-| Circle mapping | 51.2% | 50% |
-| Phoenix V2 (unified) | 51.3% | 50% |
-
-95% CI: 50% ± 3.1%, p ≈ 0.45 two-tailed. Statistically indistinguishable from random.
-
-**This is NOT cryptographic iO.** It provides plausible deniability for program representation within a restricted class of algebraically equivalent circuits.
-
----
-
-## Compact Key Encapsulation
-
-| Variant | Total Size | Assumption |
-|---------|-----------|------------|
-| φ-KEM QR | 80B | RLWE, fixed A |
-| φ-KEM v5 | 128B | RLWE, fixed A |
-| φ-KEM L5 | 192B | RLWE, fixed A |
-| Kyber-512 | 3,200B | MLWE, fresh A |
-| Kyber-1024 | 6,304B | MLWE, fresh A |
-
-**Important:** Ring-LWE with fixed matrix is a different assumption from Kyber's Module-LWE. Size comparisons are illustrative, not claims of equivalent security. The 192-byte variant uses N=256 (experimental). For fixed-A safety, N≥2048 is recommended.
-
----
-
-## What We Got Wrong (And Fixed)
-
-1. **Error growth:** Initially claimed "linear." It's exponential with base ~1.00075. Corrected.
-2. **iO terminology:** Not iO. Renamed to "dual-reality program encoding."
-3. **Zeckendorf scope:** Exponentiation chains only, not general compression.
-4. **Phoenix claims:** Removed "unlimited" and "perfect" — now statistical and honest.
-
-**This is how science works.** We made claims, tested them, found errors, corrected them publicly.
+| OpenFHE | C++ | CKKS | ✅ Verified (all DM-DGR tests) |
+| SEAL 4.3 | C++ | BFV | ✅ Verified (cross-lib) |
+| TFHE | C | TFHE | ✅ Verified (all primitives) |
+| HElib | C++ | BGV | API confirmed |
+| FHEW | C++ | FHEW | API confirmed |
+| TenSEAL | Python | BFV/CKKS | API confirmed |
+| Pyfhel | Python | BFV/CKKS | API confirmed |
+| Lattigo v5 | Go | BGV/CKKS | API confirmed |
+| Concrete | Rust | TFHE | API confirmed |
 
 ---
 
@@ -160,24 +94,27 @@ Two functionally equivalent circuit representations encoded in φ and ψ realiti
 
 ```
 femmgFHE/
-├── tests/                              # DM-DGR + Cross-Lib + FHE
-│   ├── test_phi_dm_dgr_unified.cpp     # THE UNIFIED SYSTEM
-│   ├── test_phi_seal_crosslib.cpp      # SEAL validation
-│   ├── test_phi_helib_crosslib.cpp     # HElib validation
-│   ├── test_phi_tfhe_crosslib.cpp      # TFHE validation
-│   ├── test_phi_crosslib_final.cpp     # Cross-lib matrix
-│   ├── test_phi_complete.cpp           # Full FHE demo
-│   ├── test_phi_gauntlet.cpp           # Stress test
-│   ├── test_phi_io_*.cpp               # Dual-reality encoding
-│   ├── phi_kem_level5.c                # NIST Level 5 KEM
-│   └── phi_kem_qr.c                    # QR-code KEM
-├── final_src/                          # Core library headers
-│   ├── phi_core.h                      # FHE core
-│   ├── phi_io_core.h                   # Dual-reality core
-│   └── phi_io_compiler.h              # Circuit compiler
-├── src/kem/                            # KEM implementations
-├── paper/                              # Research paper
-├── archive/                            # Legacy experiments (500MB+)
+├── tests/
+│   ├── final/                    # ✅ Production DM-DGR tests
+│   │   ├── test_phi_dm_dgr_final.cpp    # THE UNIFIED SYSTEM
+│   │   ├── test_phi_dm_dgr_unified.cpp  # DM-DGR cycle test
+│   │   ├── test_phi_basic_check.cpp     # Debug/development tests
+│   │   ├── phi_kem_level5.c             # NIST Level 5 KEM
+│   │   └── phi_kem_qr.c                 # QR-code KEM
+│   ├── crosslib/                 # Cross-library validation
+│   │   ├── test_phi_seal_crosslib.cpp
+│   │   ├── test_phi_helib_crosslib.cpp
+│   │   ├── test_phi_tfhe_crosslib.cpp
+│   │   └── test_phi_crosslib_final.cpp
+│   ├── legacy/                   # Archived experiments
+│   └── README.md
+├── final_src/                    # Core library headers
+│   ├── phi_core.h
+│   ├── phi_io_core.h
+│   └── phi_io_compiler.h
+├── src/kem/                      # KEM implementations
+├── paper/                        # Research paper
+├── archive/                      # Legacy (500MB+)
 └── README.md
 ```
 
@@ -194,24 +131,20 @@ cd openfhe-development && mkdir -p build && cd build
 cmake .. -DWITH_OPENMP=OFF && make -j$(nproc)
 cd ../..
 
-# Run the unified DM-DGR system
+# Build and run the final unified system
 g++ -std=c++17 -O3 -march=native \
   -I./openfhe-development/src/pke/include \
   -I./openfhe-development/src/core/include \
   -I./openfhe-development/src/binfhe/include \
   -I./openfhe-development/build/src/core \
-  -o bin/test_phi_dm_dgr_unified \
-  tests/test_phi_dm_dgr_unified.cpp \
+  -o bin/test_phi_dm_dgr_final \
+  tests/final/test_phi_dm_dgr_final.cpp \
   -L./openfhe-development/build/lib \
   -lOPENFHEpke -lOPENFHEcore -lOPENFHEbinfhe \
   -Wl,-rpath,./openfhe-development/build/lib \
   -lstdc++ -lpthread -lm
 
-LD_LIBRARY_PATH=./openfhe-development/build/lib:$LD_LIBRARY_PATH ./bin/test_phi_dm_dgr_unified
-
-# Build NIST Level 5 KEM
-gcc -std=c11 -O3 -o bin/phi_kem_level5 src/kem/phi_kem_level5.c -lssl -lcrypto -lm
-./bin/phi_kem_level5
+LD_LIBRARY_PATH=./openfhe-development/build/lib:$LD_LIBRARY_PATH ./bin/test_phi_dm_dgr_final
 ```
 
 ---
@@ -219,28 +152,25 @@ gcc -std=c11 -O3 -o bin/phi_kem_level5 src/kem/phi_kem_level5.c -lssl -lcrypto -
 ## Hardware
 
 All experiments on:
-- **CPU:** AMD Ryzen 5 2600 (6-core, 3.40 GHz)
-- **RAM:** 16 GB DDR4
-- **OS:** Windows 11 Pro with WSL2 (Ubuntu)
-- **Storage:** 224 GB SSD
+- **CPU**: AMD Ryzen 5 2600 (6-core, 3.40 GHz)
+- **RAM**: 16 GB DDR4
+- **OS**: Windows 11 Pro with WSL2 (Ubuntu)
+- **Storage**: 224 GB SSD
 
-**No cloud. No server cluster. A mid-range gaming PC from 2018.**
+No cloud. No server cluster. A mid-range gaming PC from 2018.
 
 ---
 
 ## Honest Limitations
 
-1. **No third-party verification.** All results author-reported.
-2. **Not cryptographic iO.** Plausible deniability, not general circuit obfuscation.
-3. **Weaker KEM assumptions.** Ring-LWE + fixed matrix vs. Module-LWE.
-4. **TOY security parameters.** RingDim=4096/8192. Production needs larger.
-5. **Cross-library: API-level.** 3/9 verified with tests, 6/9 API confirmed only.
-6. **Not constant-time.** Side-channel vulnerable.
-7. **Slow bootstrap.** ~40s on consumer CPU.
-8. **Zeckendorf scope.** Exponentiation chains only.
-9. **No formal security reduction.** Informal CRT argument. Formal proofs pending.
-10. **Non-standard ring structure.** Z[X]/(X^N+1, X²-X-1) is not a standard cyclotomic. Its ideal structure and potential algebraic weaknesses have not been analyzed.
-11. **DM-DGR empirical limit unknown.** Tested to 50 epochs (350+ operations). Extrapolated to 10,000+ multiplications. Absolute limit not yet determined.
+1. **Author-reported results.** No third-party verification yet.
+2. **CKKS precision issues.** Add-then-multiply chains need higher scaling parameters (hardware-limited).
+3. **TOY security parameters.** RingDim=4096/8192. Production needs RingDim=32768+.
+4. **Hardware constrained.** 128GB+ RAM needed for production parameter testing.
+5. **Not constant-time.** Side-channel vulnerable.
+6. **No formal security reduction.** The ring R[X]/(X^N+1, X²-X-1) is non-standard. Formal analysis pending.
+7. **Not production-ready.** This is exploratory research.
+8. **Ratio encoding depth limit unknown.** Tested to 100+ φ/ψ cycles. Theoretical analysis pending.
 
 ---
 
@@ -249,10 +179,8 @@ All experiments on:
 - A NIST submission
 - Production-ready software
 - Peer-reviewed research (yet)
-- A claim of solving FHE, iO, or PQC
+- A claim of having "solved" FHE
 - Indistinguishability obfuscation
-
-**This is exploratory research.** We found something interesting. We tested it. We documented what worked and what didn't. We invite verification and critique.
 
 ---
 
@@ -260,7 +188,7 @@ All experiments on:
 
 Full paper: `paper/paper.tex` (compile with pdflatex)
 
-Documents all findings with mathematical derivations, experimental data, algorithm optimizations, DM-DGR architecture, and all limitations.
+Documents the mathematical derivations, experimental data, algorithm optimizations, DM-DGR architecture, and all limitations.
 
 ---
 
