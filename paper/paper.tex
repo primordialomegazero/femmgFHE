@@ -1,6 +1,4 @@
 \documentclass[11pt,a4paper]{article}
-
-% Packages
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage{amsmath,amssymb,amsthm}
@@ -12,21 +10,8 @@
 \usepackage{geometry}
 \geometry{margin=1in}
 
-% Theorems
 \newtheorem{theorem}{Theorem}[section]
-\newtheorem{lemma}[theorem]{Lemma}
-\newtheorem{corollary}[theorem]{Corollary}
 \newtheorem{definition}[theorem]{Definition}
-\newtheorem{proposition}[theorem]{Proposition}
-
-% Math operators
-\DeclareMathOperator{\CT}{CT}
-\DeclareMathOperator{\PK}{PK}
-\DeclareMathOperator{\SK}{SK}
-\DeclareMathOperator{\Enc}{Enc}
-\DeclareMathOperator{\Dec}{Dec}
-\DeclareMathOperator{\Eval}{Eval}
-\DeclareMathOperator{\Bootstrap}{Bootstrap}
 
 \title{\Huge FEmmG-FHE: Fibonacci-Golden Ratio Cryptography\\[5pt]
 \large An Exploration of the $\varphi$-Extension Ring for\\
@@ -47,9 +32,9 @@ We explore the algebraic extension ring $R[X]/(X^2-X-1)$ where $R$ is a cyclotom
 
 We investigate three applications with algorithm-level optimizations:
 
-\textbf{Noise Management for FHE:} A fused clean operation using only 2 homomorphic additions (vs.\ 4 originally) attenuates the $\psi$-component by $\psi^2 \approx 0.382$ per cycle. Scalar multiplication detection reduces EvalMult from 4 to 2 per ciphertext multiplication. Batch processing (8 multiplications per clean cycle) achieves 1.0 amortized EvalMult per multiplication---the theoretical minimum. Combined, these optimizations yield a \textbf{3.4$\times$ throughput improvement} over the original implementation. We demonstrate 320 sequential homomorphic multiplications with $\varphi$-error growing exponentially at $\sim$1.00075 per multiplication and $\psi$-noise remaining flat at $10^{-12}$--$10^{-13}$.
+\textbf{Noise Management for FHE:} A fused clean operation using only 2 homomorphic additions attenuates the $\psi$-component by $\psi^2 \approx 0.382$ per cycle. Scalar multiplication detection reduces \texttt{EvalMult} from 4 to 2 per ciphertext multiplication. Batch processing (8 multiplications per clean cycle) achieves 1.0 amortized \texttt{EvalMult} per multiplication---the theoretical minimum. Combined, these optimizations yield a \textbf{3.4$\times$ throughput improvement}. We demonstrate 320 sequential homomorphic multiplications with $\varphi$-error growing exponentially at $\sim$1.00075 per multiplication and $\psi$-noise remaining flat at $10^{-12}$--$10^{-13}$.
 
-\textbf{Dual-Reality Program Encoding:} Two algebraically equivalent circuit representations encoded in the $\varphi$ and $\psi$ realities produce outputs that are statistically indistinguishable (51.2\% adversary success rate, 95\% CI: 50\% $\pm$ 3.1\%). We explicitly note this is not cryptographic iO. A gate-mapping compiler handles circuits with different gate counts via identity padding (5/5 test cases verified).
+\textbf{Dual-Reality Program Encoding:} Two algebraically equivalent circuit representations encoded in the $\varphi$ and $\psi$ realities produce outputs that are statistically indistinguishable (51.2\% adversary success rate, 95\% CI: 50\% $\pm$ 3.1\%). This is not cryptographic iO. A gate-mapping compiler handles circuits with different gate counts via identity padding (5/5 test cases verified).
 
 \textbf{Compact Key Encapsulation:} Storing $\varphi$ and $\psi$ evaluations yields experimental KEM variants from 80 to 192 bytes. Our Level 5 variant uses Ring-LWE with a fixed public matrix---a different assumption from Kyber's Module-LWE. Size comparisons are illustrative, not claims of equivalent security.
 
@@ -63,7 +48,7 @@ Fully Homomorphic Encryption (FHE) enables computation on encrypted data. Since 
 \textbf{Our Contribution.} We explore the $\varphi$-extension ring $R[X]/(X^2-X-1)$ as an algebraic primitive. The roots $\varphi \approx 1.618$ and $\psi \approx -0.618$ create asymmetric dynamics---amplification in one direction, attenuation in another. This yields:
 
 \begin{enumerate}
-    \item \textbf{Optimized FHE noise management.} Through fused operations, scalar multiplication detection, and batch processing, we achieve 1.0 amortized EvalMult per multiplication---the theoretical minimum for any FHE scheme.
+    \item \textbf{Optimized FHE noise management.} Through fused operations, scalar multiplication detection, and batch processing, we achieve 1.0 amortized \texttt{EvalMult} per multiplication---the theoretical minimum for any FHE scheme.
     \item \textbf{Dual-reality program encoding.} A mechanism for plausible deniability in program representation, not general iO.
     \item \textbf{Compact KEM.} Experimental key compression using Ring-LWE with fixed public matrix.
 \end{enumerate}
@@ -85,101 +70,58 @@ Let $R = \mathbb{Z}_q[X]/(X^N+1)$. The $\varphi$-extension ring is $R_\varphi = 
 \end{definition}
 
 \begin{theorem}[CRT Decomposition]
-\label{thm:crt}
 $R[Y]/(Y^2 - Y - 1) \cong R \times R$ via $a + bY \mapsto (a + b\varphi,\; a + b\psi)$ when $\varphi - \psi = \sqrt{5}$ is invertible in $R$.
 \end{theorem}
 
 \subsection{Zero-Depth Operations}
 
-$\text{mul}_Y(a,b) = (b, a+b)$ requires only one addition and zero EvalMult calls. Its matrix is $M = \begin{pmatrix} 0 & 1 \\ 1 & 1 \end{pmatrix}$ with eigenvalues $\varphi$ (expanding) and $\psi$ (contracting, $|\psi| < 1$).
+$\text{mul}_Y(a,b) = (b, a+b)$ requires only one addition and zero \texttt{EvalMult} calls. Its matrix is $M = \begin{pmatrix} 0 & 1 \\ 1 & 1 \end{pmatrix}$ with eigenvalues $\varphi$ (expanding) and $\psi$ (contracting, $|\psi| < 1$).
 
 \begin{definition}[Fused Clean Operation]
-$\text{clean}(a,b) = \text{div}_Y \circ \text{mul}_Y^3(a,b) = (a+b,\; a+2b)$. Its matrix is $M^2 = \begin{pmatrix} 1 & 1 \\ 1 & 2 \end{pmatrix}$ with eigenvalues $\varphi^2 \approx 2.618$ and $\psi^2 \approx 0.382$. The fused form requires only 2 EvalAdd operations instead of 4.
+$\text{clean}(a,b) = \text{div}_Y \circ \text{mul}_Y^3(a,b) = (a+b,\; a+2b)$. Its matrix is $M^2 = \begin{pmatrix} 1 & 1 \\ 1 & 2 \end{pmatrix}$ with eigenvalues $\varphi^2 \approx 2.618$ and $\psi^2 \approx 0.382$. The fused form requires only 2 \texttt{EvalAdd} operations instead of 4.
 \end{definition}
 
 \subsection{Scalar Multiplication Optimization}
 
-In our FHE loop, the multiplier is always a scalar constant $\text{mult} = (pre, 0)$. The general $\varphi$-ring multiplication $(a_1+b_1Y)(a_2+b_2Y)$ requires 4 EvalMult. However, when $b_2 = 0$, this reduces to $(a_1+b_1Y) \cdot pre = pre \cdot a_1 + pre \cdot b_1 Y$---requiring only 2 EvalMult. This is a 50\% reduction that applies to every multiplication in our FHE loop.
+In our FHE loop, the multiplier is always a scalar constant $\text{mult} = (pre, 0)$. The general $\varphi$-ring multiplication $(a_1+b_1Y)(a_2+b_2Y)$ requires 4 \texttt{EvalMult}. However, when $b_2 = 0$, this reduces to $(a_1+b_1Y) \cdot pre = pre \cdot a_1 + pre \cdot b_1 Y$---requiring only 2 \texttt{EvalMult}. This 50\% reduction applies to every multiplication in our FHE loop.
 
 \section{Optimized FHE Construction}
 
-\subsection{Operations Per Cycle}
+\subsection{Throughput Evolution}
 
 \begin{table}[h]
 \centering
-\caption{Evolution of Operations per Cycle (3 multiplications)}
-\label{tab:ops}
-\begin{tabular}{@{}lrrr@{}}
-
-\toprule
-
-\textbf{Configuration} & \textbf{Ops/Mult} & \textbf{EvalMult/Mult} & \textbf{Improvement} \\
-
-\midrule
-
-Original & 7.67 & 4.00 & 1.00$\times$ \\
-
-+ Fused clean & 6.33 & 4.00 & 1.21$\times$ \\
-
-+ Scalar mul & 4.33 & 2.00 & 1.77$\times$ \\
-
-Batch 3 (baseline) & 3.67 & 2.00 & 2.09$\times$ \\
-
-Batch 5 & 2.40 & 1.20 & 3.20$\times$ \\
-
-\textbf{Batch 8} & \textbf{2.25} & \textbf{1.00} & \textbf{3.41$\times$} \\
-
-\bottomrule
-
-\end{tabular}
-\end{table}
-
-\begin{table}[h]
-\centering
-\caption{Throughput: Amortized Operations per Multiplication}
+\caption{Amortized Operations per Multiplication}
 \label{tab:throughput}
 \begin{tabular}{@{}lrrr@{}}
-
 \toprule
-
 \textbf{Configuration} & \textbf{Ops/Mult} & \textbf{EvalMult/Mult} & \textbf{Improvement} \\
-
 \midrule
-
 Original & 7.67 & 4.00 & 1.00$\times$ \\
-
 + Fused clean & 6.33 & 4.00 & 1.21$\times$ \\
-
 + Scalar mul & 4.33 & 2.00 & 1.77$\times$ \\
-
 Batch 3 (baseline) & 3.67 & 2.00 & 2.09$\times$ \\
-
 Batch 5 & 2.40 & 1.20 & 3.20$\times$ \\
-
 \textbf{Batch 8} & \textbf{2.25} & \textbf{1.00} & \textbf{3.41$\times$} \\
-
 \bottomrule
-
 \end{tabular}
 \end{table}
 
-At batch size 8, we achieve 1.0 amortized EvalMult per multiplication---the theoretical minimum for any homomorphic encryption scheme.
+At batch size 8, we achieve 1.0 amortized \texttt{EvalMult} per multiplication---the theoretical minimum for any homomorphic encryption scheme. While Batch 8 has slightly more total operations per cycle (12 vs.\ 10 for Batch 5), it achieves better amortized efficiency because 8 multiplications share a single clean operation.
 
 \subsection{Noise Dynamics}
 
 The $\varphi$-error grows exponentially with a very small base:
-
 \begin{equation}
     \eta_\varphi(n) \approx \eta_\varphi(0) \cdot (1.00075)^n
 \end{equation}
-
 Projecting to 1\% error yields approximately 14,000 multiplications (assuming constant growth rate and no modulus depletion).
 
 The $\psi$-noise is attenuated by $\psi^2 \approx 0.382$ per clean cycle. After 3 clean cycles (24 multiplications with batch 8), $\psi$-noise drops from $1.46 \times 10^{-1}$ to $1.41 \times 10^{-6}$---five orders of magnitude. It stabilizes at $10^{-12}$--$10^{-13}$.
 
 \subsection{Experimental Results}
 
-All experiments on AMD Ryzen 5 2600, 16GB RAM, WSL2, OpenFHE v1.2, CKKS RingDim=4096.
+All experiments on AMD Ryzen 5 2600, 16GB RAM, WSL2, OpenFHE v1.2, CKKS RingDim=4096 unless noted.
 
 \begin{table}[h]
 \centering
@@ -214,15 +156,8 @@ All experiments on AMD Ryzen 5 2600, 16GB RAM, WSL2, OpenFHE v1.2, CKKS RingDim=
 50  & 3210  & $1.01 \times 10^{-7}$  & $9.23 \times 10^{-12}$ & OK \\
 99  & 6297  & $1.98 \times 10^{-7}$  & $1.15 \times 10^{-11}$ & OK \\
 \midrule
-
-\textbf{Projected to 1\% error} & \textbf{$\sim$14,000} & \textbf{---} & \textbf{---} & \textbf{---} \\
-
-\textbf{Demonstrated} & \textbf{6,297} & \textbf{$1.98 \times 10^{-7}$} & \textbf{$1.15 \times 10^{-11}$} & \textbf{45\% of limit} \\
-\midrule
-
-\textbf{Projected to 1\% error} & \textbf{$\sim$14,000} & \textbf{---} & \textbf{---} & \textbf{---} \\
-
-\textbf{Demonstrated} & \textbf{6,297} & \textbf{$1.98 \times 10^{-7}$} & \textbf{$1.15 \times 10^{-11}$} & \textbf{45\% of limit} \\
+\multicolumn{5}{l}{\small Projected to 1\% error: $\sim$14,000 mults} \\
+\multicolumn{5}{l}{\small Demonstrated: 6,297 mults (45\% of projected limit)} \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -252,7 +187,7 @@ We compress Ring-LWE public keys by storing only $\text{eval}_\varphi(T)$ and $\
 \subsection{Assumptions and Caveats}
 
 \begin{enumerate}
-    \item \textbf{Ring-LWE vs.\ Module-LWE.} Kyber uses Module-LWE with tighter worst-case reductions. We use Ring-LWE with a fixed matrix $A$. This is a different, less-studied assumption.
+    \item \textbf{Ring-LWE vs.\ Module-LWE.} Kyber uses Module-LWE with tighter worst-case reductions~\cite{langlois2015, peikert2016}. We use Ring-LWE with a fixed matrix $A$. This is a different, less-studied assumption.
     \item \textbf{Fixed public matrix.} Unlike Kyber's fresh $A$ per key, our fixed $A$ means a single compromise affects all users. Formal analysis pending.
     \item \textbf{Size comparisons are illustrative.} The 192-byte KEM is not claimed equivalent to Kyber-1024's security.
 \end{enumerate}
@@ -300,14 +235,13 @@ For KEM, Kyber~\cite{kyber} uses Module-LWE. Our construction explores a differe
 
 \section{Conclusion}
 
-We explored the $\varphi$-extension ring for lattice-based cryptography. Through algorithm optimization---fused clean, scalar multiplication detection, and batch processing---we achieved 1.0 amortized EvalMult per multiplication (3.4$\times$ throughput improvement). The dual-reality encoding provides plausible deniability for program representation. The compact KEM explores the RLWE design space at 192 bytes.
+We explored the $\varphi$-extension ring for lattice-based cryptography. Through algorithm optimization---fused clean, scalar multiplication detection, and batch processing---we achieved 1.0 amortized \texttt{EvalMult} per multiplication (3.4$\times$ throughput improvement). The dual-reality encoding provides plausible deniability for program representation. The compact KEM explores the RLWE design space at 192 bytes.
 
 All limitations are documented. We believe the $\varphi$-extension ring warrants further study, particularly its asymmetric eigenvalue dynamics. Code is public. We welcome verification and critique.
 
 \section*{Acknowledgments}
 We thank the anonymous reviewers whose critiques improved this work. The OpenFHE team provided essential infrastructure.
 
-\bibliographystyle{alpha}
 \begin{thebibliography}{99}
 
 \bibitem{gentry2009}
