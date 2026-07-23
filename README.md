@@ -187,7 +187,6 @@ Two functionally equivalent circuit representations encoded in φ and ψ realiti
 
 ## What We Got Wrong (And Fixed)
 
-**Historical note:** Early single-reality tests (pre-DM-DGR) showed ~14,000 multiplications to 1% error at RingDim=4096. This limit is now obsolete. DM-DGR bypasses it via reverse cleans and native bootstrap. The 14K number is preserved here only as a record of our initial (incorrect) understanding.
 
 1. **Error growth:** Initially claimed "linear." It's exponential with base ~1.00075. Corrected.
 2. **iO terminology:** Not iO. Renamed to "dual-reality program encoding."
