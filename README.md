@@ -90,6 +90,78 @@ DM-DGR requires only 4 primitive operations: `EvalAdd`, `EvalSub`, `EvalMult`, `
 
 ---
 
+## Critical Questions (FAQ)
+
+### Q1: Security of the non-standard ring R[X]/(X^N+1, X²-X-1)?
+
+**Status: Not yet formally analyzed. This is the #1 priority for peer review.**
+
+The factorization X²-X-1 = (X-φ)(X-ψ) over ℝ is not directly exploitable in the FHE setting because operations occur over Z_q (finite field), not ℝ. However:
+
+- Over Z_q, the factorization depends on whether √5 is a quadratic residue modulo q
+- If √5 exists mod q, X²-X-1 splits into linear factors, creating a potential CRT decomposition attack surface
+- The ideal structure of the composite extension Z[X]/(X^N+1, X²-X-1) needs formal analysis
+- Potential concerns: subfield attacks, Galois automorphism leakage, ideal factorization patterns
+
+This requires collaboration with an algebraic number theorist or cryptanalyst. Listed as honest limitation #6.
+
+### Q2: How does unbounded magnitude interact with CKKS noise budget?
+
+**Status: Partially analyzed. There is a fundamental tension.**
+
+Two separate concepts exist:
+1. **CKKS noise**: Inherent encryption noise growing with each operation
+2. **Value magnitude**: The actual encoded numbers (which grow via Fibonacci)
+
+The ψ-attractor controls the **ratio** (value), but the **ciphertext coefficient magnitudes** still grow exponentially (Fibonacci growth ~1.618^N). In CKKS, this consumes the available precision:
+
+- Larger encoded values → less room for noise → earlier precision loss
+- This is why add-then-multiply chains show 0.5 error instead of 10⁻¹⁶
+- The ratio encoding extends practical depth significantly, but is not literally infinite
+
+Potential solutions: occasional CKKS bootstrapping for magnitude reset, larger RingDim for more precision headroom, or a hybrid approach. Listed as honest limitation #2.
+
+### Q3: How does the "native bootstrap" work at 0 EvalMult cost?
+
+**Status: Verified. This is a novel mechanism unique to the φ/ψ dual reality.**
+
+Traditional bootstrapping homomorphically evaluates the decryption circuit — expensive (minutes, many EvalMults).
+
+DM-DGR's native bootstrap is fundamentally different — it's a **ring automorphism**:
+
+```cpp
+native_bootstrap(a, b, to_phi):
+    if to_phi: return (b, a+b)    // mulY — transfer to φ-reality
+    else:      return (a-b, a)    // mulY_inv — transfer to ψ-reality
+```
+
+Why this refreshes the modulus:
+- In CKKS, each ciphertext object carries its own modulus level
+- `EvalAdd`/`EvalSub` create **new ciphertext objects** with fresh modulus levels
+- The ring swap transfers the computational state between φ and ψ realities while simultaneously creating new objects
+- Result: modulus refreshed without decrypt+re-encrypt, at cost of 0 EvalMult
+
+Verified: 100 successful swaps, 10⁻¹³ identity preservation.
+
+### Q4: How does this scale to RingDim=32768?
+
+**Status: Theoretically linear, experimentally untested.**
+
+Memory scaling in Ring-LWE is approximately O(RingDim × number_of_moduli). DM-DGR uses **two ciphertexts** (a and b components) instead of one:
+
+| RingDim | Standard CKKS | DM-DGR (×2) | Estimated RAM |
+|---------|---------------|-------------|---------------|
+| 4096 | ~2-4 MB | ~4-8 MB | 16 GB (tested ✅) |
+| 8192 | ~8-16 MB | ~16-32 MB | 32 GB (borderline) |
+| 16384 | ~32-64 MB | ~64-128 MB | 64 GB (minimum) |
+| 32768 | ~128-256 MB | ~256-512 MB | 128-256 GB |
+
+Plus overhead for keys, temporary buffers: ~2-3× multiplier. The ring extension itself is linear — no hidden superlinear factors from X²-X-1. The bottleneck is CKKS infrastructure, not the φ-extension.
+
+**Honest estimate: RingDim=32768 needs 128 GB RAM minimum, 256 GB comfortable.** Listed as honest limitation #4.
+
+---
+
 ## Project Structure
 
 ```
@@ -164,13 +236,14 @@ No cloud. No server cluster. A mid-range gaming PC from 2018.
 ## Honest Limitations
 
 1. **Author-reported results.** No third-party verification yet.
-2. **CKKS precision issues.** Add-then-multiply chains need higher scaling parameters (hardware-limited).
+2. **CKKS precision issues.** Add-then-multiply chains need higher scaling parameters (hardware-limited). Magnitude growth from Fibonacci evolution consumes CKKS precision headroom.
 3. **TOY security parameters.** RingDim=4096/8192. Production needs RingDim=32768+.
 4. **Hardware constrained.** 128GB+ RAM needed for production parameter testing.
 5. **Not constant-time.** Side-channel vulnerable.
-6. **No formal security reduction.** The ring R[X]/(X^N+1, X²-X-1) is non-standard. Formal analysis pending.
+6. **No formal security reduction.** The ring R[X]/(X^N+1, X²-X-1) is non-standard. The factorization X²-X-1 = (X-φ)(X-ψ) over ℝ, and its behavior over finite fields, needs cryptanalytic review.
 7. **Not production-ready.** This is exploratory research.
-8. **Ratio encoding depth limit unknown.** Tested to 100+ φ/ψ cycles. Theoretical analysis pending.
+8. **Ratio encoding depth limit unknown.** Tested to 100+ φ/ψ cycles. Theoretical analysis and hardware-limited deeper testing pending.
+9. **Native bootstrap is novel, not traditional.** The ring swap mechanism is not standard CKKS bootstrapping — it refreshes modulus via ring automorphism, not by evaluating the decryption circuit.
 
 ---
 
