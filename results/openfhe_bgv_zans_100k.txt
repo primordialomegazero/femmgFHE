@@ -1,7 +1,0 @@
-
-===============================================================
-  OpenFHE BGV ZANS 100K — DETAILED CHECKPOINTS
-  100,000 ZANS Additions on OpenFHE BGV
-  SCHEME: BGV (integer, different from BFV/CKKS)
-===============================================================
-
