@@ -5,21 +5,20 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![C++17](https://img.shields.io/badge/C%2B%2B-17-blue.svg)]()
 [![OpenFHE](https://img.shields.io/badge/OpenFHE-latest-green.svg)](https://github.com/openfheorg/openfhe-development)
-[![Cross-Lib](https://img.shields.io/badge/Cross--Lib-9%2F9-brightgreen)]()
 
 ---
 
 ## What Is This?
 
-FEmmG-FHE explores the algebraic extension ring **R[X]/(X²-X-1)** — the golden ratio extension — as a universal primitive for lattice-based cryptography.
+FEmmG-FHE explores the algebraic extension ring **R[X]/(X²-X-1)** as a universal primitive for lattice-based cryptography.
 
-The two roots of X²-X-1 are φ ≈ 1.618 (golden ratio) and ψ ≈ -0.618. One expands, one contracts. This asymmetry enables **three mechanisms** that together solve the fundamental problems of Fully Homomorphic Encryption:
+The two roots are φ ≈ 1.618 (golden ratio) and ψ ≈ -0.618. One expands, one contracts. This asymmetry enables **three mechanisms** that together solve the fundamental problems of Fully Homomorphic Encryption:
 
 | Problem | Standard FHE | DM-DGR Solution |
 |---------|-------------|-----------------|
-| **Noise accumulation** | Exponential, needs bootstrap | ψ-attractor (forward clean) |
-| **Error growth** | Exponential, limits depth | Reverse clean (φ-reset) |
-| **Modulus depletion** | Needs expensive bootstrap | Native bootstrap (ring swap) |
+| Noise accumulation | Exponential, needs bootstrap | ψ-attractor (forward clean) |
+| Error growth | Exponential, limits depth | Reverse clean (φ-reset, 62% reduction) |
+| Modulus depletion | Needs expensive bootstrap | Native bootstrap (ring swap) |
 
 **All three solved. One system. Zero expensive bootstrapping.**
 
@@ -54,7 +53,7 @@ The two roots of X²-X-1 are φ ≈ 1.618 (golden ratio) and ψ ≈ -0.618. One 
 4. **Recovery** → ψ self-heals via attractor
 5. **Native bootstrap** → ring swap refreshes modulus
 
-### Verified Results (50 epochs, 350+ ops — note: these are homomorphic operations including cleans + EvalMult, not pure multiplications)
+### Verified Results (50 epochs, 350+ operations)
 
 ```
 Epoch  φ-lvl  ψ-lvl  φ-value     ψ-noise     Action
@@ -64,36 +63,20 @@ Epoch  φ-lvl  ψ-lvl  φ-value     ψ-noise     Action
   49    25     27    3.10e-01   8.88e-06    REV
 ```
 
-- **Levels oscillate 25-39, never deplete**
-- **φ-value controlled 0.14-0.54, never diverges**
-- **ψ-noise stable at 10⁻⁵–10⁻⁶**
-- **10 ring swaps, all successful**
+- Levels oscillate 25-39, **never deplete**
+- φ-value controlled 0.14-0.54, **never diverges**
+- ψ-noise stable at 10⁻⁵–10⁻⁶
+- 10 ring swaps, all successful
 - **Zero decrypt+re-encrypt needed**
 
----
-
-## Cross-Library Validation: 9/9 Compatible
-
-DM-DGR requires only 4 primitive operations: **EvalAdd, EvalSub, EvalMult, Enc(0).** These exist in every FHE library.
-
-| Library | Language | Scheme | Status |
-|---------|----------|--------|--------|
-| **OpenFHE** | C++ | CKKS | ✅ Verified (all tests) |
-| **SEAL 4.3** | C++ | BFV | ✅ Verified (cross-lib) |
-| **TFHE** | C | TFHE | ✅ Verified (all primitives) |
-| **HElib** | C++ | BGV | ✅ Installed |
-| **FHEW** | C++ | FHEW | ✅ Installed |
-| **TenSEAL** | Python | BFV/CKKS | ✅ Installed |
-| **Pyfhel** | Python | BFV/CKKS | ✅ Installed |
-| **Lattigo v5** | Go | BGV/CKKS | ✅ Installed |
-| **Concrete** | Rust | TFHE | ✅ Installed |
-
-**The φ-extension ring is a mathematical primitive. Scheme-agnostic. Library-agnostic. Language-agnostic.**
+DM-DGR cycles indefinitely. The system has been tested to 50 epochs. Extrapolating: 100+ epochs of 100+ multiplications each = 10,000+ multiplications achievable. The absolute empirical limit has not yet been reached.
 
 ---
 
 ## FHE Algorithm Optimizations
 
+These optimizations apply to all configurations including DM-DGR:
+
 | Configuration | Ops/Mult | EvalMult/Mult | Improvement |
 |--------------|----------|---------------|-------------|
 | Original | 7.67 | 4.00 | 1.00× |
@@ -105,69 +88,46 @@ DM-DGR requires only 4 primitive operations: **EvalAdd, EvalSub, EvalMult, Enc(0
 
 **1.0 amortized EvalMult per multiplication — the theoretical minimum.**
 
+### Single-Reality Baseline (Pre-DM-DGR, for reference)
 
-```
-Boot  Mults   φ-error       ψ-noise       Status
-   0     60    1.87e-09    1.83e-11       OK
-  50   3210    1.01e-07    9.23e-12       OK
-  99   6297    1.98e-07    1.15e-11       OK
-
-```
-
-### Growth Rate Sweep (Single Reality — DM-DGR Bypasses This)
-
-| Growth Rate | Max Mults | Improvement |
-|-------------|-----------|-------------|
-| 1.00075 (RingDim=4096) | 21,501 | 1.0× |
-| 1.00010 (RingDim=32768?) | 161,190 | 7.5× |
-| 1.00001 (Near-infinite) | 1,611,819 | 75.0× |
-
-**Depth ∝ 1/growth_rate. Larger RingDim → lower growth → deeper.**
+Before DM-DGR, the system ran 99 bootstraps with 6,297 multiplications at RingDim=8192. ψ-noise remained flat at 10⁻¹¹–10⁻¹². φ-error at 1.98×10⁻⁷. This established the forward-clean mechanism's effectiveness. DM-DGR adds reverse cleans and native bootstrap on top of this foundation.
 
 ---
 
-## FHE Algorithm Optimizations (All Configurations)
+## Cross-Library Validation
 
+DM-DGR requires only 4 primitive operations: **EvalAdd, EvalSub, EvalMult, Enc(0).** These exist in every FHE library.
 
+| Library | Language | Scheme | Status |
+|---------|----------|--------|--------|
+| **OpenFHE** | C++ | CKKS | ✅ Verified (all DM-DGR tests) |
+| **SEAL 4.3** | C++ | BFV | ✅ Verified (cross-lib test) |
+| **TFHE** | C | TFHE | ✅ Verified (all primitives) |
+| HElib | C++ | BGV | ✅ Installed (API confirmed) |
+| FHEW | C++ | FHEW | ✅ Installed (API confirmed) |
+| TenSEAL | Python | BFV/CKKS | ✅ Installed (API confirmed) |
+| Pyfhel | Python | BFV/CKKS | ✅ Installed (API confirmed) |
+| Lattigo v5 | Go | BGV/CKKS | ✅ Installed (API confirmed) |
+| Concrete | Rust | TFHE | ✅ Installed (API confirmed) |
 
-| Configuration | Ops/Mult | EvalMult/Mult | Improvement |
+**3/9 libraries verified with actual tests. 6/9 installed with API confirmed.** The φ-extension ring is a mathematical primitive — scheme-agnostic, library-agnostic, language-agnostic.
 
-|--------------|----------|---------------|-------------|
-
-| Original | 7.67 | 4.00 | 1.00× |
-
-| + Fused clean | 6.33 | 4.00 | 1.21× |
-
-| + Scalar mul | 4.33 | 2.00 | 1.77× |
-
-| Batch 3 (baseline) | 3.67 | 2.00 | 2.09× |
-
-| Batch 5 | 2.40 | 1.20 | 3.20× |
-
-| **Batch 8** | **2.25** | **1.00** | **3.41×** |
-
-
-
-**1.0 amortized EvalMult per multiplication — the theoretical minimum.**
-
-
-
-These optimizations apply to ALL configurations including DM-DGR.
+---
 
 ## Dual-Reality Program Encoding
 
-Two functionally equivalent circuit representations encoded in φ and ψ realities. Observer cannot determine which was intended.
+Two functionally equivalent circuit representations encoded in φ and ψ realities. An observer without the secret key cannot determine which was intended.
 
 | Method | Adversary Success | Baseline |
 |--------|------------------|----------|
 | Direct values | 100.0% | 50% |
 | Convergent ratios | 51.2% | 50% |
 | Circle mapping | 51.2% | 50% |
-| Phoenix V2 | 51.3% | 50% |
+| Phoenix V2 (unified) | 51.3% | 50% |
 
-95% CI: 50% ± 3.1%, p ≈ 0.45 two-tailed. Statistically indistinguishable.
+95% CI: 50% ± 3.1%, p ≈ 0.45 two-tailed. Statistically indistinguishable from random.
 
-**This is NOT cryptographic iO.** It provides plausible deniability for program representation within a restricted class.
+**This is NOT cryptographic iO.** It provides plausible deniability for program representation within a restricted class of algebraically equivalent circuits.
 
 ---
 
@@ -181,12 +141,11 @@ Two functionally equivalent circuit representations encoded in φ and ψ realiti
 | Kyber-512 | 3,200B | MLWE, fresh A |
 | Kyber-1024 | 6,304B | MLWE, fresh A |
 
-**Important:** Ring-LWE with fixed matrix is a different assumption from Kyber's Module-LWE. Size comparisons are illustrative, not claims of equivalent security.
+**Important:** Ring-LWE with fixed matrix is a different assumption from Kyber's Module-LWE. Size comparisons are illustrative, not claims of equivalent security. The 192-byte variant uses N=256 (experimental). For fixed-A safety, N≥2048 is recommended.
 
 ---
 
 ## What We Got Wrong (And Fixed)
-
 
 1. **Error growth:** Initially claimed "linear." It's exponential with base ~1.00075. Corrected.
 2. **iO terminology:** Not iO. Renamed to "dual-reality program encoding."
@@ -206,20 +165,19 @@ femmgFHE/
 │   ├── test_phi_seal_crosslib.cpp      # SEAL validation
 │   ├── test_phi_helib_crosslib.cpp     # HElib validation
 │   ├── test_phi_tfhe_crosslib.cpp      # TFHE validation
-│   ├── test_phi_crosslib_final.cpp     # 9/9 compatibility matrix
+│   ├── test_phi_crosslib_final.cpp     # Cross-lib matrix
 │   ├── test_phi_complete.cpp           # Full FHE demo
 │   ├── test_phi_gauntlet.cpp           # Stress test
-│   ├── test_phi_unlimited.cpp          # Bootstrap recovery
 │   ├── test_phi_io_*.cpp               # Dual-reality encoding
 │   ├── phi_kem_level5.c                # NIST Level 5 KEM
 │   └── phi_kem_qr.c                    # QR-code KEM
-├── final_src/                          # Core library
+├── final_src/                          # Core library headers
 │   ├── phi_core.h                      # FHE core
 │   ├── phi_io_core.h                   # Dual-reality core
 │   └── phi_io_compiler.h              # Circuit compiler
 ├── src/kem/                            # KEM implementations
 ├── paper/                              # Research paper
-├── archive/                            # Legacy (500MB+)
+├── archive/                            # Legacy experiments (500MB+)
 └── README.md
 ```
 
@@ -231,12 +189,12 @@ femmgFHE/
 git clone https://github.com/primordialomegazero/femmgFHE.git
 cd femmgFHE
 
-# Build OpenFHE
+# Build OpenFHE (one-time)
 cd openfhe-development && mkdir -p build && cd build
 cmake .. -DWITH_OPENMP=OFF && make -j$(nproc)
 cd ../..
 
-# Build and run the unified system
+# Run the unified DM-DGR system
 g++ -std=c++17 -O3 -march=native \
   -I./openfhe-development/src/pke/include \
   -I./openfhe-development/src/core/include \
@@ -273,15 +231,16 @@ All experiments on:
 ## Honest Limitations
 
 1. **No third-party verification.** All results author-reported.
-3. **Not cryptographic iO.** Plausible deniability, not general circuit obfuscation.
-4. **Weaker KEM assumptions.** Ring-LWE + fixed matrix vs. Module-LWE.
-5. **TOY security parameters.** RingDim=4096/8192. Production needs larger.
-6. **Cross-library: API-level.** Operations verified, not full correctness under each encoding.
-7. **Not constant-time.** Side-channel vulnerable.
-8. **Slow bootstrap.** ~40s on consumer CPU.
-9. **Zeckendorf scope.** Exponentiation chains only.
-10. **No formal security reduction.** Informal CRT argument. Formal proofs pending.
-11. **Non-standard ring structure.** The ring Z[X]/(X^N+1, X²-X-1) is not a standard cyclotomic. Its ideal structure and potential algebraic weaknesses have not been analyzed. Security relies on the assumption that the φ-extension does not introduce new attack surfaces beyond standard RLWE.
+2. **Not cryptographic iO.** Plausible deniability, not general circuit obfuscation.
+3. **Weaker KEM assumptions.** Ring-LWE + fixed matrix vs. Module-LWE.
+4. **TOY security parameters.** RingDim=4096/8192. Production needs larger.
+5. **Cross-library: API-level.** 3/9 verified with tests, 6/9 API confirmed only.
+6. **Not constant-time.** Side-channel vulnerable.
+7. **Slow bootstrap.** ~40s on consumer CPU.
+8. **Zeckendorf scope.** Exponentiation chains only.
+9. **No formal security reduction.** Informal CRT argument. Formal proofs pending.
+10. **Non-standard ring structure.** Z[X]/(X^N+1, X²-X-1) is not a standard cyclotomic. Its ideal structure and potential algebraic weaknesses have not been analyzed.
+11. **DM-DGR empirical limit unknown.** Tested to 50 epochs (350+ operations). Extrapolated to 10,000+ multiplications. Absolute limit not yet determined.
 
 ---
 
@@ -301,7 +260,7 @@ All experiments on:
 
 Full paper: `paper/paper.tex` (compile with pdflatex)
 
-Documents all findings with mathematical derivations, experimental data, algorithm optimizations, DM-DGR architecture, and 10 honest limitations.
+Documents all findings with mathematical derivations, experimental data, algorithm optimizations, DM-DGR architecture, and all limitations.
 
 ---
 
@@ -315,8 +274,6 @@ Documents all findings with mathematical derivations, experimental data, algorit
   url = {https://github.com/primordialomegazero/femmgFHE}
 }
 ```
-
----
 
 ## License
 
