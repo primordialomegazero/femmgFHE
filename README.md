@@ -113,11 +113,11 @@ Boot  Mults   φ-error       ψ-noise       Status
   50   3210    1.01e-07    9.23e-12       OK
   99   6297    1.98e-07    1.15e-11       OK
 
-Projected to 1% error: ~14,000 mults
-Demonstrated: 6,297 (45% of projected limit)
+Projected to 1% error (single reality, no DM-DGR): ~14,000 mults
+Demonstrated: 6,297 (single reality). DM-DGR extends this via reverse cleans + native bootstrap.
 ```
 
-### Growth Rate Sweep (Path to Unlimited)
+### Growth Rate Sweep (Single Reality — DM-DGR Bypasses This)
 
 | Growth Rate | Max Mults | Improvement |
 |-------------|-----------|-------------|
@@ -247,7 +247,7 @@ All experiments on:
 ## Honest Limitations
 
 1. **No third-party verification.** All results author-reported.
-2. **Exponential error growth.** Base ~1.00075/mult. Practical limit ~14,000 mults.
+2. **Exponential error growth.** Base ~1.00075/mult. Practical limit: ~14,000 mults WITHOUT DM-DGR (single reality, no reverse clean). WITH DM-DGR: depth limited only by growth rate × RingDim. Modulus refreshed via native bootstrap. φ-error reset via reverse clean.
 3. **Not cryptographic iO.** Plausible deniability, not general circuit obfuscation.
 4. **Weaker KEM assumptions.** Ring-LWE + fixed matrix vs. Module-LWE.
 5. **TOY security parameters.** RingDim=4096/8192. Production needs larger.
