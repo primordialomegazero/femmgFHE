@@ -54,7 +54,7 @@ The two roots of X²-X-1 are φ ≈ 1.618 (golden ratio) and ψ ≈ -0.618. One 
 4. **Recovery** → ψ self-heals via attractor
 5. **Native bootstrap** → ring swap refreshes modulus
 
-### Verified Results (50 epochs, 350+ ops)
+### Verified Results (50 epochs, 350+ ops — note: these are homomorphic operations including cleans + EvalMult, not pure multiplications)
 
 ```
 Epoch  φ-lvl  ψ-lvl  φ-value     ψ-noise     Action
@@ -247,7 +247,7 @@ All experiments on:
 ## Honest Limitations
 
 1. **No third-party verification.** All results author-reported.
-2. **Exponential error growth.** Base ~1.00075/mult. Practical limit: ~14,000 mults WITHOUT DM-DGR (single reality, no reverse clean). WITH DM-DGR: depth limited only by growth rate × RingDim. Modulus refreshed via native bootstrap. φ-error reset via reverse clean.
+2. **Exponential error growth.** Base ~1.00075/mult. Practical limit: ~14,000 mults WITHOUT DM-DGR (single reality, no reverse clean). WITH DM-DGR: depth limited only by growth rate × RingDim. Modulus refreshed via native bootstrap. φ-error reset via reverse clean. Current DM-DGR tests: 50 epochs × ~7 ops = 350+ total operations (including forward cleans, reverse cleans, and EvalMult workload). Extrapolating: 100+ epochs of 100 mults = 10,000+ mults achievable. Absolute limit not yet empirically determined.
 3. **Not cryptographic iO.** Plausible deniability, not general circuit obfuscation.
 4. **Weaker KEM assumptions.** Ring-LWE + fixed matrix vs. Module-LWE.
 5. **TOY security parameters.** RingDim=4096/8192. Production needs larger.
@@ -256,6 +256,7 @@ All experiments on:
 8. **Slow bootstrap.** ~40s on consumer CPU.
 9. **Zeckendorf scope.** Exponentiation chains only.
 10. **No formal security reduction.** Informal CRT argument. Formal proofs pending.
+11. **Non-standard ring structure.** The ring Z[X]/(X^N+1, X²-X-1) is not a standard cyclotomic. Its ideal structure and potential algebraic weaknesses have not been analyzed. Security relies on the assumption that the φ-extension does not introduce new attack surfaces beyond standard RLWE.
 
 ---
 
