@@ -1,6 +1,6 @@
 # FEmmG-FHE: Fibonacci-Golden Ratio Cryptography
 
-**Fully Homomorphic Encryption. Indistinguishability Obfuscation. Post-Quantum KEM.**
+**An exploration of the φ-extension ring for noise management, program encoding, and key compression in lattice-based cryptography.**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![C++17](https://img.shields.io/badge/C%2B%2B-17-blue.svg)]()
@@ -10,117 +10,92 @@
 
 ## What Is This?
 
-FEmmG-FHE is a research project exploring the **golden ratio (φ ≈ 1.618)** as a structural primitive for cryptography.
+FEmmG-FHE is a research project exploring the algebraic extension ring **R[X]/(X²-X-1)** — the golden ratio extension — as a primitive for lattice-based cryptography.
 
-The core algebraic structure: **R[X]/(X²-X-1)** splits computation into two simultaneous realities — one expanding (φ ≈ 1.618, signal domain), one contracting (ψ ≈ -0.618, noise domain). This asymmetry enables:
+The two roots of X²-X-1 are φ ≈ 1.618 (the golden ratio) and ψ ≈ -0.618. One expands, one contracts. This asymmetry creates interesting dynamics that we apply to three problems.
 
-- **Noise that decays naturally** in FHE
-- **Two indistinguishable computation paths** for iO
-- **Compact key representations** for KEM
-
-All primitives built on standard **CKKS (OpenFHE)** without library modifications. All claims are experimentally verified on consumer hardware. **No third-party audit yet. No formal security proofs yet.**
+**This is exploratory work.** Some things worked. Some things didn't. We document both honestly.
 
 ---
 
-## What's Included
+## What We Found
 
-### 1. Fully Homomorphic Encryption (FHE)
+### 1. FHE Noise Management
 
-| Property | Status | Evidence |
-|----------|--------|----------|
-| φ-extension ring | Verified | R[X]/(X²-X-1) ≅ R×R via CRT |
-| Zero-depth noise clean | Verified | mul_X = copy+add, zero EvalMult |
-| ψ-noise decay | Verified | 15,000,000× reduction measured |
-| Linear φ-error growth | Verified | ~3×10⁻¹¹ per multiplication |
-| Bootstrap recovery | Verified | 2 clean cycles post-bootstrap |
-| Unlimited depth | Verified | 6,300 multiplications, 100 bootstraps, no divergence |
-| Fibonacci depth compression | Verified (math) | O(log N) — 17M× compression at N=1B |
+We use the φ/ψ split to separate signal from noise into distinct algebraic directions. A "clean" operation using only addition (zero ciphertext multiplication depth) attenuates the ψ-component by ~0.382× per cycle.
 
-**Honest limitations:** All benchmarks at RingDim=4096/8192 (TOY security). 128-bit benchmarks pending (hardware limited). Bootstrap ~40s on consumer CPU. Formal RLWE security reduction pending.
+**What works:**
+- 6,297 sequential homomorphic multiplications across 99 bootstraps
+- ψ-noise remains flat at 10⁻¹¹–10⁻¹² (no accumulation)
+- φ-error grows slowly (~0.075% per multiplication)
+- Bootstrap noise recovers within 2 clean cycles
 
-**Quick start:**
-```bash
-make test_phi_complete
-LD_LIBRARY_PATH=./openfhe-development/build/lib:$LD_LIBRARY_PATH ./bin/test_phi_complete
-```
+**What doesn't:**
+- Error growth is **exponential, not linear** (we initially got this wrong)
+- Practical limit: ~14,000 multiplications to 1% error
+- Not "unlimited" depth — just significantly extended
+- Benchmarks at RingDim=4096/8192 (TOY security, not production)
 
----
+### 2. Dual-Reality Program Encoding
 
-### 2. Indistinguishability Obfuscation (iO)
+Two functionally equivalent representations of a computation can be encoded in the φ and ψ realities. An observer without the secret key sees both outputs but cannot determine which representation was intended.
 
-| Property | Status | Evidence |
-|----------|--------|----------|
-| φ/ψ reality split | Verified | Two simultaneous computation paths |
-| Functional equivalence | Verified | Both realities produce valid outputs |
-| Adversary distinguishability | Verified | 51.2% success rate (random = 50%) |
-| Circle mapping method | Verified | Clockwise/counterclockwise symmetric paths |
-| Fibonacci ratio method | Verified | Convergent sequences, identical metrics |
-| General circuit compiler | Prototype | Gate alignment issue identified |
+**What works:**
+- Adversary success rate: 51.2% (random baseline: 50%)
+- 95% CI: 50% ± 3.1%, n=1000, p=0.45 — cannot reject random guessing
+- Fibonacci circle mapping hides direction (normal vs. reverse)
 
-**Honest limitations:** iO tested on simple circuits (x² vs 2x+1). General circuit compiler needs gate mapping for arbitrary structures. Formal iO security definition (indistinguishability under chosen circuit attacks) not yet proven. Adversary model assumes no side-channel access.
+**What this is NOT:**
+- This is **not** indistinguishability obfuscation (iO) in the cryptographic sense
+- It provides plausible deniability for program representation, not general circuit hiding
+- Limited to algebraically equivalent representations of the same function
 
----
+### 3. Compact Key Encapsulation
 
-### 3. Post-Quantum Key Encapsulation (KEM)
+Compressing public key material by storing φ and ψ evaluations instead of full polynomial coefficients.
 
-| Variant | Total Size | Security Level | Status |
-|---------|-----------|----------------|--------|
-| φ-KEM QR | 80 bytes | ~64-bit PQ | 50/50 passed |
-| φ-KEM v5 | 128 bytes | ~64-bit PQ | 1000/1000 passed |
-| φ-KEM Ultra v2 | 1,792 bytes | ~128-bit PQ | 20/20 passed |
-| **φ-KEM Level 5** | **192 bytes** | **256-bit PQ (NIST Level 5)** | **30/30 passed** |
+**What works:**
+- 192 bytes total (SK=64, PK=64, CT=64) for the Level 5 experimental variant
+- 30/30 encaps/decaps passed, 100% tamper detection
+- Fits in QR Code Version 1 (196 bytes)
 
-All variants feature:
-- Ring-LWE with φ-extension for key generation
-- Fujisaki-Okamoto transform for IND-CCA security
-- Tamper detection (verified)
-- Fixed system matrix (non-standard; see limitations)
-
-**Honest limitations:** Fixed matrix A (all users share same base) — if broken, all users affected. Not constant-time (vulnerable to timing side-channels). SK=64 bytes provides 512 bits classical, ~256 bits post-quantum (Grover). Formal reduction to RLWE pending. No NIST submission.
-
-**Quick start:**
-```bash
-gcc -std=c11 -O3 -o bin/phi_kem_level5 src/kem/phi_kem_level5.c -lssl -lcrypto -lm
-./bin/phi_kem_level5
-```
+**Important caveats:**
+- Uses **Ring-LWE** with a **fixed public matrix** — different from Kyber's Module-LWE
+- Ring-LWE has weaker worst-case reductions than Module-LWE
+- Fixed matrix is non-standard (if broken, all users affected)
+- Size comparison to Kyber-1024 is **illustrative only**, not a claim of equivalent security
+- No formal security reduction
 
 ---
 
-### Cross-Library Validation
-
-| Library | Language | Schemes | Status |
-|---------|----------|---------|--------|
-| OpenFHE | C++ | BFV, BGV, CKKS | ✅ Compatible |
-| SEAL 4.3 | C++ | BFV, BGV, CKKS | ✅ Compatible |
-| HElib | C++ | BGV, CKKS | ✅ Compatible |
-| Lattigo v5 | Go | BGV, CKKS | ✅ Compatible |
-| TFHE | C | TFHE | ✅ Compatible |
-| FHEW | C++ | FHEW | ✅ Compatible |
-| TenSEAL | Python | BFV | ✅ Compatible |
-| Pyfhel | Python | BFV | ✅ Compatible |
-| Concrete | Rust | TFHE | ✅ Compatible |
-| TFHE-rs | Rust | TFHE | ✅ Compatible |
-| PALISADE | C++ | BFV/BGV/CKKS | ✅ Compatible |
-
-**17/17 library/scheme combinations compatible.** The φ-transform requires only EvalAdd, EvalMult, and Enc(0)—operations supported by all Ring-LWE based FHE libraries.
-
-
-### 4. Phoenix Protocol (FHE + iO + Fibonacci Unified)
-
-All three primitives combined: encrypted input → obfuscated computation → encrypted output. Adversary sees only symmetric circle paths. 51.3% distinguishability (random baseline).
-
----
-
-## Key Results (RingDim=8192, 100 bootstraps)
+## Key Results (RingDim=8192, 99 Bootstraps)
 
 ```
 Boot  Mults   φ-error       ψ-noise       Status
    0     60    1.87e-09    1.83e-11       OK
+  10    690    2.19e-08    8.49e-12       OK
+  20   1320    4.21e-08    2.17e-11       OK
+  30   1950    6.16e-08    6.93e-12       OK
+  40   2580    8.13e-08    9.11e-12       OK
   50   3210    1.01e-07    9.23e-12       OK
+  60   3840    1.21e-07    8.93e-12       OK
+  70   4470    1.41e-07    5.50e-12       OK
+  80   5100    1.60e-07    2.13e-12       OK
+  90   5730    1.80e-07    4.51e-12       OK
   99   6297    1.98e-07    1.15e-11       OK
 ```
 
-φ-error grows linearly (~3×10⁻¹¹/mult). ψ-noise stays flat (10⁻¹¹–10⁻¹²). No divergence after 6,300 multiplications and 100 bootstraps.
+φ-error grows exponentially with base ~1.00075 (0.075% per multiplication). ψ-noise flat. No divergence.
+
+---
+
+## What We Got Wrong (And Fixed)
+
+1. **Error growth:** Initially claimed "linear." It's exponential with a very small base. Corrected in paper v4.
+2. **iO terminology:** Initially called our encoding "indistinguishability obfuscation." It's not. Renamed to "dual-reality program encoding."
+3. **Zeckendorf scope:** Initially implied general depth compression. Actually applies to exponentiation chains. Scoped correctly now.
+
+**This is how science works.** We made claims, tested them, found errors, corrected them publicly.
 
 ---
 
@@ -130,16 +105,16 @@ Boot  Mults   φ-error       ψ-noise       Status
 femmgFHE/
 ├── src/
 │   ├── femmg/phi_core.h          # FHE core library
-│   ├── io/phi_io_core.h          # iO core library
-│   ├── io/phi_io_compiler.h      # iO circuit compiler
+│   ├── io/phi_io_core.h          # Dual-reality encoding
+│   ├── io/phi_io_compiler.h      # Circuit compiler (prototype)
 │   └── kem/                      # KEM implementations
 ├── tests/
 │   ├── active/                   # FHE test suite (18 tests)
-│   └── io_tests/                 # iO/KEM tests (15 tests)
+│   └── io_tests/                 # Encoding/KEM tests (15 tests)
 ├── docs/                         # Documentation
-├── paper/                        # Research paper (draft)
+├── paper/                        # Research paper (PDF)
 ├── openfhe-development/          # OpenFHE library
-├── archive/                      # Legacy experiments
+├── archive/                      # Legacy experiments (523MB)
 ├── Makefile
 └── README.md
 ```
@@ -157,36 +132,40 @@ cd ../..
 # Build all FHE tests
 make all
 
-# Build individual KEM
+# Run the complete system demo
+LD_LIBRARY_PATH=./openfhe-development/build/lib:$LD_LIBRARY_PATH ./bin/test_phi_complete
+
+# Build KEM Level 5
 gcc -std=c11 -O3 -o bin/phi_kem_level5 src/kem/phi_kem_level5.c -lssl -lcrypto -lm
+./bin/phi_kem_level5
 ```
 
 ---
 
-## Hardware Tested
+## Hardware
 
-| Component | Spec |
-|-----------|------|
-| CPU | AMD Ryzen 5 2600 (6-core, 3.40 GHz) |
-| RAM | 16 GB DDR4 |
-| GPU | Radeon RX 580 (8 GB) |
-| Storage | 224 GB SSD (202 GB used) |
-| OS | Windows 11 Pro (25H2, Build 26200) |
-| Environment | WSL2 (Windows Subsystem for Linux) |
-| Linux Kernel | Ubuntu on WSL2 |
+All experiments conducted on:
+- **CPU:** AMD Ryzen 5 2600 (6-core, 3.40 GHz)
+- **RAM:** 16 GB DDR4
+- **OS:** Windows 11 Pro (25H2) with WSL2 (Ubuntu)
+- **Storage:** 224 GB SSD
 
-All results are reproducible on this consumer desktop with WSL2. No cloud compute, no server clusters, no special accelerators. A mid-range gaming PC from 2018.
+No cloud. No server cluster. A mid-range gaming PC from 2018.
 
+---
+
+## Honest Limitations
 
 1. **No third-party verification.** All results are author-reported.
-2. **Formal security proofs pending.** Claims reduce to RLWE hardness (informal argument). φ-iO security model not yet formalized.
-3. **TOY security parameters.** Most FHE benchmarks at RingDim=4096/8192. 128-bit benchmarks pending (hardware-limited).
-4. **Fixed matrix A in KEM.** Non-standard. All users share the same base matrix.
-5. **Not constant-time.** Side-channel attacks possible.
-6. **iO tested on simple circuits.** General compiler needs gate mapping for arbitrary structures.
-7. **Fibonacci compression verified mathematically, not experimentally.** Implementation in progress.
-8. **Bootstrap is slow.** ~40 seconds on consumer CPU. Practical deployment needs optimization or better hardware.
-9. **Some claims are mathematical, not experimental.** Fibonacci depth compression is proven via Zeckendorf's theorem but not yet benchmarked in encrypted domain.
+2. **Exponential error growth.** Not linear as we initially claimed.
+3. **Not iO.** Our encoding provides plausible deniability, not general circuit obfuscation.
+4. **Weaker KEM assumptions.** Ring-LWE with fixed matrix A, not Module-LWE. Comparison to Kyber is illustrative only.
+5. **TOY security parameters.** FHE at RingDim=4096/8192. Production needs larger dimensions.
+6. **Cross-library: API-level only.** We verified operations exist, not full correctness under each encoding.
+7. **Not constant-time.** Vulnerable to side-channel attacks.
+8. **Slow bootstrap.** ~40 seconds on consumer CPU.
+9. **Zeckendorf scope.** Applies to exponentiation chains, not arbitrary sequential multiplications.
+10. **No formal security reduction.** Relies on informal CRT argument. Formal proofs pending.
 
 ---
 
@@ -194,10 +173,19 @@ All results are reproducible on this consumer desktop with WSL2. No cloud comput
 
 - A NIST submission
 - Production-ready software
-- Peer-reviewed research
-- A claim of solving all of cryptography
+- Peer-reviewed research (yet)
+- A claim of solving FHE, iO, or PQC
+- Indistinguishability obfuscation
 
-**This is a research prototype.** It demonstrates that the golden ratio extension ring is a viable primitive for FHE, iO, and KEM. The results are promising and reproducible. The limitations are real and documented.
+**This is exploratory research.** We found something interesting. We tested it. We documented what worked and what didn't. We invite verification and critique.
+
+---
+
+## Paper
+
+Full paper: `paper/paper.pdf` (9 pages, 16 references)
+
+The paper documents all findings with complete mathematical derivations, experimental data, and honest limitations. We corrected significant errors between versions (see Section 1: "What We Did NOT Find").
 
 ---
 
@@ -211,6 +199,16 @@ All results are reproducible on this consumer desktop with WSL2. No cloud comput
   url = {https://github.com/primordialomegazero/femmgFHE}
 }
 ```
+
+---
+
+## License
+
+MIT — see [LICENSE](LICENSE)
+
+## Author
+
+**Dan Joseph M. Fernandez / Primordial Omega Zero**
 
 ---
 
