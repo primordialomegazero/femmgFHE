@@ -149,14 +149,15 @@ gcc -std=c11 -O3 -o bin/phi_kem_level5 src/kem/phi_kem_level5.c -lssl -lcrypto -
 | Component | Spec |
 |-----------|------|
 | CPU | AMD Ryzen 5 2600 (6-core, 3.40 GHz) |
-| RAM | 16 GB |
-| OS | Linux x64 |
+| RAM | 16 GB DDR4 |
+| GPU | Radeon RX 580 (8 GB) |
+| Storage | 224 GB SSD (202 GB used) |
+| OS | Windows 11 Pro (25H2, Build 26200) |
+| Environment | WSL2 (Windows Subsystem for Linux) |
+| Linux Kernel | Ubuntu on WSL2 |
 
-All results are reproducible on this hardware. No cloud, no cluster, no special accelerators.
+All results are reproducible on this consumer desktop with WSL2. No cloud compute, no server clusters, no special accelerators. A mid-range gaming PC from 2018.
 
----
-
-## Honest Limitations (Complete)
 
 1. **No third-party verification.** All results are author-reported.
 2. **Formal security proofs pending.** Claims reduce to RLWE hardness (informal argument). φ-iO security model not yet formalized.
