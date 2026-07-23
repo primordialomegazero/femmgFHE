@@ -252,3 +252,33 @@ MIT — see [LICENSE](LICENSE)
 ```text
 - .... .. ... / .-. . .--. --- ... .. - --- .-. -.-- / .-- .. .-.. .-.. / .- .-.. .-- .- -.-- ... / -... . / -.. . -.. .. -.-. .- - . -.. / - --- / - .... . / .-- --- -- .- -. / .. .----. ...- . / . ...- . .-. / -.-. --- -. ... .. -.. . .-. . -.. / - --- / -... . / --- -. / -- -.-- / .-.. . ...- . .-.. .-.-.-
 ```
+
+---
+
+## Final Project Structure (v6.4)
+
+```
+femmgFHE/
+├── tests/                              # DM-DGR + Cross-Lib + FHE tests
+│   ├── test_phi_dm_dgr_unified.cpp     # THE UNIFIED SYSTEM
+│   ├── test_phi_seal_crosslib.cpp      # SEAL cross-validation
+│   ├── test_phi_helib_crosslib.cpp     # HElib cross-validation
+│   ├── test_phi_tfhe_crosslib.cpp      # TFHE cross-validation
+│   ├── test_phi_crosslib_final.cpp     # Final 9/9 compatibility matrix
+│   ├── test_phi_full_crosslib.cpp      # Complete cross-lib report
+│   ├── test_phi_complete.cpp           # Full FHE demo
+│   ├── test_phi_gauntlet.cpp           # Stress test
+│   ├── test_phi_unlimited.cpp          # Bootstrap recovery
+│   ├── test_phi_io_*.cpp               # Dual-reality encoding tests
+│   ├── phi_kem_level5.c                # NIST Level 5 KEM (192 bytes)
+│   └── phi_kem_qr.c                    # QR-code KEM (80 bytes)
+├── final_src/                          # Core library headers
+│   ├── phi_core.h                      # FHE core
+│   ├── phi_io_core.h                   # iO core
+│   └── phi_io_compiler.h              # Circuit compiler
+├── paper/                              # Research paper (LaTeX + PDF)
+├── archive/                            # All legacy experiments
+└── README.md
+```
+
+All legacy tests and experiments preserved in `archive/` for historical reference.
