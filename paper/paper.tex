@@ -46,7 +46,7 @@ We explore the algebraic extension ring $R[X]/(X^2-X-1)$ where $R$ is a cyclotom
 
 We investigate three applications of this structure:
 
-\textbf{Noise Management for FHE:} The $\varphi/\psi$ split separates signal and noise into distinct algebraic directions. A ``clean'' operation using only homomorphic addition (zero ciphertext multiplication depth) attenuates the $\psi$-component by a factor of $|\psi|^2 \approx 0.382$ per cycle. Combined with standard CKKS bootstrapping, this enables extended computation depth. We demonstrate 6,300 sequential homomorphic multiplications across 100 bootstraps. We observe that error growth is exponential with a very small base ($\sim$1.00075 per multiplication), not linear as we initially hypothesized. Projecting this rate yields approximately 14,000 multiplications to 1\% error---a practical improvement over standard CKKS but not ``unlimited'' depth.
+\textbf{Noise Management for FHE:} The $\varphi/\psi$ split separates signal and noise into distinct algebraic directions. A ``clean'' operation using only homomorphic addition (zero ciphertext multiplication depth) attenuates the $\psi$-component by a factor of $|\psi|^2 \approx 0.382$ per cycle. Combined with standard CKKS bootstrapping, this enables extended computation depth. We demonstrate 6,297 sequential homomorphic multiplications across 99 bootstraps. We observe that error growth is exponential with a very small base ($\sim$1.00075 per multiplication), not linear as we initially hypothesized. Projecting this rate yields approximately 14,000 multiplications to 1\% error---a practical improvement over standard CKKS but not ``unlimited'' depth.
 
 \textbf{Dual-Reality Program Encoding:} The two simultaneous ``realities'' ($\varphi$ and $\psi$) can encode two functionally equivalent representations of a computation. An observer seeing both outputs cannot determine which representation was the intended one (51.2\% adversary success rate, 95\% CI: 50\% $\pm$ 3.1\%). We explicitly note this is \textbf{not} indistinguishability obfuscation in the standard cryptographic sense~\cite{barak2001, garg2013}; it provides plausible deniability for program representation rather than general circuit hiding.
 
@@ -211,6 +211,25 @@ To prevent an adversary from distinguishing representations by their intermediat
 
 Both normal and reverse sequences produce symmetric trajectories converging to $\exp(2\pi i/\varphi)$ with identical total angular distance. The adversary sees two circle paths with equal metrics and cannot identify which corresponds to which representation.
 
+\subsection{Adversary Model}
+
+The adversary in our experiment receives:
+
+\begin{itemize}
+
+    \item The obfuscated program (a $\varphi/psi$-encoded ciphertext pair)
+
+    \item The ability to query the program on arbitrary inputs
+
+    \item The two evaluation outputs ($\varphi$-reality and $\psi$-reality values)
+
+    \item Knowledge of the obfuscation algorithm (Kerckhoffs's principle)
+
+\end{itemize}
+
+The adversary does NOT receive the secret key, and therefore cannot determine which evaluation corresponds to which reality. The adversary's task is to identify whether the $\varphi$-reality output came from the first or second representation, given both outputs and unlimited queries.
+
+
 \subsection{Adversary Game Results}
 
 1,000 trials. Adversary must identify which representation was used.
@@ -316,7 +335,7 @@ We document limitations honestly:
 We have explored the $\varphi$-extension ring $R[X]/(X^2-X-1)$ as a primitive for lattice-based cryptography. Our exploration yielded:
 
 \begin{itemize}
-    \item A noise attenuation technique for FHE that uses zero-depth operations, enabling extended computation chains (demonstrated to 6,300 multiplications, projected to $\sim$14,000 practical limit)
+    \item A noise attenuation technique for FHE that uses zero multiplication depth operations, enabling extended computation chains (demonstrated to 6,300 multiplications, projected to $\sim$14,000 practical limit)
     \item A dual-reality program encoding that provides plausible deniability for evaluation strategy (not general iO)
     \item A compact KEM construction trading assumption strength for key size (192 bytes with RLWE + fixed A)
 \end{itemize}
