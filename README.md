@@ -10,7 +10,7 @@
 
 ## What Is This?
 
-DM-DGR explores the **golden ratio extension ring** $R[Y]/(Y^2-Y-1)$ as a cryptographic primitive. The two roots — $\phi \approx 1.618$ (expanding) and $\psi \approx -0.618$ (contracting) — create a natural asymmetry that enables:
+DM-DGR explores the **golden ratio extension ring** `R[Y]/(Y²-Y-1)` as a cryptographic primitive. The two roots — φ ≈ 1.618 (expanding) and ψ ≈ -0.618 (contracting) — create a natural asymmetry that enables:
 
 - **Fully Homomorphic Encryption** without bootstrapping
 - **Indistinguishability Obfuscation** via scale-invariant encoding
@@ -22,40 +22,52 @@ DM-DGR explores the **golden ratio extension ring** $R[Y]/(Y^2-Y-1)$ as a crypto
 
 ### The φ-Extension Ring
 
-$$R_\phi = R[Y]/(Y^2 - Y - 1), \quad R = \mathbb{Z}_q[X]/(X^N + 1)$$
+```
+R_φ = R[Y]/(Y² - Y - 1),   where R = Z_q[X]/(X^N + 1)
+```
 
-Properties of $\psi$ ($|\psi| = 1/\phi \approx 0.618$):
-- $\psi^2 = 1 - \psi$ (contracting attractor)
-- $|\psi| < 1$ → exponential damping
+Properties of ψ (|ψ| = 1/φ ≈ 0.618):
+- ψ² = 1 - ψ (contracting attractor)
+- |ψ| < 1 → exponential damping
 
 ### Direct Value Encoding
 
-$$\text{encode}(v) = (v, 1), \quad \text{decode}(a,b) = \frac{a}{b}$$
+```
+encode(v) = (v, 1)
+decode(a, b) = a / b
+```
 
-Scale-invariant: $\text{decode}(s \cdot a, s \cdot b) = \text{decode}(a, b)$ for any $s$.
+Scale-invariant: `decode(s·a, s·b) = decode(a, b)` for any scale factor `s`.
 
 ### Homogeneous NAND Gate
 
-$$NAND_a = b_A \cdot b_B - a_A \cdot a_B, \quad NAND_b = b_A \cdot b_B$$
+```
+NAND_a = b_A · b_B - a_A · a_B
+NAND_b = b_A · b_B
+```
 
-- Scale-commutative: $NAND(s_A A, s_B B) = s_A s_B \cdot NAND(A, B)$
-- Truth table: 4/4, $10^{-12}$ precision
+- Scale-commutative: `NAND(s_A·A, s_B·B) = s_A·s_B · NAND(A, B)`
+- Truth table: 4/4, 10⁻¹² precision
 - Cost: 2 EvalMults, 1 EvalSub
 
 ### φ/ψ Spiral Auto-Correction
 
-$$\text{spiral}(s, n) = (\text{mulY\_inv} \circ \text{mulY})^n (s)$$
+```
+spiral(s, n) = (mulY_inv ∘ mulY)^n (s)
+```
 
-- Theoretically identity ($M^{-1}M = I$)
+- Theoretically identity (M⁻¹M = I)
 - Drives CKKS noise into ψ-eigenspace → exponential damping
-- Cost: Zero EvalMult (only EvalAdd/EvalSub)
+- **Cost: Zero EvalMult** (only EvalAdd/EvalSub)
 
 ### Fractal Extension (Level k)
 
-$$R_\phi^{(k)} = R[Y_1, ..., Y_k]/(Y_1^2-Y_1-1, ..., Y_k^2-Y_k-1)$$
+```
+R_φ^(k) = R[Y₁,...,Y_k]/(Y₁²-Y₁-1, ..., Y_k²-Y_k-1)
+```
 
-- $2^k \times 2^k$ transformation matrices
-- $\psi^k$ super-damping: noise decays as $O(|\psi|^k)$
+- 2^k × 2^k transformation matrices
+- ψ^k super-damping: noise decays as O(|ψ|^k)
 - Level 1 (2×2), Level 2 (4×4), Level 3 (8×8) — all verified
 
 ---
@@ -66,14 +78,14 @@ All tests on **AMD Ryzen 5 2600, 16GB RAM, WSL2 Ubuntu, OpenFHE CKKS**.
 
 | Test | Gates | Result | Precision |
 |------|-------|--------|-----------|
-| NAND truth table | 1 | 4/4 | $10^{-12}$ |
-| Full Adder | 9 | 8/8 SUM + COUT | $10^{-12}$ |
+| NAND truth table | 1 | 4/4 | 10⁻¹² |
+| Full Adder | 9 | 8/8 SUM + COUT | 10⁻¹² |
 | 4-bit Ripple Adder | 36 | MATCH | Exact |
 | 8-bit Ripple Adder | 72 | MATCH | Exact |
 | 16-bit Ripple Adder | 144 | MATCH | Exact |
-| Fractal Level-2 | 9 | 8/8 | $10^{-12}$ |
-| Fractal Level-3 | 9 | 8/8 | $10^{-12}$ |
-| Spiral damping | — | Stable across depths | $\Delta \sim 10^{-13}$ |
+| Fractal Level-2 | 9 | 8/8 | 10⁻¹² |
+| Fractal Level-3 | 9 | 8/8 | 10⁻¹² |
+| Spiral damping | — | Stable across depths | Δ ∼ 10⁻¹³ |
 | iO Indistinguishability | — | 93/100 overlap | PASS |
 
 ### Running the 16-bit Adder
@@ -189,6 +201,6 @@ MIT — see [LICENSE](LICENSE)
 
 ---
 
-```text
+```
 - .... .. ... / .-. . .--. --- ... .. - --- .-. -.-- / .-- .. .-.. .-.. / .- .-.. .-- .- -.-- ... / -... . / -.. . -.. .. -.-. .- - . -.. / - --- / - .... . / .-- --- -- .- -. / .. .----. ...- . / . ...- . .-. / -.-. --- -. ... .. -.. . .-. . -.. / - --- / -... . / --- -. / -- -.-- / .-.. . ...- . .-.. .-.-.-
 ```
