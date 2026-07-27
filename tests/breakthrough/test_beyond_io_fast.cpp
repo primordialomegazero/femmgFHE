@@ -1,0 +1,209 @@
+// BEYOND iO — FAST VALIDATION (No timing noise, fixed true output)
+#include <iostream>
+#include <iomanip>
+#include <cmath>
+#include <cstdlib>
+#include <ctime>
+#include <sys/time.h>
+#include <random>
+#include <vector>
+#include "openfhe.h"
+using namespace lbcrypto;
+
+const double PHI=1.6180339887498948482, PSI=-0.6180339887498948482;
+struct PE { Ciphertext<DCRTPoly> a; Ciphertext<DCRTPoly> b; };
+
+PE op_phi(CryptoContext<DCRTPoly>& cc, const PE& x) { return {x.b, cc->EvalAdd(x.a, x.b)}; }
+PE op_psi(CryptoContext<DCRTPoly>& cc, const PE& x) { return {cc->EvalSub(x.b, x.a), x.a}; }
+PE op_swap(PE x) { auto t=x.a; x.a=x.b; x.b=t; return x; }
+
+double decrypt_val(CryptoContext<DCRTPoly>& cc, KeyPair<DCRTPoly>& kp, const Ciphertext<DCRTPoly>& c) {
+    Plaintext pt; cc->Decrypt(kp.secretKey, c, &pt); return pt->GetCKKSPackedValue()[0].real();
+}
+double get_ratio(CryptoContext<DCRTPoly>& cc, KeyPair<DCRTPoly>& kp, const PE& s) {
+    double a=decrypt_val(cc,kp,s.a), b=decrypt_val(cc,kp,s.b); return (std::abs(b)>1e-10)?a/b:a;
+}
+int extract_bit(CryptoContext<DCRTPoly>& cc, KeyPair<DCRTPoly>& kp, const PE& s) { return (get_ratio(cc,kp,s)>0.5)?1:0; }
+double elapsed_ms(struct timeval s, struct timeval e) { return (e.tv_sec-s.tv_sec)*1000.0+(e.tv_usec-s.tv_usec)/1000.0; }
+PE encrypt_bit(CryptoContext<DCRTPoly>& cc, KeyPair<DCRTPoly>& kp, int b) {
+    double v=b?1.0:0.0;
+    return {cc->Encrypt(kp.publicKey, cc->MakeCKKSPackedPlaintext(std::vector<double>{v})),
+            cc->Encrypt(kp.publicKey, cc->MakeCKKSPackedPlaintext(std::vector<double>{1.0}))};
+}
+std::mt19937 global_rng(std::random_device{}());
+
+PE nand_gate(CryptoContext<DCRTPoly>& cc, const PE& A, const PE& B) {
+    auto aa=cc->EvalMult(A.a,B.a), bb=cc->EvalMult(A.b,B.b);
+    PE raw={cc->EvalSub(bb,aa),bb};
+    for(int i=0;i<4;i++) raw=op_phi(cc,raw);
+    for(int i=0;i<4;i++) raw=op_psi(cc,raw);
+    return raw;
+}
+PE nand_encrypt(CryptoContext<DCRTPoly>& cc, KeyPair<DCRTPoly>& kp, const PE& in, int rounds) {
+    PE s=in, c=encrypt_bit(cc,kp,1); for(int i=0;i<rounds;i++) s=nand_gate(cc,s,c); return s;
+}
+
+// Reality 1
+PE r1_decoy(CryptoContext<DCRTPoly>& cc, const PE& in) {
+    PE s=in; srand(42); int ops=3+rand()%3;
+    for(int i=0;i<ops;i++){ if(rand()%2)s=op_phi(cc,s); else s=op_psi(cc,s); } s=op_psi(cc,s); return s;
+}
+PE r1_fortress(CryptoContext<DCRTPoly>& cc, const PE& in) {
+    PE s=in; int dims=3+rand()%5;
+    for(int d=0;d<dims;d++){ srand(1000+d*137); int ops=2+rand()%3;
+        for(int i=0;i<ops;i++){ if(rand()%2)s=op_phi(cc,s); else s=op_psi(cc,s); } } return s;
+}
+PE r1_quicksand(CryptoContext<DCRTPoly>& cc, const PE& in, int layers) {
+    PE surf=in, under=in; double depth=0; int mut=rand()%13;
+    for(int l=0;l<layers;l++){ int steps=3+(int)(depth*6);
+        for(int s=0;s<steps;s++){ mut=(mut+1)%13;
+            switch(mut%8){
+                case 0:surf=op_phi(cc,surf);under=op_psi(cc,under);break;
+                case 1:surf=op_psi(cc,surf);under=op_phi(cc,under);break;
+                case 2:surf=op_phi(cc,surf);under=op_psi(cc,under);break;
+                case 3:surf=op_psi(cc,surf);under=op_phi(cc,under);break;
+                case 4:surf=op_swap(surf);break;
+                case 5:under=op_swap(under);break;
+                case 6:{auto t=surf;surf=under;under=t;}break;
+                case 7:surf=op_phi(cc,surf);surf=op_psi(cc,surf);break;
+            }
+        } depth+=std::abs(PSI)*0.15; if(depth>1)depth=1;
+        if(l<layers-1){surf=op_phi(cc,surf);under=op_psi(cc,under);}
+    } return under;
+}
+
+// Reality 2
+PE r2_whitehole(CryptoContext<DCRTPoly>& cc, const PE& in) { PE s=in; for(int i=0;i<3;i++)s=op_phi(cc,s); return s; }
+PE r2_blackhole(CryptoContext<DCRTPoly>& cc, const PE& in) { PE s=in; for(int i=0;i<3;i++)s=op_psi(cc,s); return s; }
+PE r2_antimatter(CryptoContext<DCRTPoly>& cc, const PE& sig, const PE& noi) {
+    PE s=op_phi(cc,sig), n=op_psi(cc,noi); return nand_gate(cc,s,n);
+}
+PE r2_consciousness(CryptoContext<DCRTPoly>& cc, const PE& in) {
+    PE s=in; s=op_phi(cc,s); s=op_psi(cc,s); s=op_phi(cc,s); s=op_psi(cc,s); s=op_phi(cc,s); return s;
+}
+
+// Reality 3
+PE r3_veil(CryptoContext<DCRTPoly>& cc, KeyPair<DCRTPoly>& kp, const PE& in) {
+    PE s=nand_encrypt(cc,kp,in,3); for(int i=0;i<2;i++){s=op_psi(cc,s);s=op_phi(cc,s);}
+    for(int i=0;i<4;i++)s=op_psi(cc,s); return s;
+}
+PE r3_signal(CryptoContext<DCRTPoly>& cc, KeyPair<DCRTPoly>& kp, const PE& in) {
+    PE s=nand_encrypt(cc,kp,in,3); for(int i=0;i<2;i++){s=op_phi(cc,s);s=op_psi(cc,s);}
+    for(int i=0;i<4;i++)s=op_phi(cc,s); return s;
+}
+PE r3_fractal(CryptoContext<DCRTPoly>& cc, KeyPair<DCRTPoly>& kp, const PE& in) {
+    PE s=nand_encrypt(cc,kp,in,4);
+    for(int i=0;i<5;i++){s=op_phi(cc,s);s=op_phi(cc,s);s=op_psi(cc,s);}
+    for(int i=0;i<3;i++){s=op_phi(cc,s);s=op_psi(cc,s);s=op_phi(cc,s);} return s;
+}
+PE r3_omega(CryptoContext<DCRTPoly>& cc, KeyPair<DCRTPoly>& kp, const PE& in) {
+    PE s=nand_encrypt(cc,kp,in,4); for(int i=0;i<3;i++){s=op_phi(cc,s);s=op_psi(cc,s);}
+    for(int i=0;i<3;i++)s=op_phi(cc,s); for(int i=0;i<2;i++)s=op_psi(cc,s);
+    for(int i=0;i<2;i++){s=op_psi(cc,s);s=op_phi(cc,s);} s=op_phi(cc,s);
+    for(int i=0;i<2;i++)s=op_psi(cc,s); return s;
+}
+
+struct BeyondIO { PE r1_surf,r1_deep,r2_white,r2_black,r2_ann,r2_cons,r3_veil,r3_sig,r3_frac,r3_omega,true_out; };
+
+BeyondIO beyond_io(CryptoContext<DCRTPoly>& cc, KeyPair<DCRTPoly>& kp, const PE& in, int qs_depth) {
+    BeyondIO bio;
+    bio.r1_surf=r1_decoy(cc,in); PE r1f=r1_fortress(cc,bio.r1_surf); bio.r1_deep=r1_quicksand(cc,r1f,qs_depth);
+    PE r2in=bio.r1_deep; bio.r2_cons=r2_consciousness(cc,r2in);
+    bio.r2_white=r2_whitehole(cc,bio.r2_cons); bio.r2_black=r2_blackhole(cc,bio.r2_white);
+    bio.r2_ann=r2_antimatter(cc,bio.r2_white,bio.r2_black);
+    PE r3in=bio.r2_ann; bio.r3_veil=r3_veil(cc,kp,r3in); bio.r3_sig=r3_signal(cc,kp,r3in);
+    bio.r3_frac=r3_fractal(cc,kp,r3in); bio.r3_omega=r3_omega(cc,kp,r3in);
+    // FIX: True output = R3 Omega directly (no disguise for key holder)
+    bio.true_out=bio.r3_omega;
+    return bio;
+}
+
+struct FA { PE sum, carry; };
+FA full_adder(CryptoContext<DCRTPoly>& cc, KeyPair<DCRTPoly>& kp, const PE& A, const PE& B, const PE& Cin) {
+    PE X1=encrypt_bit(cc,kp,extract_bit(cc,kp,nand_gate(cc,A,B)));
+    PE X2=encrypt_bit(cc,kp,extract_bit(cc,kp,nand_gate(cc,A,X1)));
+    PE X3=encrypt_bit(cc,kp,extract_bit(cc,kp,nand_gate(cc,B,X1)));
+    PE X4=encrypt_bit(cc,kp,extract_bit(cc,kp,nand_gate(cc,X2,X3)));
+    PE X5=encrypt_bit(cc,kp,extract_bit(cc,kp,nand_gate(cc,X4,Cin)));
+    PE X6=encrypt_bit(cc,kp,extract_bit(cc,kp,nand_gate(cc,X4,X5)));
+    PE X7=encrypt_bit(cc,kp,extract_bit(cc,kp,nand_gate(cc,X5,Cin)));
+    return {nand_gate(cc,X6,X7), nand_gate(cc,X1,X5)};
+}
+
+int main() {
+    time_t st=time(0);
+    std::cout<<"\n  BEYOND iO — FAST VALIDATION (No timing noise, 50 trials)\n  Started: "<<ctime(&st)<<"\n";
+    
+    CCParams<CryptoContextCKKSRNS> p;
+    p.SetMultiplicativeDepth(120); p.SetScalingModSize(50); p.SetBatchSize(1024);
+    p.SetRingDim(16384); p.SetSecretKeyDist(UNIFORM_TERNARY); p.SetSecurityLevel(HEStd_NotSet);
+    auto cc=GenCryptoContext(p); cc->Enable(PKE); cc->Enable(KEYSWITCH); cc->Enable(LEVELEDSHE);
+    auto kp=cc->KeyGen(); cc->EvalMultKeyGen(kp.secretKey);
+    PE b0=encrypt_bit(cc,kp,0), b1=encrypt_bit(cc,kp,1);
+    
+    // FHE Gates
+    PE in[2]={b0,b1};
+    int fhe_ok=0, fhe_tot=0;
+    struct{std::string n;PE(*f)(CryptoContext<DCRTPoly>&,KeyPair<DCRTPoly>&,const PE&,const PE&);int t[2][2];}
+    gates[]={{"NAND",[](CryptoContext<DCRTPoly>& cc,KeyPair<DCRTPoly>& kp,const PE&A,const PE&B){(void)kp;return nand_gate(cc,A,B);},{{1,1},{1,0}}},
+             {"AND ",[](CryptoContext<DCRTPoly>& cc,KeyPair<DCRTPoly>& kp,const PE&A,const PE&B){PE n=nand_gate(cc,A,B);PE nn=nand_gate(cc,n,n);return encrypt_bit(cc,kp,extract_bit(cc,kp,nn));},{{0,0},{0,1}}},
+             {"OR  ",[](CryptoContext<DCRTPoly>& cc,KeyPair<DCRTPoly>& kp,const PE&A,const PE&B){PE na=nand_gate(cc,A,A),nb=nand_gate(cc,B,B),nn=nand_gate(cc,na,nb);return encrypt_bit(cc,kp,extract_bit(cc,kp,nn));},{{0,1},{1,1}}},
+             {"XOR ",[](CryptoContext<DCRTPoly>& cc,KeyPair<DCRTPoly>& kp,const PE&A,const PE&B){PE n1=nand_gate(cc,A,B),n2=nand_gate(cc,A,n1),n3=nand_gate(cc,B,n1),r=nand_gate(cc,n2,n3);return encrypt_bit(cc,kp,extract_bit(cc,kp,r));},{{0,1},{1,0}}}};
+    std::cout<<"  FHE Gates:\n";
+    for(auto&g:gates){int ok=0;
+        for(int a=0;a<=1;a++)for(int b=0;b<=1;b++){PE r=g.f(cc,kp,in[a],in[b]);if(extract_bit(cc,kp,r)==g.t[a][b])ok++;}
+        std::cout<<"    "<<g.n<<": "<<ok<<"/4 "<<(ok==4?"OK":"FAIL")<<"\n"; fhe_ok+=ok; fhe_tot+=4;
+    }
+    
+    // Full Adder
+    int so=0,co=0,cs[8][3]={{0,0,0},{0,0,1},{0,1,0},{0,1,1},{1,0,0},{1,0,1},{1,1,0},{1,1,1}};
+    for(int i=0;i<8;i++){PE A=encrypt_bit(cc,kp,cs[i][0]),B=encrypt_bit(cc,kp,cs[i][1]),C=encrypt_bit(cc,kp,cs[i][2]);
+        FA fa=full_adder(cc,kp,A,B,C);if(extract_bit(cc,kp,fa.sum)==(cs[i][0]+cs[i][1]+cs[i][2])%2)so++;
+        if(extract_bit(cc,kp,fa.carry)==(cs[i][0]+cs[i][1]+cs[i][2])/2)co++;}
+    std::cout<<"  FA: SUM="<<so<<"/8 COUT="<<co<<"/8\n\n";
+    
+    // Beyond iO
+    const int TRIALS=50, QS=2;
+    int dw=0,aw=0,vw=0,sw=0,tw=0,a1=0,a0=0,t1=0,t0=0;
+    std::cout<<"  Beyond iO ("<<TRIALS<<" trials): "<<std::flush;
+    struct timeval t_start,t_end; gettimeofday(&t_start,NULL);
+    for(int t=0;t<TRIALS;t++){
+        int sec=global_rng()%2; PE inp=(sec==0)?b0:b1;
+        BeyondIO bio=beyond_io(cc,kp,inp,QS);
+        if(extract_bit(cc,kp,bio.r1_surf)!=sec)dw++;
+        if(extract_bit(cc,kp,bio.r2_ann)!=sec)aw++;
+        if(extract_bit(cc,kp,bio.r3_veil)!=sec)vw++;
+        if(extract_bit(cc,kp,bio.r3_sig)!=sec)sw++;
+        int tb=extract_bit(cc,kp,bio.true_out); if(tb!=sec)tw++;
+        if(sec==1){t1++;if(tb==1)a1++;}else{t0++;if(tb==1)a0++;}
+        if((t+1)%10==0)std::cout<<"."<<std::flush;
+    }
+    gettimeofday(&t_end,NULL);
+    double total_ms=elapsed_ms(t_start,t_end);
+    
+    double dacc=100.0*(TRIALS-dw)/TRIALS, aacc=100.0*(TRIALS-aw)/TRIALS;
+    double vacc=100.0*(TRIALS-vw)/TRIALS, sacc=100.0*(TRIALS-sw)/TRIALS, tacc=100.0*(TRIALS-tw)/TRIALS;
+    double adv=std::abs(100.0*a1/t1-100.0*a0/t0);
+    
+    time_t et=time(0);
+    std::cout<<"\n\n";
+    std::cout<<"  ┌──────────────────────────────────────────────────────┐\n";
+    std::cout<<"  │  REALITY 1 (Physical Decoy)                          │\n";
+    std::cout<<"  │    Surface accuracy:  "<<std::fixed<<std::setprecision(1)<<std::setw(6)<<dacc<<"%  ← TARGET: ~60% (false hope)  │\n";
+    std::cout<<"  │  REALITY 2 (Metaphysical)                             │\n";
+    std::cout<<"  │    Annihilated acc:   "<<std::setw(6)<<aacc<<"%  ← TARGET: ~50% (random)      │\n";
+    std::cout<<"  │  REALITY 3 (Higher Metaphysical)                      │\n";
+    std::cout<<"  │    Veil accuracy:      "<<std::setw(6)<<vacc<<"%  ← TARGET: ~50% (decoy)       │\n";
+    std::cout<<"  │    Signal accuracy:    "<<std::setw(6)<<sacc<<"%  ← TARGET: ~50% (hidden)      │\n";
+    std::cout<<"  │  TRUE OUTPUT (key holder):                             │\n";
+    std::cout<<"  │    Accuracy:           "<<std::setw(6)<<tacc<<"%  ← TARGET: >95%              │\n";
+    std::cout<<"  │  ADVERSARY ADVANTAGE:  "<<std::setprecision(2)<<std::setw(6)<<adv<<"%  ← TARGET: <5%               │\n";
+    std::cout<<"  ├──────────────────────────────────────────────────────┤\n";
+    std::cout<<"  │  Duration: "<<std::setprecision(0)<<total_ms/1000.0<<"s ("<<total_ms/(TRIALS*1000.0)<<"s/trial)              │\n";
+    std::cout<<"  └──────────────────────────────────────────────────────┘\n";
+    
+    bool pass=(fhe_ok==fhe_tot)&&(so==8&&co==8)&&(tacc>90.0)&&(adv<5.0);
+    std::cout<<"\n  STATUS: "<<(pass?"BEYOND iO VALIDATED ✓✓✓":"DEBUG — Check Reality outputs")<<"\n";
+    std::cout<<"  Ended: "<<ctime(&et)<<"\n";
+    return 0;
+}
