@@ -263,7 +263,7 @@ LD_LIBRARY_PATH=./openfhe-development/build/lib:$LD_LIBRARY_PATH \
 
 ## 📜 License
 
-MIT — see [LICENSE](LICENSE)
+DM-DGR Hybrid License v1.0 — Research Free, Commercial Protected — see [LICENSE.md](LICENSE.md)
 
 ---
 
