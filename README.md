@@ -2,7 +2,7 @@
 
 ## Fibonacci-Golden Ratio Cryptography — FHE + iO Unified
 
-**License:** MIT &nbsp;|&nbsp; **Language:** C++17 &nbsp;|&nbsp; **Library:** OpenFHE CKKS &nbsp;|&nbsp; **Hardware:** 16GB Consumer
+**License:** DM-DGR Hybrid License v1.0 &nbsp;|&nbsp; **Language:** C++17 &nbsp;|&nbsp; **Library:** OpenFHE CKKS &nbsp;|&nbsp; **Hardware:** 16GB Consumer
 
 ---
 
@@ -254,7 +254,7 @@ LD_LIBRARY_PATH=./openfhe-development/build/lib:$LD_LIBRARY_PATH \
 @software{fernandez2025femmgfhe,
   author = {Dan Joseph M. Fernandez},
   title = {DM-DGR: Dual Modulus + Double Golden Ratio},
-  year = {2025},
+  year = {2025-2026},
   url = {https://github.com/primordialomegazero/femmgFHE}
 }
 ```
