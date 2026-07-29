@@ -13,7 +13,7 @@ using namespace lbcrypto;
 
 const double PHI = 1.6180339887498948482;
 const double PSI = -0.6180339887498948482;
-const double LAMBDA = 0.25;
+const double LAMBDA = 0.10;
 
 struct DualGate { Ciphertext<DCRTPoly> a; Ciphertext<DCRTPoly> b; };
 
