@@ -1,5 +1,6 @@
 #pragma once
 #include "../utils/logger.h"
+#include "../config/system_config.h"
 #include <string>
 #include <chrono>
 #include <thread>
@@ -12,13 +13,18 @@ struct TemporalScheduler {
     double noise_ceiling, noise_floor;
     int stability_window, throttle_delay_us;
     
+    // Configurable
+    double N_temporal_noise_ceiling_scale, N_temporal_noise_floor_scale;
+    double N_temporal_aggressive_factor, N_temporal_conservative_factor;
+    double N_temporal_trend_threshold, N_temporal_severity_base;
+
     enum ScheduleMode { ADAPTIVE, FIXED, AGGRESSIVE, CONSERVATIVE };
     ScheduleMode mode = ADAPTIVE;
-    
+
     int current_batch;
     double noise_history[10];
     int history_index, batches_completed, total_gates;
-    
+
     void init(int base = 50, int min_b = 10, int max_b = 500,
               double accel = 2.0, double decel = 0.5,
               double ceil_n = 0.7, double floor_n = 0.3) {
@@ -28,24 +34,36 @@ struct TemporalScheduler {
         stability_window = 10; throttle_delay_us = 0;
         current_batch = base; history_index = 0; batches_completed = 0; total_gates = 0;
         for (int i = 0; i < 10; i++) noise_history[i] = 0.5;
+        
+        N_temporal_noise_ceiling_scale = 0.8;
+        N_temporal_noise_floor_scale = 1.5;
+        N_temporal_aggressive_factor = 1.5;
+        N_temporal_conservative_factor = 0.6;
+        N_temporal_trend_threshold = 0.1;
+        N_temporal_severity_base = 0.8;
     }
     
+    void init_from_config(const SystemConfig& cfg) {
+        init(cfg.N_batch_size, cfg.N_batch_min, cfg.N_batch_max, 2.0, 0.5,
+             cfg.N_noise_critical, cfg.N_noise_warning * 0.5);
+    }
+
     int get_window_size(double current_noise) {
         noise_history[history_index] = current_noise;
         history_index = (history_index + 1) % 10;
-        
+
         double avg_noise = 0;
         for (int i = 0; i < 10; i++) avg_noise += noise_history[i];
         avg_noise /= 10.0;
         double noise_trend = current_noise - avg_noise;
-        
+
         switch (mode) {
             case FIXED: return base_batch_size;
             case AGGRESSIVE:
-                if (current_noise < noise_floor * 1.5)
-                    current_batch = std::min((int)(current_batch * acceleration_factor * 1.5), max_batch);
-                else if (current_noise > noise_ceiling * 0.8)
-                    current_batch = std::max((int)(current_batch * deceleration_factor * 0.8), min_batch);
+                if (current_noise < noise_floor * N_temporal_noise_floor_scale)
+                    current_batch = std::min((int)(current_batch * acceleration_factor * N_temporal_aggressive_factor), max_batch);
+                else if (current_noise > noise_ceiling * N_temporal_noise_ceiling_scale)
+                    current_batch = std::max((int)(current_batch * deceleration_factor * N_temporal_conservative_factor), min_batch);
                 break;
             case CONSERVATIVE:
                 if (current_noise > noise_ceiling * 0.7)
@@ -55,7 +73,7 @@ struct TemporalScheduler {
                 break;
             case ADAPTIVE:
             default:
-                if (noise_trend > 0.1 && current_noise > noise_ceiling * 0.8) {
+                if (noise_trend > N_temporal_trend_threshold && current_noise > noise_ceiling * N_temporal_severity_base) {
                     double severity = (current_noise - noise_floor) / (noise_ceiling - noise_floor);
                     double factor = 1.0 - severity * (1.0 - deceleration_factor);
                     current_batch = std::max((int)(current_batch * factor), min_batch);
@@ -66,14 +84,14 @@ struct TemporalScheduler {
                 }
                 break;
         }
-        
+
         if (throttle_delay_us > 0)
             std::this_thread::sleep_for(std::chrono::microseconds(throttle_delay_us));
-        
+
         batches_completed++;
         return current_batch;
     }
-    
+
     int predict_next_batch() {
         double trend = 0;
         for (int i = 1; i < 10; i++) {
@@ -86,7 +104,7 @@ struct TemporalScheduler {
         if (trend < -0.05) return std::min(current_batch * 2, max_batch);
         return current_batch;
     }
-    
+
     void report() {
         double avg = 0;
         for (int i = 0; i < 10; i++) avg += noise_history[i];
@@ -96,9 +114,9 @@ struct TemporalScheduler {
                     " mode=" + mode_string() +
                     " batches=" + std::to_string(batches_completed));
     }
-    
+
     std::string mode_string() {
-        switch(mode) { 
+        switch(mode) {
             case ADAPTIVE: return "ADAPTIVE";
             case FIXED: return "FIXED";
             case AGGRESSIVE: return "AGGRESSIVE";

@@ -103,7 +103,8 @@ struct FractalNEncryption {
     // DEFAULT INIT — Single seed, auto N=1
     // ═══════════════════════════════════════════════════════════
     
-    void init(double master_seed, int n_layers = 1) {
+    void init_from_config(const SystemConfig& cfg) { init(cfg.master_seed, cfg.N_fne_layers); }
+    void init(double master_seed, int n_layers) {
         if (n_layers < 1) n_layers = 1;
         init_enterprise(master_seed, n_layers);
     }

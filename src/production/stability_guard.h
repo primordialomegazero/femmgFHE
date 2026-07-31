@@ -1,6 +1,7 @@
 #pragma once
 #include "../utils/logger.h"
 #include "../core/constants.h"
+#include "../config/system_config.h"
 #include <deque>
 #include <vector>
 #include <string>
@@ -10,20 +11,8 @@
 #include <algorithm>
 #include <cmath>
 
-// ═══════════════════════════════════════════════════════════════
-// STABILITY GUARD — Pure Backend System Monitor
-// ═══════════════════════════════════════════════════════════════
-//
-// Configurable thresholds. Zero frontend.
-// Exports JSON + Prometheus metrics endpoints.
-// Users provide their own dashboard (Grafana/Datadog/whatever).
-// ═══════════════════════════════════════════════════════════════
-
 struct StabilityGuard {
-    
-    // ═══════════════════════════════════════════════════════════
-    // USER-CONFIGURABLE THRESHOLD TEMPLATE
-    // ═══════════════════════════════════════════════════════════
+
     struct ThresholdConfig {
         double lyapunov_critical     = 0.05;
         double lyapunov_warning      = 0.15;
@@ -37,38 +26,26 @@ struct StabilityGuard {
         int history_window_size      = 100;
         int prediction_min_samples   = 10;
     };
-    
-    ThresholdConfig cfg;  // PUBLIC — user modifies directly
-    
-    // ═══════════════════════════════════════════════════════════
-    // METRICS
-    // ═══════════════════════════════════════════════════════════
+
+    ThresholdConfig cfg;
+
     struct Snapshot {
-        double lyapunov;
-        double noise;
-        double stability;
-        double gate_time_sec;
-        int refreshes_done;
-        int refresh_failures;
+        double lyapunov, noise, stability, gate_time_sec;
+        int refreshes_done, refresh_failures;
         time_t timestamp;
     };
-    
+
     std::deque<Snapshot> history;
     Snapshot current;
-    
-    // ═══════════════════════════════════════════════════════════
-    // ALERTING
-    // ═══════════════════════════════════════════════════════════
+
     enum Level { CLEAR = 0, WARNING = 1, CRITICAL = 2 };
-    
+
     struct Alert {
         Level level;
-        std::string component;
-        std::string message;
-        double value;
-        double threshold;
+        std::string component, message;
+        double value, threshold;
         time_t when;
-        
+
         std::string to_json() const {
             std::stringstream ss;
             ss << "{\"level\":\"" << (level==CRITICAL?"critical":"warning")
@@ -80,137 +57,113 @@ struct StabilityGuard {
             return ss.str();
         }
     };
-    
+
     std::vector<Alert> alerts;
     Level current_level = CLEAR;
     std::chrono::steady_clock::time_point last_alert_time;
     int consecutive_failures = 0;
-    
-    // ═══════════════════════════════════════════════════════════
-    // UPDATE — Called every monitoring cycle
-    // ═══════════════════════════════════════════════════════════
-    
-    void update(double lyapunov, double noise, double stability, 
+
+    void init_from_config(const SystemConfig& cfg) {
+        this->cfg.lyapunov_critical = cfg.N_lyapunov_critical;
+        this->cfg.lyapunov_warning = cfg.N_lyapunov_warning;
+        this->cfg.noise_critical = cfg.N_noise_critical;
+        this->cfg.noise_warning = cfg.N_noise_warning;
+        this->cfg.stability_critical = cfg.N_lyapunov_critical * 6;
+        this->cfg.stability_warning = cfg.N_lyapunov_warning * 3.33;
+        this->cfg.refresh_failure_max = 3;
+        this->cfg.gate_timeout_seconds = 10.0;
+        this->cfg.alert_cooldown_seconds = cfg.N_alert_cooldown;
+        this->cfg.history_window_size = cfg.N_history_window;
+        this->cfg.prediction_min_samples = cfg.N_prediction_min_samples;
+    }
+
+    void update(double lyapunov, double noise, double stability,
                 double gate_time_sec, int refresh_ok) {
-        current.lyapunov = lyapunov;
-        current.noise = noise;
-        current.stability = stability;
-        current.gate_time_sec = gate_time_sec;
+        current.lyapunov = lyapunov; current.noise = noise;
+        current.stability = stability; current.gate_time_sec = gate_time_sec;
         current.timestamp = time(0);
-        
-        if (refresh_ok) {
-            current.refreshes_done++;
-            consecutive_failures = 0;
-        } else {
-            current.refresh_failures++;
-            consecutive_failures++;
-        }
-        
+
+        if (refresh_ok) { current.refreshes_done++; consecutive_failures = 0; }
+        else { current.refresh_failures++; consecutive_failures++; }
+
         history.push_back(current);
         if ((int)history.size() > cfg.history_window_size) history.pop_front();
-        
         evaluate_all_checks();
     }
-    
+
     void evaluate_all_checks() {
-        check("lyapunov", current.lyapunov, 
-              cfg.lyapunov_warning, cfg.lyapunov_critical, true);
-        check("noise", current.noise, 
-              cfg.noise_warning, cfg.noise_critical, false);
-        check("stability", current.stability, 
-              cfg.stability_warning, cfg.stability_critical, true);
-        
+        check("lyapunov", current.lyapunov, cfg.lyapunov_warning, cfg.lyapunov_critical, true);
+        check("noise", current.noise, cfg.noise_warning, cfg.noise_critical, false);
+        check("stability", current.stability, cfg.stability_warning, cfg.stability_critical, true);
+
         if (current.gate_time_sec > cfg.gate_timeout_seconds) {
             raise(CRITICAL, "gate_timeout",
-                  "Gate execution time " + std::to_string(current.gate_time_sec).substr(0,4) + "s exceeds threshold",
+                  "Gate time " + std::to_string(current.gate_time_sec).substr(0,4) + "s exceeds threshold",
                   current.gate_time_sec, cfg.gate_timeout_seconds);
         }
-        
+
         if (consecutive_failures >= cfg.refresh_failure_max) {
             raise(CRITICAL, "refresh_failures",
                   std::to_string(consecutive_failures) + " consecutive refresh failures",
                   (double)consecutive_failures, (double)cfg.refresh_failure_max);
         }
     }
-    
-    void check(const std::string& name, double value, 
+
+    void check(const std::string& name, double value,
                double warn_thresh, double crit_thresh, bool lower_is_worse) {
         bool crit = lower_is_worse ? (value < crit_thresh) : (value > crit_thresh);
         bool warn = lower_is_worse ? (value < warn_thresh) : (value > warn_thresh);
-        
-        if (crit) {
-            raise(CRITICAL, name, 
-                  name + " at critical level: " + std::to_string(value).substr(0,6),
-                  value, crit_thresh);
-        } else if (warn) {
-            raise(WARNING, name,
-                  name + " degraded: " + std::to_string(value).substr(0,6),
-                  value, warn_thresh);
-        }
+
+        if (crit) raise(CRITICAL, name, name + " critical: " + std::to_string(value).substr(0,6), value, crit_thresh);
+        else if (warn) raise(WARNING, name, name + " degraded: " + std::to_string(value).substr(0,6), value, warn_thresh);
     }
-    
-    void raise(Level level, const std::string& component, 
+
+    void raise(Level level, const std::string& component,
                const std::string& msg, double value, double threshold) {
         auto now = std::chrono::steady_clock::now();
         auto since = std::chrono::duration_cast<std::chrono::seconds>(now - last_alert_time).count();
-        
         if (since < cfg.alert_cooldown_seconds && level != CRITICAL) return;
-        
+
         Alert a{level, component, msg, value, threshold, time(0)};
         alerts.push_back(a);
         if ((int)alerts.size() > 50) alerts.erase(alerts.begin());
-        
         last_alert_time = now;
         current_level = level;
-        
+
         if (level == CRITICAL) Logger::error("GUARD: " + a.to_json());
         else Logger::warn("GUARD: " + a.to_json());
     }
-    
-    // ═══════════════════════════════════════════════════════════
-    // PREDICTIVE: Estimate time to collapse
-    // ═══════════════════════════════════════════════════════════
-    
+
     double predict_collapse_seconds() {
         int n = history.size();
         if (n < cfg.prediction_min_samples) return -1;
-        
         double sx = 0, sy = 0, sxy = 0, sx2 = 0;
         for (int i = 0; i < n; i++) {
-            sx += i;
-            sy += history[i].lyapunov;
-            sxy += i * history[i].lyapunov;
-            sx2 += i * i;
+            sx += i; sy += history[i].lyapunov;
+            sxy += i * history[i].lyapunov; sx2 += i * i;
         }
-        
         double slope = (n * sxy - sx * sy) / (n * sx2 - sx * sx);
-        if (slope >= 0) return -1;  // Stable or improving
-        if (current.lyapunov <= 0) return 0;  // Already collapsed
-        
+        if (slope >= 0) return -1;
+        if (current.lyapunov <= 0) return 0;
         double gates_left = current.lyapunov / (-slope);
         return gates_left * std::max(0.001, current.gate_time_sec);
     }
-    
-    // ═══════════════════════════════════════════════════════════
-    // METRICS EXPORT — User's dashboard consumes this
-    // ═══════════════════════════════════════════════════════════
-    
+
     std::string metrics_json() const {
         std::stringstream ss;
-        ss << "{"
-           << "\"lyapunov\":" << current.lyapunov << ","
-           << "\"noise\":" << current.noise << ","
-           << "\"stability\":" << current.stability << ","
-           << "\"gate_time_sec\":" << current.gate_time_sec << ","
-           << "\"refreshes\":" << current.refreshes_done << ","
-           << "\"failures\":" << current.refresh_failures << ","
-           << "\"alert_level\":" << current_level << ","
-           << "\"alert_count\":" << alerts.size() << ","
-           << "\"uptime_sec\":" << (time(0) - (history.empty() ? time(0) : history.front().timestamp))
+        ss << "{\"lyapunov\":" << current.lyapunov
+           << ",\"noise\":" << current.noise
+           << ",\"stability\":" << current.stability
+           << ",\"gate_time_sec\":" << current.gate_time_sec
+           << ",\"refreshes\":" << current.refreshes_done
+           << ",\"failures\":" << current.refresh_failures
+           << ",\"alert_level\":" << current_level
+           << ",\"alert_count\":" << alerts.size()
+           << ",\"uptime_sec\":" << (time(0) - (history.empty() ? time(0) : history.front().timestamp))
            << "}";
         return ss.str();
     }
-    
+
     std::string metrics_prometheus() const {
         std::stringstream ss;
         ss << "femmgfhe_lyapunov " << current.lyapunov << "\n";
@@ -222,7 +175,7 @@ struct StabilityGuard {
         ss << "femmgfhe_alert_level " << current_level << "\n";
         return ss.str();
     }
-    
+
     std::string alerts_json() const {
         std::stringstream ss;
         ss << "[";
@@ -233,14 +186,10 @@ struct StabilityGuard {
         ss << "]";
         return ss.str();
     }
-    
-    // ═══════════════════════════════════════════════════════════
-    // STATUS REPORT — Single call for health check endpoint
-    // ═══════════════════════════════════════════════════════════
-    
+
     std::string health_report() const {
         std::stringstream ss;
-        ss << "{\"status\":\"" << (current_level == CRITICAL ? "critical" : 
+        ss << "{\"status\":\"" << (current_level == CRITICAL ? "critical" :
                                     current_level == WARNING ? "degraded" : "healthy")
            << "\",\"lyapunov\":" << current.lyapunov
            << ",\"noise\":" << current.noise
@@ -250,7 +199,7 @@ struct StabilityGuard {
            << "}";
         return ss.str();
     }
-    
+
     void reset_alerts() {
         alerts.clear();
         current_level = CLEAR;

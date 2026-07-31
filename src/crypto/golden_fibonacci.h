@@ -45,7 +45,8 @@ struct GoldenFibonacci {
     }
     
     std::pair<double, double> encrypt(double plaintext) {
-        double x = (plaintext >= 0.9999) ? 0.999 : plaintext;
+        double N_golden_clamp = 0.999;
+    double x = (plaintext >= N_golden_clamp) ? N_golden_clamp : plaintext;
         double s = secret_seed;
         return {SafeMath::fmod_safe(G_n1 * x + G_n * s),
                 SafeMath::fmod_safe(G_n * x + G_n_minus_1 * s)};
