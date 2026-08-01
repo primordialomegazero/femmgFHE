@@ -4,6 +4,7 @@
 #include "../utils/logger.h"
 #include "../crypto/golden_fibonacci.h"
 #include "../crypto/hierarchical_seed.h"
+#include "../config/system_config.h"
 #include <vector>
 #include <utility>
 #include <string>
