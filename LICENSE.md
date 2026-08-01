@@ -42,7 +42,7 @@ Any modification or derivative work created for research purposes MUST be made p
 Commercial use of this Software REQUIRES a separate commercial license agreement with the original author. Contact: devilswithin13@gmail.com
 
 ### 2.3 Revenue Sharing
-For commercial licenses granted, a revenue-sharing agreement of 5% gross revenue from products or services that substantially incorporate the core innovations (Fractal iO, Ultra Rashomon KEM, Golden Fibonacci encryption, φ-based FHE mechanisms) will apply.
+For commercial licenses granted, a revenue-sharing agreement of 5% net revenue directly attributable to the licensed technology from products or services that substantially incorporate the core innovations (Fractal iO, Ultra Rashomon KEM, Golden Fibonacci encryption, φ-based FHE mechanisms) will apply.
 
 ### 2.4 Automatic Commercial Grant (Startup Exception)
 Small companies with:
@@ -69,7 +69,7 @@ This repository serves as public prior art establishing:
 ### 3.2 Patent Restriction
 No party may patent the core innovations contained in this Software. Any patent application that includes these mechanisms must:
 - Name the original author as co-inventor
-- Assign 50% ownership to the original author
+- Assign minimum 50% ownership to the original author
 - Be submitted for review before filing
 
 ### 3.3 Defensive Publication
@@ -124,7 +124,7 @@ Apply by submitting proof of:
 
 ### 8.1 License Violation
 Using this Software commercially without a commercial license constitutes copyright infringement and may result in:
-- DMCA takedown notices
+- copyright takedown under applicable laws
 - Legal action for damages
 - Public disclosure of violation
 
