@@ -105,6 +105,8 @@ struct FractalRefresh {
     double N_refresh_npsi_w1, N_refresh_npsi_w2, N_refresh_npsi_w3;
 
     void init(double master_seed, int n_layers = 5, int d = 3, double iw = 0.75) {
+        // All parameters now configurable via SystemConfig
+        // n_layers = N_fractal_layers, d = N_fractal_depth, iw = N_refresh_weight
         N = n_layers; depth = d; input_weight = iw;
         gf.init(master_seed, 50);
         
