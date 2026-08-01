@@ -1,40 +1,46 @@
-#ifndef FEMMGFHE_H
-#define FEMMGFHE_H
+// ═══════════════════════════════════════════════════════════════
+// femmgFHE — C API Bindings
+// ═══════════════════════════════════════════════════════════════
+
+#ifndef FEMMGFHE_C_H
+#define FEMMGFHE_C_H
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-typedef struct FemmgFHE FemmgFHE;
+// Opaque handle
+typedef void* femmgfhe_handle_t;
 
 // Lifecycle
-FemmgFHE* femmgfhe_init(double seed, int ring_dim, int depth);
-void femmgfhe_destroy(FemmgFHE* ctx);
+femmgfhe_handle_t femmgfhe_create(void);
+void femmgfhe_destroy(femmgfhe_handle_t h);
 
-// Golden Fibonacci
-double femmgfhe_gf_encrypt(FemmgFHE* ctx, double plaintext, double* y2_out);
-double femmgfhe_gf_decrypt(FemmgFHE* ctx, double y1, double y2);
+// Version
+const char* femmgfhe_version(void);
 
-// Universal Compiler
-int femmgfhe_circuit_create(FemmgFHE* ctx, const char* name, int num_inputs);
-void femmgfhe_circuit_add_gate(FemmgFHE* ctx, int ckt_id, int type, int in1, int in2);
-int femmgfhe_verify_equivalence(FemmgFHE* ctx, int ckt_a, int ckt_b);
-int femmgfhe_truth_table_check(FemmgFHE* ctx, int ckt_a, int ckt_b, int* results);
+// Constants
+double femmgfhe_phi(void);
+double femmgfhe_psi(void);
+double femmgfhe_pi(void);
 
-// iO Chain
-int femmgfhe_chain_run(FemmgFHE* ctx, int target_gates);
-double femmgfhe_get_phi(FemmgFHE* ctx);
-double femmgfhe_get_psi(FemmgFHE* ctx);
-int femmgfhe_get_gate_count(FemmgFHE* ctx);
-int femmgfhe_get_refresh_count(FemmgFHE* ctx);
-int femmgfhe_chain_is_alive(FemmgFHE* ctx);
+// Hardware
+int femmgfhe_hw_max_ring_dim(void);
+int femmgfhe_hw_cpu_cores(void);
+const char* femmgfhe_hw_cpu_brand(void);
 
-// Fractal Refresh
-void femmgfhe_refresh_set_params(FemmgFHE* ctx, int n_layers, int depth, double input_weight);
-int femmgfhe_refresh_manual(FemmgFHE* ctx);
-int femmgfhe_refresh_get_auto(FemmgFHE* ctx);
+// Config
+void femmgfhe_set_dev_mode(femmgfhe_handle_t h);
+void femmgfhe_set_test_mode(femmgfhe_handle_t h);
+void femmgfhe_set_prod_mode(femmgfhe_handle_t h);
+void femmgfhe_set_enterprise_mode(femmgfhe_handle_t h);
+
+int femmgfhe_get_ring_dim(femmgfhe_handle_t h);
+int femmgfhe_get_variants(femmgfhe_handle_t h);
+int femmgfhe_get_fractal_layers(femmgfhe_handle_t h);
 
 #ifdef __cplusplus
 }
 #endif
-#endif
+
+#endif // FEMMGFHE_C_H
