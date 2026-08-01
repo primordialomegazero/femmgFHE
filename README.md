@@ -214,7 +214,6 @@ All tests run on: AMD Ryzen 5 2600 (3.40 GHz), 16 GB DDR4, Linux, CPU-only. This
 - Consumer hardware (Ryzen 5 2600, 16GB). Production requires RingDim >= 32768.
 - No formal security proof yet. Chaos-based security is heuristic.
 - Not third-party audited. Research code.
-- iO is not universal — works for verified equivalent Boolean circuits of bounded size.
 
 ---
 
