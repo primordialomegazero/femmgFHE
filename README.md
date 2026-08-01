@@ -331,3 +331,201 @@ All benchmarks and test results documented here were produced on the Ryzen 5 260
 ```
 - .... .. ... / .-. . .--. --- ... .. - --- .-. -.-- / .-- .. .-.. .-.. / .- .-.. .-- .- -.-- ... / -... . / -.. . -.. .. -.-. .- - . -.. / - --- / - .... . / --- -. .-.. -.-- / .-- --- -- .- -. / .. ...- . / . ...- . .-. / -.-. --- -. ... .. -.. . .-. . -.. / - --- / -... . / --- -. / -- -.-- / .-.. . ...- . .-.. .-.-.-
 ```
+
+---
+
+## Complete System Architecture
+
+```
+═══════════════════════════════════════════════════════════════════════════════
+                    femmgFHE v26.0 — SPIRAL FRACTAL iO SYSTEM
+                         Complete Architecture Diagram
+═══════════════════════════════════════════════════════════════════════════════
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                           EXTERNAL INTERFACES                               │
+├─────────────────────────────────────────────────────────────────────────────┤
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐    │
+│  │  Python      │  │  C API       │  │  Go (cgo)    │  │  Rust (FFI)  │    │
+│  │  (pybind11)  │  │  (femmgfhe.h)│  │  (femmgfhe)  │  │  (femmgfhe)  │    │
+│  └──────┬───────┘  └──────┬───────┘  └──────┬───────┘  └──────┬───────┘    │
+│         └─────────────────┴─────────────────┴─────────────────┘            │
+└───────────────────────────────────┬─────────────────────────────────────────┘
+                                    │
+┌───────────────────────────────────┼─────────────────────────────────────────┐
+│                          PRODUCTION LAYER                                   │
+├───────────────────────────────────┼─────────────────────────────────────────┤
+│  ┌────────────────────────────────────────────────────────────────────┐   │
+│  │  Health Check │ Graceful Shutdown │ Error Handler │ Retry Policies │   │
+│  └────────────────────────────────────────────────────────────────────┘   │
+└───────────────────────────────────┬─────────────────────────────────────────┘
+                                    │
+┌───────────────────────────────────┼─────────────────────────────────────────┐
+│                          DATA PERSISTENCE LAYER                             │
+├───────────────────────────────────┼─────────────────────────────────────────┤
+│  ┌────────────────────────────────────────────────────────────────────┐   │
+│  │  FractalDB v2.0: L0(Hot) → L1(Warm) → L2(Cold) → L3(Archive)     │   │
+│  │  SQLite3 + 7-Layer Fractal Index + AES-256-GCM + 3-Mirror         │   │
+│  └────────────────────────────────────────────────────────────────────┘   │
+└───────────────────────────────────┬─────────────────────────────────────────┘
+                                    │
+┌───────────────────────────────────┼─────────────────────────────────────────┐
+│                        ADAPTIVE INTELLIGENCE LAYER                          │
+├───────────────────────────────────┼─────────────────────────────────────────┤
+│  ┌────────────────────────────────────────────────────────────────────┐   │
+│  │  Autonomous Controller (IIT-inspired phi-state)                    │   │
+│  │  Fused Signal = (IQ×φ + EQ×ψ) × (1+SQ)                           │   │
+│  │  Parameter Optimizer | Anomaly Detector | Stability Guard         │   │
+│  └────────────────────────────────────────────────────────────────────┘   │
+└───────────────────────────────────┬─────────────────────────────────────────┘
+                                    │
+┌───────────────────────────────────┼─────────────────────────────────────────┐
+│                          CRYPTOGRAPHIC CORE LAYER                           │
+├───────────────────────────────────┼─────────────────────────────────────────┤
+│  ┌────────────────────────────────────────────────────────────────────┐   │
+│  │  Hierarchical Seed Tree (8 branches, φ-scaled)                     │   │
+│  │  Fractal N-Encryption (5 layers Golden Fibonacci)                  │   │
+│  │  CKKS FHE (RingDim 4096, Depth 120)                                │   │
+│  │  iO Compiler (DualGate NAND in R_φ ring)                          │   │
+│  │  Fractal Refresh (7-step bootstrapping alternative)                │   │
+│  │  Ultra Rashomon KEM (42 rounds, Fibonacci spiral binding)          │   │
+│  └────────────────────────────────────────────────────────────────────┘   │
+└───────────────────────────────────┬─────────────────────────────────────────┘
+                                    │
+┌───────────────────────────────────┼─────────────────────────────────────────┐
+│                        VALIDATION LAYER                                     │
+├───────────────────────────────────┼─────────────────────────────────────────┤
+│  ┌────────────────────────────────────────────────────────────────────┐   │
+│  │  KS Statistical Test: D = sup|F_A(x) - F_B(x)|                    │   │
+│  │  KS < 0.05 → iO-SECURE | KS = 0.000000 → PERFECT                  │   │
+│  │  Batched validation: ALL pairs evaluated simultaneously            │   │
+│  └────────────────────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+## System Execution Flow
+
+```
+═══════════════════════════════════════════════════════════════════════════════
+                        SYSTEM EXECUTION FLOW
+═══════════════════════════════════════════════════════════════════════════════
+
+PHASE 0: INITIALIZATION
+  ├── Parse CLI Args & Config (encryption_layers, fractal_L, fractal_D, ...)
+  ├── Initialize Production Layer (Logger, GracefulShutdown, ErrorHandler)
+  ├── Initialize Persistence (FractalDB L0→L1→L2→L3, CheckpointManager)
+  └── Initialize Adaptive Intelligence (ADM, Optimizer, Detector)
+
+PHASE 1: CHECKPOINT CHECK
+  ├── Load Checkpoint from FractalDB
+  ├── Determine Phase (INIT, TRUTH_TABLE_DONE, STATS_DONE, CHAIN_RUNNING, COMPLETE)
+  └── Restore State (gates_completed, refreshes_done, phi, psi, noise, L/D)
+
+PHASE 2: CRYPTOGRAPHIC INITIALIZATION
+  ├── Hierarchical Seed Tree (8 branches, φ-scaled)
+  ├── Fractal N-Encryption (5 layers, unique seeds per layer)
+  ├── CKKS FHE Context (RingDim 4096, Depth 120)
+  ├── iO Compiler (Circuit A/B, DualGate NAND)
+  └── Fractal Refresh (7-step cycle, chaos engine)
+
+PHASE 3: TRUTH TABLE VERIFICATION
+  └── 8/8 combinations → Circuits functionally equivalent (compile-time verified)
+
+PHASE 4: STATISTICAL iO VALIDATION
+  ├── Generate random inputs → Encrypt → Evaluate both circuits
+  ├── FractalGates (internal chaos) + iO Refresh (cross-circuit obfuscation)
+  ├── KS Test: D = sup|F_A(x) - F_B(x)|
+  └── Verdict: KS < 0.05 → iO-SECURE
+
+PHASE 5: ADAPTIVE CHAIN EXECUTION
+  ├── Chain: state = state AND next_input (homomorphic NAND)
+  ├── Every batch: extract phi/psi, compute noise, record metrics
+  ├── Adaptive Optimization: ADM + Optimizer → update L, D, batch
+  ├── Fractal Refresh (if needed): 7-step cycle → noise budget reset
+  └── Checkpoint every 50 gates → FractalDB L1/L2/L3
+
+PHASE 6: FINAL REPORT & SHUTDOWN
+  ├── Gates completed, Refreshes done, Total time, Security level
+  ├── Save to FractalDB L3 (eternal archive)
+  └── Graceful Shutdown (flush DB, close logs, exit)
+```
+
+## Data Flow: Plaintext to iO Output
+
+```
+Plaintext (0 or 1 bit)
+    │
+    ▼
+Layer 1: Fractal N-Encryption (5 layers Golden Fibonacci)
+    │  (y1, y2) — fractional ciphertext
+    ▼
+Layer 2: CKKS FHE Encryption (RingDim 4096, Depth 120)
+    │  DualGate {a, b} — double-encrypted
+    ▼
+Layer 3: iO Circuit Execution (NAND-based, R_φ ring)
+    │  Circuit A: (X AND Y) OR Z → φ_A, ψ_A
+    │  Circuit B: (X OR Z) AND (Y OR Z) → φ_B, ψ_B
+    ▼
+Layer 4: Fractal iO Obfuscation
+    │  FractalGates: chaos + φ-rotation + swap (per circuit)
+    │  iO Refresh: Superpose → Fractal Transform → Permutation → Commutative
+    ▼
+Layer 5: KS Statistical Test
+    │  D = sup|F_A(x) - F_B(x)| → 0.000000 = INDISTINGUISHABLE
+    ▼
+FINAL OUTPUT: Obfuscated state. Attacker cannot distinguish Circuit A from B.
+```
+
+## Core Algorithms
+
+### Golden Fibonacci Encryption
+```
+G_k = (G_{k-1} + G_{k-2}) × φ mod 1
+Encryption matrix: [y1; y2] = [G_{n+1} G_n; G_n G_{n-1}] × [x; s] mod 1
+Cassini invariant: Δ = G_{n+1}×G_{n-1} - G_n² > 0.1
+```
+
+### Fractal N-Encryption
+```
+For layer i = 1 to N:
+    seed_i = seed_tree.get_seed("encryption", i)
+    (y1_i, y2_i) = golden_encrypt(y1_current, seed_i)
+    y2_total += y2_i
+Return (y1_final, y2_total)
+```
+
+### DualGate NAND (iO Compiler)
+```
+NAND in R_φ ring:
+    a_out = 1 - a×b
+    b_out = -(a×d_s + a_s×c + b×d_s)
+AND = NAND(NAND(a,b), NAND(a,b))
+OR = NAND(NOT(a), NOT(b))
+NOT = NAND(a, a)
+```
+
+### Fractal Refresh (7 Steps)
+```
+Step 1: Emergent Timing (φ-derived chaos delays)
+Step 2: Unwrap CKKS → Golden Fibonacci ciphertext
+Step 3: Fractal Transform (L layers × D depth)
+Step 4: Random Permutation (N! × 2^N)
+Step 5: Commutative Reconstruction (order-independent)
+Step 6: Golden Fibonacci Re-encrypt
+Step 7: FHE Re-encrypt (budget fully reset)
+```
+
+### Ultra Rashomon KEM
+```
+Fibonacci Spiral Binding: 42 rounds, 7 passes
+    sin chaos + Riemann zeta + Fibonacci contraction
+    Avalanche: >200 bits (SHA-256 is ~128)
+```
+
+### Adaptive Decision Matrix
+```
+Fused Signal = (IQ×φ + EQ×ψ) × (1+SQ)
+Decision > 0.7 → increase_security
+Decision < 0.3 → increase_performance
+Resource pressure > 0.6 → reduce_resource_usage
+```
