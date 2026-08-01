@@ -1,0 +1,48 @@
+name: Build & Test
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  unit-tests:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential cmake libsodium-dev libsqlite3-dev libssl-dev
+      
+      - name: Build unit tests (non-FHE)
+        run: |
+          g++ -std=c++17 -O0 -I. -o bin/test_safe_math tests/unit/test_safe_math.cpp -lm
+          g++ -std=c++17 -O0 -I. -o bin/test_golden_fibonacci tests/unit/test_golden_fibonacci.cpp -lm
+          g++ -std=c++17 -O0 -I. -o bin/test_fractal_chaos tests/unit/test_fractal_chaos.cpp -lm
+          g++ -std=c++17 -O0 -I. -o bin/test_lock_free_ring tests/unit/test_lock_free_ring.cpp -lpthread -lm
+          g++ -std=c++17 -O0 -I. -o bin/test_system_config tests/unit/test_system_config.cpp -lm
+          g++ -std=c++17 -O0 -I. -o bin/test_fractal_db tests/unit/test_fractal_db.cpp -lpthread -lsodium -lsqlite3 -lm
+      
+      - name: Run unit tests
+        run: |
+          ./bin/test_safe_math
+          ./bin/test_golden_fibonacci
+          ./bin/test_fractal_chaos
+          ./bin/test_lock_free_ring
+          ./bin/test_system_config
+          ./bin/test_fractal_db
+
+  docker-build:
+    needs: unit-tests
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Build Docker image
+        run: docker build -t spiralfractalio .
+      
+      - name: Quick smoke test
+        run: docker run --rm spiralfractalio /app/bin/test_full_integration
