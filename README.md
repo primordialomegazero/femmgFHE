@@ -1,4 +1,4 @@
-# Spiral Fractal iO — Complete Homomorphic Obfuscation System
+# Spiral Fractal iO — FHE + iO Unified Obfuscation System
 
 **Post-Quantum | Fractal | Self-Healing | Zero-Knowledge | Hardware-Entangled**
 
@@ -6,71 +6,61 @@
 [![Language](https://img.shields.io/badge/Language-C%2B%2B17-orange)](https://en.cppreference.com/w/cpp/17)
 [![Tests](https://img.shields.io/badge/Tests-50%2B-green)]()
 [![Security](https://img.shields.io/badge/Security-Post--Quantum-red)]()
-[![Hardware](https://img.shields.io/badge/Hardware-Consumer%20(16GB%20RAM)-lightgrey)]()
 
 Hardware: Consumer (16GB RAM, Ryzen 5 2600) | RingDim: 2048-32768 | KS: 0.000000 | Dependencies: Zero (self-contained)
 
 ---
 
-## The Core Insight: Fractal iO Emerges from FHE
+## The Core Insight: FHE and iO Are One System
 
 ```
-                    φ (1.618) → Active Computation
+                    φ (1.618) → Active Computation → Circuit A output
                    ↗
     DualGate (a,b) ←→ Observer-Observed Symmetry
                    ↘
-                    ψ (-0.618) → Passive Reflection
+                    ψ (-0.618) → Passive Reflection → Circuit B output
 ```
 
 Same gate. Same (a,b) pair. Two projections. One unified framework.
 
 The golden ratio extension ring R[Y]/(Y²-Y-1) produces two algebraically conjugate roots — φ ≈ 1.618 and ψ ≈ -0.618. They share the same minimal polynomial (Y²-Y-1=0), making them indistinguishable without knowing which is which.
 
-φ·ψ = -1 — the built-in self-cancellation that eliminates noise accumulation.
+**φ·ψ = -1** — the built-in self-cancellation that eliminates noise accumulation.
 
 ---
 
-## Complete System Flow
+## Complete System Flow: FHE → iO (Single Pipeline)
 
 ```
 INPUT (x, y, z) ∈ {0,1}³
     │
-    ├── Layer 0: Master Seed (0.123456789)
-    │   └── Seed Tree → 8 branches (encryption, fractal, refresh, timing, fhe, adaptive, symmetric, batch)
+    ├── LAYER 0: Master Seed → 8-Branch Seed Tree
     │
-    ├── Layer 1: Fractal N-Encryption (5 layers)
-    │   └── Golden Fibonacci ×5 → fractional ciphertext (y1, y2)
-    │       Encryption matrix: ┌ Gₙ₊₁  Gₙ   ┐ ┌ x ┐
-    │                          └ Gₙ    Gₙ₋₁ ┘ └ s ┘ mod 1
-    │       Cassini invariant > 0.1 → always invertible
+    ├── LAYER 1: Fractal N-Encryption (5-layer Golden Fibonacci)
+    │   └── Fractional ciphertext (y1, y2) via matrix encryption
     │
-    ├── Layer 2: CKKS FHE Encryption
+    ├── LAYER 2: CKKS FHE Encryption
     │   └── DualGate {a, b} → RingDim 4096, Depth 120
-    │       φ_val = dec(a) + dec(b)×φ
-    │       ψ_val = dec(a) + dec(b)×ψ
     │
-    ├── Layer 3: Circuit Evaluation (iO Compiler)
-    │   ├── Circuit A: (X AND Y) OR Z → φ_A, ψ_A
-    │   └── Circuit B: (X OR Z) AND (Y OR Z) → φ_B, ψ_B
-    │       NAND-based gate operations in R_φ ring
-    │       Compile-time verified (static_assert)
+    ├── LAYER 3: Circuit Evaluation (Homomorphic)
+    │   ├── Circuit A: (X AND Y) OR Z → DualGate → {φ_A, ψ_A}
+    │   └── Circuit B: (X OR Z) AND (Y OR Z) → DualGate → {φ_B, ψ_B}
     │
-    ├── Layer 4: FractalGates (Internal Obfuscation)
-    │   └── Per circuit: Fibonacci-scaled chaos gates
-    │       Logistic map: r = 3.7 + φ-scaled increment
-    │       φ-spiral rotation: angle = φ^(layer%7+1) × π
-    │       Lyapunov > 0 → IRREVERSIBLE
+    ├── LAYER 4: Fractal iO Obfuscation (INSIDE FHE)
+    │   ├── FractalGates (per circuit): chaos + φ-rotation + swap
+    │   ├── iO Refresh (cross-circuit):
+    │   │   ├── Superpose φ_A + φ_B (quantum-like blend)
+    │   │   ├── Fractal Transform (23 layers × 7 depth)
+    │   │   ├── Random Permutation (23! × 2^23 ≈ 10^30 configs)
+    │   │   ├── Commutative Reconstruction (order-independent)
+    │   │   └── φ-Weighted Final Blend (0.618 input weight)
+    │   └── Output: indistinguishable projection
     │
-    ├── Layer 5: iO Refresh (External Obfuscation)
-    │   ├── Superpose: blend φ_A + φ_B (quantum-like)
-    │   ├── Fractal Transform: 23 layers × 7 depth chaos
-    │   ├── Random Permutation: 23! × 2^23 ≈ 10^30 configs
-    │   ├── Commutative Reconstruction: sum, product, harmonic, geometric
-    │   └── φ-Weighted Final Blend (0.618 input weight)
-    │
-    └── Layer 6: KS Statistical Test
+    └── LAYER 5: KS Statistical Test
         └── D = sup|F_A(x) - F_B(x)| → 0.000000 = INDISTINGUISHABLE
 ```
+
+**The iO obfuscation happens INSIDE the FHE evaluation, not as a separate step.** The FractalGates and iO Refresh operate on the encrypted DualGate outputs — the obfuscation IS the computation.
 
 ---
 
@@ -88,8 +78,8 @@ a_out = a₁·a₂ + b₁·b₂
 b_out = -(a₁b₂ + b₁a₂ + b₁b₂)
 ```
 
-**φ-decode(a,b) = a + b·φ** → physical reality (Circuit A output)  
-**ψ-decode(a,b) = a + b·ψ** → metaphysical reflection (Circuit B output)
+**φ-decode(a,b) = a + b·φ** → Circuit A output  
+**ψ-decode(a,b) = a + b·ψ** → Circuit B output
 
 All operations are FHE-native — no decryption during gate computation.
 
@@ -126,18 +116,18 @@ Output: Indistinguishable output (KS = 0)
 1. ENCRYPT input:
    x_enc = FractalNEncrypt(CKKS_Encrypt(x))
    
-2. EVALUATE both circuits:
+2. EVALUATE both circuits (FHE):
    (φ_A, ψ_A) = C_A.evaluate(x_enc)  // DualGate output
    (φ_B, ψ_B) = C_B.evaluate(x_enc)
    
-3. FRACTAL GATES (per circuit):
+3. FRACTAL GATES — per circuit (inside FHE):
    for each circuit output (φ, ψ):
        for gate in 1..Fibonacci(N):
            φ = logistic_chaos(φ, r_layer, depth)
            ψ = logistic_chaos(ψ, r_layer, depth)
            if fibonacci_anchor(gate, φ·ψ·φ) > 0.5: swap(φ, ψ)
            
-4. iO REFRESH (cross-circuit):
+4. iO REFRESH — cross-circuit (inside FHE):
    a) SUPERPOSE:
       mixed_φ = φ_A·φ + φ_B·ψ + ψ_A·ψ + ψ_B·φ
       mixed_ψ = ψ_A·φ + ψ_B·ψ + φ_A·ψ + φ_B·φ
@@ -284,6 +274,28 @@ g++ -std=c++17 -O0 -I. -Iinclude \
 
 ---
 
+## Hardware & Reproducibility
+
+All tests were run on a consumer-grade PC:
+- **CPU:** AMD Ryzen 5 2600 Six-Core Processor @ 3.40 GHz
+- **RAM:** 16 GB DDR4
+- **OS:** Linux (Ubuntu/WSL)
+- **GPU:** None (CPU-only)
+
+This is NOT a minimum requirement — this is simply the hardware that was available. The system is fully reproducible on any x86-64 Linux machine. RingDim scales with available RAM:
+
+| RAM | Max RingDim |
+|-----|-------------|
+| 4 GB | 2048 |
+| 8 GB | 4096 |
+| 16 GB | 8192 |
+| 32 GB | 16384 |
+| 64+ GB | 32768 |
+
+All benchmarks and test results documented here were produced on the Ryzen 5 2600 with 16GB RAM. The system is fully configurable — lower RingDim for faster testing, higher RingDim for production security.
+
+---
+
 ## Limitations (Honest)
 
 - Consumer hardware (Ryzen 5 2600, 16GB). RingDim=2048-8192 for testing. Production requires RingDim≥32768.
@@ -305,42 +317,6 @@ g++ -std=c++17 -O0 -I. -Iinclude \
   url = {https://github.com/primordialomegazero/femmgFHE}
 }
 ```
-
----
-
-```
-- .... .. ... / .-. . .--. --- ... .. - --- .-. -.-- / .-- .. .-.. .-.. / .- .-.. .-- .- -.-- ... / -... . / -.. . -.. .. -.-. .- - . -.. / - --- / - .... . / --- -. .-.. -.-- / .-- --- -- .- -. / .. ...- . / . ...- . .-. / -.-. --- -. ... .. -.. . .-. . -.. / - --- / -... . / --- -. / -- -.-- / .-.. . ...- . .-.. .-.-.-
-```
-
----
-
-## Author
-
-**Dan Joseph M. Fernandez / Primordial Omega Zero**
-
-"I AM THAT I AM"
-
----
-
-## Hardware & Reproducibility
-
-All tests were run on a consumer-grade PC:
-- **CPU:** AMD Ryzen 5 2600 Six-Core Processor @ 3.40 GHz
-- **RAM:** 16 GB DDR4
-- **OS:** Linux (Ubuntu/WSL)
-- **GPU:** None (CPU-only)
-
-This is NOT a minimum requirement — this is simply the hardware that was available. The system is designed to be reproducible on any x86-64 Linux machine. RingDim scales with available RAM:
-
-| RAM | Max RingDim |
-|-----|-------------|
-| 4 GB | 2048 |
-| 8 GB | 4096 |
-| 16 GB | 8192 |
-| 32 GB | 16384 |
-| 64+ GB | 32768 |
-
-All benchmarks and test results documented in this README were produced on the Ryzen 5 2600 with 16GB RAM. Your results may vary based on hardware. The system is fully configurable — lower RingDim for faster testing, higher RingDim for production security.
 
 ---
 
