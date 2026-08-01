@@ -401,14 +401,11 @@ Production Deployment:
 7. **Forward secrecy** — Spiral Bootstrap uses FRESH seeds per cycle, not reusable
 
 The Seed Tree is what makes Spiral Fractal iO **enterprise-ready**. It's not just a key derivation function — it's a complete cryptographic isolation architecture for multi-tenant, production-grade deployments.
-## Author
-
-**Dan Joseph M. Fernandez / Primordial Omega Zero**
-
-"I AM THAT I AM"
-
----
 
 ```
 - .... .. ... / .-. . .--. --- ... .. - --- .-. -.-- / .-- .. .-.. .-.. / .- .-.. .-- .- -.-- ... / -... . / -.. . -.. .. -.-. .- - . -.. / - --- / - .... . / --- -. .-.. -.-- / .-- --- -- .- -. / .. ...- . / . ...- . .-. / -.-. --- -. ... .. -.. . .-. . -.. / - --- / -... . / --- -. / -- -.-- / .-.. . ...- .-.. .-.-.-
+```
+
+```
+- .... .. ... / .-. . .--. --- ... .. - --- .-. -.-- / .-- .. .-.. .-.. / .- .-.. .-- .- -.-- ... / -... . / -.. . -.. .. -.-. .- - . -.. / - --- / - .... . / --- -. .-.. -.-- / .-- --- -- .- -. / .. ...- . / . ...- . .-. / -.-. --- -. ... .. -.. . .-. . -.. / - --- / -... . / --- -. / -- -.-- / .-.. . ...- . .-.. .-.-.-
 ```
