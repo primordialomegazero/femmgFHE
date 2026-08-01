@@ -1,40 +1,18 @@
-# DM-DGR Tests
+# Tests — Active & Maintained
 
-## Directory Structure
+## breakthrough/
+- `test_io_batched.cpp` — Main batched iO validation (DEV/TEST/PROD modes)
+- `test_io_integrated_refresh.cpp` — Integrated iO with external Refresh
+- `test_hardware.cpp` — Hardware sentinel & entropy test
 
-### `final/` — Production-Ready DM-DGR Tests
-- `test_phi_dm_dgr_final.cpp` — **THE UNIFIED SYSTEM**: Complete arbitrary CT computation
-- `test_phi_dm_dgr_unified.cpp` — DM-DGR unified cycle test
-- `test_phi_basic_check.cpp` — Basic operation debug tests
-- `phi_kem_level5.c` — NIST Level 5 KEM
-- `phi_kem_qr.c` — QR-code KEM
-
-### `crosslib/` — Cross-Library Validation
-- `test_phi_seal_crosslib.cpp` — SEAL validation
-- `test_phi_helib_crosslib.cpp` — HElib validation
-- `test_phi_tfhe_crosslib.cpp` — TFHE validation
-- `test_phi_crosslib_final.cpp` — 9/9 compatibility matrix
-- `test_phi_full_crosslib.cpp` — Full cross-library test
-
-### `legacy/` — Historical Tests (Archived)
-Earlier experiments and intermediate tests.
-Not needed for current DM-DGR operation.
-
-## Quick Run
-
+## Running
 ```bash
-# Build and run the final system
-cd ..
-g++ -std=c++17 -O3 -march=native \
-  -I./openfhe-development/src/pke/include \
-  -I./openfhe-development/src/core/include \
-  -I./openfhe-development/src/binfhe/include \
-  -I./openfhe-development/build/src/core \
-  -o bin/test_phi_dm_dgr_final \
-  tests/final/test_phi_dm_dgr_final.cpp \
-  -L./openfhe-development/build/lib \
-  -lOPENFHEpke -lOPENFHEcore -lOPENFHEbinfhe \
-  -Wl,-rpath,./openfhe-development/build/lib \
-  -lstdc++ -lpthread -lm
+# Quick dev test (3 variants, 10 samples, ~30s)
+./bin/test_io_batched 10 3
 
-LD_LIBRARY_PATH=./openfhe-development/build/lib:$LD_LIBRARY_PATH ./bin/test_phi_dm_dgr_final
+# Test mode (5 variants, 50 samples, ~5min)
+./bin/test_io_batched 50 5
+
+# Hardware audit
+./bin/test_hardware
+```
