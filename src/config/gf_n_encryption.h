@@ -9,7 +9,7 @@
 #include <utility>
 #include <string>
 
-struct FractalNEncryption {
+struct GFNEncryption {
     // All configurable — NO HARDCODING
     int N_layers;
     int base_n;                    // Base n for GoldenFibonacci (default 50)
@@ -37,7 +37,7 @@ struct FractalNEncryption {
     // CONSTRUCTOR — Set configurable defaults
     // ═══════════════════════════════════════════════════════════
     
-    FractalNEncryption() : N_layers(1), base_n(50), n_step(7), 
+    GFNEncryption() : N_layers(1), base_n(50), n_step(7), 
                            cassini_min(0.1), max_cassini_retries(200),
                            seed_branch("encryption"), use_unique_branches(true) {}
     
