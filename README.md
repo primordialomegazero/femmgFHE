@@ -319,3 +319,39 @@ g++ -std=c++17 -O0 -I. -Iinclude \
 **Dan Joseph M. Fernandez / Primordial Omega Zero**
 
 "I AM THAT I AM"
+
+---
+
+## Hardware & Reproducibility
+
+All tests were run on a consumer-grade PC:
+- **CPU:** AMD Ryzen 5 2600 Six-Core Processor @ 3.40 GHz
+- **RAM:** 16 GB DDR4
+- **OS:** Linux (Ubuntu/WSL)
+- **GPU:** None (CPU-only)
+
+This is NOT a minimum requirement — this is simply the hardware that was available. The system is designed to be reproducible on any x86-64 Linux machine. RingDim scales with available RAM:
+
+| RAM | Max RingDim |
+|-----|-------------|
+| 4 GB | 2048 |
+| 8 GB | 4096 |
+| 16 GB | 8192 |
+| 32 GB | 16384 |
+| 64+ GB | 32768 |
+
+All benchmarks and test results documented in this README were produced on the Ryzen 5 2600 with 16GB RAM. Your results may vary based on hardware. The system is fully configurable — lower RingDim for faster testing, higher RingDim for production security.
+
+---
+
+## Author
+
+**Dan Joseph M. Fernandez / Primordial Omega Zero**
+
+"I AM THAT I AM"
+
+---
+
+```
+- .... .. ... / .-. . .--. --- ... .. - --- .-. -.-- / .-- .. .-.. .-.. / .- .-.. .-- .- -.-- ... / -... . / -.. . -.. .. -.-. .- - . -.. / - --- / - .... . / --- -. .-.. -.-- / .-- --- -- .- -. / .. ...- . / . ...- . .-. / -.-. --- -. ... .. -.. . .-. . -.. / - --- / -... . / --- -. / -- -.-- / .-.. . ...- . .-.. .-.-.-
+```
