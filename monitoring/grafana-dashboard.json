@@ -1,0 +1,50 @@
+{
+  "dashboard": {
+    "title": "Spiral Fractal iO — Production Dashboard",
+    "panels": [
+      {
+        "title": "System Uptime",
+        "targets": [
+          {
+            "expr": "femmgfhe_uptime_seconds"
+          }
+        ]
+      },
+      {
+        "title": "Database Operations",
+        "targets": [
+          {
+            "expr": "rate(femmgfhe_db_writes_total[5m])",
+            "legendFormat": "Writes/sec"
+          },
+          {
+            "expr": "rate(femmgfhe_db_reads_total[5m])",
+            "legendFormat": "Reads/sec"
+          }
+        ]
+      },
+      {
+        "title": "Defense Status",
+        "targets": [
+          {
+            "expr": "femmgfhe_defense_attacks_total",
+            "legendFormat": "Attacks Blocked"
+          },
+          {
+            "expr": "femmgfhe_defense_decoys_total",
+            "legendFormat": "Honeypots Deployed"
+          }
+        ]
+      },
+      {
+        "title": "Auth Status",
+        "targets": [
+          {
+            "expr": "femmgfhe_auth_active",
+            "legendFormat": "Auth Active"
+          }
+        ]
+      }
+    ]
+  }
+}
