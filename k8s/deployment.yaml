@@ -1,0 +1,104 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: spiralfractalio
+  labels:
+    app: spiralfractalio
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: spiralfractalio
+  template:
+    metadata:
+      labels:
+        app: spiralfractalio
+    spec:
+      containers:
+      - name: spiralfractalio
+        image: ghcr.io/primordialomegazero/spiralfractalio:latest
+        ports:
+        - containerPort: 8443
+          name: tls
+        - containerPort: 8080
+          name: health
+        env:
+        - name: FEMMG_ENV
+          value: "production"
+        - name: FEMMG_RING_DIM
+          value: "32768"
+        resources:
+          requests:
+            memory: "8Gi"
+            cpu: "4"
+          limits:
+            memory: "64Gi"
+            cpu: "16"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 5
+        volumeMounts:
+        - name: data
+          mountPath: /app/data
+        - name: certs
+          mountPath: /app/certs
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: spiralfractalio-data
+      - name: certs
+        secret:
+          secretName: spiralfractalio-tls
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: spiralfractalio
+spec:
+  selector:
+    app: spiralfractalio
+  ports:
+  - port: 8443
+    targetPort: 8443
+    name: tls
+  - port: 8080
+    targetPort: 8080
+    name: health
+  type: LoadBalancer
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: spiralfractalio-data
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 100Gi
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: spiralfractalio-config
+data:
+  system_config.yaml: |
+    mode: production
+    ring_dim: 32768
+    fractal_layers: 23
+    fractal_depth: 7
+    variants: 12
+    stats_samples: 100
+    enable_encryption: true
+    enable_mirror: true
+    enable_tls: true
+    enable_defense: true
