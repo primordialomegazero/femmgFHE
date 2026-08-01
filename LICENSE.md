@@ -1,7 +1,7 @@
 # SPIRAL FRACTAL iO HYBRID LICENSE v1.0
 ## "Open Research, Protected Commercial Use"
 
-Copyright (c) 2025-2026 Dan Joseph M. Fernandez / Primordial Omega Zero
+Copyright (c) 2026 Dan Joseph M. Fernandez / Primordial Omega Zero
 
 ---
 
