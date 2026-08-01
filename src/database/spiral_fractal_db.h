@@ -369,3 +369,4 @@ struct SpiralFractalDB {
     
     ~SpiralFractalDB() { if (sql_db) sqlite3_close(sql_db); }
 };
+
