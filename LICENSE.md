@@ -39,7 +39,7 @@ Any modification or derivative work created for research purposes MUST be made p
 - Any use generating revenue directly or indirectly from the Software
 
 ### 2.2 Commercial License Required
-Commercial use of this Software REQUIRES a separate commercial license agreement with the original author. Contact: primordialomega@proton.me
+Commercial use of this Software REQUIRES a separate commercial license agreement with the original author. Contact: devilswithin13@gmail.com
 
 ### 2.3 Revenue Sharing
 For commercial licenses granted, a revenue-sharing agreement of 5% gross revenue from products or services that substantially incorporate the core innovations (Fractal iO, Ultra Rashomon KEM, Golden Fibonacci encryption, φ-based FHE mechanisms) will apply.
@@ -108,8 +108,9 @@ This license shall be governed by the laws of the Republic of the Philippines. A
 Apply by using this Software for non-commercial research. No action needed — automatically granted.
 
 ### 7.2 Commercial License
-Apply by contacting: primordialomega@proton.me  
+Apply by contacting: devilswithin13@gmail.com  
 Subject line: "Spiral Fractal iO — Commercial License Request"
+  GitHub: https://github.com/primordialomegazero
 
 ### 7.3 Startup Exception License
 Apply by submitting proof of:
