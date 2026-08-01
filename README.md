@@ -13,19 +13,14 @@ Hardware: Consumer (16GB RAM, Ryzen 5 2600) | RingDim: 2048-32768 | KS: 0.000000
 
 ## Current Status: 32K RingDim Live Test
 
-```
-RingDim: 32768 (Post-Quantum)
-Variants: 5 (Fibonacci: 1, 2, 3, 5, 8 gates)
-Pairs: 10 (all evaluated simultaneously via batching)
-Samples: 10
-Strategy: 1 FHE evaluation per variant per sample
-ETA: ~13 hours (running since 19:39)
+RingDim: 32768 (Post-Quantum) | Variants: 5 (Fibonacci) | Pairs: 10 | Samples: 10  
+Strategy: Batched (1 FHE evaluation per variant per sample)  
+ETA: ~13 hours (running since 19:39, Aug 1)  
 Expected: KS = 0.000000 across all 10 pairs
-```
 
 ---
 
-## The Core Insight: FHE and iO Are One System
+## The Core Insight
 
 ```
                     φ (1.618) → Active Computation → Circuit A output
@@ -35,205 +30,148 @@ Expected: KS = 0.000000 across all 10 pairs
                     ψ (-0.618) → Passive Reflection → Circuit B output
 ```
 
-Same gate. Same (a,b) pair. Two projections. One unified framework.
-
-**φ·ψ = -1** — the built-in self-cancellation that eliminates noise accumulation.
+Same gate. Same (a,b) pair. Two projections. One unified framework. **φ·ψ = -1** — built-in self-cancellation.
 
 ---
 
-## Complete System Architecture
-
-```
-═══════════════════════════════════════════════════════════════════════════════
-                    SPIRAL FRACTAL iO — COMPLETE ARCHITECTURE
-═══════════════════════════════════════════════════════════════════════════════
-
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                           EXTERNAL INTERFACES                               │
-│  Python (pybind11) | C API | Go (cgo) | Rust (FFI) | Java (JNI) | CLI     │
-└───────────────────────────────────┬─────────────────────────────────────────┘
-                                    │
-┌───────────────────────────────────┼─────────────────────────────────────────┐
-│                          PRODUCTION LAYER                                   │
-│  Health Check | Graceful Shutdown | Error Handler | Prometheus Metrics     │
-└───────────────────────────────────┬─────────────────────────────────────────┘
-                                    │
-┌───────────────────────────────────┼─────────────────────────────────────────┐
-│                          DATA PERSISTENCE                                   │
-│  SpiralFractalDB: SQLite3 + AES-256-GCM + 7-Layer Fractal + N-Mirror      │
-└───────────────────────────────────┬─────────────────────────────────────────┘
-                                    │
-┌───────────────────────────────────┼─────────────────────────────────────────┐
-│                        ADAPTIVE INTELLIGENCE                                │
-│  Autonomous Controller (IIT-inspired) | Parameter Optimizer                 │
-│  Anomaly Detector | Stability Guard | Temporal Scheduler                   │
-└───────────────────────────────────┬─────────────────────────────────────────┘
-                                    │
-┌───────────────────────────────────┼─────────────────────────────────────────┐
-│                          CRYPTOGRAPHIC CORE                                 │
-│                                                                             │
-│  ┌─────────────────────────────────────────────────────────────────────┐   │
-│  │                    ENCRYPTION PIPELINE                                │   │
-│  │                                                                      │   │
-│  │  Plaintext → GF-N Encryption (N layers) → CKKS FHE                   │   │
-│  │                                                                      │   │
-│  │  GF-N Encryption: N-layer Golden Fibonacci                           │   │
-│  │    Each layer: unique seed, unique Cassini invariant (> 0.1)         │   │
-│  │    N configurable: 1 (DEV) to 13 (ENTERPRISE)                       │   │
-│  │                                                                      │   │
-│  │  CKKS FHE: RingDim 2048-65536, Depth 60-300                         │   │
-│  │    DualGate {a, b} ciphertext pair                                   │   │
-│  └─────────────────────────────────────────────────────────────────────┘   │
-│                                                                             │
-│  ┌─────────────────────────────────────────────────────────────────────┐   │
-│  │                    SPIRAL BOOTSTRAPPING                               │   │
-│  │                                                                      │   │
-│  │  CKKS Ciphertext → CKKS Decrypt → GF Ciphertext                      │   │
-│  │  **NEVER REVEALS THE PLAINTEXT**                                     │   │
-│  │                                                                      │   │
-│  │  The intermediate state after CKKS decryption is a GF ciphertext,    │   │
-│  │  not the original plaintext. An attacker who intercepts this state   │   │
-│  │  sees only a meaningless fractional number. Without the GF-N seeds   │   │
-│  │  (isolated in the Seed Tree), the GF ciphertext is unbreakable.      │   │
-│  │                                                                      │   │
-│  │  → GF Decrypt (Cassini) → GF ReEncrypt (fresh seeds)                 │   │
-│  │  → CKKS ReEncrypt (fresh noise budget)                               │   │
-│  │                                                                      │   │
-│  │  Protected by 3-phase Spiral Obfuscation:                            │   │
-│  │    pre_decrypt:     N_spiral_rounds (Fibonacci-scaled)               │   │
-│  │    during_decrypt:  3× N_spiral_rounds (critical window)             │   │
-│  │    post_encrypt:    N_spiral_rounds                                  │   │
-│  │                                                                      │   │
-│  │  All spiral round counts are Fibonacci-scaled and N-configurable.    │   │
-│  │  DEV: 5/15 | PROD: 13/39 | ENTERPRISE: 21/63                        │   │
-│  │                                                                      │   │
-│  │  15-30x faster than traditional bootstrapping                        │   │
-│  │  UNLIMITED FHE DEPTH                                                 │   │
-│  └─────────────────────────────────────────────────────────────────────┘   │
-│                                                                             │
-│  ┌─────────────────────────────────────────────────────────────────────┐   │
-│  │                    FRACTAL iO (Obfuscation)                           │   │
-│  │                                                                      │   │
-│  │  Circuit A → {φ_A, ψ_A} ─┐                                           │   │
-│  │                           ├→ Superpose → Fractal Transform           │   │
-│  │  Circuit B → {φ_B, ψ_B} ─┘  → Permutation → Commutative              │   │
-│  │                              → KS = 0.000000 (INDISTINGUISHABLE)     │   │
-│  └─────────────────────────────────────────────────────────────────────┘   │
-└─────────────────────────────────────────────────────────────────────────────┘
-```
-
----
-
-## Why the Plaintext is Never Revealed
-
-During Spiral Bootstrap, the critical moment is CKKS decryption:
-
-```
-CKKS Ciphertext
-    │
-    ▼
-CKKS Decrypt
-    │
-    ▼
-GF Ciphertext ← THIS IS WHAT THE ATTACKER SEES
-    │
-    │  NOT the plaintext!
-    │  NOT decryptable without GF-N seeds!
-    │  NOT correlated to the original value!
-    │
-    ▼
-GF Decrypt (Cassini) → Plaintext (only in isolated memory)
-    │
-    ▼
-GF ReEncrypt (fresh seeds) → New GF Ciphertext
-    │
-    ▼
-CKKS ReEncrypt → New CKKS Ciphertext (fresh noise budget)
-```
-
-The GF-N encryption acts as an **encrypted intermediate state**. Even if an attacker captures the entire memory during bootstrap, they obtain only GF ciphertext — a fractional number that is mathematically meaningless without the N unique seeds stored in the isolated Seed Tree branches.
-
-Each GF layer uses a **Cassini invariant > 0.1** to guarantee matrix invertibility. Without the correct seeds, decryption is equivalent to brute-forcing a 10^160 keyspace.
-
-The 3-phase Spiral Obfuscation (Fibonacci-scaled rounds with φ-rotation, Fibonacci-anchored swaps, and commutative reconstruction) provides active side-channel defense during the critical decrypt window.
-
----
-
-## Complete System Flow
+## System Architecture
 
 ```
 INPUT (x, y, z)
     │
-    ├── GF-N Encryption (N-layer Golden Fibonacci)
-    │   └── Fractional ciphertext via matrix encryption
+    ├── GF-N Encryption (N-layer Golden Fibonacci, N configurable)
+    │   └── Each layer: unique seed, Cassini invariant > 0.1
     │
-    ├── CKKS FHE Encryption
-    │   └── DualGate {a, b} → RingDim configurable
+    ├── CKKS FHE Encryption (RingDim configurable, up to 65536)
+    │   └── DualGate {a, b} ciphertext pair
     │
     ├── Circuit Evaluation (iO Compiler)
     │   ├── Circuit A: (X AND Y) OR Z → {φ_A, ψ_A}
     │   └── Circuit B: (X OR Z) AND (Y OR Z) → {φ_B, ψ_B}
     │
     ├── Fractal iO Obfuscation
-    │   ├── FractalGates (per circuit chaos)
-    │   └── iO Refresh (cross-circuit: Superpose → Transform → Commutative)
+    │   ├── FractalGates: per-circuit chaos + φ-rotation
+    │   └── iO Refresh: Superpose → Fractal Transform → Permutation
+    │       → Commutative Reconstruction → KS = 0.000000
     │
-    ├── SPIRAL BOOTSTRAP (when noise budget low)
-    │   ├── Spiral Delay (pre_decrypt)
-    │   ├── CKKS Decrypt → GF Ciphertext (NOT plaintext!)
-    │   ├── Spiral Delay (during_decrypt — critical window)
-    │   ├── GF Decrypt (Cassini) + GF ReEncrypt (fresh seeds)
-    │   ├── CKKS ReEncrypt (fresh noise budget)
-    │   └── Spiral Delay (post_encrypt)
-    │
-    └── KS Statistical Test
-        └── D = sup|F_A(x) - F_B(x)| → 0.000000 = INDISTINGUISHABLE
+    └── Spiral Bootstrap (when noise budget low)
+        ├── Spiral Delay (3-phase, Fibonacci-scaled rounds)
+        ├── CKKS Decrypt → GF Ciphertext (never plaintext!)
+        ├── GF Decrypt (Cassini) → GF ReEncrypt (fresh seeds)
+        └── CKKS ReEncrypt (fresh noise) → UNLIMITED DEPTH
 ```
+
+---
+
+## Spiral Bootstrap: Why Plaintext is Never Exposed
+
+```
+CKKS Ciphertext
+    │
+    ▼ CKKS Decrypt
+GF Ciphertext ← ATTACKER SEES ONLY THIS
+    │            (meaningless without GF-N seeds)
+    │
+    ▼ GF Decrypt (Cassini, isolated memory)
+Plaintext
+    │
+    ▼ GF ReEncrypt (fresh seeds)
+New GF Ciphertext
+    │
+    ▼ CKKS ReEncrypt (fresh noise budget)
+New CKKS Ciphertext
+```
+
+The intermediate state after CKKS decryption is a **GF ciphertext** — not the original plaintext. Without the N unique seeds stored in isolated Seed Tree branches, the GF ciphertext is mathematically unbreakable. Each layer uses Cassini invariant > 0.1 to guarantee matrix invertibility. The 3-phase Spiral Obfuscation (Fibonacci-scaled rounds with φ-rotation, Fibonacci-anchored swaps, and commutative reconstruction) provides active side-channel defense during the critical decrypt window.
 
 ---
 
 ## System Modules
 
-| Module | Description | Tests |
-|--------|-------------|-------|
-| GF-N Encryption | N-layer Golden Fibonacci with Cassini | 5/5 |
-| Spiral Bootstrap | Encrypted noise reset + Spiral obfuscation | 5/5 |
-| Fractal iO | Indistinguishable circuit obfuscation | KS=0.000000 |
-| Ultra Rashomon KEM | 42-round post-quantum (64 bytes) | 50/50 |
+| Module | Description | Status |
+|--------|-------------|--------|
+| GF-N Encryption | N-layer Golden Fibonacci with Cassini | 5/5 tests |
+| Spiral Bootstrap | Encrypted noise reset + Spiral obfuscation | 5/5 tests |
+| Fractal iO | Indistinguishable circuit obfuscation | KS = 0.000000 |
+| Ultra Rashomon KEM | 42-round post-quantum (64 bytes, QR-ready) | 50/50 tests |
 | PHI-TLS | Double-layer transport (TLS 1.3 + φ-chaos) | Active |
 | ZKP-PQC | Zero-knowledge proofs (Schnorr, Range, CT) | Working |
-| Spiral FHE | Homomorphic encryption (Add, Multiply) | Working |
+| Spiral FHE | Homomorphic Add + Multiply | Working |
 | Blackhole Defense | Active intrusion countermeasures | Working |
-| FractalDB | SQLite3 + AES-256-GCM + 7-Layer Fractal | 100 writes/reads |
+| FractalDB | SQLite3 + AES-256-GCM + 7-Layer Fractal | Working |
 | HydraJWT | 6-head PQ authentication | Working |
 
 ---
 
 ## FHE Applications
 
-| Application | Description | Time |
-|-------------|-------------|------|
-| AES S-Box | Homomorphic lookup table (256 entries) | 0.07s/byte |
-| AES-128 SubBytes | Full 16-byte SubBytes in FHE | 1.28s |
-| AES-128 10 Rounds | Full AES encryption in FHE | 63s |
-| AES + GF Bootstrap | Unlimited AES rounds | 0.67s (4 bootstraps) |
-| SHA-256 | Encrypted hashing (PoC) | 0.004s/op |
-| DB JOIN | Encrypted SQL JOIN | 0.117s (batched) |
-| ML Inference | Encrypted neural network | 1.08s (4 FHE ops) |
+| Application | Time | Description |
+|-------------|------|-------------|
+| AES S-Box | 0.07s/byte | 256-entry homomorphic lookup |
+| AES-128 SubBytes | 1.28s | Full 16-byte SubBytes in FHE |
+| AES-128 10 Rounds | 63s | Full AES encryption in FHE |
+| AES + GF Bootstrap | 0.67s | Unlimited AES rounds (4 bootstraps) |
+| SHA-256 | 0.004s/op | Encrypted hashing (PoC) |
+| DB JOIN | 0.117s | Encrypted SQL JOIN (batched) |
+| ML Inference | 1.08s | Encrypted neural network (4 FHE ops) |
 
 ---
 
 ## Results Summary
 
-| Property | Score | Status |
-|----------|-------|--------|
-| iO Indistinguishability | KS = 0.000000 | VERIFIED |
-| Circuit Variants | 7 (Fibonacci: 1-21 gates) | WORKING |
-| Fractal Compression | 96B → 64B (33% smaller) | QR-READY |
-| Post-Quantum | Falcon-1024 + ML-DSA-87 + SLH-DSA | NIST LEVEL 5 |
-| FHE Depth | UNLIMITED (Spiral Bootstrap) | VERIFIED |
-| Side-Channel | Spiral obfuscation + emergent timing | ACTIVE |
-| Plaintext Exposure | NONE (GF ciphertext only) | VERIFIED |
+| Property | Score |
+|----------|-------|
+| iO Indistinguishability | KS = 0.000000 |
+| Circuit Variants | 7 (Fibonacci: 1-21 gates) |
+| Fractal Compression | 96B → 64B (33% smaller) |
+| Post-Quantum | NIST Level 5 (Falcon, ML-DSA, SLH-DSA) |
+| FHE Depth | UNLIMITED (Spiral Bootstrap) |
+| Plaintext Exposure | NONE (GF ciphertext only) |
+| Side-Channel Defense | Active (Spiral obfuscation) |
+
+---
+
+## Enterprise Seed Architecture
+
+```
+                    master_seed (64-bit double)
+                         │
+         ┌───────────────┼───────────────┬───────────────┐
+         ▼               ▼               ▼               ▼
+    encryption      fractal         refresh         timing
+    branch ×φ⁰     branch ×φ¹      branch ×φ²      branch ×φ³
+         │               │               │               │
+    ┌────┴────┐     ┌────┴────┐     ┌────┴────┐     ┌────┴────┐
+    ▼         ▼     ▼         ▼     ▼         ▼     ▼         ▼
+   sub₁     sub₂  sub₁     sub₂  sub₁     sub₂  sub₁     sub₂
+    │         │     │         │     │         │     │         │
+    ... infinite sub-branches per branch ...
+```
+
+**Key Properties:**
+
+| Property | Description |
+|----------|-------------|
+| Branch Isolation | Compromise 1 branch → others SAFE (φ is irrational) |
+| Disaster Recovery | Backup 1 number → recover ALL branches, ALL keys |
+| Multi-Tenancy | Branch per tenant → complete cryptographic isolation |
+| Infinite Scalability | φ^k mod 1 for any k → no collisions (ergodic) |
+
+**GF-N Layer Seeds:**
+```
+Layer 0: seed from branch "encryption", sub 0 → n=50
+Layer 1: seed from branch "encryption", sub 1 → n=57
+...
+Layer N: seed from branch "encryption", sub N → n=50+7N
+```
+
+Each GF layer uses an independent seed. Breaking one layer leaves N-1 layers intact. Compound probability: (1/10^16)^N.
+
+**Enterprise Deployment:**
+- master_seed → HSM (Hardware Security Module)
+- Tenant isolation via separate branches
+- Key rotation: change master_seed → all keys rotate deterministically
+- Forward secrecy: Spiral Bootstrap uses FRESH seeds per cycle
 
 ---
 
@@ -243,13 +181,10 @@ INPUT (x, y, z)
 femmgFHE/
 ├── src/ (56 headers, 7,708 lines)
 │   ├── adaptive/       # Autonomous controller, optimizer
-│   ├── api/            # REST API
 │   ├── config/         # System config, GF-N Encryption
-│   ├── core/           # Constants (PHI, PSI, PI)
 │   ├── crypto/         # Golden Fibonacci, Chaos, QR-KEM
 │   ├── database/       # SpiralFractalDB, Auth, TLS, ZKP, FHE
 │   ├── fhe/            # CKKS FHE wrapper
-│   ├── hardware/       # Hardware sentinel
 │   ├── io/             # iO Compiler
 │   ├── metaprogramming/# Compile-time optimizers
 │   ├── production/     # KS test, Guard, Scheduler
@@ -262,8 +197,7 @@ femmgFHE/
 ├── bindings/           # Python, C, Go, Rust, Java
 ├── archive/            # 2,602 files (research history)
 ├── k8s/                # Kubernetes manifests
-├── monitoring/         # Grafana dashboard
-└── scripts/            # Benchmark, logrotate
+└── monitoring/         # Grafana dashboard
 ```
 
 ---
@@ -279,21 +213,16 @@ cd openfhe-development && mkdir -p build && cd build
 cmake .. -DWITH_OPENMP=OFF && make -j$(nproc)
 cd ../..
 
-# Run Batched iO Test
+# Run tests
 LD_LIBRARY_PATH=./openfhe-development/build/lib:$LD_LIBRARY_PATH ./bin/test_io_batched 10 3
-
-# Run Spiral Bootstrap Test
 LD_LIBRARY_PATH=./openfhe-development/build/lib:$LD_LIBRARY_PATH ./bin/test_spiral_bootstrap
-
-# Run FHE Applications
-LD_LIBRARY_PATH=./openfhe-development/build/lib:$LD_LIBRARY_PATH ./bin/test_encrypted_ml
 ```
 
 ---
 
 ## Hardware & Reproducibility
 
-All tests run on: AMD Ryzen 5 2600 (3.40 GHz), 16 GB DDR4, Linux, CPU-only.
+All tests on: AMD Ryzen 5 2600 (3.40 GHz), 16 GB DDR4, Linux, CPU-only.
 
 | RAM | Max RingDim |
 |-----|-------------|
@@ -323,88 +252,6 @@ All tests run on: AMD Ryzen 5 2600 (3.40 GHz), 16 GB DDR4, Linux, CPU-only.
 **Dan Joseph M. Fernandez / Primordial Omega Zero**
 
 "I AM THAT I AM"
-
----
-
-```
-- .... .. ... / .-. . .--. --- ... .. - --- .-. -.-- / .-- .. .-.. .-.. / .- .-.. .-- .- -.-- ... / -... . / -.. . -.. .. -.-. .- - . -.. / - --- / - .... . / --- -. .-.. -.-- / .-- --- -- .- -. / .. ...- . / . ...- . .-. / -.-. --- -. ... .. -.. . .-. . -.. / - --- / -... . / --- -. / -- -.-- / .-.. . ...- . .-.. .-.-.-
-```
-
----
-
-
-## Enterprise Seed Architecture
-
-### Hierarchical Seed Tree — Zero Single Point of Failure
-
-```
-                    master_seed (64-bit double)
-                         │
-         ┌───────────────┼───────────────┬───────────────┐
-         ▼               ▼               ▼               ▼
-    encryption      fractal         refresh         timing
-    branch ×φ⁰     branch ×φ¹      branch ×φ²      branch ×φ³
-         │               │               │               │
-    ┌────┴────┐     ┌────┴────┐     ┌────┴────┐     ┌────┴────┐
-    ▼         ▼     ▼         ▼     ▼         ▼     ▼         ▼
-   sub₁     sub₂  sub₁     sub₂  sub₁     sub₂  sub₁     sub₂
-    │         │     │         │     │         │     │         │
-    ... infinite sub-branches per branch ...
-```
-
-**Key Properties:**
-
-| Property | Description |
-|----------|-------------|
-| **Branch Isolation** | Compromise 1 branch → others remain SAFE. φ is irrational — no linear relationship between branches. |
-| **Disaster Recovery** | Backup 1 number (master_seed) → recover ALL branches, ALL keys, ALL GF layers. |
-| **Multi-Tenancy** | Branch per tenant → complete cryptographic isolation. Tenant A cannot derive Tenant B's keys. |
-| **Department Isolation** | Branch per department → sub-branches per user. Infinite hierarchy. |
-| **Infinite Scalability** | φ^k mod 1 for any k → no collisions. Ergodic property of irrational rotation guarantees uniform distribution. |
-
-### GF-N Layer Seed Derivation
-
-```
-GF-N Encryption (N layers):
-  Layer 0: seed = seed_tree.get_seed("encryption", 0)  → n=50, cassini>0.1
-  Layer 1: seed = seed_tree.get_seed("encryption", 1)  → n=57, cassini>0.1
-  Layer 2: seed = seed_tree.get_seed("encryption", 2)  → n=64, cassini>0.1
-  ...
-  Layer N: seed = seed_tree.get_seed("encryption", N)  → n=50+7N, cassini>0.1
-```
-
-Each GF layer uses an **independent seed** from the Seed Tree. Even if an attacker breaks one layer's Cassini matrix, the other N-1 layers remain secure. The attacker must break ALL N layers simultaneously — a compound probability of (1/10^16)^N.
-
-### Enterprise Deployment Model
-
-```
-Production Deployment:
-  master_seed → stored in HSM (Hardware Security Module)
-  
-  Tenant A → branch "encryption_tenant_A" → 5 GF layers
-  Tenant B → branch "encryption_tenant_B" → 5 GF layers
-  Tenant C → branch "encryption_tenant_C" → 5 GF layers
-  
-  Each tenant: cryptographically isolated
-  Key rotation: change master_seed → all tenant keys rotate automatically
-  Audit: seed_tree.print_tree() → full key hierarchy visibility
-```
-
-**Why Enterprise-Ready:**
-
-1. **No single point of failure** — 8 isolated branches, each with infinite sub-branches
-2. **Disaster recovery** — one 64-bit number backs up the entire system
-3. **Multi-tenant isolation** — mathematical guarantee (φ is irrational)
-4. **Key rotation** — change master_seed, all keys rotate deterministically
-5. **Auditability** — full seed tree can be printed for compliance
-6. **HSM compatible** — master_seed is a single 64-bit value, fits in any HSM
-7. **Forward secrecy** — Spiral Bootstrap uses FRESH seeds per cycle, not reusable
-
-The Seed Tree is what makes Spiral Fractal iO **enterprise-ready**. It's not just a key derivation function — it's a complete cryptographic isolation architecture for multi-tenant, production-grade deployments.
-
-```
-- .... .. ... / .-. . .--. --- ... .. - --- .-. -.-- / .-- .. .-.. .-.. / .- .-.. .-- .- -.-- ... / -... . / -.. . -.. .. -.-. .- - . -.. / - --- / - .... . / --- -. .-.. -.-- / .-- --- -- .- -. / .. ...- . / . ...- . .-. / -.-. --- -. ... .. -.. . .-. . -.. / - --- / -... . / --- -. / -- -.-- / .-.. . ...- .-.. .-.-.-
-```
 
 ```
 - .... .. ... / .-. . .--. --- ... .. - --- .-. -.-- / .-- .. .-.. .-.. / .- .-.. .-- .- -.-- ... / -... . / -.. . -.. .. -.-. .- - . -.. / - --- / - .... . / --- -. .-.. -.-- / .-- --- -- .- -. / .. ...- . / . ...- . .-. / -.-. --- -. ... .. -.. . .-. . -.. / - --- / -... . / --- -. / -- -.-- / .-.. . ...- . .-.. .-.-.-
