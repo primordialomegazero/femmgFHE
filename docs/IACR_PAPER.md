@@ -30,7 +30,7 @@ The answer is yes — in the φ-extension ring R[Y]/(Y²-Y-1), where the two roo
 
 ### 2.1 The φ-Extension Ring
 
-Let φ ≈ 1.6180339887498948482 and ψ ≈ -0.6180339887498948482 be the roots of Y² - Y - 1 = 0. Define R_φ = R[Y]/(Y²-Y-1).
+Let φ ≈ 1.6180339887498948482 and ψ ≈ -0.6180339887498948482 be the roots of Y² - Y - 1 = 0. Define R_φ = R[Y]/(Y²-Y-1). The ring has the following properties:
 
 | Property | Identity |
 |----------|----------|
@@ -38,119 +38,9 @@ Let φ ≈ 1.6180339887498948482 and ψ ≈ -0.6180339887498948482 be the roots 
 | Product | φ·ψ = -1 |
 | Square | φ² = φ + 1, ψ² = ψ + 1 |
 
-These are **mathematical facts**, not cryptographic assumptions.
+These are **mathematical facts**, not cryptographic assumptions. They hold in any field of characteristic zero.
 
 ### 2.2 DualGate Structure
 
-A DualGate is a pair {a, b} in R_φ². Two projections are defined:
+A DualGate is a pair {a, b} ∈ R_φ². Two projections are defined:
 
-φ(a,b) = a + b·φ   (Circuit A — Active Computation)
-ψ(a,b) = a + b·ψ   (Circuit B — Passive Reflection)
-
-The projections are algebraic conjugates: φ·ψ = (a+b·φ)(a+b·ψ) = a² + ab - b².
-
-### 2.3 CKKS Fully Homomorphic Encryption
-
-We use the CKKS approximate arithmetic scheme [CHK+17] with configurable RingDim N in {2048, 4096, 8192, 16384, 32768, 65536}.
-
-### 2.4 Golden Fibonacci Encryption (GF-N)
-
-N stacked layers of matrix encryption using Fibonacci numbers with Cassini invariant > 0.1 guaranteeing invertibility.
-
-### 2.5 Spiral Bootstrap
-
-CKKS Decrypt → GF Ciphertext (NOT plaintext) → GF ReEncrypt (fresh seeds) → CKKS ReEncrypt (fresh noise). Zero plaintext exposure.
-
----
-
-## 3. Construction
-
-### 3.1 System Pipeline
-
-INPUT → GF-N Encryption → CKKS Encryption (DualGate) → Circuit Evaluation → FractalGates (chaos + φ-rotation) → Superpose → Fractal Transform → Permutation → Commutative Reconstruction → KS = 0.000000
-
-### 3.2 Commutative Reconstruction
-
-Four commutative operations (arithmetic mean, geometric mean, harmonic mean, RMS) combined linearly. For any permutation: reconstruct(σ(v)) = reconstruct(v).
-
-### 3.3 Speed Engines
-
-| Engine | Speedup | Time (4096) |
-|--------|---------|-------------|
-| Serial | 1× | 94 min |
-| Turbo SIMD | 512× | 8.8s |
-| Ultra O(1) | gate-independent | 0.2s |
-
-All preserve KS = 0.000000.
-
----
-
-## 4. Security
-
-**Theorem 1 (Functional Equivalence).** Verified at compile-time via static_assert.
-
-**Theorem 2 (DualGate Projection).** φ·ψ = a² + ab - b².
-
-**Theorem 3 (Superpose Symmetry).** Swapping A↔B yields conjugate expressions.
-
-**Theorem 4 (Commutative Reconstruction).** All operations order-independent.
-
-**Theorem 5 (Structural Indistinguishability).** KS = 0 by algebraic construction.
-
-**Theorem 6 (Zero Plaintext Exposure).** Intermediate state is GF-N ciphertext.
-
-**Theorem 7 (Irreversible Chaos).** r > 3.57 yields Lyapunov > 0.
-
-**Theorem 8 (Cassini Security).** Matrix invertibility guaranteed per layer.
-
-**Theorem 9 (Unlimited Depth).** Bootstrap resets noise to initial budget.
-
-### Structural vs. Computational Security
-
-Traditional cryptography: "Security holds if problem P is hard."
-Our system: "Output distributions are identical because mathematics requires it."
-
-φ·ψ = -1 is not a hardness assumption — it is an algebraic fact. No computational advance can change this.
-
----
-
-## 5. Implementation and Performance
-
-**All benchmarks: Ryzen 5 2600, 16GB RAM, KS = 0.000000:**
-
-| RingDim | Serial | Turbo SIMD | Ultra O(1) |
-|---------|--------|------------|------------|
-| 4096 | 94 min | 8.8s | 0.2s |
-| 16384 | ~24h | 36s | 0.8s |
-| 32768 | ~56h | 76s | 1.8s |
-
-**1,000,000 gates: 5.0s (Ultra O(1)).**
-
-### Comparison with Prior Work
-
-| Property | GGH+13 | JLS21 | WWW24 | This Work |
-|----------|--------|-------|-------|-----------|
-| Basis | Multilinear | LWE | Bilinear | Algebraic identity |
-| Status | Broken | Theory | 1 gate, 60s | 1M gates, 5s |
-| Hardware | — | — | Cluster | Consumer PC |
-
----
-
-## 6. Conclusion
-
-Practical iO is achievable — not by finding better hardness assumptions, but by eliminating the need for them. The φ-extension ring provides algebraic identities that produce structurally identical output distributions.
-
----
-
-## References
-
-[GGH+13] Garg et al. Candidate iO for all circuits. FOCS 2013.
-[CLT13] Coron et al. Practical multilinear maps. CRYPTO 2013.
-[JLS21] Jain, Lin, Sahai. iO from well-founded assumptions. STOC 2021.
-[WWW24] Wee, Wichs, Waters. iO from bilinear maps. EUROCRYPT 2024.
-[CHK+17] Cheon et al. Homomorphic encryption for approximate arithmetic. ASIACRYPT 2017.
-
----
-
-*Spiral Fractal iO — v33 | August 2026*
-*Dan Joseph M. Fernandez | devilswithin13@gmail.com*
