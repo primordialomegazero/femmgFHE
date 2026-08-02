@@ -51,6 +51,7 @@ static_assert(PreComputedTruthTable::verify(),
               "iO Circuits must be functionally equivalent!");
 ```
 **Source:** `src/metaprogramming/compile_time_fractal.h:59`  
+**Unit Test:** `tests/theorem_tests/test_theorem_1.cpp` — Standalone, 8/8 inputs verified  
 **Status:** ✅ Compile-time verified. Code will not compile if A ≠ B.
 
 ---
@@ -79,6 +80,7 @@ static_assert(std::abs(PHI + PSI - 1.0) < 1e-10, "φ + ψ must equal 1");
 static_assert(std::abs(PHI * PSI + 1.0) < 1e-10, "φ·ψ must equal -1");
 ```
 **Source:** `unified-phi-stack/phi_stack.h:11-12` (static_assert), `:64-68` (DualGate), `:147-160` (commutative)  
+**Unit Test:** `tests/theorem_tests/test_theorem_2.cpp` — Standalone, 25 (a,b) pairs verified  
 **Status:** ✅ Verified at compile-time and runtime (10/10 tests).
 
 ---
@@ -137,6 +139,7 @@ The final blend is a linear combination of these four statistics, all of which a
 // Order-independent: YES
 ```
 **Source:** `unified-phi-stack/phi_stack.h:147-160` (commutative_reconstruct), `test_unified.cpp` (Test 8: diff=0)  
+**Unit Test:** `tests/theorem_tests/test_theorem_4.cpp` — Standalone, 3 permutations all identical  
 **Status:** ✅ Verified. Test 8 shows diff=0 between original and permuted inputs.
 
 ---
@@ -216,6 +219,7 @@ After N rounds: δx_N ≈ δx_0 · e^{λN}
 double r = 3.7 + (layer * 0.05);  // r > 3.57 → Lyapunov > 0
 ```
 **Source:** `src/crypto/fractal_chaos.h:62` (r = 3.7 + layer·0.05)  
+**Unit Test:** `tests/theorem_tests/test_theorem_7.cpp` — Standalone, 10⁻⁶ difference → chaotic divergence  
 **Status:** ✅ Chaos parameters guarantee irreversible diffusion.
 
 ---
