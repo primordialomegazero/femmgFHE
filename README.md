@@ -7,7 +7,7 @@
 [![Tests](https://img.shields.io/badge/Tests-539-green)]()
 [![Security](https://img.shields.io/badge/Security-Post--Quantum-red)]()
 
-Hardware: Consumer (16GB RAM, Ryzen 5 2600) | RingDim: 2048-32768 | KS: 0.000000 | Commits: 779
+Hardware: Consumer (16GB RAM, Ryzen 5 2600) | RingDim: 2048-32768 | KS: 0.000000 | Commits: 800+
 
 ---
 
@@ -180,23 +180,27 @@ Each GF layer uses an independent seed. Breaking one layer leaves N-1 layers int
 
 ```
 femmgFHE/
-├── src/ (56 headers, 7,708 lines)
-│   ├── adaptive/       # Autonomous controller, optimizer
+├── src/
+│   ├── api/            # C API (libspiral.so)
+│   ├── cli/            # spiralc (compiler), spiralrun (runtime)
+│   ├── adaptive/       # Autonomous controller, Divine Spark
 │   ├── config/         # System config, GF-N Encryption
-│   ├── crypto/         # Golden Fibonacci, Chaos, QR-KEM
-│   ├── database/       # SpiralFractalDB, Auth, TLS, ZKP, FHE
-│   ├── fhe/            # CKKS FHE wrapper
-│   ├── io/             # iO Compiler
-│   ├── metaprogramming/# Compile-time optimizers
-│   ├── production/     # KS test, Guard, Scheduler
-│   ├── refresh/        # Spiral Bootstrap + Fractal Refresh
+│   ├── crypto/         # Golden Fibonacci, Chaos, Seed Tree
+│   ├── database/       # FractalDB, Auth, TLS, ZKP, FHE, Defense
+│   ├── fhe/            # CKKS FHE wrapper (DualGate, SIMD)
+│   ├── io/             # iO Compiler (Universal Circuit)
+│   ├── kem/            # Ultra Rashomon KEM (19 variants)
+│   ├── metaprogramming/# Compile-time verification (static_assert)
+│   ├── production/     # KS test, FractalDB v4.0, Guard
+│   ├── refresh/        # Spiral Bootstrap + Turbo Engine
 │   └── utils/          # Logger, SafeMath
-├── tests/ (539 files)
-│   ├── unit/           # 45 standalone tests
-│   ├── breakthrough/   # 156 iO tests
-│   └── fhe_apps/       # 8 real-world FHE applications
-├── bindings/           # Python, C, Go, Rust, Java
-├── archive/            # 2,602 files (research history)
+├── unified-phi-stack/  # φ-ψ core math library (10/10 tests)
+├── tests/
+│   ├── unit/           # Unit tests
+│   ├── breakthrough/   # Core iO validation (2 tests)
+│   └── fhe_apps/       # AES, SHA-256, DB JOIN, ML Inference
+├── bindings/           # Python (spiral-fhe), C, Go, Rust, Java
+├── archive/            # Research history (preserved)
 ├── k8s/                # Kubernetes manifests
 └── monitoring/         # Grafana dashboard
 ```
@@ -218,7 +222,7 @@ make quick-test
 # Run iO validation (RingDim 4096, ~90 min)
 make run-test
 
-# Run 16K Spiral Bootstrap (RingDim 16384, ~24h on 16GB, ~6h on 64GB)
+# Run 16K Spiral Bootstrap (RingDim 16384, ~24h serial, 36s Turbo, 0.8s Ultra)
 make run-16k
 ```
 
