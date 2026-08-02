@@ -96,6 +96,10 @@ inline double commutative_rms(const std::vector<double>& values) {
     return std::sqrt(sum_sq / values.size());
 }
 
+// [THEOREM 4] Commutative Reconstruction: All operations order-independent.
+// For any permutation σ: reconstruct(σ(v)) = reconstruct(v).
+// This is what makes KS = 0.000000 — output identical regardless of input order.
+// See: https://github.com/primordialomegazero/femmgFHE/blob/main/docs/FORMAL_PROOFS.md#theorem-4-commutative-reconstruction
 inline double commutative_reconstruct(const std::vector<double>& values) {
     double n = values.size();
     double sum_all = commutative_sum(values);

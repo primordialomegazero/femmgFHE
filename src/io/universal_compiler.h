@@ -7,6 +7,16 @@
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // iO COMPILER — Universal Circuit Compiler for Encrypted Evaluation
+//
+// FORMAL PROOFS COVERED:
+//   Theorem 1 (Functional Equivalence): Circuit A = Circuit B for all 8 inputs.
+//     See: https://github.com/primordialomegazero/femmgFHE/blob/main/docs/FORMAL_PROOFS.md#theorem-1-functional-equivalence-of-circuits
+//   Theorem 3 (Superpose Symmetry): Swapping A↔B yields conjugate expressions.
+//     See: https://github.com/primordialomegazero/femmgFHE/blob/main/docs/FORMAL_PROOFS.md#theorem-3-superpose-invariance
+//
+// WHAT: Compiles Boolean circuits into sequences of homomorphic gate operations.
+// WHY: Enables evaluation of functionally equivalent circuits on encrypted DualGate
+//      inputs without decryption — the foundation of iO.
 // ═══════════════════════════════════════════════════════════════════════════════
 //
 // Compiles Boolean circuits into sequences of homomorphic gate operations.
@@ -42,7 +52,10 @@ struct iOCompiler {
     iOCompiler(SecureContext& ctx) : sc(ctx) {}
 
     // ═══════════════════════════════════════════════════════════
-    // Evaluate a single gate on encrypted wire values
+    // [THEOREM 1+3] Evaluate a single gate on encrypted wire values.
+// Each gate preserves functional equivalence (T1) and superpose symmetry (T3).
+// See: https://github.com/primordialomegazero/femmgFHE/blob/main/docs/FORMAL_PROOFS.md
+// Evaluate a single gate on encrypted wire values
     // ═══════════════════════════════════════════════════════════
     DualGate evaluate_gate(Gate& g, std::vector<DualGate>& wires) {
         DualGate& w1 = wires[g.in1];

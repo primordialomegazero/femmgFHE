@@ -6,6 +6,15 @@ using namespace lbcrypto;
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // FHE CORE — CKKS Fully Homomorphic Encryption Wrapper
+//
+// FORMAL PROOFS COVERED:
+//   Theorem 2 (DualGate Projection): φ(a,b)·ψ(a,b) = a²+ab-b²
+//   See: https://github.com/primordialomegazero/femmgFHE/blob/main/docs/FORMAL_PROOFS.md#theorem-2-dualgate-projection-identity
+//
+// ARCHITECTURE:
+//   WHAT: Wraps OpenFHE CKKS for encrypted computation on DualGate {a,b} pairs.
+//   WHY: DualGate enables φ/ψ projections that are algebraic conjugates,
+//        making structural indistinguishability possible.
 // ═══════════════════════════════════════════════════════════════════════════════
 //
 // Wraps OpenFHE CKKS scheme for encrypted computation.
@@ -20,6 +29,9 @@ using namespace lbcrypto;
 //
 // ═══════════════════════════════════════════════════════════════════════════════
 
+// [THEOREM 2] DualGate {a,b}: Two CKKS ciphertexts representing a value in R_φ².
+// φ(a,b)=a+b·φ, ψ(a,b)=a+b·ψ — algebraic conjugates.
+// See: https://github.com/primordialomegazero/femmgFHE/blob/main/docs/FORMAL_PROOFS.md#theorem-2-dualgate-projection-identity
 // A pair of CKKS ciphertexts representing a DualGate value
 struct DualGate { 
     Ciphertext<DCRTPoly> a;  // First component
