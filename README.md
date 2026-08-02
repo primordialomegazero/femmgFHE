@@ -208,6 +208,23 @@ femmgFHE/
 git clone https://github.com/primordialomegazero/femmgFHE.git
 cd femmgFHE
 
+# Build everything (OpenFHE + all binaries)
+make all
+
+# Run quick test suite (5 tests)
+make quick-test
+
+# Run iO validation (RingDim 4096, ~90 min)
+make run-test
+
+# Run 16K Spiral Bootstrap (RingDim 16384, ~24 hours)
+make run-16k
+```
+
+```bash
+git clone https://github.com/primordialomegazero/femmgFHE.git
+cd femmgFHE
+
 # Build OpenFHE (one-time)
 cd openfhe-development && mkdir -p build && cd build
 cmake .. -DWITH_OPENMP=OFF && make -j$(nproc)

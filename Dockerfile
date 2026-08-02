@@ -1,22 +1,24 @@
 # ═══════════════════════════════════════════════════════════════════════════════
-# SPIRAL FRACTAL iO — PRODUCTION DOCKER IMAGE
+# SPIRAL FRACTAL iO — MULTI-STAGE PRODUCTION DOCKER IMAGE
 # ═══════════════════════════════════════════════════════════════════════════════
 #
 # Build:
-#   docker build -t spiralfractalio .
+#   docker build -t ghcr.io/primordialomegazero/femmgfhe:latest .
 #
 # Run:
-#   docker run -p 8443:8443 -v $(pwd)/data:/data spiralfractalio
+#   docker run -p 8443:8443 -v $(pwd)/data:/app/data ghcr.io/primordialomegazero/femmgfhe:latest
 #
-# Troubleshooting: see TROUBLESHOOTING.md
+# Pull:
+#   docker pull ghcr.io/primordialomegazero/femmgfhe:latest
 #
 # ═══════════════════════════════════════════════════════════════════════════════
 
 # ── STAGE 1: Build OpenFHE ───────────────────────────────────────────────────
 FROM ubuntu:22.04 AS openfhe-builder
 
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential cmake git wget pkg-config \
+    libssl-dev libsodium-dev libsqlite3-dev \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /build
@@ -24,80 +26,75 @@ RUN git clone https://github.com/openfhe-org/openfhe-development.git && \
     cd openfhe-development && mkdir build && cd build && \
     cmake .. -DWITH_OPENMP=OFF -DCMAKE_BUILD_TYPE=Release && \
     make -j$(nproc) && make install
+ENV OPENFHE_DIR=/build/openfhe-development
 
-# ── STAGE 2: Install Dependencies ─────────────────────────────────────────────
-FROM ubuntu:22.04 AS dependencies
+# ── STAGE 2: Build femmgFHE ──────────────────────────────────────────────────
+FROM ubuntu:22.04 AS femmgfhe-builder
 
-RUN apt-get update && apt-get install -y \
-    build-essential cmake git \
-    libsodium-dev libsqlite3-dev libssl-dev \
-    wget pkg-config \
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential cmake libssl-dev libsodium-dev libsqlite3-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Install liboqs (Open Quantum Safe — for HydraJWT PQ heads)
-RUN git clone --depth 1 https://github.com/open-quantum-safe/liboqs.git && \
-    cd liboqs && mkdir build && cd build && \
-    cmake .. -DCMAKE_BUILD_TYPE=Release && \
-    make -j$(nproc) && make install && \
-    ldconfig
-
-# Copy OpenFHE from stage 1
-COPY --from=openfhe-builder /usr/local/include/openfhe /usr/local/include/openfhe
-COPY --from=openfhe-builder /usr/local/lib/libOPENFHE* /usr/local/lib/
-
-# ── STAGE 3: Build femmgFHE ───────────────────────────────────────────────────
-FROM dependencies AS builder
+COPY --from=openfhe-builder /usr/local/lib /usr/local/lib
+COPY --from=openfhe-builder /usr/local/include /usr/local/include
+COPY --from=openfhe-builder /build/openfhe-development /build/openfhe-development
 
 WORKDIR /app
 COPY . .
 
-# Build HydraJWT (PQ auth library)
-RUN cd archive/HydraJWT && \
-    mkdir -p build && cd build && \
-    cmake .. && make -j$(nproc)
+# Build all binaries
+RUN mkdir -p bin && \
+    g++ -std=c++17 -O3 -march=native -mtune=native \
+        -I/build/openfhe-development/src/pke/include \
+        -I/build/openfhe-development/src/core/include \
+        -I/build/openfhe-development/src/binfhe/include \
+        -I/build/openfhe-development/build/src/core \
+        -I. -I./src \
+        -o bin/test_io_batched tests/breakthrough/test_io_batched.cpp \
+        -L/build/openfhe-development/build/lib \
+        -lOPENFHEpke -lOPENFHEcore -lOPENFHEbinfhe \
+        -Wl,-rpath,/build/openfhe-development/build/lib \
+        -lsodium -lsqlite3 -lstdc++ -lpthread -lm && \
+    g++ -std=c++17 -O3 -march=native -mtune=native \
+        -I/build/openfhe-development/src/pke/include \
+        -I/build/openfhe-development/src/core/include \
+        -I/build/openfhe-development/src/binfhe/include \
+        -I/build/openfhe-development/build/src/core \
+        -I. -I./src \
+        -o bin/test_io_16k_spiral tests/breakthrough/test_io_16k_spiral.cpp \
+        -L/build/openfhe-development/build/lib \
+        -lOPENFHEpke -lOPENFHEcore -lOPENFHEbinfhe \
+        -Wl,-rpath,/build/openfhe-development/build/lib \
+        -lsodium -lsqlite3 -lstdc++ -lpthread -lm && \
+    g++ -std=c++17 -O3 -I./unified-phi-stack \
+        -o bin/test_unified_all unified-phi-stack/test_unified.cpp -lm && \
+    gcc -std=c99 -O3 -o bin/phi_kem_level5 src/kem/phi_kem_level5.c -lcrypto -lm && \
+    echo "All binaries built successfully."
 
-# Build femmgFHE core
-RUN g++ -std=c++17 -O3 -march=native -mtune=native \
-    -I./openfhe-development/src/pke/include \
-    -I./openfhe-development/src/core/include \
-    -I./openfhe-development/src/binfhe/include \
-    -I./openfhe-development/build/src/core \
-    -I. -Iinclude \
-    -o bin/test_io_batched \
-    tests/breakthrough/test_io_batched.cpp \
-    -L./openfhe-development/build/lib \
-    -lOPENFHEpke -lOPENFHEcore -lOPENFHEbinfhe \
-    -Wl,-rpath,/usr/local/lib \
-    -lstdc++ -lpthread -lm
+# ── STAGE 3: Runtime ─────────────────────────────────────────────────────────
+FROM ubuntu:22.04 AS runtime
 
-RUN g++ -std=c++17 -O0 -I. -Iinclude \
-    -o bin/test_full_integration \
-    tests/breakthrough/test_full_integration.cpp \
-    bin/libhydrajwt.a \
-    -loqs -lssl -lcrypto -lsodium -lsqlite3 -lpthread -lm
-
-# ── STAGE 4: Runtime ──────────────────────────────────────────────────────────
-FROM ubuntu:22.04
-
-RUN apt-get update && apt-get install -y \
-    libsodium23 libsqlite3-0 libssl3 \
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libssl3 libsodium23 libsqlite3-0 curl ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy built binaries and libraries
-COPY --from=builder /app/bin /app/bin
-COPY --from=builder /usr/local/lib /usr/local/lib
-COPY --from=builder /usr/local/include /usr/local/include
+COPY --from=openfhe-builder /usr/local/lib /usr/local/lib
+COPY --from=femmgfhe-builder /app/bin /app/bin
+COPY --from=femmgfhe-builder /app/scripts /app/scripts
+COPY --from=femmgfhe-builder /app/unified-phi-stack /app/unified-phi-stack
+COPY --from=femmgfhe-builder /app/tests /app/tests
+COPY --from=femmgfhe-builder /app/src /app/src
+COPY --from=femmgfhe-builder /app/openfhe-development/build/lib /app/openfhe-development/build/lib
 
-RUN ldconfig
+ENV LD_LIBRARY_PATH=/app/openfhe-development/build/lib:/usr/local/lib
+ENV OPENFHE_DIR=/app/openfhe-development
 
 WORKDIR /app
-ENV LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
-
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --retries=3 \
-    CMD /app/bin/test_full_integration || exit 1
-
 EXPOSE 8443
 
-# Default: run batched iO test in DEV mode
-CMD ["/app/bin/test_io_batched", "10", "3"]
+# Health check — run quick test suite
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD /app/bin/test_unified_all || exit 1
+
+# Default: run quick test suite
+CMD ["/bin/bash", "-c", "echo 'Spiral Fractal iO Container Ready' && /app/bin/test_unified_all && /app/bin/phi_kem_level5 && tail -f /dev/null"]
