@@ -37,11 +37,12 @@ struct SecureContext {
 //   rd: Ring dimension (2048, 4096, 8192, 16384, 32768)
 //   dp: Multiplicative depth (60, 120, 200, 300)
 // ═══════════════════════════════════════════════════════════════
-inline SecureContext create_fhe_context(uint32_t rd, uint32_t dp) {
+inline SecureContext create_fhe_context(uint32_t rd, uint32_t dp, uint32_t batch_size = 0) {
+    uint32_t N_batch = (batch_size > 0) ? batch_size : (rd / 16);
     CCParams<CryptoContextCKKSRNS> p;
     p.SetMultiplicativeDepth(dp);
     p.SetScalingModSize(50);
-    p.SetBatchSize(256);
+    p.SetBatchSize(N_batch);
     p.SetRingDim(rd);
     p.SetSecretKeyDist(UNIFORM_TERNARY);
     p.SetSecurityLevel(HEStd_NotSet);  // Allow custom RingDim
@@ -54,7 +55,7 @@ inline SecureContext create_fhe_context(uint32_t rd, uint32_t dp) {
     auto kp = cc->KeyGen();
     cc->EvalMultKeyGen(kp.secretKey);  // Generate relinearization keys
     
-    Logger::info("FHE: RingDim=" + std::to_string(rd) + " Depth=" + std::to_string(dp));
+    Logger::info("FHE: RingDim=" + std::to_string(rd) + " Depth=" + std::to_string(dp) + " Batch=" + std::to_string(N_batch));
     return {cc, kp};
 }
 
