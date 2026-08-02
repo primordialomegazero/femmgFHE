@@ -217,7 +217,7 @@ make quick-test
 # Run iO validation (RingDim 4096, ~90 min)
 make run-test
 
-# Run 16K Spiral Bootstrap (RingDim 16384, ~24 hours)
+# Run 16K Spiral Bootstrap (RingDim 16384, ~24h on 16GB, ~6h on 64GB)
 make run-16k
 ```
 
