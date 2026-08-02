@@ -1,25 +1,9 @@
 #include <iostream>
-#include <iomanip>
 #include <random>
 #include <vector>
 #include <algorithm>
 #include <cmath>
 #include <cassert>
-#include "../../src/core/constants.h"
-#include "../../src/utils/safe_math.h"
-
-double compute_ks(const std::vector<double>& A, const std::vector<double>& B) {
-    if (A.empty() || B.empty()) return 1.0;
-    std::vector<double> sA = A, sB = B;
-    std::sort(sA.begin(), sA.end()); std::sort(sB.begin(), sB.end());
-    double max_diff = 0; size_t i = 0, j = 0;
-    while (i < sA.size() && j < sB.size()) {
-        double diff = std::abs((double)i/sA.size() - (double)j/sB.size());
-        max_diff = std::max(max_diff, diff);
-        if (sA[i] < sB[j]) i++; else if (sB[j] < sA[i]) j++; else { i++; j++; }
-    }
-    return max_diff;
-}
 
 double commutative_reconstruct(const std::vector<double>& v) {
     double n = v.size();
@@ -32,9 +16,7 @@ int main() {
     std::mt19937 gen(42);
     std::uniform_real_distribution<double> dist(0, 1);
     
-    int total = 1000;
-    double worst_ks = 0;
-    std::vector<double> all_recA, all_recB;
+    int passed = 0, total = 1000;
     
     for (int t = 0; t < total; t++) {
         int n = 50 + (t % 200);
@@ -45,11 +27,13 @@ int main() {
         double recA = commutative_reconstruct(A);
         double recB = commutative_reconstruct(B);
         
-        all_recA.push_back(recA);
-        all_recB.push_back(recB);
+        if (std::abs(recA - recB) < 1e-10) passed++;
+        else {
+            std::cout << "FAIL: t=" << t << " diff=" << std::abs(recA-recB) << "\n";
+            return 1;
+        }
     }
     
-    double ks = compute_ks(all_recA, all_recB);
-    std::cout << std::fixed << std::setprecision(6) << ks << "\n";
+    std::cout << passed << "/" << total << "\n";
     return 0;
 }
