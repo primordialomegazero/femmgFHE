@@ -94,7 +94,7 @@ The intermediate state after CKKS decryption is a **GF ciphertext** — not the 
 | GF-N Encryption | N-layer Golden Fibonacci with Cassini | 5/5 tests |
 | Spiral Bootstrap | Encrypted noise reset + Spiral obfuscation | 5/5 tests |
 | Fractal iO | Indistinguishable circuit obfuscation | KS = 0.000000 |
-| Ultra Rashomon KEM | 42-round post-quantum (64 bytes, QR-ready) | 50/50 tests |
+| Ultra Rashomon KEM | Post-quantum (192 bytes, NIST Level 5, QR-ready) | 50/50 tests |
 | PHI-TLS | Double-layer transport (TLS 1.3 + φ-chaos) | Active |
 | ZKP-PQC | Zero-knowledge proofs (Schnorr, Range, CT) | Working |
 | Spiral FHE | Homomorphic Add + Multiply | Working |
@@ -123,7 +123,7 @@ The intermediate state after CKKS decryption is a **GF ciphertext** — not the 
 | Property | Score |
 |----------|-------|
 | iO Indistinguishability | KS = 0.000000 |
-| Circuit Variants | 7 (Fibonacci: 1-21 gates) |
+| Circuit Variants | N-configurable (Fibonacci: 1 to 1,000,000 gates) |
 | Fractal Compression | 96B → 64B (33% smaller) |
 | Post-Quantum | NIST Level 5 (Falcon, ML-DSA, SLH-DSA) |
 | FHE Depth | UNLIMITED (Spiral Bootstrap) |
@@ -227,6 +227,20 @@ make run-16k
 ```
 
 ```bash
+### License Tiers
+
+| Tier | RingDim | Gates | Price | How to Get |
+|------|---------|-------|-------|------------|
+| Community | 4096 | 500 | Free | Auto-granted |
+| Pro | 16384 | Unlimited | $499/yr | `devilswithin13@gmail.com` |
+| Enterprise | 32768 | Unlimited | $4,999/yr | Contact |
+| Academic | 16384 | Unlimited | Free (.edu) | Email |
+| Unlimited | 65536 | Unlimited | Contact | Author only |
+
+Activate with: `export SPIRAL_LICENSE="SPIRAL-X:XXXXX:email@domain.com-XXXX"`
+
+---
+
 ## Hardware & Reproducibility
 
 All tests on: AMD Ryzen 5 2600 (3.40 GHz), 16 GB DDR4, Linux, CPU-only.
