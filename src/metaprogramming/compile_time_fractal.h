@@ -57,5 +57,7 @@ struct PreComputedTruthTable {
 };
 
 // [THEOREM 1] Compile-time verification: Circuit A = Circuit B for all 8 inputs.
+// See: https://github.com/primordialomegazero/femmgFHE/blob/main/docs/FORMAL_PROOFS.md#theorem-1-functional-equivalence-of-circuits
+// Unit Test: tests/theorem_tests/test_theorem_1.cpp (8/8 inputs verified)
 // If A ≠ B, this file WILL NOT COMPILE. See docs/FORMAL_PROOFS.md §1
 static_assert(PreComputedTruthTable::verify(), "iO Circuits must be functionally equivalent!");

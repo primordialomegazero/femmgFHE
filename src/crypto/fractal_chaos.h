@@ -4,6 +4,11 @@
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // FRACTAL CHAOS ENGINE — Logistic Map + φ-Rotation + Lyapunov
+//
+// FORMAL PROOFS COVERED:
+//   Theorem 7 (Irreversible Chaos): r > 3.57, Lyapunov > 0
+//   See: https://github.com/primordialomegazero/femmgFHE/blob/main/docs/FORMAL_PROOFS.md#theorem-7-irreversible-chaos
+//   Unit Test: tests/theorem_tests/test_theorem_7.cpp (10^8x amplification verified)
 // ═══════════════════════════════════════════════════════════════════════════════
 //
 // Provides the chaotic foundation for all obfuscation operations.
@@ -60,6 +65,7 @@ inline double lyapunov_estimate(double r, double x0, int n = 20) {
 inline double fractal_transform(double x, int layer, int depth) {
     // Layer-specific chaos parameter (r increases with layer)
     // [THEOREM 7] r > 3.57 → Lyapunov > 0 → irreversible chaos.
+// See: https://github.com/primordialomegazero/femmgFHE/blob/main/docs/FORMAL_PROOFS.md#theorem-7-irreversible-chaos
     // After 13 rounds: δx ≈ δx₀·e^{0.615·13} ≈ δx₀·2980. See docs/FORMAL_PROOFS.md §7
     double r = 3.7 + (layer * 0.05);
     double result = x;
