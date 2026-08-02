@@ -65,3 +65,4 @@ test_io_ctct_*
 
 # Allow DM-DGR final tests
 *.txt
+WSL2-Linux-Kernel/
