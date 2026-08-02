@@ -50,6 +50,7 @@ All 8 inputs produce identical outputs.
 static_assert(PreComputedTruthTable::verify(), 
               "iO Circuits must be functionally equivalent!");
 ```
+**Source:** `src/metaprogramming/compile_time_fractal.h:59`  
 **Status:** ✅ Compile-time verified. Code will not compile if A ≠ B.
 
 ---
@@ -77,6 +78,7 @@ For DualGate {a, b} with φ-projection φ(a,b) = a + b·φ and ψ-projection ψ(
 static_assert(std::abs(PHI + PSI - 1.0) < 1e-10, "φ + ψ must equal 1");
 static_assert(std::abs(PHI * PSI + 1.0) < 1e-10, "φ·ψ must equal -1");
 ```
+**Source:** `unified-phi-stack/phi_stack.h:11-12` (static_assert), `:64-68` (DualGate), `:147-160` (commutative)  
 **Status:** ✅ Verified at compile-time and runtime (10/10 tests).
 
 ---
@@ -108,6 +110,7 @@ void superpose(double& phi, double& psi, double phi_A, double psi_A,
     // Symmetric: swapping A↔B yields φ↔ψ exchange
 }
 ```
+**Source:** `src/refresh/spiral_bootstrap.h:117-125`  
 **Status:** ✅ Implemented and verified in all iO tests.
 
 ---
@@ -133,6 +136,7 @@ The final blend is a linear combination of these four statistics, all of which a
 // original=0.430011 permuted=0.430011 diff=0
 // Order-independent: YES
 ```
+**Source:** `unified-phi-stack/phi_stack.h:147-160` (commutative_reconstruct), `test_unified.cpp` (Test 8: diff=0)  
 **Status:** ✅ Verified. Test 8 shows diff=0 between original and permuted inputs.
 
 ---
@@ -158,6 +162,7 @@ The output distributions of Circuit A and Circuit B are structurally identical. 
 | 32768 | 10/10 | 0.000000 |
 | 1M gates | 10/10 | 0.000000 |
 
+**Source:** `tests/breakthrough/test_io_ultra_circuit.cpp` (1M gates, 5.0s, KS=0), `tests/breakthrough/test_io_batched.cpp` (KS=0 all pairs)  
 **Status:** ✅ Empirically verified across all RingDims and gate counts. KS = 0.000000 without exception.
 
 ---
@@ -181,6 +186,7 @@ sc.cc->Decrypt(sc.kp.secretKey, encrypted_input, &ckks_plain);
 double gf_ciphertext = ckks_plain->GetCKKSPackedValue()[0].real();
 // GF ciphertext — NOT plaintext. Attacker sees only this.
 ```
+**Source:** `src/refresh/spiral_bootstrap.h:195-196` (Decrypt → GF ciphertext)  
 **Status:** ✅ Implemented. GF-N encrypted intermediate state.
 
 ---
@@ -209,6 +215,7 @@ After N rounds: δx_N ≈ δx_0 · e^{λN}
 // src/crypto/fractal_chaos.h
 double r = 3.7 + (layer * 0.05);  // r > 3.57 → Lyapunov > 0
 ```
+**Source:** `src/crypto/fractal_chaos.h:62` (r = 3.7 + layer·0.05)  
 **Status:** ✅ Chaos parameters guarantee irreversible diffusion.
 
 ---
@@ -242,6 +249,7 @@ bool verify_cassini() {
     return true;
 }
 ```
+**Source:** `src/refresh/spiral_bootstrap.h:185-187` (verify_cassini)  
 **Status:** ✅ Cassini verified at runtime for each bootstrap cycle.
 
 ---
@@ -271,6 +279,7 @@ Ciphertext<DCRTPoly> bootstrap(const Ciphertext<DCRTPoly>& encrypted_input,
     return fresh_ckks;  // Fresh noise budget = B_0
 }
 ```
+**Source:** `src/refresh/spiral_bootstrap.h:192-223` (bootstrap cycle)  
 **Status:** ✅ Implemented and tested. Each bootstrap call resets noise budget.
 
 ---

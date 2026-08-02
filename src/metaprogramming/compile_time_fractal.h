@@ -56,4 +56,6 @@ struct PreComputedTruthTable {
     }
 };
 
+// [THEOREM 1] Compile-time verification: Circuit A = Circuit B for all 8 inputs.
+// If A ≠ B, this file WILL NOT COMPILE. See docs/FORMAL_PROOFS.md §1
 static_assert(PreComputedTruthTable::verify(), "iO Circuits must be functionally equivalent!");

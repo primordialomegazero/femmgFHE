@@ -13,6 +13,7 @@ constexpr double PI    = 3.14159265358979323846;
 static_assert(std::abs(PHI + PSI - 1.0) < 1e-10, "phi + psi must equal 1");
 static_assert(std::abs(PHI * PSI + 1.0) < 1e-10, "phi * psi must equal -1");
 
+// [THEOREM 2] φ(a,b) = a + b·φ — Active projection. See docs/FORMAL_PROOFS.md §2
 inline double phi_project(double a, double b) {
     return a + b * PHI;
 }
