@@ -31,3 +31,20 @@ docker:
 
 clean:
 	rm -f bin/spiralc bin/spiralrun bin/test_unified_all bin/test_hierarchical_seed bin/test_fractal_chaos bin/phi_kem_level5
+
+# ═══════════════════════════════════════════════════════════════
+# STRUCTURAL OS
+# ═══════════════════════════════════════════════════════════════
+os: bin/phi_userspace_kernel bin/test_phi_os
+
+bin/phi_userspace_kernel: src/os/phi_userspace_kernel.c
+	gcc -std=c99 -O3 -Wall -o $@ $< -lm -lpthread
+
+bin/test_phi_os: tests/experiments/test_phi_os.cpp src/os/phi_kernel.h src/os/phi_process.h src/os/phi_scheduler.h src/os/phi_allocator.h src/os/phi_syscall.h src/os/phi_filesystem.h
+	g++ -std=c++17 -O3 -o $@ $< -lm -lpthread
+
+run-os: bin/phi_userspace_kernel
+	./bin/phi_userspace_kernel
+
+run-os-sim: bin/test_phi_os
+	./bin/test_phi_os

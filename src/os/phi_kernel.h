@@ -153,6 +153,9 @@ public:
         booted = false;
     }
     
+    // Runtime info
+    int process_count() const { return proc_count; }
+    
     // Compile-time info
     static constexpr int max_processes() { return N_PROC_MAX; }
     static constexpr int memory_size() { return N_MEM_PAGES * N_PAGE_SIZE; }
