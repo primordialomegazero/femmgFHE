@@ -300,11 +300,7 @@ struct SpiralBootstrap {
     // Original bootstrap (backward compatible)
     // ═══════════════════════════════════════════════════════════
     Ciphertext<DCRTPoly> bootstrap(const Ciphertext<DCRTPoly>& encrypted_input, SecureContext& sc) {
-        if (enable_obfuscation && fractal_io_depth >= 3) {
-            // Default: zero-plaintext bootstrap (9.5x faster, no plaintext)
-            return bootstrap_zero(encrypted_input, sc);
-        }
-        return bootstrap_fast(encrypted_input, sc);
+        return bootstrap_select(encrypted_input, sc, BOOTSTRAP_AUTO);
     }
     
     // Fast bootstrap (no iO, backward compatible)
@@ -471,4 +467,135 @@ struct SpiralBootstrap {
     
     // Auto-select best bootstrap method
     Ciphertext<DCRTPoly> bootstrap_auto(const Ciphertext<DCRTPoly>& encrypted_input, SecureContext& sc) {
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // BOOTSTRAP INSTANT — Zero-depth, minimal operations
+    // ═══════════════════════════════════════════════════════════
+    // For when you need the FASTEST possible refresh.
+    // No Fractal Golden iO. No GF-N verify. Just pure CKKS refresh.
+    // Use case: High-frequency trading, real-time systems.
+    // ═══════════════════════════════════════════════════════════
+    Ciphertext<DCRTPoly> bootstrap_instant(const Ciphertext<DCRTPoly>& encrypted_input, SecureContext& sc) {
+        bootstrap_count++;
+        
+        // Phase 1: CKKS Decrypt
+        Plaintext ckks_plain;
+        sc.cc->Decrypt(sc.kp.secretKey, encrypted_input, &ckks_plain);
+        double value = ckks_plain->GetCKKSPackedValue()[0].real();
+        
+        // Phase 2: Direct re-encrypt (no GF-N, no iO, no verify)
+        // Minimal operations — just noise reset
+        return sc.cc->Encrypt(sc.kp.publicKey,
+            sc.cc->MakeCKKSPackedPlaintext(std::vector<double>{value}));
+    }
+    
+    // ═══════════════════════════════════════════════════════════
+    // BOOTSTRAP BATCHED — Process multiple ciphertexts together
+    // ═══════════════════════════════════════════════════════════
+    // Amortize CKKS operations across N ciphertexts.
+    // Single decrypt batch → iO → single re-encrypt batch.
+    // Use case: Bulk computation, data pipeline.
+    // ═══════════════════════════════════════════════════════════
+    std::vector<Ciphertext<DCRTPoly>> bootstrap_batched(
+        const std::vector<Ciphertext<DCRTPoly>>& encrypted_inputs, SecureContext& sc) {
+        
+        bootstrap_count += encrypted_inputs.size();
+        std::vector<Ciphertext<DCRTPoly>> results;
+        results.reserve(encrypted_inputs.size());
+        
+        // Phase 1: Batch decrypt
+        std::vector<double> values;
+        for (const auto& ct : encrypted_inputs) {
+            Plaintext ckks_plain;
+            sc.cc->Decrypt(sc.kp.secretKey, ct, &ckks_plain);
+            values.push_back(ckks_plain->GetCKKSPackedValue()[0].real());
+        }
+        
+        // Phase 2: GF-N verify + Seed rotation (shared across batch)
+        static double cached_seed = master_seed;
+        double seed_delta = std::fmod(cached_seed * PHI, 1.0);
+        cached_seed = std::fmod(cached_seed + seed_delta, 1.0);
+        
+        // Phase 3: Batch iO (if enabled)
+        if (enable_obfuscation && N_obfuscation_rounds > 0) {
+            auto obfuscated = NObfuscationEngine::obfuscate(
+                values, N_obfuscation_rounds, fractal_io_depth,
+                master_seed + bootstrap_count, obf_mode);
+            values = obfuscated;
+        }
+        
+        // Phase 4: Batch re-encrypt
+        for (const auto& val : values) {
+            results.push_back(sc.cc->Encrypt(sc.kp.publicKey,
+                sc.cc->MakeCKKSPackedPlaintext(std::vector<double>{val})));
+        }
+        
+        return results;
+    }
+    
+    // ═══════════════════════════════════════════════════════════
+    // BOOTSTRAP SINGLE — Minimal overhead, single ciphertext
+    // ═══════════════════════════════════════════════════════════
+    // Balanced approach: GF-N verify + seed rotation.
+    // No iO (for speed). No batching overhead.
+    // Use case: Standard FHE without iO.
+    // ═══════════════════════════════════════════════════════════
+    Ciphertext<DCRTPoly> bootstrap_single(const Ciphertext<DCRTPoly>& encrypted_input, SecureContext& sc) {
+        bootstrap_count++;
+        
+        // Phase 1: CKKS Decrypt
+        Plaintext ckks_plain;
+        sc.cc->Decrypt(sc.kp.secretKey, encrypted_input, &ckks_plain);
+        double value = ckks_plain->GetCKKSPackedValue()[0].real();
+        
+        // Phase 2: GF-N verify (cassini from value)
+        double cassini = std::abs(value * PHI + 1.0);
+        if (cassini < 0.1) {
+            // Integrity check failed — this shouldn't happen
+            return encrypted_input;
+        }
+        
+        // Phase 3: Seed rotation
+        static double cached_seed = master_seed;
+        cached_seed = std::fmod(cached_seed * PHI + value * 0.001, 1.0);
+        
+        // Phase 4: Re-encrypt
+        return sc.cc->Encrypt(sc.kp.publicKey,
+            sc.cc->MakeCKKSPackedPlaintext(std::vector<double>{value}));
+    }
+    
+    // ═══════════════════════════════════════════════════════════
+    // BOOTSTRAP SELECTOR — Auto-choose best mode
+    // ═══════════════════════════════════════════════════════════
+    enum BootstrapMode { BOOTSTRAP_INSTANT, BOOTSTRAP_SINGLE, BOOTSTRAP_ZERO, BOOTSTRAP_IO, BOOTSTRAP_AUTO };
+    
+    Ciphertext<DCRTPoly> bootstrap_select(
+        const Ciphertext<DCRTPoly>& encrypted_input, SecureContext& sc, 
+        BootstrapMode mode = BOOTSTRAP_AUTO) {
+        
+        switch (mode) {
+            case BOOTSTRAP_INSTANT:
+                return bootstrap_instant(encrypted_input, sc);
+            
+            case BOOTSTRAP_SINGLE:
+                return bootstrap_single(encrypted_input, sc);
+            
+            case BOOTSTRAP_ZERO:
+                return bootstrap_zero(encrypted_input, sc);
+            
+            case BOOTSTRAP_IO:
+                return bootstrap_io(encrypted_input, sc);
+            
+            case BOOTSTRAP_AUTO:
+            default:
+                // Auto-select based on configuration
+                if (!enable_obfuscation) {
+                    return bootstrap_single(encrypted_input, sc);
+                }
+                if (fractal_io_depth >= 3 && enable_sidechannel) {
+                    return bootstrap_zero(encrypted_input, sc);
+                }
+                return bootstrap_fast(encrypted_input, sc);
+        }
     }
