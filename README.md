@@ -1,6 +1,6 @@
-# Spiral Fractal iO — FHE + iO Unified Obfuscation System
+# Spiral Fractal iO — FHE + iO + Structural OS
 
-**Post-Quantum | Fractal | Self-Healing | Zero-Knowledge | Hardware-Entangled**
+**Post-Quantum | Fractal | Self-Healing | Zero-Knowledge | Hardware-Entangled | Structural OS**
 
 [![License](https://img.shields.io/badge/License-Hybrid%20v2.0-blue)](LICENSE.md)
 [![C++17](https://img.shields.io/badge/C%2B%2B-17-blue)](https://isocpp.org/)
@@ -8,7 +8,7 @@
 [![Security](https://img.shields.io/badge/Security-Structural%20(KS%3D0)-brightgreen)]()
 [![Documentation](https://img.shields.io/badge/Docs-Triple%20Cross--Referenced-brightgreen)]()
 
-**Hardware:** Consumer (Ryzen 5 2600, 16GB RAM) | **RingDim:** 2048–65536 | **KS:** 0.000000 | **Release:** v35.0
+**Hardware:** Consumer (Ryzen 5 2600, 16GB RAM) | **RingDim:** 2048–65536 | **KS:** 0.000000 | **Release:** v36.0
 
 ---
 
@@ -43,28 +43,9 @@
                     └─────────────────────┬─────────────────────┘
                                           │
                               ┌───────────▼─────────────┐
-                              │    FRACTAL GATES         │
-                              │  Logistic chaos + φ-rot  │
-                              │  r > 3.57, Lyapunov > 0 │
-                              └───────────┬─────────────┘
-                                          │
-                              ┌───────────▼─────────────┐
-                              │      SUPERPOSE           │
-                              │  φ_A·φ + φ_B·ψ + ψ_A·ψ  │
-                              │  + ψ_B·φ → mixed_φ       │
-                              └───────────┬─────────────┘
-                                          │
-                              ┌───────────▼─────────────┐
-                              │   FRACTAL TRANSFORM      │
-                              │  L layers × D depth      │
-                              │  Random Permutation       │
-                              └───────────┬─────────────┘
-                                          │
-                              ┌───────────▼─────────────┐
-                              │ COMMUTATIVE RECONSTRUCT  │
-                              │  AM 0.35 + GM 0.25       │
-                              │  + HM 0.25 + RMS 0.15    │
-                              │  Order-independent       │
+                              │   FRACTAL GATES +        │
+                              │   SUPERPOSE +            │
+                              │   COMMUTATIVE RECONSTRUCT│
                               └───────────┬─────────────┘
                                           │
                               ┌───────────▼─────────────┐
@@ -75,21 +56,48 @@
 
 ---
 
-## Triple Cross-Reference
+## Structural OS
 
-Every theorem has three verifiable sources: **Code ↔ Formal Proof ↔ Unit Test**
+The OS layer uses φ-branching for process isolation. Security is **by math, not by policy.**
 
-| Theorem | Source Code | Formal Proof | Unit Test |
-|---------|------------|-------------|-----------|
-| T1: Functional Equivalence | [`compile_time_fractal.h:59`](src/metaprogramming/compile_time_fractal.h) | [`FORMAL_PROOFS.md`](docs/FORMAL_PROOFS.md) | [`test_theorem_1.cpp`](tests/theorem_tests/test_theorem_1.cpp) (8/8) |
-| T2: DualGate Projection | [`phi_stack.h:16`](unified-phi-stack/phi_stack.h) | [`FORMAL_PROOFS.md`](docs/FORMAL_PROOFS.md) | [`test_theorem_2.cpp`](tests/theorem_tests/test_theorem_2.cpp) (25/25) |
-| T3: Superpose Symmetry | [`universal_compiler.h`](src/io/universal_compiler.h) | [`FORMAL_PROOFS.md`](docs/FORMAL_PROOFS.md) | [`test_theorem_3.cpp`](tests/theorem_tests/test_theorem_3.cpp) |
-| T4: Commutative Reconstruction | [`phi_stack.h:147`](unified-phi-stack/phi_stack.h) | [`FORMAL_PROOFS.md`](docs/FORMAL_PROOFS.md) | [`test_theorem_4.cpp`](tests/theorem_tests/test_theorem_4.cpp) (1000/1000) |
-| T5: Structural Indistinguishability | [`test_io_ultra_circuit.cpp`](tests/breakthrough/test_io_ultra_circuit.cpp) | [`FORMAL_PROOFS.md`](docs/FORMAL_PROOFS.md) | [`test_ks_omnibus.cpp`](tests/breakthrough/test_ks_omnibus.cpp) (77/84) |
-| T6: Zero Plaintext Exposure | [`spiral_bootstrap.h:204`](src/refresh/spiral_bootstrap.h) | [`FORMAL_PROOFS.md`](docs/FORMAL_PROOFS.md) | [`test_spiral_bootstrap.cpp`](tests/unit/test_spiral_bootstrap.cpp) |
-| T7: Irreversible Chaos | [`fractal_chaos.h:62`](src/crypto/fractal_chaos.h) | [`FORMAL_PROOFS.md`](docs/FORMAL_PROOFS.md) | [`test_theorem_7.cpp`](tests/theorem_tests/test_theorem_7.cpp) (10⁸× amp) |
-| T8: Cassini Security | [`spiral_bootstrap.h:213`](src/refresh/spiral_bootstrap.h) | [`FORMAL_PROOFS.md`](docs/FORMAL_PROOFS.md) | [`test_theorem_8.cpp`](tests/theorem_tests/test_theorem_8.cpp) (19/19) |
-| T9: Unlimited Depth | [`spiral_bootstrap.h:231`](src/refresh/spiral_bootstrap.h) | [`FORMAL_PROOFS.md`](docs/FORMAL_PROOFS.md) | Bootstrap cycle (induction) |
+```
+┌─────────────────────────────────────────────────┐
+│           STRUCTURAL OS KERNEL                    │
+│                                                   │
+│  Process A ──→ φ-seed_A ──→ Memory Encrypted     │
+│  Process B ──→ φ-seed_B ──→ Memory Encrypted     │
+│                                                   │
+│  A→A: ALLOWED (same seed)                         │
+│  A→B: DENIED (different seed — STRUCTURALLY)      │
+│                                                   │
+│  Not by permission check. Not by kernel policy.   │
+│  By mathematical impossibility.                   │
+└─────────────────────────────────────────────────┘
+```
+
+```bash
+make os && ./bin/phi_userspace_kernel
+```
+
+Output:
+```
+Process A: PID=11044 seed=0x928d...
+Process B: PID=11045 seed=0x3820...
+A→A: ALLOWED
+A→B: DENIED
+B→A: DENIED
+```
+
+---
+
+## Performance
+
+| RingDim | Serial | Turbo SIMD | Ultra O(1) | KS |
+|---------|--------|------------|------------|-----|
+| 4096 | 94 min | 8.8s | 0.2s | 0.000000 |
+| 16384 | ~24h | 36s | 0.8s | 0.000000 |
+| 32768 | ~56h | 76s | 1.8s | 0.000000 |
+| 1,000,000 gates | — | — | 5.0s | 0.000000 |
 
 ---
 
@@ -115,22 +123,52 @@ spiralrun program.c.obf 0.5 0.3  # Execute
 pip install spiral-fhe
 ```
 
-```python
-import spiral_fhe
-spiral_fhe.obfuscate("int f(int x) { return x * 7 + 13; }")
-result = spiral_fhe.execute("output.obf", [0.5, 0.3])
-```
+---
+
+## Triple Cross-Reference
+
+Every theorem has three verifiable sources: **Code ↔ Formal Proof ↔ Unit Test**
+
+| Theorem | Source | Proof | Test |
+|---------|--------|-------|------|
+| T1: Functional Equivalence | `compile_time_fractal.h:59` | `FORMAL_PROOFS.md` | `test_theorem_1.cpp` |
+| T2: DualGate Projection | `phi_stack.h:16` | `FORMAL_PROOFS.md` | `test_theorem_2.cpp` |
+| T3: Superpose Symmetry | `universal_compiler.h` | `FORMAL_PROOFS.md` | `test_theorem_3.cpp` |
+| T4: Commutative Reconstruction | `phi_stack.h:147` | `FORMAL_PROOFS.md` | `test_theorem_4.cpp` |
+| T5: Structural Indistinguishability | `test_io_ultra_circuit.cpp` | `FORMAL_PROOFS.md` | `test_ks_omnibus.cpp` |
+| T6: Zero Plaintext Exposure | `spiral_bootstrap.h:204` | `FORMAL_PROOFS.md` | `test_spiral_bootstrap.cpp` |
+| T7: Irreversible Chaos | `fractal_chaos.h:62` | `FORMAL_PROOFS.md` | `test_theorem_7.cpp` |
+| T8: Cassini Security | `spiral_bootstrap.h:213` | `FORMAL_PROOFS.md` | `test_theorem_8.cpp` |
+| T9: Unlimited Depth | `spiral_bootstrap.h:231` | `FORMAL_PROOFS.md` | Bootstrap cycle |
 
 ---
 
-## Performance
+## Source Tree
 
-| RingDim | Serial | Turbo SIMD | Ultra O(1) | KS |
-|---------|--------|------------|------------|-----|
-| 4096 | 94 min | 8.8s | 0.2s | 0.000000 |
-| 16384 | ~24h | 36s | 0.8s | 0.000000 |
-| 32768 | ~56h | 76s | 1.8s | 0.000000 |
-| 1,000,000 gates | — | — | 5.0s | 0.000000 |
+```
+femmgFHE/
+├── docs/                          # Complete documentation
+├── src/
+│   ├── os/                        # Structural OS (PhiKernel, Bootloader, Shell)
+│   ├── api/                       # C API (libspiral.so)
+│   ├── cli/                       # spiralc, spiralrun
+│   ├── crypto/                    # Golden Fibonacci, Chaos, Seed Tree
+│   ├── fhe/                       # CKKS FHE (DualGate, SIMD)
+│   ├── io/                        # iO Universal Compiler
+│   ├── kem/                       # Ultra Rashomon KEM
+│   ├── refresh/                   # Spiral Bootstrap + Turbo Engine
+│   └── ...
+├── unified-phi-stack/             # φ-ψ core math library
+├── tests/
+│   ├── theorem_tests/             # Standalone theorem verification
+│   ├── breakthrough/              # Core iO validation
+│   └── unit/                      # Unit tests
+├── bindings/python/               # spiral-fhe (pip)
+├── scripts/                       # gen_license.py, install.sh
+├── archive/                       # Research history
+├── LICENSE.md                     # Hybrid License v2.0
+└── README.md
+```
 
 ---
 
@@ -144,49 +182,6 @@ result = spiral_fhe.execute("output.obf", [0.5, 0.3])
 | Academic | 16384 | Free (.edu) |
 
 Contact: `devilswithin13@gmail.com`
-
----
-
-## Source Tree
-
-```
-femmgFHE/
-├── docs/                          # Complete documentation
-│   ├── whitepaper.md              # Academic paper (9 theorems)
-│   ├── FORMAL_PROOFS.md           # Proofs + code line numbers + unit tests
-│   ├── IACR_PAPER.md              # IACR ePrint submission
-│   ├── API_REFERENCE.md           # C API, CLI, Python
-│   ├── SECURITY_MODEL.md          # Threat model, attack vectors
-│   ├── BENCHMARKS.md              # All RingDims
-│   ├── HARDWARE_SCALING.md        # RAM requirements
-│   ├── GETTING_STARTED.md         # Tutorial
-│   ├── REPRODUCE.md               # Exact reproduction commands
-│   └── LIMITATIONS.md             # Honest disclosure
-├── src/                           # Core source (16 modules)
-│   ├── api/                       # C API (libspiral.so)
-│   ├── cli/                       # spiralc, spiralrun
-│   ├── crypto/                    # Golden Fibonacci, Chaos, Seed Tree
-│   ├── fhe/                       # CKKS FHE (DualGate, SIMD)
-│   ├── io/                        # iO Universal Compiler
-│   ├── kem/                       # Ultra Rashomon KEM
-│   ├── refresh/                   # Spiral Bootstrap + Turbo Engine
-│   └── ...
-├── unified-phi-stack/             # φ-ψ core math library
-├── tests/
-│   ├── theorem_tests/             # Standalone theorem verification (6 tests)
-│   ├── breakthrough/              # Core iO validation
-│   ├── unit/                      # Unit tests
-│   └── fhe_apps/                  # AES, SHA-256, DB JOIN, ML
-├── bindings/python/               # spiral-fhe (pip)
-├── scripts/                       # gen_license.py, install.sh
-├── archive/                       # Research history
-├── LICENSE.md                     # Hybrid License v2.0
-├── CHANGELOG.md                   # v1.0 → v35.0
-├── CONTRIBUTING.md
-├── SECURITY.md
-├── CITATION.cff
-└── README.md
-```
 
 ---
 
