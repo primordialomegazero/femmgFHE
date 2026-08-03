@@ -35,6 +35,13 @@ struct AutoBootstrap {
     int total_gates = 0;
     int total_refreshes = 0;
     int total_emergencies = 0;
+    // ═══════════════════════════════════════════════════════════
+    // Fractal Golden iO Integration
+    // ═══════════════════════════════════════════════════════════
+    int fractal_io_depth = 3;
+    int N_obfuscation_rounds = 5;
+    bool iO_enabled = true;
+    int iO_mode = 0;  // 0=STRUCTURAL_IO, 1=BLACKHOLE, 2=OFF
     int recommended_batch = 32;
     int fib_index = 7;
     double current_noise = 0, current_stability = 0, current_lyapunov = 0;

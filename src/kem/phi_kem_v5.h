@@ -1,3 +1,4 @@
+#pragma once
 // ΦΩ0 — catchmeifyouKEM v5.0 — NANO POST-QUANTUM KEM
 // 128 bytes total: 32B CT + 64B PK + 32B SK
 // 25× smaller than Kyber-512, 4.1× faster
