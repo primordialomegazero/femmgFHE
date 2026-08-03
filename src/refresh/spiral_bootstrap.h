@@ -300,13 +300,9 @@ struct SpiralBootstrap {
     // Original bootstrap (backward compatible)
     // ═══════════════════════════════════════════════════════════
     Ciphertext<DCRTPoly> bootstrap(const Ciphertext<DCRTPoly>& encrypted_input, SecureContext& sc) {
-        if (enable_obfuscation if (enable_obfuscation && fractal_io_depth >= 3) {if (enable_obfuscation && fractal_io_depth >= 3) { fractal_io_depth >= 3) {
+        if (enable_obfuscation && fractal_io_depth >= 3) {
             // Default: zero-plaintext bootstrap (9.5x faster, no plaintext)
-            if (enable_sidechannel) {
-                return bootstrap_zero(encrypted_input, sc);
-            }
-            // Fallback: standard iO bootstrap
-            return bootstrap_io(encrypted_input, sc);
+            return bootstrap_zero(encrypted_input, sc);
         }
         return bootstrap_fast(encrypted_input, sc);
     }
@@ -475,17 +471,4 @@ struct SpiralBootstrap {
     
     // Auto-select best bootstrap method
     Ciphertext<DCRTPoly> bootstrap_auto(const Ciphertext<DCRTPoly>& encrypted_input, SecureContext& sc) {
-        if (enable_obfuscation if (enable_obfuscation && fractal_io_depth >= 3) {if (enable_obfuscation && fractal_io_depth >= 3) { fractal_io_depth >= 3) {
-            // Default: zero-plaintext bootstrap (9.5x faster, no plaintext)
-            if (enable_sidechannel) {
-                return bootstrap_zero(encrypted_input, sc);
-            }
-            // Try zero-plaintext first, fall back to standard iO bootstrap
-            if (enable_sidechannel) {
-                return bootstrap_zero(encrypted_input, sc);
-            }
-            // Fallback: standard iO bootstrap
-            return bootstrap_io(encrypted_input, sc);
-        }
-        return bootstrap_fast(encrypted_input, sc);
     }
