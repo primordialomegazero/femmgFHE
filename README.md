@@ -45,49 +45,22 @@ After 23 years of open problems, Spiral Fractal achieves **both** cryptographic 
 ---
 
 ## System Flow
+## System Flow
+
+> See **[SYSTEMFLOW.md](SYSTEMFLOW.md)** for the complete end-to-end flow from plaintext to FHE to iO to computation to decryption.
 
 ```
-                              ┌─────────────────────────┐
-                              │      SOURCE CODE         │
-                              │  int f(int x) { ... }    │
-                              └───────────┬─────────────┘
-                                          │
-                              ┌───────────▼─────────────┐
-                              │    GF-N ENCRYPTION       │
-                              │  N-layer Golden Fibonacci│
-                              │  Cassini invariant > 0.1 │
-                              └───────────┬─────────────┘
-                                          │
-                              ┌───────────▼─────────────┐
-                              │    CKKS FHE ENCRYPTION   │
-                              │  DualGate {a, b} pair    │
-                              │  RingDim up to 65536     │
-                              └───────────┬─────────────┘
-                                          │
-                    ┌─────────────────────┴─────────────────────┐
-                    │                                           │
-          ┌─────────▼─────────┐                   ┌─────────────▼───────────┐
-          │   CIRCUIT A        │                   │      CIRCUIT B           │
-          │ (X AND Y) OR Z     │                   │ (X OR Z) AND (Y OR Z)    │
-          │ → Fractal Golden   │                   │ → Fractal Golden         │
-          └─────────┬─────────┘                   └─────────────┬───────────┘
-                    │                                           │
-                    └─────────────────────┬─────────────────────┘
-                                          │
-                              ┌───────────▼─────────────┐
-                              │   N-OBFUSCATION v3       │
-                              │   Group Shuffle +        │
-                              │   Order Scrambling       │
-                              └───────────┬─────────────┘
-                                          │
-                              ┌───────────▼─────────────┐
-                              │    KS = 0.000000         │
-                              │  STRUCTURALLY iO         │
-                              │  Attacker: 50% (random)  │
-                              └─────────────────────────┘
+Plaintext → GF-N Encrypt → CKKS FHE Encrypt → iO Obfuscation → FHE Computation → Bootstrap → Decrypt → Plaintext
 ```
 
----
+| Step | What Happens | Security |
+|------|--------------|----------|
+| **1. Owner Input** | Plaintext data | Local |
+| **2. GF-N Encrypt** | N-layer Golden Fibonacci | Cassini invariant |
+| **3. CKKS FHE Encrypt** | DualGate {a,b} → CKKS ciphertext | Ring-LWE |
+| **4. iO Obfuscation** | NAND → Fractal Golden → Scramble | φ·ψ = -1 (structural) |
+| **5. FHE Computation** | Homomorphic eval + bootstrapping | Noise management |
+| **6. Owner Decrypt** | CKKS decrypt → GF-N decrypt → Plaintext | Secret key |
 
 ## Structural OS
 
