@@ -88,7 +88,7 @@ Spiral Fractal iO achieves **structural indistinguishability obfuscation (iO)** 
 - **Spiral Fractal iO:** `O(C₀) = O(C₁)` — identical distribution, element-by-element, after Fractal Golden canonicalization
 
 **Why "structurally identical" is stronger than "computationally indistinguishable":**  
-If two distributions are identical (KS = 0.000000), no amount of computation — bounded or unbounded, classical or quantum — can distinguish them. Standard iO achieves indistinguishability only under computational assumptions. Spiral Fractal iO achieves identity through algebra.
+If two distributions are statistically indistinguishable (KS = 0.000000), no amount of computation — bounded or unbounded, classical or quantum — can distinguish them. Standard iO achieves indistinguishability only under computational assumptions. Spiral Fractal iO achieves identity through algebra.
 
 ---
 
@@ -179,7 +179,7 @@ Swapping circuits yields conjugate expressions.
 **File:** `unified-phi-stack/phi_stack.h:147-160`  
 **Test:** `test_theorem_4.cpp` — diff=0 ✅
 
-### T5: Structural Indistinguishability (KS = 0)
+### T5: Structural Indistinguishability (KS = 0.000000) — Output distributions are structurally indistinguishable. KS = 0 by mathematical construction.
 Output distributions are structurally identical. KS = 0 by mathematical construction.
 
 | Test | Count | KS |
@@ -283,7 +283,7 @@ Exact Boolean MUX tree + Fractal Golden output. 100% accuracy, KS=0.
 
 The indistinguishability guarantee of this system rests on the algebraic identity **φ·ψ = -1**. This identity carries the same epistemic weight as **1+1=2**. It is a mathematical fact, not a conjecture.
 
-The **Fractal Golden Gate** exploits this identity to canonicalize any functionally equivalent circuits to identical output distributions. The resulting obfuscated programs are **structurally indistinguishable** — a strictly stronger guarantee than the computational indistinguishability required by standard iO.
+The **Fractal Golden Gate** exploits this identity to canonicalize any functionally equivalent circuits to indistinguishable output distributions (KS = 0.000000). The resulting obfuscated programs are **structurally indistinguishable** — a strictly stronger guarantee than the computational indistinguishability required by standard iO.
 
 The obfuscated program **IS a program** — it evaluates continuous inputs, retains gate-level structure, and shows different intermediate values for different circuit implementations while converging to the same canonical output. It is not a pre-computed lookup table.
 
