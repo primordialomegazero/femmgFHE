@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Fibonacci DP Scalability</title>
+    <style>
+        body { font-family: monospace; background: #0a0a0a; color: #00ff00; padding: 20px; }
+        .data { display: inline-block; margin: 10px; }
+        .bar { background: #00ff00; height: 20px; margin: 2px 0; }
+        .container { max-width: 800px; margin: 0 auto; }
+        h1 { color: #00ff88; }
+        .green { color: #00ff00; }
+        .yellow { color: #ffff00; }
+        .red { color: #ff4444; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>╔══════════════════════════════════════════════════════════════════════╗</h1>
+    <h1>║  FIBONACCI DP SCALABILITY — n=20 to n=200                        ║</h1>
+    <h1>╚══════════════════════════════════════════════════════════════════════╝</h1>
+<div> 20 | <span class="bar" style="width:8px;"> </span>    7.4 (max 10)</div>
+<div> 30 | <span class="bar" style="width:11px;"> </span>    9.2 (max 13)</div>
+<div> 40 | <span class="bar" style="width:12px;"> </span>   10.4 (max 15)</div>
+<div> 50 | <span class="bar" style="width:22px;"> </span>   19.0 (max 24)</div>
+<div> 60 | <span class="bar" style="width:17px;"> </span>   14.8 (max 19)</div>
+<div> 70 | <span class="bar" style="width:21px;"> </span>   17.6 (max 20)</div>
+<div> 80 | <span class="bar" style="width:26px;"> </span>   22.0 (max 28)</div>
+<div> 90 | <span class="bar" style="width:29px;"> </span>   24.2 (max 30)</div>
+<div>100 | <span class="bar" style="width:30px;"> </span>   25.6 (max 35)</div>
+<div>110 | <span class="bar" style="width:35px;"> </span>   29.2 (max 32)</div>
+<div>120 | <span class="bar" style="width:44px;"> </span>   37.4 (max 45)</div>
+<div>130 | <span class="bar" style="width:38px;"> </span>   31.8 (max 44)</div>
+<div>140 | <span class="bar" style="width:46px;"> </span>   39.0 (max 47)</div>
+<div>150 | <span class="bar" style="width:39px;"> </span>   32.6 (max 38)</div>
+<div>160 | <span class="bar" style="width:45px;"> </span>   38.0 (max 61)</div>
+<div>170 | <span class="bar" style="width:42px;"> </span>   35.8 (max 55)</div>
+<div>180 | <span class="bar" style="width:59px;"> </span>   49.4 (max 56)</div>
+<div>190 | <span class="bar" style="width:53px;"> </span>   44.2 (max 63)</div>
+<div>200 | <span class="bar" style="width:60px;"> </span>   50.0 (max 74)</div>
+
+    <br>
+    <div>Power-law fit: avg ≈ 1.0000 × n^1.0000</div>
+    <div>Exponent b = 1.0000 ⚠️ POLYNOMIAL</div>
+    <div>Growth from n=20 to 200: 6.76×</div>
+</div>
+</body>
+</html>
