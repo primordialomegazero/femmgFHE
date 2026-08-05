@@ -67,3 +67,4 @@ test_io_ctct_*
 *.txt
 WSL2-Linux-Kernel/
 WSL2-Linux-Kernel/
+secp256k1/
