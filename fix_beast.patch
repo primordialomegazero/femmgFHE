@@ -1,0 +1,10 @@
+--- a/test_rsa_to_sat_v3_beast.cpp
++++ b/test_rsa_to_sat_v3_beast.cpp
+@@ -488,7 +488,7 @@ public:
+     
+     // Extract p and q from satisfying assignment
+-    std::pair<long long, long long> extract_factors() const {
++    std::pair<long long, long long> extract_factors() {
+         long long p = 0, q = 0;
+         for (int i = 0; i < n; i++) {
+             if (solver->get_var_value(p_var(i)) == 1) p |= (1LL << i);

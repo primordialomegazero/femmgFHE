@@ -1,0 +1,272 @@
+[
+  {
+    "bits": 4,
+    "secret": 6,
+    "found": 6,
+    "nodes": 21,
+    "traces": 16,
+    "time": 0.003232240676879883,
+    "brute": 16,
+    "correct": true
+  },
+  {
+    "bits": 4,
+    "secret": 11,
+    "found": 11,
+    "nodes": 8,
+    "traces": 3,
+    "time": 0.0012359619140625,
+    "brute": 16,
+    "correct": true
+  },
+  {
+    "bits": 4,
+    "secret": 14,
+    "found": 14,
+    "nodes": 20,
+    "traces": 15,
+    "time": 0.0032134056091308594,
+    "brute": 16,
+    "correct": true
+  },
+  {
+    "bits": 5,
+    "secret": 21,
+    "found": 21,
+    "nodes": 24,
+    "traces": 18,
+    "time": 0.00677490234375,
+    "brute": 32,
+    "correct": true
+  },
+  {
+    "bits": 5,
+    "secret": 18,
+    "found": 18,
+    "nodes": 47,
+    "traces": 41,
+    "time": 0.01234745979309082,
+    "brute": 32,
+    "correct": true
+  },
+  {
+    "bits": 5,
+    "secret": 19,
+    "found": 19,
+    "nodes": 16,
+    "traces": 10,
+    "time": 0.004041910171508789,
+    "brute": 32,
+    "correct": true
+  },
+  {
+    "bits": 6,
+    "secret": 10,
+    "found": 10,
+    "nodes": 89,
+    "traces": 82,
+    "time": 0.027844667434692383,
+    "brute": 64,
+    "correct": true
+  },
+  {
+    "bits": 6,
+    "secret": 29,
+    "found": 29,
+    "nodes": 39,
+    "traces": 32,
+    "time": 0.010935544967651367,
+    "brute": 64,
+    "correct": true
+  },
+  {
+    "bits": 6,
+    "secret": 50,
+    "found": 50,
+    "nodes": 92,
+    "traces": 85,
+    "time": 0.03577542304992676,
+    "brute": 64,
+    "correct": true
+  },
+  {
+    "bits": 7,
+    "secret": 8,
+    "found": 8,
+    "nodes": 240,
+    "traces": 232,
+    "time": 0.10127782821655273,
+    "brute": 128,
+    "correct": true
+  },
+  {
+    "bits": 7,
+    "secret": 91,
+    "found": 91,
+    "nodes": 42,
+    "traces": 34,
+    "time": 0.01212000846862793,
+    "brute": 128,
+    "correct": true
+  },
+  {
+    "bits": 7,
+    "secret": 14,
+    "found": 14,
+    "nodes": 146,
+    "traces": 138,
+    "time": 0.042497873306274414,
+    "brute": 128,
+    "correct": true
+  },
+  {
+    "bits": 8,
+    "secret": 9,
+    "found": 9,
+    "nodes": 225,
+    "traces": 216,
+    "time": 0.10356998443603516,
+    "brute": 256,
+    "correct": true
+  },
+  {
+    "bits": 8,
+    "secret": 206,
+    "found": 206,
+    "nodes": 286,
+    "traces": 277,
+    "time": 0.10234355926513672,
+    "brute": 256,
+    "correct": true
+  },
+  {
+    "bits": 8,
+    "secret": 129,
+    "found": 129,
+    "nodes": 255,
+    "traces": 246,
+    "time": 0.08566594123840332,
+    "brute": 256,
+    "correct": true
+  },
+  {
+    "bits": 8,
+    "secret": 145,
+    "found": 145,
+    "nodes": 240,
+    "traces": 231,
+    "time": 0.13710999488830566,
+    "brute": 256,
+    "correct": true
+  },
+  {
+    "bits": 8,
+    "secret": 26,
+    "found": 26,
+    "nodes": 338,
+    "traces": 329,
+    "time": 0.11257028579711914,
+    "brute": 256,
+    "correct": true
+  },
+  {
+    "bits": 9,
+    "secret": 256,
+    "found": 256,
+    "nodes": 1022,
+    "traces": 1012,
+    "time": 0.445115327835083,
+    "brute": 512,
+    "correct": true
+  },
+  {
+    "bits": 9,
+    "secret": 123,
+    "found": 123,
+    "nodes": 141,
+    "traces": 131,
+    "time": 0.053316354751586914,
+    "brute": 512,
+    "correct": true
+  },
+  {
+    "bits": 9,
+    "secret": 265,
+    "found": 265,
+    "nodes": 448,
+    "traces": 438,
+    "time": 0.17224836349487305,
+    "brute": 512,
+    "correct": true
+  },
+  {
+    "bits": 10,
+    "secret": 537,
+    "found": 537,
+    "nodes": 833,
+    "traces": 822,
+    "time": 0.3969118595123291,
+    "brute": 1024,
+    "correct": true
+  },
+  {
+    "bits": 10,
+    "secret": 103,
+    "found": 103,
+    "nodes": 212,
+    "traces": 201,
+    "time": 0.10965323448181152,
+    "brute": 1024,
+    "correct": true
+  },
+  {
+    "bits": 10,
+    "secret": 648,
+    "found": 648,
+    "nodes": 1912,
+    "traces": 1901,
+    "time": 0.867476224899292,
+    "brute": 1024,
+    "correct": true
+  },
+  {
+    "bits": 11,
+    "secret": 194,
+    "found": 194,
+    "nodes": 3026,
+    "traces": 3014,
+    "time": 1.585209846496582,
+    "brute": 2048,
+    "correct": true
+  },
+  {
+    "bits": 11,
+    "secret": 148,
+    "found": 148,
+    "nodes": 3442,
+    "traces": 3430,
+    "time": 1.6673216819763184,
+    "brute": 2048,
+    "correct": true
+  },
+  {
+    "bits": 12,
+    "secret": 2374,
+    "found": 2374,
+    "nodes": 5042,
+    "traces": 5029,
+    "time": 2.8980913162231445,
+    "brute": 4096,
+    "correct": true
+  },
+  {
+    "bits": 12,
+    "secret": 876,
+    "found": 876,
+    "nodes": 6445,
+    "traces": 6432,
+    "time": 3.847870349884033,
+    "brute": 4096,
+    "correct": true
+  }
+]

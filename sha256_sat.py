@@ -134,8 +134,8 @@ class SHA256SatCircuit:
     def SHR_word(self, X, n):
         result = self.new_vars(self.bits)
         for i in range(self.bits):
-            if i + n < self.bits:
-                self.force_false(self.XOR(result[i], X[i + n]))
+            if i >= n:
+                self.force_false(self.XOR(result[i], X[i - n]))
             else:
                 self.force_false(result[i])
         return result
