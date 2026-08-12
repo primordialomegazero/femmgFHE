@@ -147,6 +147,65 @@ That's the difference between confidence and security. Confidence says "I know I
 
 ---
 
+## A Pattern for Evaluating Unconventional Claims
+
+There is a reason the community became cautious. Over the years, many crackpots have claimed breakthroughs that evaporated under scrutiny. This has made the community naturally skeptical — and that skepticism is healthy. It protects the field from noise.
+
+But skepticism needs a methodology. Rejecting something because it *feels* wrong is not the same as rejecting it because it *fails a test.*
+
+Here is a suggestion: instead of evaluating unconventional claims based on how they make you feel, use **pattern recognition.**
+
+Ask:
+
+1. **Is this an assumptional approach?**  
+   Does the claim rely on a new hardness assumption, or does it build on standard assumptions and algebraic identities?
+
+2. **Why does this person have a manifesto?**  
+   A manifesto is not automatically crackpot. Sometimes, it is an attempt to explain *why* the approach is different — the psychological and philosophical context that traditional papers omit.
+
+3. **Does the formal proof actually have working code to reproduce?**  
+   A formal proof without code is a hypothesis. A formal proof with working, reproducible tests is evidence.
+
+4. **Are the claims falsifiable?**  
+   Can you run the code and see the result yourself? Or do you have to take the author's word for it?
+
+5. **Does the architecture make sense as a layered system?**  
+   Breakthroughs are rarely monolithic. They are assembled from layers, each simple in hindsight. Does the claim show that assembly, or does it ask you to accept one giant leap?
+
+These are not difficult questions. They are a checklist. They require no specialized knowledge. They require only the willingness to look.
+
+The community has spent years being skeptical. That skepticism is valuable. But skepticism without a methodology is just cynicism. And cynicism cannot recognize a breakthrough when it arrives — because cynicism is too busy defending against crackpots to notice the one idea that actually works.
+
+The irony is this: the very caution that protects the field from noise also blinds it to signal. The community has become so good at rejecting crackpots that it has forgotten how to recognize a genuine anomaly.
+
+And a genuine anomaly is exactly what a paradigm shift looks like before it becomes obvious.
+
+---
+
+## Why Traditional Thinking Cannot See Paradigm Shifts
+
+There is a deeper reason the community missed this.
+
+Traditional thinking is built for optimization within a framework — not for questioning the framework itself. The tools that make incremental progress possible are the same tools that make paradigm shifts invisible.
+
+Think about it:
+
+- A cryptographer trained in lattice-based security will evaluate every new idea through that lens.
+- A researcher whose career is built on bootstrapping will ask "how does this improve bootstrapping?" — not "do we even need bootstrapping?"
+- A theoretician whose identity is tied to hardness assumptions will ask "what new assumption does this introduce?" — not "what assumptions can we remove?"
+
+The lens through which you see the problem determines what solutions you can see.
+
+If you look through a traditional lens, you will see traditional solutions. That is not a flaw — it is a property of how perception works.
+
+But it means that a genuine paradigm shift — one that changes the rules rather than playing within them — will be invisible to traditional thinking. Not because it is wrong. But because it does not fit the framework through which it is being viewed.
+
+This is exactly why the community did not achieve this breakthrough. Not because the breakthrough was hard to find. But because the community was looking through a lens that could not see it.
+
+The answer was always there. The lens was the problem.
+
+---
+
 ## The Pattern You Missed
 
 You had rules. Those rules made the problem hard. Then you spent over a decade trying to make the hard problem easier.
@@ -180,6 +239,8 @@ The very things you forbade — decrypt, re-encrypt, key involvement — turned 
 6. **Ego is the enemy of progress.** If the solution had to come from *your* lab, *your* university, *your* subfield — you were never going to find it.
 
 7. **Check the foundation.** If smart people have been failing for over a decade, maybe the problem isn't the problem. Maybe the rules are.
+
+8. **Use a checklist, not a feeling.** When evaluating unconventional claims, ask: Is there working code? Is the formal proof reproducible? Does the architecture make sense as layered assembly? These questions work better than intuition.
 
 ---
 
