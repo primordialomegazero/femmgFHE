@@ -1,6 +1,10 @@
 // ================================================================
-// SPIRAL iO — FINAL COMPLETE v3 (FIXED: Read correct output slot)
+// SPIRAL iO — FINAL COMPLETE v3 (DYNAMIC ARRAYS, SCALABLE)
 // ================================================================
+// FIXED: ObfuscatedProgram now uses std::vector instead of fixed
+// arrays. Supports arbitrary gate counts. No more segfault.
+// ================================================================
+
 #pragma once
 
 #include <iostream>
@@ -10,6 +14,9 @@
 #include "openfhe.h"
 
 using namespace lbcrypto;
+
+constexpr double PHI = 1.6180339887498948482;
+constexpr double PSI = -0.6180339887498948482;
 
 namespace SpiralIO {
 
@@ -48,7 +55,6 @@ struct FHEContext {
         return cc->Encrypt(pk, pt);
     }
     
-    // FIX: Decrypt specific slot instead of always slot 0
     double dec_slot(const Ciphertext<DCRTPoly>& ct, int slot = 0) {
         Plaintext pt; cc->Decrypt(sk, ct, &pt);
         return pt->GetCKKSPackedValue()[slot].real();
@@ -63,18 +69,18 @@ struct FHEContext {
 
 class iOComplete {
 public:
-    static constexpr int MAX_GATES = 4;
-    static constexpr int MAX_INPUTS = 2;
-    
     struct ObfuscatedProgram {
-        Ciphertext<DCRTPoly> coeff_in1[MAX_GATES];
-        Ciphertext<DCRTPoly> coeff_in2[MAX_GATES];
-        int num_gates, num_inputs, total_wires;
+        std::vector<Ciphertext<DCRTPoly>> coeff_in1; // DYNAMIC
+        std::vector<Ciphertext<DCRTPoly>> coeff_in2; // DYNAMIC
+        int num_gates;
+        int num_inputs;
+        int total_wires;
     };
     
     static ObfuscatedProgram obfuscate(
         FHEContext& fhe,
-        int num_inputs, int num_gates,
+        int num_inputs,
+        int num_gates,
         const std::vector<std::vector<double>>& gate_in1,
         const std::vector<std::vector<double>>& gate_in2
     ) {
@@ -90,8 +96,8 @@ public:
                 p1[w] = gate_in1[g][w];
                 p2[w] = gate_in2[g][w];
             }
-            prog.coeff_in1[g] = fhe.enc_vector(p1);
-            prog.coeff_in2[g] = fhe.enc_vector(p2);
+            prog.coeff_in1.push_back(fhe.enc_vector(p1));
+            prog.coeff_in2.push_back(fhe.enc_vector(p2));
         }
         return prog;
     }
@@ -139,7 +145,7 @@ public:
 inline void demo_io_complete() {
     std::cout << std::fixed << std::setprecision(4);
     std::cout << "===============================================================\n";
-    std::cout << "  SPIRAL iO — FINAL v3 (Fixed slot read)\n";
+    std::cout << "  SPIRAL iO — DYNAMIC (Scalable)\n";
     std::cout << "===============================================================\n\n";
     
     FHEContext fhe;
@@ -156,8 +162,7 @@ inline void demo_io_complete() {
     auto prog = iOComplete::obfuscate(fhe, NI, NG, in1, in2);
     std::cout << "Obfuscated: " << NG << " gates\n\n";
     
-    int output_slot = NI + NG - 1; // Slot 5
-    
+    int output_slot = NI + NG - 1;
     std::cout << "Truth table (reading slot " << output_slot << "):\n";
     std::cout << "  x y | Out  XOR\n";
     std::cout << "  " << std::string(16, '-') << "\n";
@@ -168,26 +173,14 @@ inline void demo_io_complete() {
             auto cx = fhe.enc_all((double)x);
             auto cy = fhe.enc_all((double)y);
             auto ct_out = iOComplete::evaluate(fhe, prog, {cx, cy});
-            // FIX: Read the CORRECT slot!
             double out = fhe.dec_slot(ct_out, output_slot);
             bool exp = (x != y);
             if ((out > 0.5) == exp) correct++;
             std::cout << "  " << x << " " << y << " | "
                       << std::setw(4) << out << "  " << exp
-                      << "  " << ((out > 0.5) == exp ? "✅" : "❌") << "\n";
+                      << "  " << ((out > 0.5) == exp ? "OK" : "FAIL") << "\n";
         }
     }
-    
     std::cout << "\n  Correct: " << correct << "/4\n";
-    
-    if (correct == 4) {
-        std::cout << "\n╔══════════════════════════════════════════════════════════════╗\n";
-        std::cout << "║  🎉 TRUE iO OVER FHE — ACHIEVED 🎉                         ║\n";
-        std::cout << "║  Coefficients encrypted, EvalSum routing, correct output.  ║\n";
-        std::cout << "╚══════════════════════════════════════════════════════════════╝\n";
-    }
-    
-    std::cout << "\n===============================================================\n";
 }
-
 } // namespace SpiralIO
