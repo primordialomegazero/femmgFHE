@@ -1,6 +1,18 @@
-# Contributing to Spiral Fractal iO
+# Contributing to Spiral FHE+iO
 
-First off — thank you. This is a solo project that became something massive. Contributions are welcome, but they must respect the mathematical integrity of the system.
+Thank you for your interest in contributing. This project began as a solo effort and grew into a complete FHE+iO system. Contributions are welcome, provided they maintain the mathematical and architectural integrity of the system.
+
+---
+
+## Current State (Honest Assessment)
+
+| Component | Status | Test Evidence |
+|-----------|--------|---------------|
+| FHE Unlimited Bootstrap | Production | 10,000 cycles, 9.51 c/s, 0.01% Cassini warnings |
+| iO TFHE Universal Circuit | Production | 1M gates, 10.18s, XOR 4/4 |
+| DualGate Bridge | Core proven | CKKS→TFHE conversion PASS |
+| TEE Transport | Engineering | Serialization works (44.8MB), socket integration pending |
+| Hardware TEE (SGX/TrustZone) | Not implemented | Requires hardware + SDK |
 
 ---
 
@@ -9,149 +21,167 @@ First off — thank you. This is a solo project that became something massive. C
 ```bash
 git clone https://github.com/primordialomegazero/femmgFHE.git
 cd femmgFHE
-make all        # Build OpenFHE + all binaries
-make quick-test # Run 5-test suite (Phi Stack, Seed Tree, Chaos, KEM, Integration)
+```
+
+**Prerequisites:**
+- Linux (WSL2 works)
+- 16GB RAM recommended
+- GCC 11+ or Clang 14+
+- OpenFHE v1.5.1 (stable release, not development branch)
+- GMP, NTL
+
+**Build:**
+```bash
+# Manual build (simplest)
+g++ -std=c++17 -O3 -o test_fhe tests/test_production.cpp \
+    -I. -Iopenfhe-development/src/pke/include \
+    -Iopenfhe-development/src/core/include \
+    -Iopenfhe-development/src/binfhe/include \
+    -Lopenfhe-development/build/lib \
+    -lOPENFHEpke -lOPENFHEcore -lOPENFHEbinfhe -lntl -lgmp -lm
+```
+
+**Run quick tests:**
+```bash
+./test_fhe            # FHE 10-cycle bootstrap
+./test_io_tfhe        # iO 4-gate XOR
+./test_bridge_simple  # DualGate bridge
 ```
 
 ---
 
 ## What You Can Contribute
 
-| Area | Priority | Difficulty |
-|------|----------|------------|
-| **Language Bindings** | High | Medium |
-| **Documentation & Examples** | High | Easy |
-| **Test Coverage** | Medium | Medium |
-| **Bug Reports** | High | Easy |
-| **FHE Applications** (AES, SHA, ML, DB) | Medium | Hard |
-| **Core φ-Math** | Low | Extreme |
-| **Hardware Acceleration** (GPU/FPGA) | Medium | Extreme |
-
-### Language Bindings
-We have Python and C. Need:
-- **Node.js / NPM** package
-- **Go** module
-- **Rust** crate
-- **Java** library
-
-### FHE Applications
-Working examples exist for AES-128, SHA-256, DB JOIN, ML Inference. More real-world FHE applications are welcome.
-
-### Documentation
-- Tutorials
-- API reference improvements
-- Video walkthroughs
-- Academic paper translations
+| Area | Priority | Difficulty | Notes |
+|------|----------|------------|-------|
+| Bug Reports | High | Easy | Report with reproducible test case |
+| Documentation | High | Easy | Tutorials, API docs, examples |
+| Language Bindings | Medium | Medium | Python, C already exist |
+| FHE Applications | Medium | Hard | AES, SHA, ML, DB on top of FHE |
+| Test Coverage | Medium | Medium | More edge cases, property tests |
+| Performance Optimization | Medium | Hard | GPU/FPGA, batch processing |
+| Hardware TEE | Low | Extreme | SGX/TrustZone integration |
+| Core φ-Math | Low | Extreme | Requires deep understanding |
 
 ---
 
 ## Development Setup
 
-### Requirements
-- **OS:** Linux (WSL2 works)
-- **RAM:** 8GB minimum, 16GB recommended
-- **Compiler:** GCC 11+ or Clang 14+
-- **Dependencies:** OpenFHE, libsodium, libssl, sqlite3
+**Requirements:**
+- Linux (WSL2 works)
+- 8GB minimum RAM, 16GB recommended
+- GCC 11+ or Clang 14+
+- OpenFHE v1.5.1 stable (NOT development branch — has gate mapping bugs)
 
-### Build Commands
+**Known OpenFHE Issues:**
+- Development branch: TFHE gates swapped (NAND→NOR, AND→OR)
+- Fix: Use stable v1.5.1 release
+- TOY parameters: too noisy for TFHE gates
+- Fix: Use STD128
 
-| Command | Description |
-|---------|-------------|
-| `make all` | Build OpenFHE + all binaries |
-| `make quick-test` | Run 5-test suite (~30 seconds) |
-| `make run-dev` | iO validation (RingDim 4096, ~90 min) |
-| `make run-16k` | 16K Spiral Bootstrap (~24h on 16GB) |
-| `make install` | System-wide install |
-| `make docker` | Build Docker image |
-| `make clean` | Remove binaries |
+---
 
-### Key Files
+## Key Files
 
 | File | Purpose |
 |------|---------|
-| `src/fhe/fhe_core.h` | CKKS FHE wrapper, DualGate struct |
-| `src/io/universal_compiler.h` | iO Compiler, circuit evaluation |
-| `src/refresh/spiral_bootstrap.h` | Spiral Bootstrap engine |
-| `src/crypto/golden_fibonacci.h` | GF-N Encryption |
-| `unified-phi-stack/phi_stack.h` | φ-ψ core math library |
-| `src/api/libspiral.cpp` | Stable C API |
+| `src/fhe/spiral_fhe_io_final.h` | FHE bootstrap (163 lines) |
+| `src/fhe/decrypt_layer.h` | SK isolation + GF-N |
+| `src/io/spiral_io_tfhe.h` | iO TFHE universal circuit |
+| `src/bridge/dual_gate_bridge_fixed.h` | FHE↔iO bridge |
+| `src/bridge/tee_dual_gate_bridge.h` | TEE transport |
+| `src/core/constants.h` | φ·ψ = -1 constants |
+| `src/config/gf_n_encryption.h` | GF-N encryption engine |
+| `docs/FORMAL_PROOF_FINAL.md` | Formal security proof |
 
 ---
 
 ## Pull Request Process
 
-1. **Fork** the repository
-2. **Create** a feature branch: `git checkout -b feat/my-feature`
-3. **Write** code with documentation
-4. **Test**: `make quick-test` must pass
-5. **Commit**: Clear message describing what and why
-6. **Push** and open a PR against `main`
-7. **Review**: I'll review within 72 hours
+1. Fork the repository
+2. Create feature branch: `git checkout -b feat/my-feature`
+3. Write code with documentation (WHY, not just WHAT)
+4. Test: all existing tests must pass
+5. Commit with clear message
+6. Push and open PR
 
-### PR Requirements
-- [ ] All existing tests pass (`make quick-test`)
-- [ ] New code is documented (WHY, not just WHAT)
-- [ ] No hardcoded magic numbers — use N-configurable parameters
-- [ ] KS = 0.000000 preserved (if modifying iO engine)
-- [ ] License header preserved in all files
+**PR Requirements:**
+- [ ] All existing tests pass
+- [ ] New code documented (mathematical/architectural reason)
+- [ ] No hardcoded magic numbers — use named constants
+- [ ] φ·ψ = -1 invariants preserved (if modifying core)
+- [ ] License header in all new files
+- [ ] Test evidence included (what you ran, what it measured)
 
 ---
 
 ## Code Style
 
-### Philosophy
-- **Document WHY, not just WHAT** — every struct/function needs a header comment explaining the mathematical or architectural reason it exists
-- **φ/ψ duality must be clear** in naming — `phi_project()`, `psi_val()`, `commutative_reconstruct()`
-- **Compile-time verification** via `static_assert` for all invariants
-- **N-configurable** — no hardcoded constants; everything parameterized
+**Philosophy:**
+- Document WHY, not just WHAT
+- Every struct/function needs header comment explaining the mathematical reason
+- φ/ψ duality clear in naming
+- Compile-time verification where possible
+- N-configurable — no hardcoded constants
 
-### Example
-
+**Example:**
 ```cpp
-// ═══════════════════════════════════════════════════════════════
 // DUALGATE PROJECTION — Map (a,b) pair to φ-basis
-// ═══════════════════════════════════════════════════════════════
-// φ(a,b) = a + b·φ — Active computation output
-// Used by Circuit A evaluation
-inline double phi_project(double a, double b) {
-    return a + b * PHI;
-}
+// φ_val = a·φ + b·ψ, ψ_val = a·ψ + b·φ
+// Product invariant: φ_val · ψ_val = -a² + 3ab - b²
+// Used by: FHE↔iO bridge conversion
+struct DualGateFixed {
+    double phi_val, psi_val;
+    DualGateFixed(double a, double b) {
+        phi_val = a * PHI + b * PSI;
+        psi_val = a * PSI + b * PHI;
+    }
+};
 ```
-
-### Naming Conventions
-- `N_` prefix = configurable parameter (e.g., `N_ring_dim`, `N_fne_layers`)
-- `phi_` / `psi_` = φ/ψ related functions
-- `spiral_` = Spiral Bootstrap related
-- `commutative_` = Order-independent operations
 
 ---
 
 ## Mathematical Integrity
 
-The core insight is **structural security, not computational**:
-- **φ·ψ = -1** → built-in self-cancellation
-- **Commutative reconstruction** → order-independent output
-- **KS = 0.000000** → algebraic inevitability, not approximation
+**What is proven (theorems):**
+- `φ·ψ = -1` — algebraic identity
+- `φ²+ψ² = 3` — algebraic identity
+- `FGG(v, d) = |v|` for d ≥ 1 — structural erasure
+- `DualGate projection = -a² + 3ab - b²` — invariant
 
-Any contribution that modifies the core φ-math or iO engine MUST preserve these properties. Run `test_io_ultra_circuit` with 1000+ gates to verify KS = 0.000000.
+**What is standard assumptions (not proven, widely accepted):**
+- CKKS IND-CPA security (Ring-LWE)
+- TFHE scheme security
+- GF-N key secrecy (symmetric cipher)
+
+**What is NOT claimed:**
+- We do NOT claim P=NP
+- We do NOT claim Bitcoin private key recovery
+- We do NOT claim quantum supremacy
+- We do NOT claim breaking any existing cryptographic scheme
+
+**Any contribution modifying core math MUST:**
+1. Preserve `φ·ψ = -1` invariant
+2. Not introduce new hardness assumptions
+3. Document which theorems/assumptions are used
+4. Provide test evidence
 
 ---
 
 ## Communication
 
-- **Issues**: GitHub Issues for bugs and feature requests
-- **Email**: `devilswithin13@gmail.com` for private inquiries
-- **License questions**: Same email, subject "Spiral Fractal iO — Commercial License Request"
+- **Issues:** GitHub Issues for bugs and feature requests
+- **Email:** devilswithin13@gmail.com for private inquiries
+- **Subject line:** Use "Spiral FHE+iO — [Topic]"
 
 ---
 
 ## Recognition
 
-All contributors will be listed in the repository and acknowledged in academic citations. Significant contributions may qualify for:
-- Free Pro license
-- Co-authorship on papers
-- Revenue sharing for major features
+All contributors listed in repository. Significant contributions may qualify for co-authorship on academic papers.
 
 ---
 
-*"The security is structural, not computational. KS = 0 is inevitable, not miraculous."*
+*"The security is structural, not computational. φ·ψ = -1 is a theorem, not a conjecture."*
+
+*— Dan Joseph M. Fernandez*
