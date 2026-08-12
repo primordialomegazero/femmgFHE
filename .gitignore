@@ -62,3 +62,8 @@ spiral_fhe_io_final.h
 /final_compiler.log
 /complete_compiler.log
 /main
+
+# Stray root files
+/main
+/spiral_fhe_io_final.h
+/src/refresh/
