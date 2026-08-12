@@ -4,12 +4,10 @@
 
 | Version | Supported | Notes |
 |---------|-----------|-------|
-| **v32.x** | ✅ Active | Current stable |
-| v31.x | ✅ Active | Turbo SIMD + Ultra Circuit |
-| v30.x | ✅ Active | Full audit + cleanup |
-| v29.x | ⚠️ Maintenance | Pre-license system |
-| v25.x | ⚠️ Maintenance | Fractal iO complete |
-| < v25 | ❌ End of life | Legacy architectures |
+| v47.x | ✅ Active | Current stable: FHE + iO + Bridge |
+| v46.x | ✅ Active | FHE + iO (pre-bridge) |
+| v45.x | ⚠️ Maintenance | Fractal Turing-Complete (legacy) |
+| < v45 | ❌ End of life | Historical architectures |
 
 ---
 
@@ -17,7 +15,7 @@
 
 **DO NOT open a public issue.**
 
-Email: `devilswithin13@gmail.com`
+Email: devilswithin13@gmail.com
 
 Include:
 - Affected version
@@ -26,100 +24,110 @@ Include:
 - Optional: Suggested fix
 
 ### Response Time
-- **Critical** (breaks KS=0 guarantee, exposes plaintext): 24 hours
-- **High** (license bypass, tier escalation): 48 hours
-- **Medium** (performance degradation, memory leak): 7 days
-- **Low** (documentation, non-critical): 14 days
 
-### Bug Bounty
-For critical vulnerabilities in the core iO engine or Spiral Bootstrap:
-- **Critical**: Free Unlimited license + public acknowledgment
-- **High**: Free Enterprise license
+| Severity | Response |
+|----------|----------|
+| Critical (plaintext exposure, scheme break) | 24 hours |
+| High (security bypass) | 48 hours |
+| Medium (performance, memory) | 7 days |
+| Low (documentation) | 14 days |
 
 ---
 
 ## Security Model
 
-Spiral Fractal iO security is **structural, not computational** — a paradigm shift from traditional cryptography.
+Security is **layered**: computational (standard assumptions) + structural (arithmetic identities).
 
-### Core Guarantees
+### What is Proven (Theorems)
 
-| Property | Mechanism | Proof |
-|----------|-----------|-------|
-| **iO Indistinguishability** | φ/ψ commutative reconstruction | KS = 0.000000 across all pairs |
-| **Plaintext Never Exposed** | GF-N intermediate state during bootstrap | CKKS decrypt → GF ciphertext (not plaintext) |
-| **Branch Isolation** | Irrational φ-branching | Compromise 1 branch → others safe |
-| **Matrix Invertibility** | Cassini invariant > 0.1 per layer | (1/10^16)^N compound probability |
-| **Side-Channel Defense** | 3-phase Spiral Obfuscation | Active during critical decrypt window |
-| **Key Recovery** | Deterministic Seed Tree | 1 master seed → all branches recoverable |
+| Property | Mechanism | Source |
+|----------|-----------|--------|
+| `φ·ψ = -1` | Golden identity | `src/core/constants.h` |
+| `FGG(v,d) = \|v\|` for d ≥ 1 | Structural erasure | `src/fhe/spiral_fhe_io_final.h` |
+| DualGate projection invariant | `-a² + 3ab - b²` | `src/bridge/dual_gate_bridge_fixed.h` |
+| Cassini invariant | `\|φ·y1 + ψ·y2 + 1\| < 0.1` | `src/config/gf_n_encryption.h` |
 
-### Mathematical Foundation
+### What is Standard Assumptions
 
-```
-φ·ψ = -1                    → Built-in self-cancellation
-φ + ψ = 1                   → DualGate projection identity
-Commutative reconstruction  → Order-independent output
-R[Y]/(Y²-Y-1)              → φ-extension ring
-Cassini: F_{n+1}F_{n-1}-F_n² = ±1  → Always invertible
-```
+| Property | Assumption |
+|----------|-----------|
+| CKKS ciphertext security | Ring-LWE (IND-CPA) |
+| TFHE gate security | TFHE scheme security |
+| GF-N key secrecy | Symmetric cipher |
 
-### What We Are NOT Vulnerable To
+### What is NOT Claimed
 
-| Attack Vector | Status | Why |
-|---------------|--------|-----|
-| **Lattice attacks** | ❌ Not applicable | Security is algebraic, not lattice-based |
-| **Quantum attacks** | ❌ Not applicable | φ·ψ = -1 is a mathematical fact, not a hardness assumption |
-| **Side-channel timing** | ✅ Defended | 3-phase Spiral Obfuscation with Fibonacci-scaled delays |
-| **Plaintext extraction** | ✅ Defended | GF-N intermediate state during bootstrap |
-| **Circuit differentiation** | ✅ Defended | KS = 0.000000 indistinguishable output |
-| **Key extraction** | ✅ Defended | Seed Tree branch isolation |
+- ❌ Quantum resistance (CKKS/TFHE are lattice-based, quantum-sensitive)
+- ❌ Formal NIST certification
+- ❌ Perfect correctness (CKKS is approximate)
+- ❌ Side-channel immunity (software-only defense, hardware TEE needed)
 
-### Limitations (Honest Disclosure)
+---
 
-| Limitation | Impact | Mitigation |
-|------------|--------|------------|
-| **CKKS approximate arithmetic** | ±10^-10 error | Acceptable for iO (outputs are statistical distributions) |
-| **Single-point key compromise** | Master seed exposure | HSM/air-gap recommended for production |
-| **Consumer hardware limits** | 16GB = 8192 max RingDim | Enterprise tier: 64GB for 32768 |
-| **No formal NIST certification** | Regulatory compliance | Planned: NIST PQC submission |
+## Verified Test Results
+
+| Test | Result | Source File |
+|------|--------|-------------|
+| FHE 10,000 cycles | 9.51 c/s, 0.01% warnings | `test_fhe_10k_fixed.cpp` |
+| iO 1M gates | 10.18s, PASS | `test_io_tfhe_1m_sparse.cpp` |
+| iO 100 gates XOR | 4/4 correct | `test_io_tfhe_100gates.cpp` |
+| DualGate bridge | CKKS→TFHE PASS | `test_bridge_simple.cpp` |
+| Serialization | 44.8MB, recovered 0.42 | `test_serialization_fixed.cpp` |
 
 ---
 
 ## Threat Model
 
 ### Attacker Capabilities (Assumed)
-- Full access to obfuscated binary (.obf file)
-- Full access to source code of libspiral.so
-- Ability to run arbitrary FHE operations
-- Access to side-channel information (timing, power)
-- Quantum computing capabilities
 
-### Attacker Cannot
-- Distinguish Circuit A from Circuit B (KS = 0.000000)
-- Extract plaintext during Spiral Bootstrap (GF-N encrypted intermediate)
-- Break GF-N without N independent seeds (compound probability)
-- Recover master seed from any branch seed (φ is irrational)
-- Invert φ-rotation chaos (Lyapunov > 0, non-invertible)
+- Full access to source code
+- Full access to ciphertexts
+- Ability to run arbitrary FHE operations
+- Quantum computing capabilities (for lattice attacks)
+
+### Attacker Cannot (Based on Architecture)
+
+- **Extract plaintext during bootstrap:** The bootstrap decrypts to GF-N intermediate, not plaintext. Source: `src/fhe/decrypt_layer.h`
+- **Distinguish circuits of same size:** Encrypted coefficients under TFHE. Source: `src/io/spiral_io_tfhe.h`
+- **Break GF-N without key:** Multi-layer encryption with y2_trail. Source: `src/config/gf_n_encryption.h`
+
+### What Attacker CAN Do
+
+- **Lattice attacks on CKKS/TFHE ciphertexts:** These rely on standard Ring-LWE hardness. If Ring-LWE breaks, ciphertexts are vulnerable. This is an inherent limitation of all lattice-based FHE.
+- **Side-channel on untrusted server:** If the server is compromised at OS level, memory dump may reveal plaintext during computation. Mitigation: TEE (SGX/TrustZone) — not yet implemented.
+
+---
+
+## Limitations (Honest Disclosure)
+
+| Limitation | Impact | Mitigation |
+|-----------|--------|------------|
+| CKKS approximate arithmetic | ±10^-10 error | Acceptable for statistical outputs |
+| TEE not implemented | Plaintext exposure on compromised server | Hardware TEE required for production |
+| OpenFHE v1.5.1 dependency | Gate mapping bugs in dev branch | Use stable release only |
+| No formal audit | Regulatory compliance | Seeking academic review |
 
 ---
 
 ## Audit Status
 
-| Date | Version | Auditor | Result |
-|------|---------|---------|--------|
-| 2026-08-02 | v32.0 | Self-audit (full) | KS = 0.000000, all tests passed |
-| *Pending* | — | *External audit* | *Seeking academic review* |
+| Date | Version | Type | Result |
+|------|---------|------|--------|
+| 2026-08-13 | v47.0 | Self-audit | All documented tests pass |
+| Pending | — | External | Seeking academic review |
 
 ---
 
-## Responsible Disclosure Timeline
+## Responsible Disclosure
 
-1. **Report** received via email
-2. **Acknowledgment** within 48 hours
-3. **Investigation** and fix within timeframe based on severity
-4. **Patch** released
-5. **Public disclosure** after 30 days or upon mutual agreement
+1. Report via email
+2. Acknowledgment within 48 hours
+3. Investigation within severity timeframe
+4. Patch released
+5. Public disclosure after 30 days or mutual agreement
 
 ---
 
-*"The security is structural, not computational. KS = 0 is inevitable, not miraculous."*
+*"The security is layered: computational where necessary, structural where possible. φ·ψ = -1 is a theorem, not a conjecture."*
+
+*— Dan Joseph M. Fernandez*
