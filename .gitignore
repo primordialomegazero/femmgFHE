@@ -1,19 +1,11 @@
-# Build
-bin/
 build/
+bin/
 *.o
 *.so
 *.a
-main
 *.log
-
-# Dependencies
+*.pyc
 openfhe-development/
-SEAL/
-secp256k1/
-external/
-
-# Hidden (unlock later)
 archive/
 research/
 benchmarks/
@@ -22,24 +14,10 @@ k8s/
 monitoring/
 unified-phi-stack/
 fractal_db*/
-
-# IDE/OS
+external/
+secp256k1/
+__pycache__/
+.DS_Store
 .vscode/
 .idea/
-.DS_Store
-*.pyc
-__pycache__/
-
-# Experimental iO files (keep only essential 5)
-src/io/spiral_io_cancel.h
-src/io/spiral_io_debug.h
-src/io/spiral_io_final_fix.h
-src/io/spiral_io_layer2_tago.h
-src/io/spiral_io_layer4_normalize.h
-src/io/spiral_io_layer5_encrypted.h
-src/refresh/
-src/core/true_fhe_io.h
-src/phi_miner_engine.cpp
-prove_it*
-spiral_fractal_turing_complete.h
-test_*
+*.txt
