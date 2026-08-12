@@ -1,137 +1,73 @@
 # Changelog
 
-All notable changes to Spiral Fractal iO / FEmmg-FHE / Primordial Omega Zero.
+All notable changes to Spiral FHE+iO / femmgFHE.
 
-## [v30.0] — 2026-08-02
-### Full Audit & Cleanup
-- Unified Phi Stack rebuilt: `phi_stack.h` + 10/10 tests passed
-- Bindings deduped: removed duplicate `src/bindings/`, kept root `bindings/` (16 files, 5 languages)
-- KEM verified: 30/30 passed, NIST Level 5, 192 bytes, QR-ready
-- HydraJWT verified: 2 heads active (Schnorr + φ-HMAC), sign/verify, multi-user isolation
-- Seed Tree verified: 8 branches, deterministic recovery from 1 master seed
-- 90+ old breakthrough tests archived, 2 core remain: `test_io_batched` + `test_io_16k_spiral`
-- Single refresh engine: `spiral_bootstrap.h`
+---
 
-## [v29.0] — 2026-08-02
-### iO Refresh Unification
-- 80+ old breakthrough tests archived
-- All active tests unified under `spiral_bootstrap.h`
-- `test_io_batched` migrated from `emergent_refresh.h` → `spiral_bootstrap.h`
+## [v47.0] — 2026-08-13
 
-## [v28.0 - v28.5] — 2026-08-01
-### Documentation Sprint
-- Whitepaper: Complete academic paper with 9 theorems
-- API Reference: 13 modules fully documented
-- Benchmark Report: Complete performance analysis
-- All 12 core modules fully documented
+### Complete System: FHE + iO + Bridge
 
-## [v27.0 - v27.9] — 2026-07-31
-### Spiral Bootstrap + Production Readiness
-- Spiral Bootstrap complete: GF-N + CKKS + 3-phase Spiral Obfuscation
-- Formal Security Proof: 9 Theorems, Structural iO via Algebraic Identity
-- FHE Applications: AES-128, SHA-256, DB JOIN, ML Inference
-- Multi-Metaprogramming: Compile-Time Auto-Tuning
-- LICENSE: Fairer terms
+**FHE Unlimited Bootstrap:**
+- 10,000 cycles verified (9.51 c/s, 0.01% Cassini warnings)
+- No circular security assumption
+- GF-N decrypt layer with structural erasure
+- Source: `src/fhe/spiral_fhe_io_final.h` (163 lines)
 
-## [v26.0 - v26.11] — 2026-07-30
-### DevOps & Production
-- Docker, CI/CD, docker-compose, Makefile, Troubleshooting guide
-- Grafana dashboard, Log rotation, Benchmark scripts
-- Health endpoints, K8s manifests, Secrets management
-- Ultra Rashomon KEM + PHI-TLS + ZKP-PQC + Blackhole Defense complete
+**iO TFHE Universal Circuit:**
+- 1,000,000 gates verified (10.18s)
+- Built-in bootstrapping per gate — unlimited depth
+- Encrypted coefficients — indistinguishable circuits
+- Source: `src/io/spiral_io_tfhe.h` (163 lines)
 
-## [v25.0] — 2026-07-29
-### Fractal iO Complete
-- Batched, N-Configurable, KS = 0.000000
-- Hardware sentinel, compile-time optimizer
-- Multi-language bindings: Python, C, Go, Rust
+**DualGate Bridge:**
+- CKKS ↔ TFHE conversion verified
+- Projection invariant: `-a² + 3ab - b²`
+- TEE transport simulation
+- Source: `src/bridge/dual_gate_bridge_fixed.h`
 
-## [v23.0] — 2026-07-28
-### Lyapunov-Stabilized Floating Point FHE
-- IEEE 754 floating-point FHE
-- 34,172 tests, 32/32 security
-- 1M TRUE FHE Benchmark: 22.7K TPS, 100% Accuracy
+**Documentation:**
+- Formal Security Proof v47 (accurate, no overclaiming)
+- On Breakthroughs and Prisons (manifesto)
+- README, SECURITY, CONTRIBUTING, LICENSE — all updated
 
-## [v22.0 - v22.3] — 2026-07-27
-### CTU v5 + Production Systems
-- Self-Referential Chaos + Butterfly Snowball + E=mφ² Avalanche
-- VOID ENGINE + 256-bit φ-NONCE + TIME MANIPULATION + BLACKHOLE
-- Smart Auto-Sensitivity FHE, Native ML-KEM-1024 via liboqs
-- Riemann φ-Spiral, White Manipulation
+**Repository Cleanup:**
+- Tests moved to `tests/`
+- Examples moved to `examples/`
+- Duplicates removed
+- 9 root files only
 
-## [v21.0] — 2026-07-26
-### Security Hardening
-- Anti-Matter defense system
-- 1 TRILLION + 100B Mixed ops
-- IACR paper: Game 2→3 gap closed with 2^{-216} bound
+---
 
-## [v20.0] — 2026-07-25
-### Fibonacci-Lyapunov Breakthrough
-- 10 BILLION operations
-- 21.7M TPS, Fibonacci-Lyapunov stabilization
-- FORTRESS v20: The Breakthrough
+## [v46.0] — 2026-08-12
 
-## [v17.0 - v17.5] — 2026-07-24
-### Multi-Metaprogramming + OCC
-- Optimal Contraction Coefficient (OCC = φ⁻¹ = 0.618)
-- Riemann φ-Spiral Perturbation
-- 7D Sine-Coupled Map Lattice IND-CPA
-- NPM + Docker + GHCR
+### FHE Production + iO Architecture
 
-## [v16.0] — 2026-07-23
-### Phi-Zeta Stabilized
-- φ^n Riemann zero spacing discovered
-- 19M TPS, 8/8 tests
-- IACR paper v16.0 FINAL
+- FHE bootstrap: 163 lines, unlimited depth
+- DecryptLayer: SK isolation + GF-N
+- iO CKKS EvalSum: 4/4 XOR (bounded)
+- Layer architecture: BURA, TAGO, MultiDimCancel
+- Formal proof v46
 
-## [v12.0] — 2026-07-22
-### Lyapunov Proof
-- 30/30 Dark Abyss
-- Zero nonce, perfect symmetry, fully blind
-- φ self-reference insight
+---
 
-## [v8.0] — 2026-07-21
-### True FHE
-- 10^12 float precision
-- Ultra-minimal nonce
-- 24/25 Abyss Gauntlet
+## [v45.0] — 2026-08-12
 
-## [v6.0 - v6.2] — 2026-07-20
-### ZK Server + CORE Security
-- Zero-Knowledge Server
-- Multi-stage Docker
-- Corrected multiply formula, symmetric nonce
+### Fractal Turing-Complete iO+FHE
 
-## [v5.0] — 2026-07-19
-### Deepest Layer
-- Probabilistic Chaotic Nonce
-- IND-CPA proof
-- Formal Security Reduction
-- Multi-Client Emergent Keys
-
-## [v3.0] — 2026-07-18
-### N-Dimensional Banach Contraction
-- 13.4M TPS
-- 7D Lyapunov spectrum
-- Multi-party computation
-
-## [v2.0] — 2026-07-17
-### True FHE
-- Direct add+multiply, no bootstrapping
-- 8.5M TPS, 124K req/s, 3K concurrent
-
-## [v1.0] — 2026-07-16
-### Initial Release
-- 10M TPS True Homomorphic Encryption
-- φ-contraction engine
-- Lock-free, Zero dependencies
+- 5D fractal qubits
+- Anti-Matter structural erasure
+- GoldenGates: NAND, Hadamard, CNOT, Toffoli
+- Initial iO architecture
 
 ---
 
 ## Legend
-- 🔥 = Breakthrough
-- 🛡️ = Security
+
+- 🔧 = Engineering
 - 📚 = Documentation
-- 🏗️ = Architecture
-- 🚀 = Performance
 - 🧹 = Cleanup
+
+---
+
+*Note: Previous versions (v1.0 through v44.0) contained experimental architectures that have been superseded. The current system represents a complete redesign based on `φ·ψ = -1` as the unifying foundation.*
