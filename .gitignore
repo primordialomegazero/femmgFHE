@@ -29,3 +29,17 @@ fractal_db*/
 .DS_Store
 *.pyc
 __pycache__/
+
+# Experimental iO files (keep only essential 5)
+src/io/spiral_io_cancel.h
+src/io/spiral_io_debug.h
+src/io/spiral_io_final_fix.h
+src/io/spiral_io_layer2_tago.h
+src/io/spiral_io_layer4_normalize.h
+src/io/spiral_io_layer5_encrypted.h
+src/refresh/
+src/core/true_fhe_io.h
+src/phi_miner_engine.cpp
+prove_it*
+spiral_fractal_turing_complete.h
+test_*
