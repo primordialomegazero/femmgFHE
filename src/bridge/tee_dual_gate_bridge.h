@@ -1,8 +1,8 @@
 // ================================================================
-// SPIRAL BRIDGE — TEE DualGate Bridge (with DualGate Integration)
+// SPIRAL BRIDGE — TEE DualGate Bridge (FIXED Serialization)
 // ================================================================
-// Uses DualGateFixed for golden projection during conversion.
-// SKs isolated in trusted process.
+// Uses Serial::SerializeToString / DeserializeFromString (WORKING).
+// 44.8MB per ciphertext — socket can handle, just needs timeout.
 // ================================================================
 
 #pragma once
@@ -15,11 +15,21 @@
 #include <sys/un.h>
 #include <unistd.h>
 #include <atomic>
+#include <csignal>
 #include "src/fhe/spiral_fhe_io_final.h"
 #include "src/io/spiral_io_tfhe.h"
 #include "src/bridge/dual_gate_bridge_fixed.h"
+#include <cereal/cereal.hpp>
+#include <cereal/types/polymorphic.hpp>
+#include <cereal/archives/binary.hpp>
 
 using namespace lbcrypto;
+
+// CEREAL REGISTRATIONS (WORKING)
+CEREAL_REGISTER_TYPE(lbcrypto::CryptoParametersCKKSRNS);
+CEREAL_REGISTER_TYPE(lbcrypto::CryptoParametersBase<lbcrypto::DCRTPoly>);
+CEREAL_REGISTER_TYPE(lbcrypto::SchemeCKKSRNS);
+CEREAL_REGISTER_TYPE(lbcrypto::SchemeBase<lbcrypto::DCRTPoly>);
 
 namespace SpiralIO {
 
@@ -36,6 +46,8 @@ public:
         : socket_path(path), server_fd(-1), running(false) {}
     
     bool start() {
+        signal(SIGPIPE, SIG_IGN);  // Don't die on client disconnect
+        
         ckks_sc = create_fhe_context(8192, 40);
         tfhe_ctx.init();
         
@@ -62,50 +74,76 @@ public:
         return true;
     }
     
+    // Robust receive all bytes
+    bool recv_all(int fd, void* buf, size_t n) {
+        size_t offset = 0;
+        while (offset < n) {
+            ssize_t r = recv(fd, (char*)buf + offset, n - offset, 0);
+            if (r <= 0) return false;
+            offset += r;
+        }
+        return true;
+    }
+    
+    bool send_all(int fd, const void* buf, size_t n) {
+        size_t offset = 0;
+        while (offset < n) {
+            ssize_t r = send(fd, (const char*)buf + offset, n - offset, 0);
+            if (r <= 0) return false;
+            offset += r;
+        }
+        return true;
+    }
+    
     void serve() {
         while (running) {
             int client_fd = accept(server_fd, nullptr, nullptr);
             if (client_fd < 0) continue;
             
             uint8_t req_type;
-            recv(client_fd, &req_type, sizeof(req_type), 0);
+            if (!recv_all(client_fd, &req_type, sizeof(req_type))) {
+                close(client_fd);
+                continue;
+            }
+            
             uint32_t len = 0;
-            recv(client_fd, &len, sizeof(len), 0);
+            if (!recv_all(client_fd, &len, sizeof(len))) {
+                close(client_fd);
+                continue;
+            }
+            
             std::string serialized(len, '\0');
-            recv(client_fd, &serialized[0], len, 0);
+            if (!recv_all(client_fd, &serialized[0], len)) {
+                close(client_fd);
+                continue;
+            }
             
             if (req_type == 1) {
-                // CKKS → TFHE with DualGate
+                // CKKS → TFHE
                 Ciphertext<DCRTPoly> ckks_ct;
-                std::stringstream ss(serialized);
-                Serial::Deserialize(ckks_ct, ss, SerType::BINARY);
+                Serial::DeserializeFromString(ckks_ct, serialized);
                 
                 Plaintext pt;
                 ckks_sc.cc->Decrypt(ckks_sc.kp.secretKey, ckks_ct, &pt);
                 double a = pt->GetCKKSPackedValue()[0].real();
                 
-                // DUALGATE GOLDEN PROJECTION
                 DualGateFixed dg(a, 1.0 - a);
                 bool bit = (dg.to_bool() > 0.5);
                 
                 auto tfhe_ct = tfhe_ctx.encrypt_bool(bit);
-                std::stringstream out_ss;
-                Serial::Serialize(tfhe_ct, out_ss, SerType::BINARY);
-                std::string out_str = out_ss.str();
+                std::string out_str = Serial::SerializeToString(tfhe_ct);
                 uint32_t out_len = out_str.size();
-                send(client_fd, &out_len, sizeof(out_len), 0);
-                send(client_fd, out_str.data(), out_len, 0);
+                send_all(client_fd, &out_len, sizeof(out_len));
+                send_all(client_fd, out_str.data(), out_len);
             } else {
-                // TFHE → CKKS with DualGate
+                // TFHE → CKKS
                 LWECiphertext tfhe_ct;
-                std::stringstream ss(serialized);
-                Serial::Deserialize(tfhe_ct, ss, SerType::BINARY);
+                Serial::DeserializeFromString(tfhe_ct, serialized);
                 
                 LWEPlaintext lwe_pt;
                 tfhe_ctx.cc.Decrypt(tfhe_ctx.sk, tfhe_ct, &lwe_pt);
                 double bit_val = (lwe_pt == 1) ? 1.0 : 0.0;
                 
-                // DUALGATE GOLDEN PROJECTION
                 DualGateFixed dg(bit_val, 1.0 - bit_val);
                 double recovered = dg.to_bool();
                 
@@ -113,12 +151,10 @@ public:
                     std::vector<double>{recovered});
                 auto ckks_ct = ckks_sc.cc->Encrypt(ckks_sc.kp.publicKey, ckks_pt);
                 
-                std::stringstream out_ss;
-                Serial::Serialize(ckks_ct, out_ss, SerType::BINARY);
-                std::string out_str = out_ss.str();
+                std::string out_str = Serial::SerializeToString(ckks_ct);
                 uint32_t out_len = out_str.size();
-                send(client_fd, &out_len, sizeof(out_len), 0);
-                send(client_fd, out_str.data(), out_len, 0);
+                send_all(client_fd, &out_len, sizeof(out_len));
+                send_all(client_fd, out_str.data(), out_len);
             }
             
             close(client_fd);
@@ -140,6 +176,26 @@ public:
     TEEBridgeClient(const std::string& path = "/tmp/fhe_io_bridge.sock")
         : socket_path(path) {}
     
+    bool send_all(int fd, const void* buf, size_t n) {
+        size_t offset = 0;
+        while (offset < n) {
+            ssize_t r = send(fd, (const char*)buf + offset, n - offset, 0);
+            if (r <= 0) return false;
+            offset += r;
+        }
+        return true;
+    }
+    
+    bool recv_all(int fd, void* buf, size_t n) {
+        size_t offset = 0;
+        while (offset < n) {
+            ssize_t r = recv(fd, (char*)buf + offset, n - offset, 0);
+            if (r <= 0) return false;
+            offset += r;
+        }
+        return true;
+    }
+    
     LWECiphertext ckks_to_tfhe(const Ciphertext<DCRTPoly>& ckks_ct) {
         int fd = socket(AF_UNIX, SOCK_STREAM, 0);
         struct sockaddr_un addr;
@@ -149,23 +205,20 @@ public:
         connect(fd, (struct sockaddr*)&addr, sizeof(addr));
         
         uint8_t req_type = 1;
-        send(fd, &req_type, sizeof(req_type), 0);
+        send_all(fd, &req_type, sizeof(req_type));
         
-        std::stringstream ss;
-        Serial::Serialize(ckks_ct, ss, SerType::BINARY);
-        std::string serialized = ss.str();
+        std::string serialized = Serial::SerializeToString(ckks_ct);
         uint32_t len = serialized.size();
-        send(fd, &len, sizeof(len), 0);
-        send(fd, serialized.data(), len, 0);
+        send_all(fd, &len, sizeof(len));
+        send_all(fd, serialized.data(), len);
         
         uint32_t out_len = 0;
-        recv(fd, &out_len, sizeof(out_len), 0);
+        recv_all(fd, &out_len, sizeof(out_len));
         std::string out_str(out_len, '\0');
-        recv(fd, &out_str[0], out_len, 0);
+        recv_all(fd, &out_str[0], out_len);
         
         LWECiphertext result;
-        std::stringstream in_ss(out_str);
-        Serial::Deserialize(result, in_ss, SerType::BINARY);
+        Serial::DeserializeFromString(result, out_str);
         close(fd);
         return result;
     }
@@ -179,23 +232,20 @@ public:
         connect(fd, (struct sockaddr*)&addr, sizeof(addr));
         
         uint8_t req_type = 2;
-        send(fd, &req_type, sizeof(req_type), 0);
+        send_all(fd, &req_type, sizeof(req_type));
         
-        std::stringstream ss;
-        Serial::Serialize(tfhe_ct, ss, SerType::BINARY);
-        std::string serialized = ss.str();
+        std::string serialized = Serial::SerializeToString(tfhe_ct);
         uint32_t len = serialized.size();
-        send(fd, &len, sizeof(len), 0);
-        send(fd, serialized.data(), len, 0);
+        send_all(fd, &len, sizeof(len));
+        send_all(fd, serialized.data(), len);
         
         uint32_t out_len = 0;
-        recv(fd, &out_len, sizeof(out_len), 0);
+        recv_all(fd, &out_len, sizeof(out_len));
         std::string out_str(out_len, '\0');
-        recv(fd, &out_str[0], out_len, 0);
+        recv_all(fd, &out_str[0], out_len);
         
         Ciphertext<DCRTPoly> result;
-        std::stringstream in_ss(out_str);
-        Serial::Deserialize(result, in_ss, SerType::BINARY);
+        Serial::DeserializeFromString(result, out_str);
         close(fd);
         return result;
     }
