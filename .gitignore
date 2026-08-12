@@ -1,0 +1,31 @@
+# Build
+bin/
+build/
+*.o
+*.so
+*.a
+main
+*.log
+
+# Dependencies
+openfhe-development/
+SEAL/
+secp256k1/
+external/
+
+# Hidden (unlock later)
+archive/
+research/
+benchmarks/
+bindings/
+k8s/
+monitoring/
+unified-phi-stack/
+fractal_db*/
+
+# IDE/OS
+.vscode/
+.idea/
+.DS_Store
+*.pyc
+__pycache__/
