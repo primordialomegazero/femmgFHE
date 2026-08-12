@@ -50,3 +50,6 @@ test_*
 *.tar.gz
 *.zip
 *.bak
+
+# Allow curated tests in tests/ directory
+!tests/test_*.cpp
