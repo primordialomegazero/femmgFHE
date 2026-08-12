@@ -1,54 +1,34 @@
 #pragma once
+#ifndef SPIRAL_CORE_CONSTANTS_H
+#define SPIRAL_CORE_CONSTANTS_H
+
 #include <cmath>
+#include <cstdint>
 
-// ================================================================
-// SPIRAL FHE+iO — CORE CONSTANTS — FIBONACCI EVOLUTION v40.0
-// ================================================================
-//
-// φ and ψ are the two roots of Y^2 - Y - 1 = 0:
-//   φ + ψ = 1
-//   φ · ψ = -1
-//   φ² + ψ² = 3
-//
-// Fibonacci Evolution: F(n) = F(n-1) + F(n-2) → φ
-// Natural rhythm. φ-crossing modulation. No arbitrary thresholds.
-// Security is structural: φ·ψ = -1 = 1+1=2.
-// ================================================================
-
-// --- GOLDEN RATIO IDENTITY ---
-constexpr double PHI = 1.6180339887498948482;  // (1 + √5) / 2
-constexpr double PSI = -0.6180339887498948482; // (1 - √5) / 2
-constexpr double PHI_PSI_PRODUCT = -1.0;       // φ · ψ = -1
-constexpr double PHI_PSI_SUM = 1.0;            // φ + ψ = 1
-constexpr double C2 = 3.0;                     // c² = φ² + ψ² = 3
-
-// --- UNIVERSAL CONSTANTS ---
+// Core mathematical constants
+#ifndef SPIRAL_PHI_DEFINED
+#define SPIRAL_PHI_DEFINED
+constexpr double PHI = 1.6180339887498948482;
+constexpr double PSI = -0.6180339887498948482;
 constexpr double PI = 3.14159265358979323846;
-constexpr double FEIGENBAUM = 4.669201609102990;
-constexpr double OMEGA = 0.5671432904097838;
+constexpr double EULER = 2.71828182845904523536;
+constexpr double CASSINI_THRESHOLD = 0.1;
+#endif
 
-// --- FIBONACCI EVOLUTION ---
-constexpr int FIB_INITIAL_N = 2;              // Start at F(2)
-constexpr double FIB_PHI_EVOLUTION_RATE = 0.99999; // EMA factor for φ
-constexpr double FIB_MODULATION_GUARD = 1e100;     // Overflow guard
+// FHE defaults
+constexpr uint32_t DEFAULT_RING_DIM = 8192;
+constexpr uint32_t DEFAULT_DEPTH = 60;
+constexpr uint32_t DEFAULT_BATCH_SIZE = 512;
 
-// --- τ-LOCKED BUBBLE ---
-constexpr double TAU_VOID = 1.0;              // τ = φ + ψ = 1
-constexpr double BUBBLE_INITIAL_PHI = 0.42;   // Initial φ state
-constexpr double BUBBLE_INITIAL_PSI = 0.42;   // Initial ψ state
-constexpr double BUBBLE_INITIAL_TAU = 0.84;   // Initial τ = φ + ψ
+// GF-N defaults
+constexpr int DEFAULT_GF_LAYERS = 5;
+constexpr int DEFAULT_BASE_N = 50;
+constexpr int DEFAULT_N_STEP = 7;
 
-// --- ANTI-MATTER iO ---
-constexpr int IO_DIMENSIONS = 3;              // Matrix dimensions
-constexpr int IO_RECURSION_DEPTH = 5;          // Recursive layers
-constexpr double IO_KS_TARGET = 0.0;           // M + (-M) = 0
+// Security levels
+constexpr int SECURITY_STANDARD = 1;
+constexpr int SECURITY_ELEVATED = 3;
+constexpr int SECURITY_MILITARY = 10;
+constexpr int SECURITY_UNIVERSE = 100;
 
-// --- ENTANGLED ZKP ---
-constexpr double ENTANGLEMENT_THRESHOLD = 0.1; // Minimum for proof
-
-// --- PRODUCTION DEFAULTS ---
-constexpr int DEFAULT_RING_DIM = 65536;        // 64K
-constexpr int DEFAULT_BATCH_SIZE = 4096;
-constexpr int DEFAULT_MULT_DEPTH = 10;
-constexpr int DEFAULT_TOTAL_CYCLES = 10000;
-constexpr int DEFAULT_LOG_INTERVAL = 1000;
+#endif // SPIRAL_CORE_CONSTANTS_H
