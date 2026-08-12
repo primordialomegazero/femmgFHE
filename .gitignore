@@ -25,7 +25,7 @@ unified-phi-stack/
 fractal_db*/
 __pycache__/
 
-# Experimental iO files (keep only 5 essential)
+# Experimental iO files
 src/io/spiral_io_cancel.h
 src/io/spiral_io_debug.h
 src/io/spiral_io_final_fix.h
@@ -40,7 +40,6 @@ src/phi_miner_engine.cpp
 prove_it*
 spiral_fractal_turing_complete.h
 spiral_fhe_io_final.h
-test_*
 
 # IDE/OS
 .vscode/
@@ -51,5 +50,15 @@ test_*
 *.zip
 *.bak
 
-# Allow curated tests in tests/ directory
-!tests/test_*.cpp
+# Stray test executables and source in root
+/test_*
+/test_*.*
+/tee_bridge_server
+/tee_server_main.cpp
+/spiral_fhe_io_final.h
+/prove_it*
+/spiral_compiler.log
+/spiral_complete.log
+/final_compiler.log
+/complete_compiler.log
+/main
