@@ -1,11 +1,6 @@
 // ================================================================
-// SPIRAL iO — TFHE Universal Circuit (FULLY FIXED)
+// SPIRAL iO — TFHE Universal Circuit (FULLY FIXED + not_gate)
 // ================================================================
-// Fixed: Use sk->Encrypt (secret key encryption), not pk.
-// Gate test: NAND 1,1,1,0 ✅ XOR 0,1,1,0 ✅
-// Unlimited depth via built-in bootstrapping.
-// ================================================================
-
 #pragma once
 
 #include <iostream>
@@ -29,7 +24,7 @@ struct TFHEContext {
     }
     
     LWECiphertext encrypt_bool(bool b) {
-        return cc.Encrypt(sk, b ? 1 : 0);  // FIXED: Use sk, not pk!
+        return cc.Encrypt(sk, b ? 1 : 0);
     }
     
     bool decrypt_bool(const LWECiphertext& ct) {
@@ -48,6 +43,10 @@ struct TFHEContext {
     
     LWECiphertext or_gate(const LWECiphertext& a, const LWECiphertext& b) {
         return cc.EvalBinGate(OR, a, b);
+    }
+    
+    LWECiphertext not_gate(const LWECiphertext& a) {
+        return cc.EvalNOT(a);
     }
 };
 
