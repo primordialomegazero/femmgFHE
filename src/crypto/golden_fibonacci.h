@@ -31,6 +31,8 @@ struct GoldenFibonacci {
     double G_n_minus_1;       // G_{n-1} — matrix element
     double cassini;           // Determinant = |G_{n+1}·G_{n-1} - G_n²|
     double secret_seed;       // Derived from master_seed × φ mod 1
+    
+    double get_seed() const { return secret_seed; }
 
     // ═══════════════════════════════════════════════════════════
     // Initialize with standard security parameters
