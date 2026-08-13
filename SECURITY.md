@@ -69,7 +69,7 @@ Security is **layered**: computational (standard assumptions) + structural (arit
 | Test | Result | Source File |
 |------|--------|-------------|
 | FHE 10,000 cycles | 9.51 c/s, 0.01% warnings | `test_fhe_10k_fixed.cpp` |
-| iO 1M gates | 10.18s, PASS | `test_io_tfhe_1m_sparse.cpp` |
+| PFE 1M gates | 10.18s, PASS | `test_io_tfhe_1m_sparse.cpp` |
 | iO 100 gates XOR | 4/4 correct | `test_io_tfhe_100gates.cpp` |
 | DualGate bridge | CKKS→TFHE PASS | `test_bridge_simple.cpp` |
 | Serialization | 44.8MB, recovered 0.42 | `test_serialization_fixed.cpp` |
