@@ -1,4 +1,4 @@
-# Spiral FHE+iO Technical Documentation
+# Spiral FHE+PFE Technical Documentation
 
 **Version 47.0 | August 13, 2026**
 
@@ -26,7 +26,7 @@
 Spiral FHE+iO is a unified cryptographic system providing:
 
 - **Fully Homomorphic Encryption (FHE)** with unlimited depth via GF-N bootstrap
-- **Indistinguishability Obfuscation (iO)** with unlimited depth via TFHE
+- **Circuit Privacy via Universal Circuit (PFE)** with unlimited depth via TFHE
 - **Secure Bridge** between CKKS and TFHE via DualGate golden projection
 
 **Key Properties:**
@@ -210,7 +210,7 @@ int main() {
 
 ### Overview
 
-Provides unlimited-depth iO using TFHE universal circuit.
+Provides unlimited-depth PFE (circuit privacy) using TFHE universal circuit.
 
 ### Key Structures
 

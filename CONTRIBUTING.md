@@ -9,7 +9,7 @@ Thank you for your interest in contributing. This project began as a solo effort
 | Component | Status | Test Evidence |
 |-----------|--------|---------------|
 | FHE Unlimited Bootstrap | Production | 10,000 cycles, 9.51 c/s, 0.01% Cassini warnings |
-| iO TFHE Universal Circuit | Production | 1M gates, 10.18s, XOR 4/4 |
+| PFE TFHE Universal Circuit | Production | 1M gates, 10.18s, XOR 4/4 |
 | DualGate Bridge | Core proven | CKKS→TFHE conversion PASS |
 | TEE Transport | Engineering | Serialization works (44.8MB), socket integration pending |
 | Hardware TEE (SGX/TrustZone) | Not implemented | Requires hardware + SDK |

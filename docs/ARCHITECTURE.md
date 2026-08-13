@@ -22,7 +22,7 @@
 Spiral FHE+iO is a unified cryptographic system combining:
 
 - **FHE (CKKS)** — Fully Homomorphic Encryption with unlimited depth
-- **iO (TFHE)** — Indistinguishability Obfuscation with unlimited depth
+- **PFE (TFHE)** — Indistinguishability Obfuscation with unlimited depth
 - **Bridge** — DualGate golden projection connecting CKKS and TFHE
 
 All components rest on a single algebraic foundation: `φ·ψ = -1`.
@@ -37,7 +37,7 @@ All components rest on a single algebraic foundation: `φ·ψ = -1`.
 ├─────────────────────────────────────────────────────────────┤
 │                                                             │
 │  ┌──────────────┐    ┌──────────────┐    ┌──────────────┐ │
-│  │  FHE (CKKS)  │◄──►│    BRIDGE    │◄──►│  iO (TFHE)   │ │
+│  │  FHE (CKKS)  │◄──►│    BRIDGE    │◄──►│  PFE (TFHE)   │ │
 │  │              │    │   DualGate   │    │              │ │
 │  │  Unlimited   │    │  Projection  │    │  Unlimited   │ │
 │  │  Bootstrap   │    │   φ·ψ = -1   │    │  Bootstrap   │ │

@@ -18,7 +18,7 @@ A production-ready cryptographic system achieving three milestones:
 | Objective | Status | Evidence |
 |-----------|--------|----------|
 | FHE with unlimited depth | Achieved | 10,000 cycles, 9.51 c/s, 0.01% warnings |
-| iO with unlimited depth | Achieved | 1M gates, 10.18s, XOR 4/4 |
+| PFE (Private Function Evaluation) | Achieved | 1M gates, 10.18s, XOR 4/4 |
 | FHE↔iO Bridge | Core proven | CKKS→TFHE via DualGate |
 
 All guarantees derive from the algebraic identity `φ·ψ = -1 = 1+1=2`. No unproven conjectures. Working code. Reproducible benchmarks.
@@ -242,7 +242,7 @@ FGG(v, depth) = |v| for depth ≥ 1
 
 ## Disclaimer
 
-This is production research code. The FHE unlimited bootstrap, iO TFHE universal circuit, and DualGate bridge are working implementations. The mathematics (`φ·ψ = -1`) is a theorem, not a conjecture.
+This is production research code. The FHE unlimited bootstrap, PFE via TFHE universal circuit, and DualGate bridge are working implementations. The mathematics (`φ·ψ = -1`) is a theorem, not a conjecture.
 
 - CKKS/TFHE security relies on lattice assumptions (quantum-sensitive)
 - TEE transport uses Unix socket simulation; hardware TEE not yet implemented

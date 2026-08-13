@@ -10,7 +10,7 @@
 
 ## Abstract
 
-We present Spiral FHE+iO, a unified cryptographic system achieving two milestones previously thought to require separate, complex constructions: (1) unlimited-depth Fully Homomorphic Encryption (FHE) without circular security assumptions, and (2) unlimited-depth Indistinguishability Obfuscation (iO) without multilinear maps. The system bridges these two schemes through a novel DualGate projection based on the golden ratio identity `φ·ψ = -1`. We provide formal proofs, source code, and reproducible test results demonstrating 10,000 FHE bootstrap cycles and 1,000,000 iO gate evaluations.
+We present Spiral FHE+iO, a unified cryptographic system achieving two milestones previously thought to require separate, complex constructions: (1) unlimited-depth Fully Homomorphic Encryption (FHE) without circular security assumptions, and (2) unlimited-depth Private Function Evaluation (PFE) without multilinear maps. The system bridges these two schemes through a novel DualGate projection based on the golden ratio identity `φ·ψ = -1`. We provide formal proofs, source code, and reproducible test results demonstrating 10,000 FHE bootstrap cycles and 1,000,000 iO gate evaluations.
 
 ---
 
@@ -89,7 +89,7 @@ CKKS Encrypt → Compute → DecryptLayer.bootstrap() → GF-N → Re-encrypt B0
 
 **Source:** `src/fhe/spiral_fhe_io_final.h` (163 lines)
 
-### 3.2 iO: TFHE Universal Circuit
+### 3.2 PFE: TFHE Universal Circuit
 
 **Architecture:**
 ```
