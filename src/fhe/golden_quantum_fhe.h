@@ -6,8 +6,6 @@
 #include <array>
 #include <cstdint>
 #include <iostream>
-#include <csignal>
-#include <atomic>
 
 #ifdef __AVX2__
 #include <immintrin.h>
@@ -54,7 +52,7 @@ inline void keygen(PublicKey& pk, SecretKey& sk, uint64_t seed) {
         state ^= (state >> 7);
         state ^= (state << 17);
         NTL::SetCoeff(a, i, state % Q);
-        NTL::SetCoeff(e, i, (state % 1000) == 0 ? 1 : 0);
+        NTL::SetCoeff(e, i, (state % 10000) == 0 ? 1 : 0);
     }
     pk.pk0 = -(a * s + e);
     pk.pk1 = a;
@@ -101,8 +99,8 @@ inline Cipher encrypt(const PublicKey& pk, bool bit, uint64_t nonce) {
         state ^= (state >> 7);
         state ^= (state << 17);
         NTL::SetCoeff(u, i, (state % 3) - 1);
-        NTL::SetCoeff(e0, i, (state % 1000) == 0 ? 1 : 0);
-        NTL::SetCoeff(e1, i, (state % 1000) == 0 ? 1 : 0);
+        NTL::SetCoeff(e0, i, (state % 10000) == 0 ? 1 : 0);
+        NTL::SetCoeff(e1, i, (state % 10000) == 0 ? 1 : 0);
     }
 
     Cipher ct;
@@ -139,27 +137,53 @@ inline bool quantum_decrypt(const QuantumCipher& qc, const SecretKey& sk) {
     return classical_bit && (positives > TOTAL_DIMS / 2);
 }
 
+// True homomorphic NAND: NAND(a,b) = golden_plain - (a*b)/golden_plain
 inline Cipher nand_gate(const Cipher& a, const Cipher& b) {
     init_ring();
-    long golden_square = static_cast<long>((Q / PHI) * (1.0 / PHI));
+    
+    long golden_plain = static_cast<long>(Q / PHI);
+    
+    // Multiply a*b
+    NTL::ZZ_pX t0 = a.c0 * b.c0;
+    NTL::ZZ_pX t1 = a.c0 * b.c1 + a.c1 * b.c0;
+    NTL::ZZ_pX t2 = a.c1 * b.c1;
+    
+    // s^2 = -1 sa cyclotomic ring
+    NTL::ZZ_pX mult_c0 = t0 - t2;
+    NTL::ZZ_pX mult_c1 = t1;
+    
+    // Rescale: divide by golden_plain
+    NTL::ZZ_p inv_golden;
+    inv_golden = golden_plain;
+    NTL::ZZ_p inv_val = NTL::inv(inv_golden);
+    long inv_long = NTL::conv<long>(inv_val);
+    
+    NTL::ZZ_pX scaled_c0 = mult_c0 * inv_long;
+    NTL::ZZ_pX scaled_c1 = mult_c1 * inv_long;
+    
+    // NAND = golden_plain - scaled_result
+    NTL::ZZ_pX golden_poly;
+    NTL::SetCoeff(golden_poly, 0, golden_plain);
+    
     Cipher r;
-    r.c0 = NTL::ZZ_pX();
-    NTL::SetCoeff(r.c0, 0, golden_square);
-    r.c0 = r.c0 - a.c0 * b.c0;
-    r.c1 = NTL::ZZ_pX();
+    r.c0 = golden_poly - scaled_c0;
+    r.c1 = -scaled_c1;
     return r;
 }
 
 inline Cipher NOT(const Cipher& a) { return nand_gate(a, a); }
+
 inline Cipher AND(const Cipher& a, const Cipher& b) {
     auto n = nand_gate(a, b);
     return nand_gate(n, n);
 }
+
 inline Cipher OR(const Cipher& a, const Cipher& b) {
     auto na = NOT(a);
     auto nb = NOT(b);
     return nand_gate(na, nb);
 }
+
 inline Cipher XOR(const Cipher& a, const Cipher& b) {
     auto n1 = nand_gate(a, b);
     auto n2 = nand_gate(a, n1);
