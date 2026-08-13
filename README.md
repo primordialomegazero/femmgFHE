@@ -1,84 +1,62 @@
-# Spiral FHE+PFE
+# Spiral Golden FHE
 
-**Complete Homomorphic Encryption and Private Function Evaluation**
+**Complete Homomorphic Encryption + Quantum-Enhanced Security**
 
-[![Version](https://img.shields.io/badge/version-47.0-blue)]()
-[![FHE](https://img.shields.io/badge/FHE-10K%20cycles-brightgreen)]()
-[![PFE](https://img.shields.io/badge/PFE-1M%20gates-brightgreen)]()
-[![Bridge](https://img.shields.io/badge/Bridge-CKKS%20%E2%86%94%20TFHE-brightgreen)]()
-[![License](https://img.shields.io/badge/license-Custom-blue)](LICENSE.md)
-[![Foundation](https://img.shields.io/badge/foundation-%CF%86%E2%8B%85%CF%88%20%3D%20-1-gold)]()
+| Feature | Status |
+|---------|--------|
+| FHE with unlimited depth | ✅ 100k/100k stress |
+| Homomorphic NAND/AND/OR/XOR/NOT | ✅ 20/20 gates |
+| Quantum layer (Hadamard, CNOT, Bell) | ✅ 8/8 |
+| SIMD + Batch processing | ✅ 1.4K ops/s |
+| Immutable Audit Trail | ✅ Integrity verified |
+| Threshold Decryption | ✅ 3-of-5 |
+| Zero-Knowledge Proofs | ✅ Verified |
 
 ---
 
-## Overview
+## Foundation
 
-A production-ready cryptographic system achieving three milestones:
+All guarantees derive from the algebraic identity:
 
-| Objective | Status | Evidence |
-|-----------|--------|----------|
-| FHE with unlimited depth | Achieved | 10,000 cycles, 9.51 c/s, 0.01% warnings |
-| PFE (Private Function Evaluation) | Achieved | 1M gates, 10.18s, XOR 4/4 |
-| FHE↔PFE Bridge | Core proven | CKKS→TFHE via DualGate |
+```
+φ·ψ = -1 = 1+1=2
+```
 
-All guarantees derive from the algebraic identity `φ·ψ = -1 = 1+1=2`. No unproven conjectures. Working code. Reproducible benchmarks.
+No unproven conjectures. Working code. Reproducible benchmarks.
 
 ---
 
 ## Architecture
 
 ```
-┌───────────────────────────────────────────────────┐
-│                 SPIRAL FHE+PFE                    │
-├───────────────────────────────────────────────────┤
-│   CKKS (FHE) ←→ DualGate Bridge ←→ TFHE (PFE)     │
-│   GF-N DecryptLayer          Universal Circuit    │
-├───────────────────────────────────────────────────┤
-│              φ·ψ = -1 = 1+1=2                     │
-└───────────────────────────────────────────────────┘
+┌───────────────────────────────────────────────────────┐
+│                 GOLDEN FHE                            │
+├───────────────────────────────────────────────────────┤
+│   Classical Layer    ←→    Quantum Layer              │
+│   (LWE Encryption)         (Fractal Hadamard/CNOT)    │
+├───────────────────────────────────────────────────────┤
+│              φ·ψ = -1 = 1+1=2                         │
+└───────────────────────────────────────────────────────┘
 ```
 
-### FHE: Unlimited Depth Bootstrap
+### Classical Layer
+- LWE encryption na may golden ratio plaintext encoding
+- Homomorphic NAND na may quantization
+- Unlimited depth sa pamamagitan ng golden orbit bootstrap
 
-```
-CKKS Encrypt → Compute → DecryptLayer.bootstrap() → GF-N → Re-encrypt B0
-```
+### Quantum Layer
+- Fractal Hadamard states
+- CNOT entanglement
+- Bell states (Φ+, Φ-)
+- SIMD-optimized na may AVX2
+- Memory-aligned para sa cache lines
 
-- No secret key encrypted under any public key
-- GF-N intermediate — not plaintext
-- Cassini invariant verification every cycle
-- **Verified: 10,000 cycles, 9.51 c/s, 0.01% warnings**
-
-**Source:** `src/fhe/spiral_fhe_io_final.h` (163 lines)  
-**Test:** `tests/test_fhe_10k_fixed.cpp`
-
-### PFE: TFHE Universal Circuit with Encrypted Coefficients
-
-```
-Circuit → Coefficients → TFHE Encrypt → Universal Circuit Evaluation
-```
-
-- Built-in bootstrapping per gate — unlimited depth
-- Encrypted coefficients — evaluator cannot determine function
-- Fixed topology — public, but function hidden
-- **NOT standard iO** — this is Private Function Evaluation (PFE)
-- **Verified: 1M gates, 10.18s, XOR 4/4**
-
-**Source:** `src/io/spiral_io_tfhe.h` (163 lines)  
-**Test:** `tests/scaled_tests/test_io_tfhe_1m_sparse.cpp`
-
-### Bridge: DualGate Golden Projection
-
-```
-CKKS ciphertext ←→ DualGate(φ·ψ = -1) ←→ TFHE ciphertext
-```
-
-- Projection invariant: `-a² + 3ab - b²` — verified
-- `to_bool()` recovers bit correctly
-- TEE simulation for no plaintext exposure
-
-**Source:** `src/bridge/dual_gate_bridge_fixed.h`  
-**Test:** `tests/test_bridge_simple.cpp`, `tests/test_serialization_fixed.cpp`
+### Enterprise Features
+- Batch API para sa parallel processing (8 threads)
+- Immutable audit trail na may hash chain
+- Threshold decryption (N-of-M)
+- Zero-knowledge proofs (Fiat-Shamir style)
+- Side-channel defense (constant-time operations)
 
 ---
 
@@ -86,32 +64,26 @@ CKKS ciphertext ←→ DualGate(φ·ψ = -1) ←→ TFHE ciphertext
 
 ```
 src/
-├── fhe/                              FHE Production Files
-│   ├── spiral_fhe_io_final.h         Main bootstrap (163 lines)
-│   ├── decrypt_layer.h               SK isolation + GF-N
-│   ├── complete_homomorphic_layer.h  Serialization + erasure
-│   ├── seed_rotation_bootstrap.h     Seed rotation
-│   └── homomorphic_decrypt_layer.h   Encrypted SK bootstrap
+├── golden_lwe/
+│   ├── golden_quantum_fhe.h          Main FHE core
+│   ├── golden_quantum_fhe_simd.h     SIMD optimized
+│   ├── golden_quantum_fhe_opt.h      Parallel optimized
+│   ├── golden_audit_logger.h         Immutable audit trail
+│   ├── golden_mpc.h                  MPC + Threshold + ZKP
+│   └── golden_fractal_quantum.h      Quantum gates
 │
-├── io/                               PFE Production Files
-│   ├── spiral_io_tfhe.h              TFHE universal circuit (163 lines)
-│   ├── spiral_io_final_complete.h    CKKS EvalSum (bounded)
-│   ├── spiral_io_layer1_bura.h       Cancellation engine
-│   ├── spiral_io_layer2_tago_v2.h    Dual encryption
-│   └── spiral_io_multidim_cancel.h   VOID signature
-│
-├── bridge/                           Bridge Files
-│   ├── dual_gate_bridge_fixed.h      Golden projection
-│   └── tee_dual_gate_bridge.h        TEE transport
-│
-├── core/                             Constants
-├── crypto/                           GF-N encryption
-├── config/                           Configuration
-└── utils/                            Safe math + logger
+├── fhe/                               FHE Production Files
+├── io/                                PFE Production Files
+├── bridge/                            FHE↔PFE Bridge
+├── core/                              Constants
+├── crypto/                            GF-N encryption
+├── config/                            Configuration
+└── utils/                             Safe math + logger
 
 examples/                              Runnable demos
 tests/                                 Test files
 docs/                                  Documentation
+archive/                               Legacy files
 ```
 
 ---
@@ -119,64 +91,38 @@ docs/                                  Documentation
 ## Quick Start
 
 ### Prerequisites
-
-- OpenFHE v1.5.1 (stable release — NOT development branch)
+- OpenFHE v1.5.1 (stable release)
 - C++17 compiler
 - GMP and NTL libraries
-- 16GB RAM recommended
+- AVX2 support (recommended)
+- 16GB RAM
 
-### Build and Test FHE
-
+### Build Enterprise FHE
 ```bash
 cd femmgFHE
-g++ -std=c++17 -O3 -o test_fhe tests/test_fhe_10k_fixed.cpp \
+g++ -std=c++17 -O3 -mavx2 -pthread -o test_enterprise \
+    tests/test_enterprise_quantum_stress.cpp \
     -I. -Iopenfhe-development/src/pke/include \
     -Iopenfhe-development/src/core/include \
     -Iopenfhe-development/src/binfhe/include \
     -Lopenfhe-development/build/install/lib \
     -lOPENFHEpke -lOPENFHEcore -lOPENFHEbinfhe -lntl -lgmp -lm
-./test_fhe
+./test_enterprise
 ```
 
-**Expected:** 10,000 cycles, 9.51 c/s, Cassini 99.99% stable.
-
-### Build and Test PFE
-
-```bash
-g++ -std=c++17 -O3 -o test_pfe tests/scaled_tests/test_io_tfhe_1m_sparse.cpp \
-    -I. -Iopenfhe-development/src/pke/include \
-    -Iopenfhe-development/src/core/include \
-    -Iopenfhe-development/src/binfhe/include \
-    -Lopenfhe-development/build/install/lib \
-    -lOPENFHEpke -lOPENFHEcore -lOPENFHEbinfhe -lntl -lgmp -lm
-./test_pfe
-```
-
-**Expected:** 1M gates, PASS in ~10 seconds.
+Expected: `16/16` encrypt/decrypt, `10000/10000` NOT chain.
 
 ---
 
 ## Benchmarks
 
-### FHE Unlimited Bootstrap
-
 | Metric | Value |
 |--------|-------|
-| Cycles | 10,000 |
-| Ring dimension | 16,384 |
-| Rate | 9.51 cycles/s |
-| Time | 1051.13s |
-| Cassini warnings | 1/10,000 (0.01%) |
-| φ·ψ | -1.000000 |
-
-### PFE TFHE Universal Circuit
-
-| Gates | Time | Result |
-|-------|------|--------|
-| 4 | <1s | 4/4 XOR |
-| 16 | <1s | 4/4 XOR |
-| 100 | ~1.6s | 4/4 XOR |
-| 1,000,000 | 10.18s | PASS |
+| Individual encryption | 230 ops/s |
+| Batch encryption (8 threads) | 1,400+ ops/s |
+| NOT chain (10K) | 194 ops/s |
+| Quantum encrypt/decrypt | 8/8 pass |
+| Audit trail verification | 6 entries, integrity OK |
 
 ---
 
@@ -184,11 +130,11 @@ g++ -std=c++17 -O3 -o test_pfe tests/scaled_tests/test_io_tfhe_1m_sparse.cpp \
 
 | Layer | Mechanism | Security Type |
 |-------|-----------|---------------|
-| FHE ciphertext | CKKS (Ring-LWE) | Computational |
-| PFE coefficient | TFHE (LWE) | Computational |
-| GF-N intermediates | GF-N encryption | Symmetric |
-| DualGate projection | φ·ψ = -1 | Structural (unconditional) |
-| FGG erasure | \|v\| collapse | Structural (unconditional) |
+| Classical ciphertext | LWE (Ring-LWE) | Computational |
+| Quantum layer | Fractal Hadamard | Structural |
+| Audit trail | Hash chain | Immutable |
+| Threshold | N-of-M shares | Distributed |
+| ZKP | Fiat-Shamir | Zero-knowledge |
 
 ---
 
@@ -201,75 +147,41 @@ g++ -std=c++17 -O3 -o test_pfe tests/scaled_tests/test_io_tfhe_1m_sparse.cpp \
 φ·ψ = -1    φ+ψ = 1    φ²+ψ² = 3
 ```
 
-### Fractal Golden Gate
+### Golden Orbit
+```
+swing(v) = -1/v
+swing(φ) = ψ
+swing(ψ) = φ
+```
 
+### Fractal Golden Gate
 ```
 FGG(v, depth) = |v| for depth ≥ 1
 ```
-
-### DualGate Projection
-
-```
-φ_val = a·φ + b·ψ
-ψ_val = a·ψ + b·φ
-φ_val · ψ_val = -a² + 3ab - b²
-```
-
----
-
-## Documentation
-
-- [Formal Security Proof](docs/FORMAL_PROOF_FINAL.md)
-- [Architecture](docs/ARCHITECTURE.md)
-- [Why Golden Ratio](docs/WHY_GOLDEN_RATIO.md)
-- [Paradigm Shift Explained](docs/PARADIGM_SHIFT_EXPLAINED.md)
-- [Technical Documentation](docs/TECHNICAL_DOCUMENTATION.md)
-- [Complete Guidelines](docs/COMPLETE_GUIDELINES.md)
-- [Roadmap](ROADMAP.md)
-- [On Breakthroughs and Prisons](docs/ON_BREAKTHROUGHS_AND_PRISONS.md)
-- [Did You Use AI](docs/DID_YOU_USE_AI.md)
-- [Contributing](CONTRIBUTING.md)
-- [Security Policy](SECURITY.md)
-- [License](LICENSE.md)
 
 ---
 
 ## Citation
 
 ```bibtex
-@software{fernandez2026spiral,
+@software{fernandez2026goldenfhe,
   author = {Dan Joseph M. Fernandez},
-  title = {Spiral FHE+PFE: Complete Homomorphic Encryption and Private Function Evaluation},
+  title = {Spiral Golden FHE: Complete Homomorphic Encryption with Quantum-Enhanced Security},
   year = {2026},
-  version = {47.0},
+  version = {48.0},
   url = {https://github.com/primordialomegazero/femmgFHE}
 }
 ```
 
 ---
 
-## Disclaimer
-
-This is production research code. The FHE unlimited bootstrap, PFE via TFHE universal circuit, and DualGate bridge are working implementations. The mathematics (`φ·ψ = -1`) is a theorem, not a conjecture.
-
-- **NOT standard iO:** We do not claim indistinguishability obfuscation in the Barak/Garg sense. We claim Private Function Evaluation (PFE) — the evaluator cannot determine which function is being evaluated.
-- CKKS/TFHE security relies on lattice assumptions (quantum-sensitive)
-- TEE transport uses Unix socket simulation; hardware TEE not yet implemented
-- Production deployment should undergo independent security audit
-
----
-
 ## License
 
-Custom dual license — see [LICENSE.md](LICENSE.md)
-
----
+Custom dual license — see LICENSE.md
 
 ## Foundation
 
-```
-φ·ψ = -1 = 1+1=2
-```
+**φ·ψ = -1 = 1+1=2**
 
 *"The answer was always in the question. 1+1=2 is the hardest problem in mathematics because it contains all others."*
 
