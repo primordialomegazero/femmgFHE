@@ -1,4 +1,4 @@
-#include "src/golden_lwe/golden_enterprise_quantum.h"
+#include "src/fhe/golden_enterprise_quantum.h"
 #include <iostream>
 #include <chrono>
 
@@ -22,9 +22,7 @@ int main() {
 
     for (int i = 0; i < TARGET && GoldenEnterpriseQuantum::is_running(); i++) {
         bool current_bit = dec(current);
-        // Bootstrapping: toggle sa pamamagitan ng paglipat sa kabaligtaran
         current = current_bit ? false_ct : true_ct;
-        // Ang output ay dapat kabaligtaran ng naunang bit
         bool exp = !current_bit;
         if (dec(current) == exp) correct++;
 

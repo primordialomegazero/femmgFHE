@@ -35,9 +35,16 @@ public:
 };
 
 static std::atomic<bool> g_running(true);
+static std::atomic<int> g_signal_count(0);
 static void signal_handler(int sig) {
-    Logger::warn("Shutting down gracefully...");
-    g_running = false;
+    int count = g_signal_count++;
+    if (count == 0) {
+        Logger::warn("Shutting down gracefully...");
+        g_running = false;
+    } else if (count >= 3) {
+        Logger::error("Forced shutdown");
+        _exit(1);
+    }
 }
 inline void install_signal_handlers() {
     std::signal(SIGINT, signal_handler);
