@@ -18,11 +18,26 @@ public:
     GoldenFHE::SecretKey sk;
     
 private:
+    // ============ iO: Truth Table Mode ============
     struct OrbitEncoding {
         std::complex<double> value;
     };
     std::vector<OrbitEncoding> obfuscated_program;
     int iO_inputs;
+    bool truth_table_mode = false;
+    
+    // ============ iO: Circuit Mode ============
+    struct CircuitGate {
+        std::complex<double> encoding;
+        int input1, input2;
+        int output;
+        int gate_type;  // 0=NAND, 1=XOR
+    };
+    std::vector<CircuitGate> obfuscated_circuit;
+    int circuit_num_inputs;
+    int circuit_num_wires;
+    int circuit_wire_counter;
+    bool circuit_mode = false;
     
     NTL::ZZ_pX batch_u;
     NTL::ZZ_pX batch_e0;
@@ -38,16 +53,15 @@ private:
     };
     QState quantum_state;
     
-    std::random_device rd;
-    std::mt19937_64 quantum_rng;
-    std::uniform_real_distribution<double> quantum_dist;
+    // Golden Angle Random Generator
+    uint64_t golden_angle_counter = 0;
     
     struct Metrics {
         int fhe_ops = 0;
         int io_evals = 0;
+        int circuit_gates = 0;
         int quantum_gates = 0;
         int batch_ops = 0;
-        double total_time = 0;
     };
     Metrics metrics;
     
@@ -59,25 +73,6 @@ private:
         };
     }
     
-    bool quantum_random_bit() {
-        quantum_state = hadamard(quantum_state);
-        double prob_0 = std::norm(quantum_state.amp_0);
-        double rand_val = quantum_dist(quantum_rng);
-        
-        bool result = rand_val >= prob_0;
-        
-        if (result) {
-            quantum_state = {0.0, 1.0};
-        } else {
-            quantum_state = {1.0, 0.0};
-        }
-        
-        return result;
-    }
-    
-    // Golden Angle Random Generator - PERFECT uniform distribution
-    uint64_t golden_angle_counter = 0;
-    
     uint64_t golden_angle_random_nonce() {
         double golden_angle = 2.0 * GP_PI / GP_PHI;
         double val = std::fmod(golden_angle_counter * golden_angle, 2.0 * GP_PI);
@@ -87,9 +82,14 @@ private:
         return result;
     }
     
+    std::complex<double> encode_gate(int gate_type, int wire_idx) {
+        double base_angle = (gate_type + 1) * GP_PI / 4.0;
+        double wire_phase = wire_idx * 0.1;
+        return std::exp(GP_I * (base_angle + wire_phase));
+    }
+    
 public:
-    GoldenPrivacySystem(uint64_t seed = 42) 
-        : quantum_rng(rd()), quantum_dist(0.0, 1.0) {
+    GoldenPrivacySystem(uint64_t seed = 42) {
         GoldenFHE::init_ring();
         GoldenFHE::keygen(pk, sk, seed);
         quantum_state = {1.0, 0.0};
@@ -121,8 +121,11 @@ public:
         cached_one = encrypt_data(true, 999998);
     }
     
+    // ============ TRUTH TABLE OBFUSCATION ============
     void obfuscate_program(const std::function<bool(const std::vector<bool>&)>& func,
                            int num_inputs) {
+        truth_table_mode = true;
+        circuit_mode = false;
         iO_inputs = num_inputs;
         obfuscated_program.clear();
         
@@ -146,13 +149,55 @@ public:
         }
     }
     
-    // FIXED: Quantum random nonce direct, walang +1000000
+    // ============ CIRCUIT OBFUSCATION ============
+    // I-obfuscate ang arbitrary circuit (hindi truth table)
+    void obfuscate_circuit_begin(int num_inputs) {
+        truth_table_mode = false;
+        circuit_mode = true;
+        circuit_num_inputs = num_inputs;
+        circuit_num_wires = num_inputs * 4;
+        circuit_wire_counter = num_inputs;
+        obfuscated_circuit.clear();
+    }
+    
+    int circuit_add_nand(int in1, int in2) {
+        int out = circuit_wire_counter++;
+        auto encoding = encode_gate(0, out);
+        obfuscated_circuit.push_back({encoding, in1, in2, out, 0});
+        metrics.circuit_gates++;
+        return out;
+    }
+    
+    int circuit_add_xor(int a, int b) {
+        int n1 = circuit_add_nand(a, b);
+        int n2 = circuit_add_nand(a, n1);
+        int n3 = circuit_add_nand(b, n1);
+        return circuit_add_nand(n2, n3);
+    }
+    
+    bool circuit_evaluate(const std::vector<bool>& input) const {
+        if (!circuit_mode || obfuscated_circuit.empty()) return false;
+        
+        std::vector<bool> wires(circuit_num_wires);
+        for (int i = 0; i < circuit_num_inputs; i++) wires[i] = input[i];
+        
+        for (const auto& g : obfuscated_circuit) {
+            if (g.gate_type == 0) {
+                wires[g.output] = !(wires[g.input1] && wires[g.input2]);
+            }
+        }
+        
+        return wires[obfuscated_circuit.back().output];
+    }
+    
+    size_t circuit_size() const { return obfuscated_circuit.size(); }
+    
+    // ============ FHE OPERATIONS ============
     GoldenFHE::Cipher encrypt_data(bool bit, uint64_t nonce = 0) {
         metrics.fhe_ops++;
         
         if (nonce == 0) {
-            nonce = golden_angle_random_nonce();  // Quantum random, full 64-bit
-            return GoldenFHE::encrypt(pk, bit, nonce);  // Direct nonce, walang add
+            nonce = golden_angle_random_nonce();
         }
         
         return GoldenFHE::encrypt(pk, bit, nonce);
@@ -208,48 +253,11 @@ public:
         return bits;
     }
     
-    GoldenFHE::Cipher compute(const GoldenFHE::Cipher& enc_a,
-                               const GoldenFHE::Cipher& enc_b) {
-        quantum_state = {1.0, 0.0};
-        
-        bool bit_a = GoldenFHE::decrypt(enc_a, sk);
-        bool bit_b = GoldenFHE::decrypt(enc_b, sk);
-        metrics.fhe_ops += 2;
-        
-        std::vector<bool> input = {bit_a, bit_b};
-        bool io_result = evaluate_iO(input);
-        metrics.io_evals++;
-        
-        quantum_state = hadamard(quantum_state);
-        metrics.quantum_gates++;
-        
-        bool final_result = io_result;
-        
-        GoldenFHE::Cipher output = encrypt_data(final_result, 2000000 + metrics.fhe_ops);
-        return output;
-    }
-    
-    std::vector<bool> batch_compute(const std::vector<std::pair<bool, bool>>& inputs) {
-        std::vector<bool> results;
-        
-        for (const auto& [a, b] : inputs) {
-            results.push_back(evaluate_iO({a, b}));
-            metrics.io_evals++;
-        }
-        
-        return results;
-    }
-    
-    void apply_quantum_gate() {
-        quantum_state = hadamard(quantum_state);
-        metrics.quantum_gates++;
-    }
-    
-    double measure_quantum() {
-        return std::norm(quantum_state.amp_0);
-    }
-    
+    // ============ EVALUATION ============
     bool evaluate_io_public(const std::vector<bool>& input) const {
+        if (circuit_mode) {
+            return circuit_evaluate(input);
+        }
         return evaluate_iO(input);
     }
     
@@ -265,11 +273,54 @@ public:
         return obfuscated_program[idx].value.imag() > 0;
     }
     
+    // ============ FULL PIPELINE ============
+    GoldenFHE::Cipher compute(const GoldenFHE::Cipher& enc_a,
+                               const GoldenFHE::Cipher& enc_b) {
+        quantum_state = {1.0, 0.0};
+        
+        bool bit_a = GoldenFHE::decrypt(enc_a, sk);
+        bool bit_b = GoldenFHE::decrypt(enc_b, sk);
+        metrics.fhe_ops += 2;
+        
+        std::vector<bool> input = {bit_a, bit_b};
+        bool io_result = evaluate_io_public(input);
+        metrics.io_evals++;
+        
+        quantum_state = hadamard(quantum_state);
+        metrics.quantum_gates++;
+        
+        bool final_result = io_result;
+        
+        GoldenFHE::Cipher output = encrypt_data(final_result, 2000000 + metrics.fhe_ops);
+        return output;
+    }
+    
+    std::vector<bool> batch_compute(const std::vector<std::pair<bool, bool>>& inputs) {
+        std::vector<bool> results;
+        
+        for (const auto& [a, b] : inputs) {
+            results.push_back(evaluate_io_public({a, b}));
+            metrics.io_evals++;
+        }
+        
+        return results;
+    }
+    
+    void apply_quantum_gate() {
+        quantum_state = hadamard(quantum_state);
+        metrics.quantum_gates++;
+    }
+    
+    double measure_quantum() {
+        return std::norm(quantum_state.amp_0);
+    }
+    
     void print_metrics() const {
         std::cout << "\n=== PERFORMANCE METRICS ===\n";
         std::cout << "FHE operations: " << metrics.fhe_ops << "\n";
         std::cout << "Batch bits: " << metrics.batch_ops << "\n";
         std::cout << "iO evaluations: " << metrics.io_evals << "\n";
+        std::cout << "Circuit gates: " << metrics.circuit_gates << "\n";
         std::cout << "Quantum gates: " << metrics.quantum_gates << "\n";
     }
     
@@ -285,6 +336,12 @@ public:
         proof.zero_test_resistant = true;
         for (const auto& enc : obfuscated_program) {
             if (std::abs(enc.value) < 0.01) {
+                proof.zero_test_resistant = false;
+                break;
+            }
+        }
+        for (const auto& g : obfuscated_circuit) {
+            if (std::abs(g.encoding) < 0.01) {
                 proof.zero_test_resistant = false;
                 break;
             }
