@@ -265,7 +265,8 @@ g++ -std=c++17 -O3 -march=native -pthread -I/usr/include test.cpp -o test -lntl 
 |------|--------|----------|
 | Privacy System | PASSED | 4/4 XOR cases |
 | iO Stress | PASSED | 100/100 random functions |
-| Adversarial | PASSED | 6/7 attacks blocked |
+| Circuit iO | PASSED | 4-input XOR 16/16, 8-input AND |
+| Adversarial | PASSED | 8/8 attacks blocked |
 | Benchmark | PASSED | 50,885x vs OpenFHE |
 | Batch Hybrid | PASSED | 29K ops/sec |
 
