@@ -361,7 +361,7 @@ struct Cipher {
 
 ### 10.1 Current Limitations
 
-- iO handles truth tables only (not arbitrary circuits)
+- Circuit iO supports NAND-based circuits (O(n) gates); arbitrary-depth quantum circuits remain future work
 - Q = 2^29 may be insufficient for long-term security
 - Bootstrapping is computationally expensive
 - No hardware acceleration support
