@@ -13,10 +13,12 @@ constexpr double GP_PI = 3.14159265358979323846;
 constexpr std::complex<double> GP_I(0.0, 1.0);
 
 class GoldenPrivacySystem {
-private:
+public:
+    // PUBLIC members para sa benchmarking
     GoldenFHE::PublicKey pk;
     GoldenFHE::SecretKey sk;
     
+private:
     struct OrbitEncoding {
         std::complex<double> value;
     };
@@ -87,39 +89,24 @@ public:
         return GoldenFHE::decrypt(ct, sk);
     }
     
-    // FIXED: I-reset ang quantum state sa bawat compute
     GoldenFHE::Cipher compute(const GoldenFHE::Cipher& enc_a,
                                const GoldenFHE::Cipher& enc_b) {
-        // Reset quantum state sa |0>
         quantum_state = {1.0, 0.0};
         
-        // Step 1: FHE decrypt
         bool bit_a = GoldenFHE::decrypt(enc_a, sk);
         bool bit_b = GoldenFHE::decrypt(enc_b, sk);
         metrics.fhe_ops += 2;
         
-        // Step 2: iO evaluate
         std::vector<bool> input = {bit_a, bit_b};
-        int idx = 0;
-        for (bool bit : input) {
-            idx = (idx << 1) | (bit ? 1 : 0);
-        }
-        
-        bool io_result = obfuscated_program[idx].value.imag() > 0;
+        bool io_result = evaluate_iO(input);
         metrics.io_evals++;
         
-        // Step 3: Quantum verification (Hadamard sa |0>)
         quantum_state = hadamard(quantum_state);
         metrics.quantum_gates++;
-        double quantum_prob = std::norm(quantum_state.amp_0);
-        bool quantum_verified = quantum_prob > 0.4;
         
-        // Step 4: Combine
         bool final_result = io_result;
         
-        // Step 5: FHE encrypt
         GoldenFHE::Cipher output = GoldenFHE::encrypt(pk, final_result, 2000000 + metrics.fhe_ops);
-        
         return output;
     }
     
@@ -132,12 +119,29 @@ public:
         return std::norm(quantum_state.amp_0);
     }
     
+    // PUBLIC iO evaluation
+    bool evaluate_io_public(const std::vector<bool>& input) const {
+        return evaluate_iO(input);
+    }
+    
+    // PUBLIC evaluate_iO
+    bool evaluate_iO(const std::vector<bool>& input) const {
+        if (obfuscated_program.empty()) return false;
+        
+        int idx = 0;
+        for (bool bit : input) {
+            idx = (idx << 1) | (bit ? 1 : 0);
+        }
+        
+        if (idx >= static_cast<int>(obfuscated_program.size())) return false;
+        return obfuscated_program[idx].value.imag() > 0;
+    }
+    
     void print_metrics() const {
         std::cout << "\n=== PERFORMANCE METRICS ===\n";
         std::cout << "FHE operations: " << metrics.fhe_ops << "\n";
         std::cout << "iO evaluations: " << metrics.io_evals << "\n";
         std::cout << "Quantum gates: " << metrics.quantum_gates << "\n";
-        std::cout << "Total time: " << metrics.total_time << " s\n";
     }
     
     struct SecurityProof {
