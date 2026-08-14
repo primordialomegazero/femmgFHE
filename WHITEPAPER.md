@@ -190,6 +190,15 @@ This enables unlimited circuit depth at the cost of one bootstrap per level.
 
 ## 4. Indistinguishability Obfuscation
 
+### 4.0 Circuit Obfuscation
+
+The system supports circuit-based obfuscation with O(n) gates:
+- NAND gates (universal)
+- XOR via 4-gate cascade
+- AND via 2-gate sequential
+- 4-input XOR: 12 gates (vs 16 truth table entries)
+- 8-input AND: 14 gates (vs 256 truth table entries)
+
 ### 4.1 Golden Orbit Encoding
 
 We introduce a novel encoding scheme based on complex phases:
@@ -354,7 +363,7 @@ Step 4: FHE Re-encryption
 
 ### 9.1 Current Limitations
 
-- iO handles truth tables only (not arbitrary circuits)
+- Circuit iO supports NAND-based circuits (O(n) gates); arbitrary-depth quantum circuits remain future work
 - Q = 2^29 may be insufficient for long-term security
 - Bootstrapping is computationally expensive
 
