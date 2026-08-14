@@ -29,36 +29,63 @@ class UnlimitedFHE {
 private:
     Bootstrapper bootstrapper;
     
+    // Internal XOR na may manual bootstrapping sa bawat step
+    Cipher xor_internal(const Cipher& a, const Cipher& b) {
+        Cipher nand_ab = nand_gate(a, b);
+        nand_ab = bootstrapper.bootstrap(nand_ab);
+        
+        Cipher nand_a_ab = nand_gate(a, nand_ab);
+        nand_a_ab = bootstrapper.bootstrap(nand_a_ab);
+        
+        Cipher nand_b_ab = nand_gate(b, nand_ab);
+        nand_b_ab = bootstrapper.bootstrap(nand_b_ab);
+        
+        Cipher result = nand_gate(nand_a_ab, nand_b_ab);
+        return bootstrapper.bootstrap(result);
+    }
+    
 public:
     UnlimitedFHE(const PublicKey& pk, const SecretKey& sk, int = 1) 
         : bootstrapper(pk, sk) {}
     
-    // NAND na may bootstrapping ng result LANG
     Cipher nand_with_bootstrap(const Cipher& a, const Cipher& b) {
         Cipher result = nand_gate(a, b);
         return bootstrapper.bootstrap(result);
     }
     
+    // XOR na nagbo-bootstrap ng intermediates
     Cipher xor_with_bootstrap(const Cipher& a, const Cipher& b) {
-        Cipher nand_ab = nand_with_bootstrap(a, b);
-        Cipher nand_a_ab = nand_with_bootstrap(a, nand_ab);
-        Cipher nand_b_ab = nand_with_bootstrap(b, nand_ab);
-        return nand_with_bootstrap(nand_a_ab, nand_b_ab);
+        return xor_internal(a, b);
+    }
+    
+    // Para sa chained XOR, i-bootstrap muna ang previous result
+    Cipher xor_chain(const Cipher& prev, const Cipher& next) {
+        Cipher prev_clean = bootstrapper.bootstrap(prev);
+        return xor_internal(prev_clean, next);
     }
     
     Cipher and_with_bootstrap(const Cipher& a, const Cipher& b) {
-        Cipher nand_ab = nand_with_bootstrap(a, b);
-        return nand_with_bootstrap(nand_ab, nand_ab);
+        Cipher nand_ab = nand_gate(a, b);
+        nand_ab = bootstrapper.bootstrap(nand_ab);
+        
+        Cipher result = nand_gate(nand_ab, nand_ab);
+        return bootstrapper.bootstrap(result);
     }
     
     Cipher or_with_bootstrap(const Cipher& a, const Cipher& b) {
-        Cipher not_a = nand_with_bootstrap(a, a);
-        Cipher not_b = nand_with_bootstrap(b, b);
-        return nand_with_bootstrap(not_a, not_b);
+        Cipher not_a = nand_gate(a, a);
+        not_a = bootstrapper.bootstrap(not_a);
+        
+        Cipher not_b = nand_gate(b, b);
+        not_b = bootstrapper.bootstrap(not_b);
+        
+        Cipher result = nand_gate(not_a, not_b);
+        return bootstrapper.bootstrap(result);
     }
     
     Cipher not_with_bootstrap(const Cipher& a) {
-        return nand_with_bootstrap(a, a);
+        Cipher result = nand_gate(a, a);
+        return bootstrapper.bootstrap(result);
     }
 };
 
