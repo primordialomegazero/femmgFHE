@@ -16,13 +16,13 @@
 
 ## What This Is
 
-This repository contains a **research prototype** that explores a novel approach to Fully Homomorphic Encryption (FHE) and Indistinguishability Obfuscation (iO) using the golden ratio identity **φ · ψ = -1**.
+This repository contains a **research prototype** that explores an approach to Fully Homomorphic Encryption (FHE) and Indistinguishability Obfuscation (iO) using the golden ratio identity **φ · ψ = -1**.
 
-This is **not** a production library. It is a proof of concept demonstrating that the golden ratio provides structural properties relevant to cryptography:
+This is **not** a production library. It is a small-scale implementation demonstrating structural properties that may be relevant to cryptography:
 
-- Noise damping in FHE (φ·ψ = -1 alternates signs)
-- Zero-test resistance in iO (unit circle encoding)
-- Uniform nonce generation (golden angle)
+- Alternating signs in FHE (φ·ψ = -1)
+- Unit circle encoding in iO (no zero values)
+- Uniform sequence generation (golden angle)
 
 ---
 
@@ -62,19 +62,6 @@ g++ -std=c++17 -O3 -march=native -I/usr/include \
 **Expected output:**
 
 ```
-=== PERFORMANCE METRICS ===
-FHE operations: 7
-iO evaluations: 1
-Quantum gates: 2
-
-=== SECURITY GUARANTEES ===
-FHE IND-CPA: YES
-iO Indistinguishable: YES
-Quantum Verified: YES
-Zero-test Resistant: YES
-Lucas One-Way: YES
-PRNG Uniform: YES
-
 === FULL TEST (4 combinations) ===
   XOR(0,0) = 0 (expected 0)
   XOR(0,1) = 1 (expected 1)
@@ -85,27 +72,11 @@ PRNG Uniform: YES
 ### Run All Tests
 
 ```bash
-#!/bin/bash
 for test in tests/test_*.cpp; do
     name=$(basename "$test" .cpp)
     echo "=== $name ==="
     g++ -std=c++17 -O3 -march=native -I/usr/include \
         "$test" -o "/tmp/$name" -lntl -lgmp -lm
-    "/tmp/$name"
-    echo ""
-done
-```
-
-### Run Attack Suite
-
-```bash
-cd tests/attacks/class_sss
-
-for attack in test_sss_*.cpp; do
-    name=$(basename "$attack" .cpp)
-    echo "=== $name ==="
-    g++ -std=c++17 -O3 -march=native -I../../../src \
-        "$attack" -o "/tmp/$name" -lntl -lgmp -lm
     "/tmp/$name"
     echo ""
 done
@@ -122,53 +93,38 @@ done
 | Circuit iO | Pass | 4-input XOR 16/16 |
 | Bootstrapping | Pass | 20 levels |
 | Attack resistance | Pass | 8 attack classes blocked |
-| PRNG uniformity | Pass | 1M/1M unique, balance 0.0002 |
-| Lucas one-way | Pass | 0/100K collisions |
+| PRNG uniformity | Pass | 1M/1M unique |
+| Lucas commitment | Pass | 0/100K collisions |
 
 ---
 
-## What Is NOT Tested / Implemented
+## What Is NOT Implemented
 
 | Gap | Details |
 |-----|---------|
-| NTT multiplication | Not implemented (O(N²) naive multiplication only) |
+| NTT multiplication | Naive O(N²) only |
 | CRT batching | Not in current prototype |
 | Key switching | Not in current prototype |
 | Relinearization | Not in current prototype |
 | Serialization | Not implemented |
 | Formal verification | No Coq/Isabelle proofs |
 | Peer review | Not yet reviewed |
-| Large parameters | Q=2^29 only (need 2^60+ for long-term security) |
+| Large parameters | Q=2^29 only |
 
 ---
 
 ## Mathematical Foundation
 
-### Golden Ratio
-
 ```
 φ = (1 + √5) / 2
 ψ = (1 - √5) / 2
-
 φ · ψ = -1
-```
 
-### RLWE Encryption (Core)
-
-```
 Ring: Z_Q[X] / (X^1024 + 1), Q = 536870909
-Secret key: s (ternary)
-Public key: (a, -(a·s + e))
 Plaintext: m = bit ? Q/φ : 0
 Threshold: Q/(2φ)
-```
 
-### Golden Orbit iO (Core)
-
-```
-Encoding: e^(iθ) on unit circle
-|value| = 1 → no zero possible
-KS distance = 0 → indistinguishable
+iO Encoding: e^(iθ), |value| = 1
 ```
 
 ---
@@ -177,14 +133,14 @@ KS distance = 0 → indistinguishable
 
 | File | Purpose |
 |------|---------|
-| `src/golden_privacy_system.h` | Main API (unified) |
-| `src/fhe/golden_quantum_fhe.h` | FHE core (encrypt/decrypt/NAND) |
+| `src/golden_privacy_system.h` | Main API |
+| `src/fhe/golden_quantum_fhe.h` | FHE core |
 | `src/fhe/golden_bootstrapping.h` | Bootstrapping |
-| `src/io/golden_io_orbit.h` | iO core (Golden Orbit) |
+| `src/io/golden_io_orbit.h` | iO core |
 | `src/io/golden_io_bootstrap.h` | iO bootstrapping |
 | `src/golden_prng.h` | Golden Angle PRNG |
-| `src/golden_lucas.h` | Lucas One-Way |
-| `src/golden_equidistributed.h` | Equidistributed Noise |
+| `src/golden_lucas.h` | Lucas commitment |
+| `src/golden_equidistributed.h` | Equidistributed noise |
 
 ---
 
@@ -192,13 +148,19 @@ KS distance = 0 → indistinguishable
 
 | Document | Content |
 |----------|---------|
-| `CLAIMS.md` | 14 theorems with triple cross-referencing |
+| `CLAIMS.md` | Claims and test evidence |
 | `API_REFERENCE.md` | API documentation |
 | `WHY_GOLDEN_RATIO.md` | Why the golden ratio |
-| `WHITEPAPER.md` | Technical whitepaper |
-| `QUICK_START.md` | Review guide |
-| `ROADMAP.md` | Engineering work needed |
+| `IMPLEMENTATION.md` | What is implemented |
+| `OBSERVED_PROPERTIES.md` | Observed properties |
+| `FHE_SCHEME_EXPLAINED.md` | FHE implementation |
+| `IO_SCHEME_EXPLAINED.md` | iO implementation |
+| `COMPARISON_ANALYSIS.md` | Honest comparison |
+| `TECHNICAL_DOCUMENTATION.md` | Technical details |
 | `GUIDELINES_REPRODUCIBILITY.md` | Reproduction guide |
+| `ROADMAP.md` | Remaining work |
+| `CONTRIBUTING.md` | Contributing guide |
+| `AUTHOR_INFO.md` | Author and process |
 
 ---
 
