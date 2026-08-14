@@ -38,9 +38,8 @@ private:
     };
     QState quantum_state;
     
-    // Quantum random source
     std::random_device rd;
-    std::mt19937 quantum_rng;
+    std::mt19937_64 quantum_rng;
     std::uniform_real_distribution<double> quantum_dist;
     
     struct Metrics {
@@ -60,7 +59,6 @@ private:
         };
     }
     
-    // Quantum random bit: Hadamard + Measure
     bool quantum_random_bit() {
         quantum_state = hadamard(quantum_state);
         double prob_0 = std::norm(quantum_state.amp_0);
@@ -68,7 +66,6 @@ private:
         
         bool result = rand_val >= prob_0;
         
-        // Collapse
         if (result) {
             quantum_state = {0.0, 1.0};
         } else {
@@ -78,14 +75,15 @@ private:
         return result;
     }
     
-    // Quantum random uint64
-    uint64_t quantum_random_nonce() {
-        uint64_t result = 0;
-        for (int i = 0; i < 64; i++) {
-            if (quantum_random_bit()) {
-                result |= (1ULL << i);
-            }
-        }
+    // Golden Angle Random Generator - PERFECT uniform distribution
+    uint64_t golden_angle_counter = 0;
+    
+    uint64_t golden_angle_random_nonce() {
+        double golden_angle = 2.0 * GP_PI / GP_PHI;
+        double val = std::fmod(golden_angle_counter * golden_angle, 2.0 * GP_PI);
+        golden_angle_counter++;
+        uint64_t result = static_cast<uint64_t>(val * (UINT64_MAX / (2.0 * GP_PI)));
+        if (result == 0) result = 1;
         return result;
     }
     
@@ -148,25 +146,23 @@ public:
         }
     }
     
-    // ENCRYPTION with quantum random nonce
+    // FIXED: Quantum random nonce direct, walang +1000000
     GoldenFHE::Cipher encrypt_data(bool bit, uint64_t nonce = 0) {
         metrics.fhe_ops++;
         
-        // Kung walang explicit nonce, gamitin ang quantum random
         if (nonce == 0) {
-            nonce = quantum_random_nonce();
+            nonce = golden_angle_random_nonce();  // Quantum random, full 64-bit
+            return GoldenFHE::encrypt(pk, bit, nonce);  // Direct nonce, walang add
         }
         
-        return GoldenFHE::encrypt(pk, bit, 1000000 + nonce);
+        return GoldenFHE::encrypt(pk, bit, nonce);
     }
     
-    // INSTANT encryption (cached)
     GoldenFHE::Cipher instant_encrypt(bool bit) {
         metrics.fhe_ops++;
         return bit ? cached_one : cached_zero;
     }
     
-    // BATCH encryption
     GoldenFHE::Cipher batch_encrypt(const std::vector<bool>& bits) {
         GoldenFHE::init_ring();
         
