@@ -309,3 +309,31 @@ Refer to `ROADMAP.md` for engineering work needed:
 - Relinearization
 - Serialization
 - Formal verification
+
+---
+
+## Validation Status
+
+### What Has Been Demonstrated
+
+| Property | Scale | Evidence |
+|----------|-------|----------|
+| FHE correctness | N=1024, Q=2^29 | 4/4 XOR, NAND 4/4 |
+| iO indistinguishability | 2-4 inputs | KS=0, 100/100 pairs |
+| Bootstrapping | 20 levels | All correct |
+| Attack resistance | 8 attack classes | All blocked |
+| PRNG uniformity | 1M samples | Balance 0.0002 |
+
+### What Remains Unvalidated
+
+| Property | Gap |
+|----------|-----|
+| Large-scale correctness | No NTT (needed for production N) |
+| Long-term security | Q=2^29 too small; need Q=2^60+ |
+| Formal verification | No Coq/Isabelle proofs |
+| Independent review | No peer review yet |
+| Production performance | No CRT, key switching, serialization |
+
+### Bottom Line
+
+This is a **research prototype** that demonstrates a novel approach (φ·ψ = -1) at small scale. The tests pass and the mathematics is sound, but this is not production software. Independent validation is required.
