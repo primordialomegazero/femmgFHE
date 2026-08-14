@@ -24,13 +24,11 @@ private:
     std::vector<OrbitEncoding> obfuscated_program;
     int iO_inputs;
     
-    // Precomputed values para sa batch encryption
     NTL::ZZ_pX batch_u;
     NTL::ZZ_pX batch_e0;
     NTL::ZZ_pX batch_e1;
     bool batch_ready = false;
     
-    // Cached ciphertexts
     GoldenFHE::Cipher cached_zero;
     GoldenFHE::Cipher cached_one;
     
@@ -39,6 +37,11 @@ private:
         std::complex<double> amp_1;
     };
     QState quantum_state;
+    
+    // Quantum random source
+    std::random_device rd;
+    std::mt19937 quantum_rng;
+    std::uniform_real_distribution<double> quantum_dist;
     
     struct Metrics {
         int fhe_ops = 0;
@@ -57,8 +60,38 @@ private:
         };
     }
     
+    // Quantum random bit: Hadamard + Measure
+    bool quantum_random_bit() {
+        quantum_state = hadamard(quantum_state);
+        double prob_0 = std::norm(quantum_state.amp_0);
+        double rand_val = quantum_dist(quantum_rng);
+        
+        bool result = rand_val >= prob_0;
+        
+        // Collapse
+        if (result) {
+            quantum_state = {0.0, 1.0};
+        } else {
+            quantum_state = {1.0, 0.0};
+        }
+        
+        return result;
+    }
+    
+    // Quantum random uint64
+    uint64_t quantum_random_nonce() {
+        uint64_t result = 0;
+        for (int i = 0; i < 64; i++) {
+            if (quantum_random_bit()) {
+                result |= (1ULL << i);
+            }
+        }
+        return result;
+    }
+    
 public:
-    GoldenPrivacySystem(uint64_t seed = 42) {
+    GoldenPrivacySystem(uint64_t seed = 42) 
+        : quantum_rng(rd()), quantum_dist(0.0, 1.0) {
         GoldenFHE::init_ring();
         GoldenFHE::keygen(pk, sk, seed);
         quantum_state = {1.0, 0.0};
@@ -66,7 +99,6 @@ public:
         init_batch_precomputation();
     }
     
-    // Initialize precomputed values para sa batch encryption
     void init_batch_precomputation() {
         GoldenFHE::init_ring();
         
@@ -116,9 +148,15 @@ public:
         }
     }
     
-    // ORIGINAL encryption
+    // ENCRYPTION with quantum random nonce
     GoldenFHE::Cipher encrypt_data(bool bit, uint64_t nonce = 0) {
         metrics.fhe_ops++;
+        
+        // Kung walang explicit nonce, gamitin ang quantum random
+        if (nonce == 0) {
+            nonce = quantum_random_nonce();
+        }
+        
         return GoldenFHE::encrypt(pk, bit, 1000000 + nonce);
     }
     
@@ -128,7 +166,7 @@ public:
         return bit ? cached_one : cached_zero;
     }
     
-    // BATCH encryption: maraming bits sa isang ciphertext
+    // BATCH encryption
     GoldenFHE::Cipher batch_encrypt(const std::vector<bool>& bits) {
         GoldenFHE::init_ring();
         
@@ -156,7 +194,6 @@ public:
         return GoldenFHE::decrypt(ct, sk);
     }
     
-    // Batch decrypt: i-decode ang lahat ng bits mula sa ciphertext
     std::vector<bool> batch_decrypt(const GoldenFHE::Cipher& ct, int num_bits) {
         GoldenFHE::init_ring();
         
@@ -196,7 +233,6 @@ public:
         return output;
     }
     
-    // BATCH COMPUTE: i-evaluate ang maraming inputs via iO
     std::vector<bool> batch_compute(const std::vector<std::pair<bool, bool>>& inputs) {
         std::vector<bool> results;
         
