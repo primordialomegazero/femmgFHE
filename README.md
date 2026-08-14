@@ -192,9 +192,9 @@ KS distance = 0 → indistinguishable
 
 | Document | Content |
 |----------|---------|
-| `FORMAL_PROOF.md` | 14 theorems with triple cross-referencing |
+| `CLAIMS.md` | 14 theorems with triple cross-referencing |
 | `API_REFERENCE.md` | API documentation |
-| `NOVEL_APPROACH.md` | Why the golden ratio |
+| `WHY_GOLDEN_RATIO.md` | Why the golden ratio |
 | `WHITEPAPER.md` | Technical whitepaper |
 | `QUICK_START.md` | Review guide |
 | `ROADMAP.md` | Engineering work needed |
