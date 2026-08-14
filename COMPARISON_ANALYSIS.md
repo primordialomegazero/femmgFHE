@@ -1,169 +1,135 @@
-# Comparison Analysis: Golden Privacy System vs Traditional Cryptography
+# Comparison: This Prototype vs Established Schemes
 
 **Version 2.0**
 
 ---
 
-## The "Holy Grail" of FHE
+## Scope
 
-### Definition
-
-> **Computation on encrypted data without ever decrypting it.**
-
-### Why Traditional FHE Fails
-
-| Challenge | Traditional Cause | Golden Solution |
-|-----------|------------------|-----------------|
-| Noise growth | Multiplication doubles noise | φ·ψ = -1 natural cancellation |
-| Bootstrapping cost | Complex refresh (100ms+) | Simple decrypt-reencrypt (4.2ms) |
-| Parameter size | Megabytes per ciphertext | ~KBs per ciphertext |
-| Performance | O(N²) polynomial arithmetic | Batch: 48K ops/sec |
-
-### Benchmarks
-
-| Metric | OpenFHE | TFHE | SEAL | **Golden** | Speedup |
-|--------|---------|------|------|-----------|---------|
-| Bootstrap | ~500ms | ~100ms | ~500ms | **4.2ms** | **24-119x** |
-| Batch Encrypt | ~500/s | ~50/s | ~300/s | **47,650/s** | **95-953x** |
-| Full Pipeline | ~10/s | ~5/s | ~8/s | **77/s** | **7.7-15x** |
-
-**Source:** `tests/test_full_benchmark.cpp`
+This document compares the current prototype against established FHE and iO schemes. All measurements are from the test suite in this repository. These are small-scale results (N=1024, Q=2^29), not production benchmarks.
 
 ---
 
-## The "Crown Jewel" of iO
+## FHE Comparison
 
-### Definition
+### What This Prototype Implements
 
-> **Hide program implementation while preserving functionality.**
+- RLWE encryption with golden ratio scaling (Q/φ instead of Q/2)
+- 3-component ciphertext (c0, c1, c2) for exact multiplication
+- Bootstrapping via decrypt-reencrypt
+- Batch encryption (128 bits per ciphertext)
 
-### Why Traditional iO Fails
+### What Established Schemes Have That This Lacks
 
-| Scheme | Year | Broken By |
-|--------|------|-----------|
-| GGH13 | 2013 | Zeroizing (2015-2016) |
-| CLT13 | 2013 | Cheon et al. (2015) |
-| GGH15 | 2015 | CJLMS (2016) |
+| Feature | OpenFHE/TFHE | This Prototype |
+|---------|--------------|----------------|
+| NTT multiplication | Yes | No (naive O(N²)) |
+| CRT batching | Yes | No |
+| Key switching | Yes | No |
+| Relinearization | Yes | No |
+| Serialization | Yes | No |
+| Formal security proofs | Yes | No |
 
-**Root cause:** Zero-test parameters na pwedeng i-exploit.
+### Small-Scale Measurements
 
-### Golden Orbit Innovation
+| Metric | This Prototype | Notes |
+|--------|---------------|-------|
+| NAND (bootstrapped) | ~44 ops/sec | Naive multiplication |
+| Batch encrypt | ~60K bits/sec | 128 bits/ciphertext |
+| Bootstrap latency | ~4.2 ms | Simple decrypt-reencrypt |
 
-**Walang zero-test parameters.** Lahat ng values ay |value| = 1 sa unit circle.
+These numbers are from `tests/test_full_benchmark.cpp`. They are included for reference; they do not represent production throughput.
 
-| Metric | Value | Source |
-|--------|-------|--------|
-| Indistinguishability | KS = 0 | `tests/test_io_stress.cpp:89-107` |
-| Zero-test resistance | No zeros possible | `src/golden_privacy_system.h:52-78` |
-| Evaluation speed | 29,298,800/s | `tests/test_full_benchmark.cpp:50-57` |
+---
+
+## iO Comparison
+
+### What This Prototype Implements
+
+- Golden Orbit encoding: values on the unit circle (|value| = 1)
+- Truth table obfuscation (2^n entries)
+- Circuit obfuscation (NAND gates, O(n) size)
+- No zero-test parameters
+
+### What Established Schemes Have That This Lacks
+
+| Feature | GGH13/CLT13 | This Prototype |
+|---------|-------------|----------------|
+| Formal indistinguishability proof | Attempted | No (empirical KS=0 only) |
+| Matrix Branching Programs | Yes | No |
+| Peer-reviewed security analysis | Yes | No |
+
+### Why Previous iO Schemes Broke
+
+GGH13, CLT13, and GGH15 all used zero-test parameters. Zeroizing attacks exploited these to recover secrets.
+
+This prototype does not use zero-test parameters. All encoded values satisfy |value| = 1, so zero values do not occur.
+
+This is a structural difference, not a claim of security.
+
+---
+
+## What the Tests Show
+
+| Property | Result | Test File |
+|----------|--------|-----------|
+| FHE NAND correctness | Pass | `tests/test_fhe_fixed.cpp` |
+| Bootstrapping depth | 20 levels | `tests/test_bootstrapping.cpp` |
+| iO indistinguishability (KS) | 0 (100 pairs) | `tests/test_io_stress.cpp` |
 | Circuit iO | 4-input XOR 16/16 | `tests/test_circuit_integrated_v2.cpp` |
+| Attack resistance | 8 classes blocked | `tests/test_adversarial.cpp` |
+| PRNG uniformity | Balance 0.0002 | `tests/test_golden_prng_inject.cpp` |
 
----
-
-## Definition Check
-
-### FHE "Holy Grail"
-
-> "Arbitrary computation on encrypted data"
-
-| Requirement | Status | Evidence |
-|-------------|--------|----------|
-| Universal gate (NAND) | ✅ | `tests/test_fhe_fixed.cpp:18-31` |
-| Unlimited depth (bootstrap) | ✅ | `tests/test_bootstrapping.cpp:15-35` |
-| 128-bit arithmetic | ✅ | `tests/test_128bit_adder.cpp` |
-| Arbitrary functions | ✅ | `tests/test_arbitrary_fhe.cpp` |
-| Circuit obfuscation | ✅ | `tests/test_circuit_integrated_v2.cpp` |
-
-**VERDICT:** ACHIEVED
-
-### iO "Crown Jewel"
-
-> "Hide implementation while preserving functionality"
-
-| Requirement | Status | Evidence |
-|-------------|--------|----------|
-| Perfect indistinguishability | ✅ KS=0 | `tests/test_io_stress.cpp` |
-| Zero-test resistance | ✅ Construction | `tests/test_adversarial.cpp:18-24` |
-| Truth table iO | ✅ 100/100 | `tests/test_io_stress.cpp:44-51` |
-| Circuit iO (O(n)) | ✅ 16/16 | `tests/test_circuit_integrated_v2.cpp` |
-
-**VERDICT:** ACHIEVED (with circuit support)
-
----
-
-## Additional Golden Advantages
-
-| Component | Metric | Source |
-|-----------|--------|--------|
-| Golden Angle PRNG | 1M/1M unique, balance 0.0002 | `src/golden_prng.h` |
-| Lucas One-Way | 0/100K collisions | `src/golden_lucas.h` |
-| Equidistributed Noise | Perfect uniform | `src/golden_equidistributed.h` |
-| Quantum Verification | 203M gates/sec | `tests/test_full_benchmark.cpp` |
-
----
-
-## Security Comparison
-
-| Attack | GGH13 | CLT13 | **Golden** |
-|--------|-------|-------|-----------|
-| Zeroizing | ❌ Broken | ❌ Broken | ✅ Blocked |
-| Lattice Reduction | ❌ Broken | ❌ Broken | ✅ Resistant |
-| Timing | ⚠️ | ⚠️ | ✅ Constant-time |
-| Chosen Plaintext | ⚠️ | ⚠️ | ✅ Full unique |
-| Quantum | ❌ | ❌ | ✅ Post-quantum |
-
----
-
-## Peer Review Status
-
-**Status:** PENDING — hindi pa peer-reviewed.
-
-**What we encourage:**
-- Review the code
-- Publish findings (positive or negative)
-- Attack the system
-- Reproduce results
-
-**Citation required:**
-```
-Fernandez, D.J.M. (2024). Golden Privacy System: A Unified Framework
-for FHE, iO, and Quantum Verification Based on the Golden Ratio.
-Version 2.0. Open Source Repository.
-```
-
-**Contact:** devilswithin13@gmail.com
+These tests pass at the current small scale. They do not validate security at production parameters.
 
 ---
 
 ## Honest Assessment
 
-### We Claim
-- Code exists, open source
-- Tests pass (triple cross-referenced)
-- Benchmarks reproducible
-- φ·ψ = -1 foundation is sound
+### What Is Demonstrated
 
-### We Do NOT Claim
-- Security without assumptions
-- Resistance to unknown attacks
-- Peer-reviewed validation
-- Formal verification (Coq/Isabelle)
+- φ·ψ = -1 provides alternating signs in noise (observed in tests)
+- Unit circle encoding eliminates zero values (by construction)
+- Golden angle produces uniform distribution (tested)
+- Small-scale correctness of NAND and bootstrapping
 
-### Remains Open
-- Independent security audit
-- Larger parameter sets (Q = 2^60+)
-- Arbitrary-depth quantum circuits
-- Formal verification
+### What Is Not Demonstrated
+
+- Security at Q=2^60+
+- Performance with NTT/CRT
+- Formal proofs
+- Independent validation
+
+### What This Is
+
+A research prototype. It shows that the golden ratio approach is worth further study.
+
+### What This Is Not
+
+A production FHE library. Not a replacement for OpenFHE, TFHE, or SEAL. Not a formally verified scheme.
 
 ---
 
-## Conclusion
+## Next Steps
 
-| Definition | Achieved? | Key Evidence |
-|-----------|-----------|--------------|
-| FHE Holy Grail | **YES** | NAND + bootstrap + 128-bit + circuit iO |
-| iO Crown Jewel | **YES** | KS=0 + zero-test resistant + O(n) circuits |
+For this approach to become a real FHE/iO scheme, the following are needed:
 
-**The definitions are met. The code is there. The tests pass. Verify it yourself.**
+1. NTT polynomial multiplication
+2. CRT batching
+3. Key switching
+4. Relinearization
+5. Larger parameters (Q=2^60+)
+6. Formal security analysis
+7. Peer review
+
+These are listed in ROADMAP.md.
+
+---
+
+## Contact
+
+**Email:** devilswithin13@gmail.com
+
+---
 
 *φ · ψ = -1*
