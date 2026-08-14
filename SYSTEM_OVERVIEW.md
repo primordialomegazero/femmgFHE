@@ -1,298 +1,101 @@
-# Golden Privacy System — Full Framework Overview
+# System Overview
 
 **Version 2.0**
 
 ---
 
-## Executive Summary
+## What This Is
 
-The Golden Privacy System is a unified cryptographic framework integrating **six security layers** into a single research prototype system:
+This repository contains a research prototype for FHE and iO based on the golden ratio identity φ·ψ = -1.
 
-| Layer | Technology | Purpose |
-|-------|-----------|---------|
-| 1 | Fully Homomorphic Encryption (FHE) | Compute on encrypted data |
-| 2 | Indistinguishability Obfuscation (iO) | Hide program implementation |
-| 3 | Quantum Verification | Post-quantum security |
-| 4 | Golden Angle PRNG | Perfect uniform randomness |
-| 5 | Lucas One-Way | Natural one-way function |
-| 6 | Equidistributed Noise | Perfect noise generation |
-
-Foundation: **φ · ψ = -1** — natural noise cancellation, perfect indistinguishability, built-in one-way properties.
+The prototype has multiple components, each tested at small scale (N=1024, Q=2^29).
 
 ---
 
-## Framework Components
+## Components
 
-### Layer 1: FHE Core
-
-**Capabilities:**
-
-| Feature | Description |
-|---------|-------------|
-| Encrypt/Decrypt | Single-bit RLWE encryption |
-| Homomorphic NAND | Universal gate sa encrypted domain |
-| Bootstrapping | Unlimited depth (4.2ms per op) |
-| Batch Encryption | 128 bits per ciphertext (142x) |
-| Relinearization | 3→2 components |
-| Key Switching | Multi-key operations |
-| CRT Batching | SIMD parallelism |
-| Modulus Switching | Noise management |
-| Noise Flooding | Circuit privacy |
-
-**Files:**
-```
-src/fhe/golden_quantum_fhe.h       — FHE core
-src/fhe/golden_bootstrapping.h     — Bootstrapping
-src/fhe/golden_relinearization.h   — Relinearization
-src/fhe/golden_key_switching.h     — Key switching
-src/fhe/golden_crt_batching.h      — CRT batching
-```
-
-### Layer 2: iO Core
-
-**Capabilities:**
-
-| Feature | Description |
-|---------|-------------|
-| Truth Table Obfuscation | 2^n entries |
-| Circuit Obfuscation | O(n) gates (polynomial) |
-| Golden Orbit Encoding | Complex phases, unit circle |
-| Perfect Indistinguishability | KS distance = 0 |
-| Zero-test Resistance | No zero values possible |
-| Evaluation Speed | 29.3M ops/sec |
-
-**Files:**
-```
-src/io/golden_io_exact.h      — Golden iO core
-src/io/golden_io_arbitrary.h  — Arbitrary function iO
-src/io/golden_io_bootstrap.h  — iO bootstrapping
-```
-
-### Layer 3: Quantum Core
-
-**Capabilities:**
-- Hadamard gate (H|0⟩ = (|0⟩+|1⟩)/√2)
-- CNOT gate
-- Bell state preparation
-- Entanglement detection
-- Quantum Fourier Transform
-- Measurement (203M gates/sec)
-
-### Layer 4: Golden Angle PRNG
-
-**Capabilities:**
-- 1M/1M unique values
-- Balance: 0.0002 (perfect uniform)
-- No repeating pattern (aperiodic)
-- Based on golden angle = 2π/φ
-
-**File:** `src/golden_prng.h`
-
-### Layer 5: Lucas One-Way
-
-**Capabilities:**
-- Forward: O(log n) via fast doubling
-- Inverse: O(n) brute force (108K years)
-- 0/100K collisions
-- 34-bit avalanche
-- Tamper detection
-
-**File:** `src/golden_lucas.h`
-
-### Layer 6: Equidistributed Noise
-
-**Capabilities:**
-- Perfect uniform distribution
-- Balance: 0.0002
-- Weyl criterion satisfied
-- Golden angle addition (hindi multiplication)
-
-**File:** `src/golden_equidistributed.h`
+| Component | File | Status |
+|-----------|------|--------|
+| FHE core | `src/fhe/golden_quantum_fhe.h` | Tested |
+| Bootstrapping | `src/fhe/golden_bootstrapping.h` | Tested |
+| iO (Golden Orbit) | `src/io/golden_io_orbit.h` | Tested |
+| iO bootstrapping | `src/io/golden_io_bootstrap.h` | Tested |
+| Golden Angle PRNG | `src/golden_prng.h` | Tested |
+| Lucas commitment | `src/golden_lucas.h` | Tested |
+| Equidistributed noise | `src/golden_equidistributed.h` | Tested |
+| Main API | `src/golden_privacy_system.h` | Tested |
 
 ---
 
-## Mathematical Framework
+## What Is Implemented
 
-### Golden Ratio
+### FHE
 
-```
-φ = (1 + √5) / 2 = 1.6180339887498948482...
-ψ = (1 - √5) / 2 = -0.6180339887498948482...
+- RLWE encryption with Q/φ plaintext scaling
+- 3-component ciphertext (c0, c1, c2)
+- Homomorphic NAND
+- Bootstrapping via decrypt-reencrypt
+- Batch encryption (128 bits per ciphertext)
 
-  φ · ψ = -1    (multiplicative inverse)
-  φ + ψ = 1     (constant sum)
-  φ² = φ + 1    (self-referential)
-```
+### iO
 
-### Ring Structure
+- Golden Orbit encoding (unit circle)
+- Truth table mode (2^n entries)
+- Circuit mode (O(n) NAND gates)
+- No zero-test parameters
 
-```
-R = Z_Q[X] / (X^N + 1)
-N = 1024 (power of 2, NTT-friendly)
-Q = 536870909 (29-bit prime)
-```
+### Other Components
 
-### Security Assumptions
-
-| Assumption | Basis | Status |
-|-----------|-------|--------|
-| RLWE hardness | Lattice cryptography | Widely accepted |
-| Post-quantum security | No known quantum attack | Believed |
-| Golden ratio | Mathematical identity | Proven |
+- Golden Angle PRNG (deterministic uniform sequence)
+- Lucas commitment (φ^n + ψ^n rounding)
+- Equidistributed noise (golden angle addition)
 
 ---
 
-## System Workflows
+## What Is NOT Implemented
 
-### Workflow 1: Encryption
+- NTT polynomial multiplication
+- CRT batching
+- Key switching
+- Relinearization
+- Serialization
+- Formal security proofs
 
-```
-User → Encrypt(bit) → Ciphertext
-     (Golden Angle PRNG nonce)
-     (Equidistributed noise)
-```
-
-### Workflow 2: Homomorphic Computation
-
-```
-Encrypt(a) → NAND → Bootstrap → Decrypt
-     ↓          ↓        ↓          ↓
-  RLWE       Homomorphic  Fresh     Plaintext
-             3-component  noise
-```
-
-### Workflow 3: Program Obfuscation
-
-```
-Function → Truth Table → Golden Orbit → Obfuscated
-                    ↓                      ↓
-              2^n entries          Complex phases
-                                   KS = 0
-```
-
-### Workflow 4: Circuit Obfuscation
-
-```
-Circuit → NAND gates → Golden Orbit → Obfuscated
-     ↓         ↓               ↓          ↓
-  O(n) gates  Universal     Unit circle  O(n) gates
-```
-
-### Workflow 5: Full Pipeline
-
-```
-FHE Encrypt → iO Evaluate → Quantum Verify → FHE Re-encrypt
-     ↓              ↓              ↓              ↓
-  RLWE          KS = 0          Hadamard       Fresh RLWE
-```
+These are listed in ROADMAP.md.
 
 ---
 
-## Data Flow
-
-### Encryption Path
+## Mathematical Foundation
 
 ```
-Plaintext → Golden scaling (Q/φ) → RLWE encryption → Ciphertext
-     ↓              ↓                    ↓              ↓
-    bit       golden_plain         u, e0, e1       (c0,c1,c2)
+φ = (1 + √5) / 2
+ψ = (1 - √5) / 2
+φ · ψ = -1
 ```
 
-### Decryption Path
-
-```
-Ciphertext → Noise extraction → Threshold → Plaintext
-     ↓              ↓               ↓          ↓
-  (c0,c1,c2)   c0+c1·s+c2·s²    Q/(2φ)       bit
-```
-
-### Obfuscation Path
-
-```
-Function → Golden Orbit → Unit Circle → Obfuscated
-     ↓          ↓              ↓            ↓
-  2^n       e^(iθ)         |value|=1     KS=0
-```
+Ring: Z_Q[X] / (X^1024 + 1), Q = 536870909.
 
 ---
 
-## Performance Framework
+## Test Results
 
-| Component | Throughput | Speedup |
-|-----------|-----------|---------|
-| iO Evaluation | 29.3M ops/sec | 58,000x vs GGH13 |
-| Quantum Gates | 203M ops/sec | ∞ |
-| Batch Encrypt | 47.6K ops/sec | 95-953x |
-| Bootstrap | 238 ops/sec | 24-119x |
-| Full Pipeline | 77 ops/sec | 7.7-15x |
-
-### Optimizations Applied
-
-1. **Golden Angle PRNG** — perfect uniform nonces
-2. **Batch Processing** — 128 bits per ciphertext
-3. **Precomputation** — cached u, e0, e1
-4. **Instant Encryption** — cached 0/1
-5. **Golden Ratio Scaling** — natural noise damping
-6. **Equidistributed Noise** — perfect distribution
+| Component | Test | Result |
+|-----------|------|--------|
+| FHE NAND | `tests/test_fhe_fixed.cpp` | Pass |
+| Bootstrapping | `tests/test_bootstrapping.cpp` | Pass (20 levels) |
+| iO indistinguishability | `tests/test_io_stress.cpp` | KS=0 (100 pairs) |
+| Circuit iO | `tests/test_circuit_integrated_v2.cpp` | Pass (16/16) |
+| Attack resistance | `tests/test_adversarial.cpp` | 8/8 blocked |
+| PRNG uniformity | `tests/test_golden_prng_inject.cpp` | Balance 0.0002 |
+| Lucas commitment | `tests/test_lucas_inject.cpp` | 0/100K collisions |
 
 ---
 
-## Security Framework
+## Honest Summary
 
-| Attack | Defense |
-|--------|---------|
-| Zeroizing | Unit circle encoding |
-| Brute Force | 3^1024 keyspace |
-| Lattice | Hurwitz theorem |
-| Timing | Constant-time |
-| Statistical | Uniform distribution |
-| Known Plaintext | RLWE hardness |
-| Chosen Plaintext | Golden Angle PRNG |
-| Quantum | Post-quantum RLWE |
+This is a small-scale prototype. The tests pass. The approach uses φ·ψ = -1 as a structural foundation. Whether this provides security beyond standard assumptions is an open question.
 
----
-
-## Deployment Scenarios
-
-### 1. Secure Cloud
-
-```
-Client → Encrypt → Cloud → Compute → Result → Decrypt
-```
-
-### 2. Private Function Evaluation
-
-```
-Developer → Obfuscate → User → Evaluate → Output
-```
-
-### 3. Privacy-Preserving ML
-
-```
-Data → Batch Encrypt → Model → Inference → Decrypt
-```
-
----
-
-## Comparison
-
-| Framework | FHE | iO | Quantum | PRNG | Lucas | Unified |
-|-----------|-----|-----|---------|------|-------|---------|
-| OpenFHE | Yes | No | No | No | No | No |
-| TFHE | Yes | No | No | No | No | No |
-| SEAL | Yes | No | No | No | No | No |
-| **Golden** | **Yes** | **Yes** | **Yes** | **Yes** | **Yes** | **Yes** |
-
----
-
-## Conclusion
-
-The Golden Privacy System provides:
-- **6 security layers** (FHE + iO + Quantum + PRNG + Lucas + Noise)
-- **Perfect indistinguishability** (KS = 0)
-- **Post-quantum security** (RLWE)
-- **High performance** (29M iO ops/sec)
-- **Production-ready** (8/8 attacks blocked)
+This is not production software. See README.md for full context.
 
 ---
 
