@@ -1,264 +1,122 @@
-# Novel Approach: Why the Golden Ratio
+# Why the Golden Ratio Is Used
 
 **Version 2.0**
 
 ---
 
-## Executive Summary
+## Purpose
 
-This document explains why the Golden Privacy System uses the golden ratio (φ = 1.618...) as its mathematical foundation, how this differs from existing cryptographic approaches, and why this is a genuine innovation.
+This document explains why this prototype uses the golden ratio (φ) instead of arbitrary parameters. It describes the mathematical properties that motivated this choice.
 
-The golden ratio has a property that appears "designed" for cryptography:
+This is not a claim that φ provides security beyond standard assumptions. It is a record of the observations that led to this approach.
+
+---
+
+## The Core Identity
 
 ```
+φ = (1 + √5) / 2
+ψ = (1 - √5) / 2
+
 φ · ψ = -1
-```
-
-This single identity provides natural noise cancellation, perfect indistinguishability, and efficient computation — all without external parameters.
-
----
-
-## 1. The Fundamental Problem
-
-### 1.1 Traditional FHE Challenges
-
-| Challenge | Cause | Impact |
-|-----------|-------|--------|
-| Noise growth | Multiplication doubles noise | Limited depth |
-| Bootstrapping cost | Complex refresh (100ms+) | Slow |
-| Parameter selection | Awkward trade-offs | Complex |
-| Security margins | Arbitrary constants | Weak foundations |
-
-### 1.2 Traditional iO Challenges
-
-| Scheme | Year | Broken By | Root Cause |
-|--------|------|-----------|------------|
-| GGH13 | 2013 | Zeroizing | Zero-test parameters |
-| CLT13 | 2013 | Cheon et al. | Zero-test parameters |
-| GGH15 | 2015 | CJLMS | Zero-test parameters |
-
-**Pattern:** Lahat ng broken iO ay may zero-test parameters na na-exploit.
-
-### 1.3 The Golden Ratio Observation
-
-```
-φ = (1 + √5) / 2 = 1.6180339887498948482...
-ψ = (1 - √5) / 2 = -0.6180339887498948482...
-
-φ · ψ = -1  ← Perfect multiplicative inverse
-φ + ψ = 1   ← Constant sum
-φ² = φ + 1  ← Self-referential
+φ + ψ = 1
 ```
 
 ---
 
-## 2. Core Innovation
+## What φ Provides in This Prototype
 
-### 2.1 Structural Cryptography
+### 1. Alternating Signs
 
-Instead of arbitrary parameters:
-
-| Traditional | Golden |
-|-------------|--------|
-| Arbitrary scaling (Q/2) | Derived scaling (Q/φ) |
-| Gaussian noise | Sparse + golden damping |
-| External error correction | Natural cancellation |
-| Zero-test parameters | Unit circle encoding |
-
-### 2.2 The Golden Orbit iO
-
-**Key insight:** Walang zero-test parameters.
+Multiplying by φ·ψ flips the sign:
 
 ```
-Encoding: e^(iθ) sa unit circle
-|e^(iθ)| = 1 para sa LAHAT ng θ
-Zero value impossible → Zeroizing attack impossible
+noise · (φ·ψ) = -noise
 ```
 
-### 2.3 Natural Noise Damping
+This alternation is observed in the noise behavior of the FHE implementation. Whether this provides a security benefit beyond RLWE is not claimed.
 
-```
-noise · φ · ψ = noise · (-1) = -noise
-```
+### 2. Unit Circle Encoding
 
-Repeated multiplication alternates sign:
-```
-noise → -noise → +noise → -noise → ...
-```
+The iO construction uses e^(iθ) for encoding. All values have |value| = 1. Zero values do not occur.
 
-Result: **Bounded noise instead of exponential growth.**
+This is a structural difference from previous iO schemes that used zero-test parameters (and were broken). Whether this is sufficient for security is an open question.
+
+### 3. Uniform Distribution
+
+The golden angle 2π/φ, used as a step size, produces a uniformly distributed sequence. This is tested (1M/1M unique, balance 0.0002).
+
+### 4. Rounding Effect
+
+Lucas numbers satisfy φ^n + ψ^n = integer, with |ψ^n| < 1. The ψ contribution vanishes in rounding.
+
+This is used for a commitment scheme in the prototype. No formal reduction to a hard problem is claimed.
 
 ---
 
-## 3. Mathematical Analysis
+## Mathematical Facts Used
 
-### 3.1 Why Not Other Constants?
-
-| Constant | Problem |
-|----------|---------|
-| π | Walang conjugate, walang φ·ψ=-1 |
-| e | Transcendental, walang algebraic identity |
-| √2 | √2·(-√2) = -2 (hindi -1) |
-| **φ** | **φ·ψ = -1, φ+ψ = 1, φ² = φ+1** |
-
-### 3.2 Fibonacci Connection
-
-```
-φ^n = F(n)·φ + F(n-1)
-```
-
-Provides:
-- Efficient exponentiation
-- Natural recurrence
-- Built-in redundancy
-
-### 3.3 Hurwitz Theorem
-
-```
-Para sa φ: |x - p/q| > 1/(√5·q²)
-```
-
-**φ ay ang pinaka-mahirap i-approximate na irrational number.**
-
-Application: Natural resistance sa lattice attacks.
-
-### 3.4 Equidistribution (Weyl)
-
-```
-φ^n mod 1 ay equidistributed
-10000 per bucket (perfect uniform)
-```
-
-Application: Perfect PRNG at noise generation.
-
-### 3.5 Lucas One-Way
-
-```
-Lucas(n) = φ^n + ψ^n = integer
-|ψ^n| < 1 → nawawala sa rounding
-```
-
-Application: Natural one-way function.
+| Property | Statement | Relevance |
+|----------|-----------|-----------|
+| φ·ψ = -1 | Algebraic identity | Alternating signs |
+| φ+ψ = 1 | Algebraic identity | Constant sum |
+| Hurwitz theorem | \|φ - p/q\| > 1/(√5·q²) | Hard to approximate |
+| Weyl criterion | φ^n mod 1 is equidistributed | Uniform distribution |
+| Lucas property | φ^n + ψ^n = integer | Rounding effect |
 
 ---
 
-## 4. Concrete Advantages
+## What Is NOT Claimed
 
-### 4.1 Bootstrapping
-
-| Traditional | Golden |
-|-------------|--------|
-| Key switching + modulus switching | Simple decrypt-reencrypt |
-| 100ms+ | 4.2ms |
-| Complex | Natural threshold Q/(2φ) |
-
-### 4.2 Indistinguishability
-
-| Traditional | Golden |
-|-------------|--------|
-| Zero-test parameters | Unit circle |
-| Broken (GGH13/CLT13) | KS = 0 |
-| Vulnerable | Zero-test resistant |
-
-### 4.3 Performance
-
-| Metric | Traditional | Golden | Speedup |
-|--------|-------------|--------|---------|
-| iO Eval | ~500/s | 29M/s | 58,000x |
-| Batch Encrypt | ~300/s | 48K/s | 160x |
-| Bootstrap | 100ms | 4.2ms | 24x |
-| Quantum Gate | N/A | 203M/s | ∞ |
+- **Not claimed:** That φ provides security beyond RLWE.
+- **Not claimed:** That the unit circle encoding is sufficient for iO security.
+- **Not claimed:** That the PRNG is cryptographically secure.
+- **Not claimed:** That the Lucas commitment has formal binding/hiding proofs.
+- **Not claimed:** That these properties are unique to φ.
 
 ---
 
-## 5. Additional Golden Properties
+## Why Not Other Constants
 
-### 5.1 Golden Angle PRNG
+This section is explanatory, not a proof of superiority.
 
-```
-Golden angle = 2π/φ
-1M/1M unique
-Balance: 0.0002 (perfect)
-```
+| Constant | Observation |
+|----------|-------------|
+| π | No simple conjugate with product -1 |
+| e | Transcendental; no algebraic identity like φ·ψ = -1 |
+| √2 | √2 · (-√2) = -2, not -1 |
+| φ | φ·ψ = -1, φ+ψ = 1, φ² = φ+1 |
 
-### 5.2 Equidistributed Noise
-
-```
-Perfect uniform distribution
-10000 per bucket
-Walang bias
-```
-
-### 5.3 Lucas Commitment
-
-```
-0/100K collisions
-34-bit avalanche
-108,309 years brute force
-```
+The choice of φ is motivated by the identity φ·ψ = -1. Other constants may have other useful properties.
 
 ---
 
-## 6. Formal Comparison
+## Relationship to Previous Work
 
-### 6.1 FHE Schemes
+Previous iO candidates (GGH13, CLT13, GGH15) used zero-test parameters and were broken by zeroizing attacks.
 
-| Scheme | Foundation | Noise | Bootstrap |
-|--------|-----------|-------|-----------|
-| BFV | Integer lattices | Gaussian | Complex |
-| CKKS | Real numbers | Gaussian | Complex |
-| TFHE | Binary | Gaussian | 0.1s |
-| **Golden** | **φ·ψ=-1** | **Damped** | **4.2ms** |
-
-### 6.2 iO Schemes
-
-| Scheme | Security | Status |
-|--------|----------|--------|
-| GGH13 | Broken | Obsolete |
-| CLT13 | Broken | Obsolete |
-| GGH15 | Broken | Obsolete |
-| **Golden Orbit** | **KS=0** | **Working** |
+This prototype avoids zero-test parameters by using unit circle encoding. This is a structural difference, not a claim of security.
 
 ---
 
-## 7. Honest Assessment
-
-### Proven
-
-- φ·ψ = -1 provides elegant solutions
-- Golden Orbit achieves KS = 0
-- Performance exceeds libraries by 50,000x
-- 8/8 attacks blocked
-
-### Not Proven
-
-- φ provides additional security beyond RLWE
-- φ is necessary (vs merely elegant)
-- Formal superiority in all aspects
-
-### Open Questions
+## Open Questions
 
 - Does φ provide hardness beyond RLWE?
-- Can we formally prove Golden Orbit security?
-- Is performance due to φ or engineering?
+- Is the unit circle encoding sufficient for formal iO security?
+- Is the observed noise damping a consequence of φ·ψ = -1 or of the implementation details?
+- Are the performance numbers due to φ or to the small scale of the prototype?
 
 ---
 
-## 8. Conclusion
+## Summary
 
-The golden ratio is not chosen for mystical reasons. It is chosen because:
+The golden ratio provides mathematical properties that are useful in this prototype:
 
-1. **φ·ψ = -1** → Natural multiplicative inverse
-2. **φ+ψ = 1** → Constant sum
-3. **Fibonacci connection** → Efficient computation
-4. **Hurwitz theorem** → Lattice attack resistance
-5. **Equidistribution** → Perfect PRNG/Noise
-6. **Lucas numbers** → Natural one-way function
-7. **Unit circle encoding** → Zero-test resistant
-8. **Golden angle** → Perfect uniform randomness
+1. φ·ψ = -1 → alternating signs
+2. Unit circle → no zero values
+3. Golden angle → uniform distribution
+4. Lucas rounding → commitment effect
 
-The results: 50,000x speedup, perfect indistinguishability, 8/8 attacks blocked.
+These are observations, not security proofs. The approach is a research direction, not a validated scheme.
 
----
-
-*The golden ratio was always there. We just recognized its cryptographic potential.*
+*φ · ψ = -1*
