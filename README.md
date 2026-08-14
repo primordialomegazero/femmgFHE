@@ -282,3 +282,30 @@ KS distance = 0 → perfect indistinguishability
 *Version 2.0.0*
 
 </div>
+
+---
+
+## Honest Status
+
+This repository is a **research prototype** demonstrating a novel approach to FHE+iO based on the golden ratio (φ·ψ = -1).
+
+### What This IS:
+- Core FHE scheme (RLWE + golden ratio scaling)
+- Core iO scheme (Golden Orbit encoding)
+- Proof of concept that φ·ψ = -1 provides noise damping
+- Demonstration of zero-test-resistant iO
+
+### What This IS NOT:
+- Production-grade FHE library (no NTT, CRT, key switching)
+- Full iO (no Matrix Branching Programs)
+- Replacement for OpenFHE/TFHE/SEAL
+- Formally verified implementation
+
+### For Production Use:
+Refer to `ROADMAP.md` for engineering work needed:
+- NTT polynomial multiplication
+- CRT decomposition
+- Key switching
+- Relinearization
+- Serialization
+- Formal verification
