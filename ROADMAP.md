@@ -1,4 +1,4 @@
-# Roadmap — What Remains for the Community
+# Roadmap — Remaining Work
 
 **Version 2.0**
 
@@ -6,256 +6,96 @@
 
 ## Purpose
 
-This document outlines the engineering work that remains for the community. The core cryptographic framework is complete and working. What follows is a list of improvements, optimizations, and extensions.
+This document lists the engineering and research work needed to move this prototype toward a validated scheme.
+
+The current implementation is a small-scale research prototype (N=1024, Q=2^29). It is not production software.
 
 ---
 
-## What's Already DONE
+## Current State
 
-| Component | Status |
-|-----------|--------|
-| FHE Core (encrypt, decrypt, NAND) | ✅ Working |
-| Bootstrapping (unlimited depth) | ✅ 20 levels tested |
-| Circuit Obfuscation (O(n) gates) | ✅ 4-input XOR 16/16 |
-| Golden Angle PRNG | ✅ 1M/1M unique |
-| Lucas One-Way | ✅ 0/100K collisions |
-| Equidistributed Noise | ✅ Balance 0.0002 |
-| Quantum Verification | ✅ 203M gates/sec |
-| Full Pipeline (FHE+iO+Quantum) | ✅ 4/4 XOR |
-| Adversarial Suite | ✅ 8/8 blocked |
-| Documentation (12 files) | ✅ 4,200+ lines |
-| FORMAL_PROOF (14 theorems) | ✅ Triple cross-referenced |
+| Component | Status | Scale |
+|-----------|--------|-------|
+| FHE core (encrypt/decrypt/NAND) | Tested | N=1024, Q=2^29 |
+| Bootstrapping | Tested | 20 levels |
+| Circuit obfuscation | Tested | 4-input XOR 16/16 |
+| Golden Angle PRNG | Tested | 1M/1M unique |
+| Lucas commitment | Tested | 0/100K collisions |
+| Equidistributed noise | Tested | Balance 0.0002 |
+| Attack resistance | Tested | 8 classes blocked |
+| Documentation | Written | 10+ files |
 
 ---
 
-## Phase 1: Build & Test Infrastructure (Weeks 1-4)
+## Priority Work
 
-### 1.1 Build System
+### High Priority
 
-**Current:** Manual g++ compilation
+| Task | Why | Effort |
+|------|-----|--------|
+| Peer review | Validation by independent researchers | Low effort (submit) |
+| Larger Q (2^60+) | Current Q=2^29 too small for real security | Low |
+| NTT multiplication | Current O(N²) is slow; NTT gives O(N log N) | Medium |
+| Formal security analysis | Current claims rely on RLWE informally | High |
 
-**Needed:**
-- [ ] CMakeLists.txt with all targets
-- [ ] Makefile with `make test` runner
-- [ ] GitHub Actions CI/CD
-- [ ] Docker container
-- [ ] Package management (vcpkg/conan)
+### Medium Priority
 
-### 1.2 Test Framework
+| Task | Why |
+|------|-----|
+| CMake build | Easier compilation |
+| Test framework | Organized test runner |
+| Key switching | Needed for real FHE |
+| Relinearization | Reduce ciphertext size |
 
-**Current:** Individual test files
+### Low Priority
 
-**Needed:**
-- [ ] Google Test / Catch2 integration
-- [ ] Automated test runner (`./run_all_tests.sh`)
-- [ ] Code coverage (gcov/lcov)
-- [ ] Performance regression testing
-- [ ] Fuzz testing
-
-### 1.3 Code Quality
-
-**Current:** Header-only
-
-**Needed:**
-- [ ] Split .h/.cpp (optional)
-- [ ] Doxygen comments
-- [ ] clang-tidy integration
-- [ ] clang-format configuration
-- [ ] Static analysis in CI
+| Task | Why |
+|------|-----|
+| GPU acceleration | Performance only |
+| Formal verification (Coq) | Very high effort |
+| MPC integration | Feature extension |
 
 ---
 
-## Phase 2: Performance Optimization (Weeks 5-8)
+## Phases
 
-### 2.1 FHE Speed
+### Phase 1: Validation (Weeks 1-4)
 
-| Metric | Current | Target |
-|--------|---------|--------|
-| Bootstrapped NOT | 40 ops/sec | 1000+ |
-| Batch Encrypt | 47.6K ops/sec | 100K+ |
-| Full Pipeline | 77 ops/sec | 500+ |
+- [ ] Submit for peer review
+- [ ] Independent security analysis
+- [ ] Bug bounty setup
+- [ ] Community feedback
 
-**Approaches:**
+### Phase 2: Engineering (Weeks 5-12)
+
 - [ ] NTT polynomial multiplication
-- [ ] CRT decomposition
-- [ ] GPU acceleration (CUDA)
-- [ ] FPGA implementation
-- [ ] Cache optimization
+- [ ] Key switching
+- [ ] Relinearization
+- [ ] Serialization
+- [ ] CMake build
+- [ ] CI/CD
 
-### 2.2 Bootstrapping
+### Phase 3: Security Hardening (Weeks 13-20)
 
-**Current:** Simple decrypt-reencrypt (4.2ms)
-
-**Target:** TFHE-style blind rotation (<1ms)
-
-- [ ] Programmable bootstrapping
-- [ ] LUT optimization
-- [ ] Parallel bootstrapping
-- [ ] Precomputed keys
-
-### 2.3 iO Speed
-
-| Metric | Current | Target |
-|--------|---------|--------|
-| iO Evaluation | 29.3M ops/sec | 100M+ |
-
-- [ ] SIMD vectorization
-- [ ] Batch lookup tables
-- [ ] GPU parallel eval
-- [ ] Compile-time optimization
-
----
-
-## Phase 3: Security Hardening (Weeks 9-12)
-
-### 3.1 Parameters
-
-| Parameter | Current | Recommended |
-|-----------|---------|-------------|
-| N | 1024 | 2048 or 4096 |
-| Q | 2^29 | 2^60+ |
-| Error rate | 1/10000 | 1/1000 (larger Q) |
-
+- [ ] Larger parameters (Q=2^60+)
 - [ ] LWE estimator integration
-- [ ] Multiple parameter sets
-- [ ] Automated parameter selection
+- [ ] Formal verification
+- [ ] Side-channel analysis
 
-### 3.2 Formal Verification
+### Phase 4: Extensions (Ongoing)
 
-- [ ] Coq/Isabelle proofs
-- [ ] Machine-checked theorems
-- [ ] Side-channel analysis (full)
-- [ ] Fault injection testing
-
-### 3.3 Independent Review
-
-- [ ] Security audit (third party)
-- [ ] Peer review publication
-- [ ] Crypto community feedback
-- [ ] Bug bounty program
-
----
-
-## Phase 4: Feature Extensions (Weeks 13-16)
-
-### 4.1 Multi-Party Computation
-
-- [ ] Secret sharing
-- [ ] Threshold decryption
-- [ ] Distributed key generation
-- [ ] MPC protocols
-
-### 4.2 Zero-Knowledge Proofs
-
-- [ ] ZK-SNARKs integration
-- [ ] Proof of correct computation
-- [ ] Verifiable FHE
-
-### 4.3 Network
-
-- [ ] Client-server architecture
-- [ ] Secure protocol
-- [ ] Serialization format
-- [ ] Network benchmarks
-
----
-
-## Phase 5: Production Deployment (Weeks 17-20)
-
-### 5.1 API
-
-- [ ] RESTful API
-- [ ] gRPC
-- [ ] Python bindings
-- [ ] WASM port
-- [ ] Mobile SDK
-
-### 5.2 Infrastructure
-
-- [ ] Load balancing
-- [ ] High availability
-- [ ] Monitoring
-- [ ] Auditing
-
-### 5.3 Community
-
-- [ ] Tutorial series
-- [ ] Video walkthroughs
-- [ ] Interactive examples
-
----
-
-## Phase 6: Advanced Research (Ongoing)
-
-### 6.1 iO Extensions
-
-- [x] Circuit obfuscation (DONE)
 - [ ] Matrix Branching Programs
 - [ ] Functional encryption
-- [ ] Arbitrary-depth quantum circuits
-
-### 6.2 Post-Quantum
-
-- [ ] Module-LWE
-- [ ] Isogeny-based
-- [ ] Code-based
-- [ ] Hybrid schemes
-
-### 6.3 Hardware
-
-- [ ] ASIC design
-- [ ] FPGA
-- [ ] Quantum coprocessor
-- [ ] TEE integration
+- [ ] MPC
+- [ ] ZK proofs
 
 ---
 
-## Phase 7: Academic
+## What This Roadmap Does NOT Include
 
-- [ ] Peer-reviewed paper
-- [ ] Conference presentation
-- [ ] Workshop
-- [ ] University collaboration
-
----
-
-## Priority Matrix
-
-| Priority | Task | Impact | Effort |
-|----------|------|--------|--------|
-| **HIGH** | NTT multiplication | 10x+ speedup | Medium |
-| **HIGH** | Larger Q (2^60) | Stronger security | Low |
-| **HIGH** | Independent audit | Credibility | Low |
-| **HIGH** | Peer review | Validation | Medium |
-| MEDIUM | CMake build | Reproducibility | Low |
-| MEDIUM | Test framework | Quality | Medium |
-| MEDIUM | MPC | Functionality | High |
-| LOW | GPU | Performance | High |
-| LOW | Formal verification | Proof | Very High |
-
----
-
-## Estimated Timeline
-
-| Phase | Duration | Prerequisites |
-|-------|----------|---------------|
-| 1 | 4 weeks | None |
-| 2 | 4 weeks | Phase 1 |
-| 3 | 4 weeks | Phase 1 |
-| 4 | 4 weeks | Phase 2 |
-| 5 | 4 weeks | Phase 4 |
-| 6 | Ongoing | Phase 3 |
-| 7 | Ongoing | All |
-
----
-
-## How to Contribute
-
-1. **Choose a task** from the priority matrix
-2. **Read** the relevant docs (README, CONTRIBUTING)
-3. **Open an issue** to claim the task
-4. **Submit a PR** with tests
-5. **Cite** this work in publications
+- Claims of production readiness
+- Claims of security beyond RLWE
+- Claims of solving open problems
 
 ---
 
@@ -265,4 +105,4 @@ This document outlines the engineering work that remains for the community. The 
 
 ---
 
-*This roadmap is a guide. Priorities may shift based on community needs.*
+*This roadmap is honest about the current state. The prototype is small-scale. Significant work remains before this can be considered a validated scheme.*
