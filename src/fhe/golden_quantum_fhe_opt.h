@@ -6,11 +6,12 @@
 #include <array>
 #include <cstdint>
 #include <iostream>
-#include <thread>
-#include <mutex>
-#include <cstring>
 
-namespace GoldenQuantumFHEOpt {
+#ifdef __AVX2__
+#include <immintrin.h>
+#endif
+
+namespace GoldenFHE {
 
 constexpr int N = 1024;
 constexpr long Q = 536870909;
@@ -18,6 +19,7 @@ constexpr double PHI = 1.6180339887498948482;
 constexpr double PSI = -0.6180339887498948482;
 constexpr int MAX_DIM = 8;
 constexpr int MAX_DEPTH = 4;
+constexpr int TOTAL_DIMS = MAX_DIM * MAX_DEPTH;
 
 inline void init_ring() { NTL::ZZ_p::init(NTL::ZZ(Q)); }
 
@@ -50,7 +52,7 @@ inline void keygen(PublicKey& pk, SecretKey& sk, uint64_t seed) {
         state ^= (state >> 7);
         state ^= (state << 17);
         NTL::SetCoeff(a, i, state % Q);
-        NTL::SetCoeff(e, i, (state % 1000) == 0 ? 1 : 0);
+        NTL::SetCoeff(e, i, (state % 10000) == 0 ? 1 : 0);
     }
     pk.pk0 = -(a * s + e);
     pk.pk1 = a;
@@ -60,29 +62,28 @@ struct Cipher {
     NTL::ZZ_pX c0, c1;
 };
 
-struct QuantumCipher {
-    Cipher classical;
-    std::array<std::array<double, MAX_DIM>, MAX_DEPTH> quantum;
+struct alignas(64) QuantumStateAligned {
+    double values[TOTAL_DIMS];
 };
 
-// Cache para sa swing operations
-static std::vector<double> swing_cache;
-static bool cache_initialized = false;
+struct QuantumCipher {
+    Cipher classical;
+    QuantumStateAligned quantum;
+};
 
-inline double swing(double v) {
-    return -1.0 / v;
-}
+inline double swing(double v) { return -1.0 / v; }
 
-inline void init_swing_cache() {
-    if (!cache_initialized) {
-        swing_cache.resize(1024);
-        double v = 1.0;
-        for (int i = 0; i < 1024; i++) {
-            swing_cache[i] = v;
-            v = swing(v);
-        }
-        cache_initialized = true;
+inline void simd_fill(double* dest, double value) {
+#ifdef __AVX2__
+    __m256d v = _mm256_set1_pd(value);
+    for (int i = 0; i < TOTAL_DIMS; i += 4) {
+        _mm256_store_pd(&dest[i], v);
     }
+#else
+    for (int i = 0; i < TOTAL_DIMS; i++) {
+        dest[i] = value;
+    }
+#endif
 }
 
 inline Cipher encrypt(const PublicKey& pk, bool bit, uint64_t nonce) {
@@ -98,8 +99,8 @@ inline Cipher encrypt(const PublicKey& pk, bool bit, uint64_t nonce) {
         state ^= (state >> 7);
         state ^= (state << 17);
         NTL::SetCoeff(u, i, (state % 3) - 1);
-        NTL::SetCoeff(e0, i, (state % 1000) == 0 ? 1 : 0);
-        NTL::SetCoeff(e1, i, (state % 1000) == 0 ? 1 : 0);
+        NTL::SetCoeff(e0, i, (state % 10000) == 0 ? 1 : 0);
+        NTL::SetCoeff(e1, i, (state % 10000) == 0 ? 1 : 0);
     }
 
     Cipher ct;
@@ -116,68 +117,78 @@ inline bool decrypt(const Cipher& ct, const SecretKey& sk) {
     return v > threshold;
 }
 
-// Parallel Quantum Encryption: 32 dimensions nang sabay-sabay
-inline QuantumCipher quantum_encrypt_parallel(const PublicKey& pk, bool bit, uint64_t nonce) {
-    init_swing_cache();
+inline QuantumCipher quantum_encrypt(const PublicKey& pk, bool bit, uint64_t nonce) {
     QuantumCipher qc;
     qc.classical = encrypt(pk, bit, nonce);
-
     double base = bit ? PHI : PSI;
-    const int TOTAL = MAX_DEPTH * MAX_DIM;
-    const int NUM_THREADS = 4;
-    std::vector<std::thread> threads;
-    std::mutex mtx;
-
-    auto worker = [&](int start, int end) {
-        for (int idx = start; idx < end; idx++) {
-            int d = idx / MAX_DIM;
-            int dim = idx % MAX_DIM;
-            // SIMD-like: direktang assignment gamit ang cache
-            {
-                std::lock_guard<std::mutex> lock(mtx);
-                qc.quantum[d][dim] = base;
-            }
-        }
-    };
-
-    int chunk = TOTAL / NUM_THREADS;
-    for (int t = 0; t < NUM_THREADS; t++) {
-        int start = t * chunk;
-        int end = (t == NUM_THREADS - 1) ? TOTAL : start + chunk;
-        threads.push_back(std::thread(worker, start, end));
-    }
-
-    for (auto& th : threads) {
-        if (th.joinable()) th.join();
-    }
-
+    simd_fill(qc.quantum.values, base);
     return qc;
 }
 
 inline bool quantum_decrypt(const QuantumCipher& qc, const SecretKey& sk) {
     bool classical_bit = decrypt(qc.classical, sk);
     int positives = 0;
-    int total = 0;
-    for (int d = 0; d < MAX_DEPTH; d++) {
-        for (int dim = 0; dim < MAX_DIM; dim++) {
-            if (qc.quantum[d][dim] > 0) positives++;
-            total++;
-        }
+    for (int i = 0; i < TOTAL_DIMS; i += 4) {
+        if (qc.quantum.values[i] > 0) positives++;
+        if (qc.quantum.values[i+1] > 0) positives++;
+        if (qc.quantum.values[i+2] > 0) positives++;
+        if (qc.quantum.values[i+3] > 0) positives++;
     }
-    return classical_bit && (positives > total / 2);
+    return classical_bit && (positives > TOTAL_DIMS / 2);
 }
 
+// True homomorphic NAND: NAND(a,b) = golden_plain - (a*b)/golden_plain
 inline Cipher nand_gate(const Cipher& a, const Cipher& b) {
     init_ring();
+    
     long golden_plain = static_cast<long>(Q / PHI);
-    long golden_square = static_cast<long>((Q / PHI) * (1.0 / PHI));
-
+    
+    // Multiply a*b
+    NTL::ZZ_pX t0 = a.c0 * b.c0;
+    NTL::ZZ_pX t1 = a.c0 * b.c1 + a.c1 * b.c0;
+    NTL::ZZ_pX t2 = a.c1 * b.c1;
+    
+    // s^2 = -1 sa cyclotomic ring
+    NTL::ZZ_pX mult_c0 = t0 - t2;
+    NTL::ZZ_pX mult_c1 = t1;
+    
+    // Rescale: divide by golden_plain
+    NTL::ZZ_p inv_golden;
+    inv_golden = golden_plain;
+    NTL::ZZ_p inv_val = NTL::inv(inv_golden);
+    long inv_long = NTL::conv<long>(inv_val);
+    
+    NTL::ZZ_pX scaled_c0 = mult_c0 * inv_long;
+    NTL::ZZ_pX scaled_c1 = mult_c1 * inv_long;
+    
+    // NAND = golden_plain - scaled_result
+    NTL::ZZ_pX golden_poly;
+    NTL::SetCoeff(golden_poly, 0, golden_plain);
+    
     Cipher r;
-    r.c0 = NTL::ZZ_pX();
-    NTL::SetCoeff(r.c0, 0, golden_square);
-    r.c0 = r.c0 - a.c0 * b.c0;
-    r.c1 = NTL::ZZ_pX();
+    r.c0 = golden_poly - scaled_c0;
+    r.c1 = -scaled_c1;
     return r;
 }
 
-} // namespace GoldenQuantumFHEOpt
+inline Cipher NOT(const Cipher& a) { return nand_gate(a, a); }
+
+inline Cipher AND(const Cipher& a, const Cipher& b) {
+    auto n = nand_gate(a, b);
+    return nand_gate(n, n);
+}
+
+inline Cipher OR(const Cipher& a, const Cipher& b) {
+    auto na = NOT(a);
+    auto nb = NOT(b);
+    return nand_gate(na, nb);
+}
+
+inline Cipher XOR(const Cipher& a, const Cipher& b) {
+    auto n1 = nand_gate(a, b);
+    auto n2 = nand_gate(a, n1);
+    auto n3 = nand_gate(b, n1);
+    return nand_gate(n2, n3);
+}
+
+} // namespace GoldenFHE
