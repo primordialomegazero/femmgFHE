@@ -31,10 +31,8 @@ public:
     Cipher bootstrap(const Cipher& noisy_ct) {
         bootstrapping_count++;
         
-        // I-decrypt para malaman ang tamang bit value
         bool bit_value = decrypt(noisy_ct, sk);
         
-        // I-reencrypt na may fresh noise
         uint64_t fresh_nonce = 20000 + bootstrapping_count * 100;
         return encrypt(pk, bit_value, fresh_nonce);
     }
@@ -66,14 +64,13 @@ private:
     int current_depth;
     
 public:
-    UnlimitedFHE(const PublicKey& pk, const SecretKey& sk, int max_depth = 1) 
+    UnlimitedFHE(const PublicKey& pk, const SecretKey& sk, int max_depth = 2) 
         : bootstrapper(pk, sk), max_depth_before_bootstrap(max_depth), current_depth(0) {}
     
     Cipher nand_with_bootstrap(const Cipher& a, const Cipher& b) {
         Cipher result = nand_gate(a, b);
         current_depth++;
         
-        // Bootstrap pagkatapos ng bawat operation
         if (current_depth >= max_depth_before_bootstrap) {
             result = bootstrapper.bootstrap(result);
             current_depth = 0;
