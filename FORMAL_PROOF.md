@@ -1,78 +1,69 @@
-# Formal Proof: Golden Privacy System
+# Formal Claims and Test Evidence
 
-**Version 3.0 — Triple Cross-Referenced**
+**Version 3.0**
 
 ---
 
 ## How to Read This Document
 
-Each theorem is **triple cross-referenced** with:
+Each claim below includes:
 
-| Reference | Location | Purpose |
-|-----------|----------|---------|
-| **Source Code** | Exact file and line | Implementation |
-| **Theorem Statement** | Mathematical claim | What is proven |
-| **Test File** | Exact test and line | Independent verification |
+- **Source code reference** — where the implementation is
+- **Test reference** — where the behavior is tested
+- **Status** — whether the claim is proven, tested, or assumed
 
-**Verify it yourself.** Reproduce the results. Publish your findings. Attack the system. Share what you learn.
-
-All approaches are welcome — except plagiarism, misrepresentation, and unhealthy behavior.
+This document does not claim formal security proofs. It documents what has been tested at small scale and what remains as assumptions.
 
 ---
 
-## Theorem Index
+## Claim Index
 
-| # | Theorem | Status | Source | Test |
-|---|---------|--------|--------|------|
-| 1 | IND-CPA Security | PROVEN (RLWE) | `src/fhe/golden_quantum_fhe.h:71-84` | `tests/test_adversarial.cpp:45-52` |
-| 2 | NAND Correctness | PROVEN | `src/fhe/golden_quantum_fhe.h:141-167` | `tests/test_fhe_fixed.cpp:18-31` |
-| 3 | Bootstrapping | PROVEN (20 levels) | `src/fhe/golden_bootstrapping.h:25-38` | `tests/test_bootstrapping.cpp:15-35` |
-| 4 | iO Indistinguishability | PROVEN (KS=0) | `src/golden_privacy_system.h:52-78` | `tests/test_io_stress.cpp:89-107` |
-| 5 | Zero-test Resistance | PROVEN (construction) | `src/golden_privacy_system.h:52-78` | `tests/test_adversarial.cpp:18-24` |
-| 6 | Timing Resistance | RESISTANT | `src/golden_privacy_system.h:119-126` | `tests/test_timing_final.cpp:44-67` |
-| 7 | Batch Encryption | PROVEN (142x) | `src/golden_privacy_system.h:91-111` | `tests/test_fhe_encryption_opt.cpp:78-92` |
-| 8 | Golden Ratio | PROVEN (algebraic) | `src/fhe/golden_quantum_fhe.h:13-16` | `tests/test_golden_io_debug.cpp:8-15` |
-| 9 | Noise Damping | PROVEN (1000 ops) | `src/fhe/golden_quantum_fhe.h:141-167` | `tests/test_noise_visual.cpp:28-61` |
-| 10 | Full Pipeline | PROVEN (4/4) | `src/golden_privacy_system.h:132-154` | `tests/test_privacy_system.cpp:35-58` |
-| 11 | Circuit Obfuscation | PROVEN (O(n)) | `src/golden_privacy_system.h:89-121` | `tests/test_circuit_integrated_v2.cpp` |
-| 12 | Golden Angle PRNG | PROVEN (1M unique) | `src/golden_prng.h` | `tests/test_golden_prng_inject.cpp` |
-| 13 | Lucas One-Way | PROVEN (0 collisions) | `src/golden_lucas.h` | `tests/test_lucas_inject.cpp` |
-| 14 | Equidistributed Noise | PROVEN (balance 0.0002) | `src/golden_equidistributed.h` | `tests/test_equidistributed_inject.cpp` |
-
----
-
-## Theorem 1: IND-CPA Security
-
-**Claim:** The FHE scheme provides semantic security under the RLWE assumption.
-
-**Source:** `src/fhe/golden_quantum_fhe.h:71-84`
-
-```cpp
-// Secret key: ternary {-1, 0, 1}
-// Public key: (pk0, pk1) = (-(a·s + e), a)
-pk.pk0 = -(a * s + e);
-pk.pk1 = a;
-```
-
-**Test:** `tests/test_adversarial.cpp:45-52` → BLOCKED
-
-**Proof:** The public key is an RLWE sample. Distinguishing from uniform requires solving RLWE.
-
-**Status:** PROVEN (conditional on RLWE hardness)
+| # | Claim | Status | Source | Test |
+|---|-------|--------|--------|------|
+| 1 | IND-CPA under RLWE | Assumed | `src/fhe/golden_quantum_fhe.h` | `tests/test_adversarial.cpp` |
+| 2 | NAND correctness | Tested | `src/fhe/golden_quantum_fhe.h` | `tests/test_fhe_fixed.cpp` |
+| 3 | Bootstrapping correctness | Tested | `src/fhe/golden_bootstrapping.h` | `tests/test_bootstrapping.cpp` |
+| 4 | iO indistinguishability | Tested (KS=0) | `src/io/golden_io_orbit.h` | `tests/test_io_stress.cpp` |
+| 5 | Zero-test resistance | By construction | `src/io/golden_io_orbit.h` | `tests/test_adversarial.cpp` |
+| 6 | Timing resistance | Tested | `src/golden_privacy_system.h` | `tests/test_timing_final.cpp` |
+| 7 | Batch encryption | Tested | `src/golden_privacy_system.h` | `tests/test_full_benchmark.cpp` |
+| 8 | φ·ψ = -1 | Algebraic identity | `src/fhe/golden_quantum_fhe.h` | N/A |
+| 9 | Noise damping | Observed | `src/fhe/golden_quantum_fhe.h` | Archive tests |
+| 10 | Full pipeline | Tested | `src/golden_privacy_system.h` | `tests/test_privacy_system.cpp` |
+| 11 | Circuit obfuscation | Tested | `src/io/golden_io_orbit.h` | `tests/test_circuit_integrated_v2.cpp` |
+| 12 | PRNG uniformity | Tested | `src/golden_prng.h` | `tests/test_golden_prng_inject.cpp` |
+| 13 | Lucas commitment | Tested | `src/golden_lucas.h` | `tests/test_lucas_inject.cpp` |
+| 14 | Noise equidistribution | Tested | `src/golden_equidistributed.h` | `tests/test_equidistributed_inject.cpp` |
 
 ---
 
-## Theorem 2: NAND Correctness
+## Status Definitions
 
-**Claim:** Homomorphic NAND correctly computes ¬(a∧b) on encrypted bits.
+| Status | Meaning |
+|--------|---------|
+| **Assumed** | Relies on a standard hardness assumption (e.g., RLWE). No independent proof provided. |
+| **Tested** | Behavior verified by test suite at small scale (N=1024, Q=2^29). |
+| **By construction** | Property follows directly from the mathematical structure. |
+| **Algebraic identity** | Standard mathematical fact, not a security claim. |
+| **Observed** | Behavior seen in testing; no formal proof. |
 
-**Source:** `src/fhe/golden_quantum_fhe.h:141-167`
+---
 
-```cpp
-NAND(a, b) = golden_plain - (a·b) / golden_plain
-```
+## Claim 1: IND-CPA under RLWE
 
-**Test:** `tests/test_fhe_fixed.cpp:18-31` → ALL PASSED
+**Status:** Assumed
+
+**Basis:** The public key is an RLWE sample `(a, -(a·s + e))`. Under the RLWE assumption, distinguishing this from uniform is hard.
+
+**Not provided:** A formal reduction proof. This prototype relies on the standard RLWE assumption without independent verification.
+
+---
+
+## Claim 2: NAND Correctness
+
+**Status:** Tested
+
+**Test:** `tests/test_fhe_fixed.cpp` — 4/4 truth table cases pass.
 
 | a | b | Result | Expected |
 |---|---|--------|----------|
@@ -81,165 +72,105 @@ NAND(a, b) = golden_plain - (a·b) / golden_plain
 | 1 | 0 | 1 | 1 |
 | 1 | 1 | 0 | 0 |
 
-**Status:** PROVEN
+---
+
+## Claim 3: Bootstrapping
+
+**Status:** Tested
+
+**Test:** `tests/test_bootstrapping.cpp` — 20-level NOT chain, all correct.
+
+**Not provided:** Formal proof that decrypt-reencrypt bootstrapping preserves IND-CPA security. This is a known gap.
 
 ---
 
-## Theorem 3: Bootstrapping
+## Claim 4: iO Indistinguishability
 
-**Claim:** Bootstrapping resets noise while preserving plaintext.
+**Status:** Tested (empirical)
 
-**Source:** `src/fhe/golden_bootstrapping.h:25-38`
+**Test:** `tests/test_io_stress.cpp` — 100 pairs of different functions, KS distance = 0.
 
-```cpp
-Cipher bootstrap(const Cipher& noisy_ct) {
-    bool bit_value = decrypt(noisy_ct, sk);
-    return encrypt(pk, bit_value, fresh_nonce);
-}
-```
-
-**Test:** `tests/test_bootstrapping.cpp:15-35` → 20 levels, 0 errors
-
-**Status:** PROVEN
+**Not provided:** A formal indistinguishability proof. The KS=0 result is empirical, not a security proof.
 
 ---
 
-## Theorem 4: iO Indistinguishability
+## Claim 5: Zero-test Resistance
 
-**Claim:** Obfuscated programs are perfectly indistinguishable.
+**Status:** By construction
 
-**Source:** `src/golden_privacy_system.h:52-78`
+**Basis:** All encoded values satisfy |value| = 1. Zero values cannot occur.
 
-```cpp
-// Golden Orbit: |value| = 1 for all encodings
-std::complex<double> value = std::exp(GP_I * angle);
-```
-
-**Test:** `tests/test_io_stress.cpp:89-107` → KS = 0, 100/100 pairs
-
-**Status:** PROVEN
+**Not provided:** A formal proof that absence of zero values implies security against all zeroizing variants.
 
 ---
 
-## Theorem 5: Zero-test Resistance
+## Claim 6: Timing Resistance
 
-**Claim:** No zero values exist in the encoding.
+**Status:** Tested
 
-**Source:** `src/golden_privacy_system.h:52-78`
+**Test:** `tests/test_timing_final.cpp` — no data-dependent timing correlation found.
 
-```cpp
-// |e^(iθ)| = 1 for all θ → walang zero possible
-```
-
-**Test:** `tests/test_adversarial.cpp:18-24` → BLOCKED
-
-**Status:** PROVEN (by construction)
+**Not provided:** A formal constant-time analysis.
 
 ---
 
-## Theorem 6: Timing Resistance
+## Claim 7: Batch Encryption
 
-**Claim:** No data-dependent timing leakage.
+**Status:** Tested
 
-**Source:** `src/golden_privacy_system.h:119-126`
-
-```cpp
-// Pure arithmetic, walang data-dependent branches
-return obfuscated_program[idx].value.imag() > 0;
-```
-
-**Test:** `tests/test_timing_final.cpp:44-67` → RESISTANT
-
-**Status:** RESISTANT (no correlation found)
+**Test:** `tests/test_full_benchmark.cpp` — batch encrypt/decrypt works for 128 bits per ciphertext.
 
 ---
 
-## Theorem 7: Batch Encryption
+## Claim 8: φ·ψ = -1
 
-**Claim:** N bits encrypted in O(N) time, not O(N²).
+**Status:** Algebraic identity
 
-**Source:** `src/golden_privacy_system.h:91-111`
-
-```cpp
-// Each bit sa iba't ibang coefficient
-NTL::SetCoeff(m, i, golden_plain);
-```
-
-**Test:** `tests/test_fhe_encryption_opt.cpp:78-92` → 48,503 ops/sec (142x)
-
-**Status:** PROVEN
-
----
-
-## Theorem 8: Golden Ratio Foundation
-
-**Claim:** φ·ψ = -1.
-
-**Algebraic Proof:**
-
+**Proof:**
 ```
 φ = (1 + √5) / 2
 ψ = (1 - √5) / 2
 φ·ψ = ((1+√5)/2)((1-√5)/2) = (1-5)/4 = -1
 ```
 
-**Source:** `src/fhe/golden_quantum_fhe.h:13-16`
-
-**Status:** PROVEN (algebraic identity)
+This is standard mathematics, not a security claim.
 
 ---
 
-## Theorem 9: Noise Damping
+## Claim 9: Noise Damping
 
-**Claim:** Golden ratio rescaling keeps noise bounded.
+**Status:** Observed
 
-**Source:** `src/fhe/golden_quantum_fhe.h:141-167`
+**Basis:** In tests, noise values remain at golden_plain or 0 after 1000 operations.
 
-```cpp
-// Each NAND rescales by 1/golden_plain
-// golden_plain = Q/φ ≈ 3.3×10^8
-```
-
-**Test:** `tests/test_noise_visual.cpp:28-61` → 1000 ops, 0 drift
-
-**Status:** PROVEN
+**Not provided:** A formal proof that the alternation from φ·ψ = -1 bounds noise in all cases.
 
 ---
 
-## Theorem 10: Full Pipeline
+## Claim 10: Full Pipeline
 
-**Claim:** FHE → iO → Quantum → FHE correctly computes.
+**Status:** Tested
 
-**Source:** `src/golden_privacy_system.h:132-154`
-
-**Test:** `tests/test_privacy_system.cpp:35-58` → 4/4 XOR cases
-
-**Status:** PROVEN
+**Test:** `tests/test_privacy_system.cpp` — 4/4 XOR cases pass through FHE → iO → Quantum → FHE.
 
 ---
 
-## Theorem 11: Circuit Obfuscation
+## Claim 11: Circuit Obfuscation
 
-**Claim:** O(n) gates instead of 2^n truth table entries.
-
-**Source:** `src/golden_privacy_system.h:89-121`
+**Status:** Tested
 
 **Test:** `tests/test_circuit_integrated_v2.cpp`
 
-| Circuit | Gates | Truth Table | Space Saved |
-|---------|-------|-------------|-------------|
-| 4-input XOR | 12 | 16 | 25% |
-| 8-input AND | 14 | 256 | 94.5% |
-
-**Status:** PROVEN (16/16 XOR)
+| Circuit | Gates | Truth Table |
+|---------|-------|-------------|
+| 4-input XOR | 12 | 16 |
+| 8-input AND | 14 | 256 |
 
 ---
 
-## Theorem 12: Golden Angle PRNG
+## Claim 12: PRNG Uniformity
 
-**Claim:** Perfect uniform distribution.
-
-**Source:** `src/golden_prng.h`
+**Status:** Tested
 
 **Test:** `tests/test_golden_prng_inject.cpp`
 
@@ -247,74 +178,46 @@ NTL::SetCoeff(m, i, golden_plain);
 |--------|--------|
 | Uniqueness | 1M/1M |
 | Balance | 0.0002 |
-| Distribution | 10000 per bucket |
 
-**Status:** PROVEN
+**Not claimed:** Cryptographic security of the PRNG. This is a deterministic sequence with good distribution, not a CSPRNG.
 
 ---
 
-## Theorem 13: Lucas One-Way
+## Claim 13: Lucas Commitment
 
-**Claim:** One-way function with collision resistance.
-
-**Source:** `src/golden_lucas.h`
+**Status:** Tested
 
 **Test:** `tests/test_lucas_inject.cpp`
 
 | Metric | Result |
 |--------|--------|
 | Collisions | 0/100K |
-| Avalanche | 34 bits |
-| Inversion | 108,309 years (brute force) |
+| Tamper detection | Works |
 
-**Status:** PROVEN
+**Not claimed:** Formal binding/hiding proofs. No reduction to a hard problem is provided.
 
 ---
 
-## Theorem 14: Equidistributed Noise
+## Claim 14: Noise Equidistribution
 
-**Claim:** Noise distribution is uniform.
-
-**Source:** `src/golden_equidistributed.h`
+**Status:** Tested
 
 **Test:** `tests/test_equidistributed_inject.cpp`
 
 | Metric | Result |
 |--------|--------|
 | Balance | 0.0002 |
-| Distribution | Perfect uniform |
-
-**Status:** PROVEN
 
 ---
 
-## Honest Assessment
+## What Is NOT Claimed
 
-### Proven
-
-- 14 theorems with triple cross-referencing
-- All tests pass with 100% correctness
-- Performance exceeds known libraries by 50,000x
-
-### Not Proven
-
-- Security against unknown future attacks
-- RLWE hardness for larger parameter sets
-- Formal verification in Coq/Isabelle
-- Security without assumptions
-
-### Welcome
-
-- **Reproduce** — Run the tests
-- **Publish** — Share findings with attribution
-- **Attack** — Try to break it honestly
-- **Learn** — Study and teach
-
-### Not Welcome
-
-- **Plagiarism** — Copy without attribution
-- **Misrepresentation** — Claim untested results
-- **Toxicity** — Unhealthy competition
+- Formal security proofs (Coq/Isabelle)
+- Security at production parameters (Q=2^60+)
+- CSPRNG status for the PRNG
+- Formal iO indistinguishability
+- Formal commitment scheme security
+- Resistance to attacks not yet considered
 
 ---
 
@@ -324,6 +227,4 @@ NTL::SetCoeff(m, i, golden_plain);
 
 ---
 
-*14 theorems. Triple cross-referenced. The code is there. The tests are there. Verify. Learn. Improve.*
-
-*φ · ψ = -1*
+*This document is a factual record of what has been tested. It is not a substitute for peer-reviewed security analysis.*
