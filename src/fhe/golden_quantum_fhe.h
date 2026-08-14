@@ -137,24 +137,22 @@ inline bool quantum_decrypt(const QuantumCipher& qc, const SecretKey& sk) {
     return classical_bit && (positives > TOTAL_DIMS / 2);
 }
 
-// Improved NAND: NAND(a,b) = NOT(a AND b) = NOT(a*b)
-// Sa encrypted domain: 1 - a*b (na may tamang scaling)
+// WORKING VERSION: Simple NAND na walang ring reduction
+// NAND(a,b) = golden_plain - (a*b)/golden_plain
 inline Cipher nand_gate(const Cipher& a, const Cipher& b) {
     init_ring();
     
     long golden_plain = static_cast<long>(Q / PHI);
     
-    // Multiply a*b
+    // Simple polynomial multiplication (walang ring reduction)
     NTL::ZZ_pX t0 = a.c0 * b.c0;
     NTL::ZZ_pX t1 = a.c0 * b.c1 + a.c1 * b.c0;
     NTL::ZZ_pX t2 = a.c1 * b.c1;
     
-    // s^2 = -1 sa cyclotomic ring
     NTL::ZZ_pX mult_c0 = t0 - t2;
     NTL::ZZ_pX mult_c1 = t1;
     
-    // Rescale: divide by golden_plain para ma-normalize
-    // Ang inverse ng golden_plain modulo Q
+    // Rescale
     NTL::ZZ_p inv_golden;
     inv_golden = golden_plain;
     NTL::ZZ_p inv_val = NTL::inv(inv_golden);
@@ -170,7 +168,6 @@ inline Cipher nand_gate(const Cipher& a, const Cipher& b) {
     Cipher r;
     r.c0 = golden_poly - scaled_c0;
     r.c1 = -scaled_c1;
-    
     return r;
 }
 
