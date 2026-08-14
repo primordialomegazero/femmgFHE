@@ -174,7 +174,7 @@ std::ofstream GoldenLogger::log_file;
 bool GoldenLogger::file_logging_enabled = false;
 int GoldenLogger::log_count = 0;
 
-// Macros para sa easy logging
+// Macros for easy logging
 #define LOG_TRACE(msg) GoldenLogger::trace(msg, __FILE__, __LINE__)
 #define LOG_DEBUG(msg) GoldenLogger::debug(msg, __FILE__, __LINE__)
 #define LOG_INFO(msg)  GoldenLogger::info(msg, __FILE__, __LINE__)

@@ -17,12 +17,12 @@ private:
 public:
     GoldenBatchEncryptor(GoldenPrivacySystem& system) : gps(system) {}
     
-    // BATCH: I-encrypt ang maraming bits sa isang ciphertext
+    // BATCH: Encrypt multiple bits in one ciphertext
     GoldenFHE::Cipher batch_encrypt(const std::vector<bool>& bits) {
         return gps.batch_encrypt(bits);
     }
     
-    // BATCH: I-encrypt ang N bits gamit ang batching
+    // BATCH: Encrypt N bits using batching
     std::vector<GoldenFHE::Cipher> encrypt_many(const std::vector<bool>& bits) {
         std::vector<GoldenFHE::Cipher> results;
         
@@ -37,7 +37,7 @@ public:
         return results;
     }
     
-    // ULTRA FAST: Batch encrypt para sa 100M bits
+    // ULTRA FAST: Batch encrypt for 100M bits
     void benchmark_100m() {
         std::cout << "100M BATCH ENCRYPTION BENCHMARK\n";
         std::cout << "================================\n\n";

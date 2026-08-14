@@ -54,12 +54,12 @@ public:
         return modular_lucas(n, PRIME);
     }
     
-    // Commitment: i-commit sa value, makuha ang Lucas hash
+    // Commitment: commit to value, get Lucas hash
     static long long commit(long long value) {
         return forward(value);
     }
     
-    // Verify: i-check kung ang commitment ay tumutugma
+    // Verify: check if commitment matches
     static bool verify(long long value, long long commitment) {
         return forward(value) == commitment;
     }

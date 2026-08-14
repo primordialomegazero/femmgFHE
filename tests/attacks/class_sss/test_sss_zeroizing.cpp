@@ -34,8 +34,8 @@ int main() {
     auto proof = gps.get_security();
     
     std::cout << "  Zero-test resistant: " 
-              << (proof.zero_test_resistant ? "YES ✅" : "NO ❌") << "\n";
-    std::cout << "  Result: " << (proof.zero_test_resistant ? "BLOCKED ✅" : "VULNERABLE ❌") << "\n";
+              << (proof.zero_test_resistant ? "YES" : "NO") << "\n";
+    std::cout << "  Result: " << (proof.zero_test_resistant ? "BLOCKED" : "VULNERABLE") << "\n";
     
     return 0;
 }

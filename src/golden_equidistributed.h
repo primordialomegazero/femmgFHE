@@ -9,15 +9,15 @@ constexpr double GP_PHI_E = 1.6180339887498948482;
 // ============================================
 // GOLDEN EQUIDISTRIBUTED NOISE (FIXED)
 // 
-// Gumagamit ng GOLDEN ANGLE ADDITION (hindi multiplication)
+// Uses GOLDEN ANGLE ADDITION (not multiplication)
 // 
-// FIX: φ·x mod 1 ay may 3-cycle orbit → BIASED
-//      (x + φ mod 1) mod 1 ay perfect equidistributed
+// FIX: φ·x mod 1 has 3-cycle orbit → BIASED
+//      (x + φ mod 1) mod 1 is perfectly equidistributed
 // 
 // Properties:
 // - Weyl criterion: equidistributed
 // - Balance: 0.0002 (perfect)
-// - Walang periodic orbits
+// - No periodic orbits
 // ============================================
 
 class GoldenEquidistributedNoise {
@@ -29,7 +29,7 @@ public:
     GoldenEquidistributedNoise(double initial = 0.123456789) 
         : state(initial), golden_angle_frac(std::fmod(GP_PHI_E, 1.0)) {}
     
-    // FIXED: Golden angle addition (hindi multiplication)
+    // FIXED: Golden angle addition (not multiplication)
     double next_noise() {
         state = std::fmod(state + golden_angle_frac, 1.0);
         return state;
