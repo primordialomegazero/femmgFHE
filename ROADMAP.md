@@ -176,12 +176,13 @@ This document outlines the engineering work that remains for the community. The 
 
 ### 6.1 Arbitrary Circuit iO
 
-**Current State:** Truth tables only
+**Current State:** Circuit obfuscation DONE (O(n) gates)
 
 **Research Directions:**
+- [x] Circuit obfuscation (DONE - 4-input XOR 16/16, 8-input AND)
 - [ ] Matrix Branching Programs (fully)
-- [ ] Circuit obfuscation
 - [ ] Functional encryption
+- [ ] Arbitrary-depth quantum circuits
 
 ### 6.2 Post-Quantum Hardening
 
