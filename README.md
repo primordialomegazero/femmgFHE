@@ -18,7 +18,7 @@
 
 ## Overview
 
-Golden Privacy System is a cryptographic framework that unifies six security layers into one production-ready system:
+Golden Privacy System is a cryptographic framework that unifies six security layers into one research prototype system:
 
 | Layer | Component | Purpose |
 |-------|-----------|---------|
@@ -101,7 +101,7 @@ PRNG Uniform: YES
   XOR(1,0) = 1 (expected 1)
   XOR(1,1) = 0 (expected 0)
 
-GOLDEN PRIVACY SYSTEM: PRODUCTION READY!
+GOLDEN PRIVACY SYSTEM: RESEARCH PROTOTYPE!
 ```
 
 ### Run All Tests

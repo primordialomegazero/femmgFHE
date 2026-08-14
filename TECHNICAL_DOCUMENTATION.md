@@ -8,7 +8,7 @@
 
 ### 1.1 Description
 
-The Golden Privacy System is a cryptographic framework unifying six security layers into a single production-ready system:
+The Golden Privacy System is a cryptographic framework unifying six security layers into a single research prototype system:
 
 | Layer | Technology |
 |-------|-----------|

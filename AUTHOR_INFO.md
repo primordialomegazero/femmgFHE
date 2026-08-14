@@ -47,7 +47,7 @@ Hindi ba parang natural na noise cancellation yan?"
 ```
 "Write a fully homomorphic encryption library in C++.
 Use N=1024 and Q=536870909. Include bootstrapping.
-Make it production ready."
+Make it research prototype."
 ```
 
 The difference: **curiosity vs command**. The author asked "what if" questions and explored together with the AI. The AI was not asked to "build everything" — it was asked to help explore possibilities.

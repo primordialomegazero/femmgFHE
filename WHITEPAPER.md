@@ -8,7 +8,7 @@
 
 ## Abstract
 
-We present the Golden Privacy System, a unified cryptographic framework integrating **six security layers** into a single production-ready system. The framework is built on the golden ratio φ = (1+√5)/2 and its conjugate ψ = (1-√5)/2, satisfying **φ·ψ = -1**. This identity provides natural noise cancellation, perfect indistinguishability, and built-in one-way properties.
+We present the Golden Privacy System, a unified cryptographic framework integrating **six security layers** into a single research prototype system. The framework is built on the golden ratio φ = (1+√5)/2 and its conjugate ψ = (1-√5)/2, satisfying **φ·ψ = -1**. This identity provides natural noise cancellation, perfect indistinguishability, and built-in one-way properties.
 
 Key results:
 - FHE: IND-CPA under RLWE, bootstrapping 4.2ms (24x faster than TFHE)
