@@ -1,7 +1,7 @@
 // ============================================
 // CLASS SSS ATTACK 1: FULL BRUTE FORCE
 // ============================================
-#include "../../src/golden_privacy_system.h"
+#include "../../../src/golden_privacy_system.h"
 #include <iostream>
 #include <chrono>
 

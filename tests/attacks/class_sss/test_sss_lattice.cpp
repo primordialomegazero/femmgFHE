@@ -1,7 +1,7 @@
 // ============================================
 // CLASS SSS ATTACK 2: LATTICE REDUCTION (LLL/BKZ)
 // ============================================
-#include "../../src/golden_privacy_system.h"
+#include "../../../src/golden_privacy_system.h"
 #include <iostream>
 #include <vector>
 #include <cmath>

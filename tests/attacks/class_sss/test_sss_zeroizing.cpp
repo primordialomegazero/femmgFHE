@@ -1,7 +1,7 @@
 // ============================================
 // CLASS SSS ATTACK 5: ZEROIZING (GGH13/CLT13 style)
 // ============================================
-#include "../../src/golden_privacy_system.h"
+#include "../../../src/golden_privacy_system.h"
 #include <iostream>
 #include <complex>
 #include <cmath>

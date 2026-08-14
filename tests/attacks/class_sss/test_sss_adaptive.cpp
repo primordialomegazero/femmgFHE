@@ -1,7 +1,7 @@
 // ============================================
 // CLASS SSS ATTACK 6: ADAPTIVE CHOSEN CIPHERTEXT
 // ============================================
-#include "../../src/golden_privacy_system.h"
+#include "../../../src/golden_privacy_system.h"
 #include <iostream>
 
 // CCA2 attack: mag-query sa decrypt oracle na may crafted ciphertexts

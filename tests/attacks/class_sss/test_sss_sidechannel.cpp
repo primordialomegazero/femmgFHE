@@ -1,7 +1,7 @@
 // ============================================
 // CLASS SSS ATTACK 4: SIDE-CHANNEL ANALYSIS
 // ============================================
-#include "../../src/golden_privacy_system.h"
+#include "../../../src/golden_privacy_system.h"
 #include <iostream>
 #include <chrono>
 #include <vector>
