@@ -1,6 +1,6 @@
 # Author Information
 
-**Version 1.0**
+**Version 2.0**
 
 ---
 
@@ -8,120 +8,58 @@
 
 **Full Name:** Dan Joseph M. Fernandez
 
-**Affiliation:** Independent Researcher
-
-**Status:** Unaffiliated. Not employed by any institution, company, or organization in connection with this work. No academic affiliation claimed. No corporate backing. No funding received.
+**Affiliation:** Independent
 
 **Contact:** devilswithin13@gmail.com
 
 ---
 
-## Development Process
+## About This Work
 
-### The Role of AI
+This repository contains a research prototype for FHE + iO based on the golden ratio identity φ·ψ = -1.
 
-This system was developed **with the assistance of AI** — treated not as a mere prompt-response tool, but as a **co-researcher**.
-
-The AI was engaged as:
-- A sounding board for mathematical ideas
-- A code reviewer and debugger
-- A documentation assistant
-- A stress-testing partner
-
-The intuition, direction, and core mathematical insight came from the author. The AI helped refine, implement, and validate.
-
-### How Questions Were Asked
-
-The author asked questions in a **collaborative, exploratory manner** — not as commands, but as genuine inquiry.
-
-**Example prompt style (actual, paraphrased):**
-
-```
-"Pare, may PHI at PSI ako dito. Ang product nila ay -1.
-Tingin mo ba may magagawa tayo dito sa cryptography?
-Hindi ba parang natural na noise cancellation yan?"
-```
-
-**Compare with typical prompts:**
-
-```
-"Write a fully homomorphic encryption library in C++.
-Use N=1024 and Q=536870909. Include bootstrapping.
-Make it research prototype."
-```
-
-The difference: **curiosity vs command**. The author asked "what if" questions and explored together with the AI. The AI was not asked to "build everything" — it was asked to help explore possibilities.
-
-### Not a Single Prompt
-
-This was **not** a single prompt that produced the system. The development involved:
-
-- Hundreds of iterative exchanges
-- Debugging sessions lasting hours
-- Multiple approaches tried and abandoned
-- Dead ends followed by breakthroughs
-- Continuous refinement of both code and mathematics
-
-The repository contains an **archive** of experimental files that document this process. Open source readers who explore the archive will find the full history of attempts, failures, and eventual successes.
-
-### The Archive
-
-The archive is **not hidden** — it is part of the open source repository. It contains:
-
-- Early experimental implementations
-- Failed attempts and dead ends
-- Debug sessions and test traces
-- Iterative improvements
-
-Those who wish to understand how the system evolved can examine the archive. It is the honest record of the development process.
+The code is open source. The tests are runnable. The results are documented.
 
 ---
 
-## Disclaimer
+## Development Approach
 
-The author makes **no guarantee** that this approach will work for others.
+The work was developed through an iterative, exploratory process with AI assistance.
 
-What is documented here is:
-- What was built
-- How it was tested
-- What results were obtained
-- What remains unproven
+The author contributed:
+- The mathematical intuition (φ·ψ = -1 as a cryptographic foundation)
+- The direction of the research
+- The questions that guided the exploration
 
-If others attempt to replicate this process:
-- Results may vary
-- The approach may not translate
-- Different hardware, compilers, or libraries may produce different outcomes
-- The collaborative process may not work the same way for everyone
+The AI contributed:
+- Implementation assistance
+- Code review and debugging
+- Documentation support
+- Test generation
 
-**This is not a tutorial on "how to build FHE+iO with AI."**
-This is an honest account of what happened in this specific case.
+This was a collaborative process, not a single prompt.
 
 ---
 
-## The Truth
+## The Archive
 
-The system exists. The code is in the repository. The tests pass. The documentation is complete.
+The repository includes an archive of experimental files showing the development history: early attempts, abandoned approaches, debug traces, and iterative improvements.
 
-How it got here:
-- The author had the intuition about the golden ratio
-- The AI helped refine and implement that intuition
-- Together, through honest collaboration, the system was built
-
-Whether this is reproducible by others is **not claimed**. What is claimed is that it worked here.
+The archive is open. Anyone can examine it to see how the work evolved.
 
 ---
 
-## Author's Note
+## Replication
 
-Walang ibang tao, institution, o organization na dapat pangalanan dito.
+The code in this repository can be cloned, compiled, and run. Instructions are in README.md and GUIDELINES_REPRODUCIBILITY.md.
 
-Ang sistema ay bunga ng:
-- Intuition ng author
-- Collaboration with AI as co-researcher
-- Honest iterative development
-
-Hindi ito "AI-generated code" na puro prompt lang. Ito ay **co-authored** na may tunay na mathematical intuition mula sa author.
+The development conversation itself is not documented as a step-by-step recipe — it was an organic process of exploration, not a procedure to follow.
 
 ---
 
-*This document is honest. It does not overclaim. It tells the truth about how this system came to be.*
+## Summary
+
+- Author had the intuition about φ·ψ = -1
+- AI assisted with implementation and testing
+- Code, tests, and documentation are in this repository
+- The repository is the deliverable
