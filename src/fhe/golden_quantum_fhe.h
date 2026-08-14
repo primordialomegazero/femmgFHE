@@ -58,8 +58,9 @@ inline void keygen(PublicKey& pk, SecretKey& sk, uint64_t seed) {
     pk.pk1 = a;
 }
 
+// 3-component ciphertext para sa tamang multiplication
 struct Cipher {
-    NTL::ZZ_pX c0, c1;
+    NTL::ZZ_pX c0, c1, c2;
 };
 
 struct alignas(64) QuantumStateAligned {
@@ -106,12 +107,16 @@ inline Cipher encrypt(const PublicKey& pk, bool bit, uint64_t nonce) {
     Cipher ct;
     ct.c0 = pk.pk0 * u + e0 + m;
     ct.c1 = pk.pk1 * u + e1;
+    ct.c2 = NTL::ZZ_pX();  // Initialize to 0
     return ct;
 }
 
 inline bool decrypt(const Cipher& ct, const SecretKey& sk) {
     init_ring();
-    NTL::ZZ_pX noise = ct.c0 + ct.c1 * sk.sk;
+    NTL::ZZ_pX s = sk.sk;
+    NTL::ZZ_pX s2 = s * s;
+    
+    NTL::ZZ_pX noise = ct.c0 + ct.c1 * s + ct.c2 * s2;
     long v = NTL::conv<long>(NTL::coeff(noise, 0));
     long threshold = static_cast<long>(Q / (2 * PHI));
     return v > threshold;
@@ -137,58 +142,35 @@ inline bool quantum_decrypt(const QuantumCipher& qc, const SecretKey& sk) {
     return classical_bit && (positives > TOTAL_DIMS / 2);
 }
 
-// Improved NAND na may mas mahusay na rescaling
-// Key: PHI * PSI = -1, kaya ang noise ay dapat mag-cancel
+// TAMANG homomorphic multiplication na may 3 components
 inline Cipher nand_gate(const Cipher& a, const Cipher& b) {
     init_ring();
     
     long golden_plain = static_cast<long>(Q / PHI);
     
-    // Multiply a*b
-    NTL::ZZ_pX t0 = a.c0 * b.c0;
-    NTL::ZZ_pX t1 = a.c0 * b.c1 + a.c1 * b.c0;
-    NTL::ZZ_pX t2 = a.c1 * b.c1;
+    // Tamang multiplication: (a0 + a1*s + a2*s²) * (b0 + b1*s + b2*s²)
+    NTL::ZZ_pX new_c0 = a.c0 * b.c0;
+    NTL::ZZ_pX new_c1 = a.c0 * b.c1 + a.c1 * b.c0;
+    NTL::ZZ_pX new_c2 = a.c0 * b.c2 + a.c1 * b.c1 + a.c2 * b.c0;
     
-    NTL::ZZ_pX mult_c0 = t0 - t2;
-    NTL::ZZ_pX mult_c1 = t1;
-    
-    // Rescale gamit ang golden ratio
+    // Rescale
     NTL::ZZ_p inv_golden;
     inv_golden = golden_plain;
     NTL::ZZ_p inv_val = NTL::inv(inv_golden);
     long inv_long = NTL::conv<long>(inv_val);
     
-    NTL::ZZ_pX scaled_c0 = mult_c0 * inv_long;
-    NTL::ZZ_pX scaled_c1 = mult_c1 * inv_long;
+    new_c0 = new_c0 * inv_long;
+    new_c1 = new_c1 * inv_long;
+    new_c2 = new_c2 * inv_long;
     
     // NAND = golden_plain - scaled_result
     NTL::ZZ_pX golden_poly;
     NTL::SetCoeff(golden_poly, 0, golden_plain);
     
     Cipher r;
-    r.c0 = golden_poly - scaled_c0;
-    r.c1 = -scaled_c1;
-    
-    // Golden ratio correction: i-multiply sa PSI para ma-dampen ang noise
-    // PSI = -0.618, kaya ito ay magre-reduce ng noise
-    long psi_scaled = static_cast<long>(Q * std::abs(PSI));
-    NTL::ZZ_pX psi_poly;
-    NTL::SetCoeff(psi_poly, 0, psi_scaled);
-    
-    // I-apply ang PSI correction sa c0 lang para hindi ma-overwhelm
-    r.c0 = r.c0 * psi_poly;
-    
-    // Re-normalize
-    NTL::ZZ_p inv_psi;
-    inv_psi = psi_scaled;
-    NTL::ZZ_p inv_psi_val = NTL::inv(inv_psi);
-    long inv_psi_long = NTL::conv<long>(inv_psi_val);
-    
-    NTL::ZZ_pX norm_poly;
-    NTL::SetCoeff(norm_poly, 0, inv_psi_long);
-    
-    r.c0 = r.c0 * norm_poly;
-    
+    r.c0 = golden_poly - new_c0;
+    r.c1 = -new_c1;
+    r.c2 = -new_c2;
     return r;
 }
 
