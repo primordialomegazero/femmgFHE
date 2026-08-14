@@ -208,7 +208,7 @@ inline Cipher nand_gate(const Cipher& a, const Cipher& b) {
     return r;
 }
 
-// Batch API para sa enterprise
+// Batch API for enterprise
 inline std::vector<QuantumCipher> batch_enterprise_encrypt(
     const EnterpriseKeys& ek,
     const std::vector<bool>& bits,

@@ -58,7 +58,7 @@ inline void keygen(PublicKey& pk, SecretKey& sk, uint64_t seed) {
     pk.pk1 = a;
 }
 
-// 3-component ciphertext para sa tamang multiplication
+// 3-component ciphertext for correct multiplication
 struct Cipher {
     NTL::ZZ_pX c0, c1, c2;
 };
@@ -148,7 +148,7 @@ inline Cipher nand_gate(const Cipher& a, const Cipher& b) {
     
     long golden_plain = static_cast<long>(Q / PHI);
     
-    // Tamang multiplication: (a0 + a1*s + a2*s²) * (b0 + b1*s + b2*s²)
+    // Correct multiplication: (a0 + a1*s + a2*s²) * (b0 + b1*s + b2*s²)
     NTL::ZZ_pX new_c0 = a.c0 * b.c0;
     NTL::ZZ_pX new_c1 = a.c0 * b.c1 + a.c1 * b.c0;
     NTL::ZZ_pX new_c2 = a.c0 * b.c2 + a.c1 * b.c1 + a.c2 * b.c0;

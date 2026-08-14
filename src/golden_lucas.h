@@ -20,7 +20,7 @@ constexpr double GP_PHI_L = 1.6180339887498948482;
 // 
 // Security:
 // - Based on Lucas Sequence DLP
-// - Walang known efficient inversion algorithm
+// - No known efficient inversion algorithm
 // ============================================
 
 class LucasOneWay {

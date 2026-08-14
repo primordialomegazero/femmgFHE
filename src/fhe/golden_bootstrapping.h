@@ -58,7 +58,7 @@ public:
         return xor_internal(a, b);
     }
     
-    // Para sa chained XOR, i-bootstrap muna ang previous result
+    // For chained XOR, bootstrap previous result first
     Cipher xor_chain(const Cipher& prev, const Cipher& next) {
         Cipher prev_clean = bootstrapper.bootstrap(prev);
         return xor_internal(prev_clean, next);

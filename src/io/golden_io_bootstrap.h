@@ -20,7 +20,7 @@ inline void init_ring() { NTL::ZZ_p::init(NTL::ZZ(Q)); }
 
 inline double swing(double v) { return -1.0 / v; }
 
-// FIXED: Walang abs() - preserve ang alternating sign
+// FIXED: No abs() - preserve alternating sign
 inline double fgg_multilinear(double v, int level) {
     double c = v;
     for (int i = 0; i < level; i++) {
@@ -40,13 +40,13 @@ public:
 
     // FIXED: Proper bootstrap - i-refresh sa golden orbit
     void bootstrap(double& value) {
-        // I-project pabalik sa golden orbit habang ini-preserve ang sign
+        // Project back to golden orbit while preserving sign
         if (value > 0) {
             value = PHI;  // Positive → PHI
         } else if (value < 0) {
             value = PSI;  // Negative → PSI
         } else {
-            value = 0;    // Zero stays zero (dapat hindi mangyari)
+            value = 0;    // Zero stays zero (should not happen)
         }
         orbit_phase++;
     }
@@ -77,7 +77,7 @@ public:
 
         int num_combos = 1 << num_inputs;
         for (int i = 0; i < num_combos; i++) {
-            // FIXED: MSB-first indexing para match sa evaluate
+            // FIXED: MSB-first indexing to match evaluate
             std::vector<bool> inputs(num_inputs);
             for (int j = 0; j < num_inputs; j++) {
                 inputs[j] = (i >> (num_inputs - 1 - j)) & 1;
@@ -101,7 +101,7 @@ public:
             depth_used = 0;
         }
 
-        // FIXED: MSB-first indexing (pareho sa obfuscate)
+        // FIXED: MSB-first indexing (same as obfuscate)
         int idx = 0;
         for (bool bit : input) {
             idx = (idx << 1) | (bit ? 1 : 0);
@@ -115,7 +115,7 @@ public:
     }
 
     bool evaluate_unlimited(const std::vector<bool>& input) {
-        // FIXED: Isang increment lang
+        // FIXED: Single increment only
         return evaluate_with_bootstrap(input);
     }
 
@@ -148,8 +148,8 @@ public:
         quantum_counter++;
         
         // FIXED: Quantum verification ay neutral layer
-        // Hindi dapat maapektuhan ang classical result
-        // Ang quantum ay para sa future quantum-classical integration
+        // Should not affect classical result
+        // Quantum is for future quantum-classical integration
         bool quantum = true;
 
         return classical && quantum;

@@ -13,7 +13,7 @@ constexpr std::complex<double> GP_I(0.0, 1.0);
 // ============================================
 // GOLDEN ANGLE PRNG - STANDALONE
 // 
-// 11.2M nonces/sec (walang RLWE overhead)
+// 11.2M nonces/sec (no RLWE overhead)
 // ============================================
 
 class GoldenAnglePRNG {
@@ -40,7 +40,7 @@ public:
         return next() > (UINT64_MAX / 2);
     }
     
-    // I-generate ang maraming nonces
+    // Generate many nonces
     std::vector<uint64_t> next_batch(int count) {
         std::vector<uint64_t> result(count);
         for (int i = 0; i < count; i++) {
