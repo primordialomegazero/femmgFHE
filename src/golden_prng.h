@@ -1,3 +1,4 @@
+#include <complex>
 #include <iostream>
 #pragma once
 #include <cstdint>
@@ -6,6 +7,7 @@
 
 constexpr double GP_PHI = 1.6180339887498948482;
 constexpr double GP_PI = 3.14159265358979323846;
+constexpr std::complex<double> GP_I(0.0, 1.0);
 
 // ============================================
 // GOLDEN ANGLE PRNG
