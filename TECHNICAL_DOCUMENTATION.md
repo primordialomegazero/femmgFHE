@@ -1,208 +1,81 @@
-# Golden Privacy System — Technical Documentation
+# Technical Documentation
 
 **Version 2.0**
 
 ---
 
-## 1. System Overview
+## 1. Overview
 
-### 1.1 Description
+This repository contains a research prototype for FHE and iO using the golden ratio identity φ·ψ = -1.
 
-The Golden Privacy System is a cryptographic framework unifying six security layers into a single research prototype system:
-
-| Layer | Technology |
-|-------|-----------|
-| 1 | Fully Homomorphic Encryption (FHE) |
-| 2 | Indistinguishability Obfuscation (iO) |
-| 3 | Quantum Verification |
-| 4 | Golden Angle PRNG |
-| 5 | Lucas One-Way Function |
-| 6 | Equidistributed Noise |
-
-Foundation: **φ · ψ = -1**
-
-### 1.2 Target Users
-
-- Cryptography researchers
-- Privacy-focused developers
-- Academic institutions
-- Security auditors
+Scope: small-scale implementation (N=1024, Q=2^29). Not production software.
 
 ---
 
-## 2. Features
+## 2. Implemented Components
 
-### 2.1 Core Features
-
-| Feature | Description | Status |
-|---------|-------------|--------|
-| Homomorphic NAND | Universal gate sa encrypted domain | ✅ |
-| Bootstrapping | Unlimited depth (4.2ms) | ✅ |
-| Circuit Obfuscation | O(n) gates (hindi 2^n) | ✅ |
-| Golden Orbit iO | KS=0, zero-test resistant | ✅ |
-| Batch Processing | 128 bits per ciphertext (142x) | ✅ |
-| Golden Angle PRNG | 1M/1M unique, balance 0.0002 | ✅ |
-| Lucas One-Way | 0/100K collisions | ✅ |
-| Equidistributed Noise | Perfect uniform | ✅ |
-| Quantum Verification | 203M gates/sec | ✅ |
-
-### 2.2 Advanced Features
-
-| Feature | Description |
-|---------|-------------|
-| Relinearization | 3→2 components |
-| Key Switching | Multi-key operations |
-| CRT Batching | SIMD parallelism |
-| Noise Flooding | Circuit privacy |
-| Modulus Switching | Noise management |
-| Functional Bootstrapping | TFHE-style LUT |
+| Component | Description | Status |
+|-----------|-------------|--------|
+| FHE core | RLWE encrypt/decrypt, NAND | Tested |
+| Bootstrapping | Decrypt-reencrypt refresh | Tested |
+| iO Golden Orbit | Unit circle encoding | Tested |
+| Circuit iO | NAND-based circuits | Tested |
+| Golden Angle PRNG | Deterministic uniform sequence | Tested |
+| Lucas commitment | φ^n + ψ^n rounding | Tested |
+| Equidistributed noise | Golden angle addition | Tested |
 
 ---
 
-## 3. System Architecture
+## 3. NOT Implemented
 
-```
-┌─────────────────────────────────────────────────────────┐
-│              GOLDEN PRIVACY SYSTEM                      │
-├─────────────────────────────────────────────────────────┤
-│                                                         │
-│  ┌──────────┐ ┌──────────┐ ┌──────────┐                │
-│  │  FHE     │→│  iO      │→│ Quantum  │                │
-│  │  Encrypt │ │ Obfuscate│ │ Verify   │                │
-│  └──────────┘ └──────────┘ └──────────┘                │
-│                                                         │
-│  ┌──────────┐ ┌──────────┐ ┌──────────┐                │
-│  │  PRNG    │ │  Lucas   │ │  Noise   │                │
-│  │  Golden  │ │ One-Way  │ │ Equidist │                │
-│  │  Angle   │ │          │ │          │                │
-│  └──────────┘ └──────────┘ └──────────┘                │
-│                                                         │
-├─────────────────────────────────────────────────────────┤
-│  Foundation: φ · ψ = -1                                │
-│  Ring: Z_Q[X]/(X^1024 + 1)                             │
-│  Security: RLWE + Golden Orbit + 6 layers              │
-└─────────────────────────────────────────────────────────┘
-```
+| Feature | Notes |
+|---------|-------|
+| NTT multiplication | Naive O(N²) used instead |
+| CRT batching | Not in current prototype |
+| Key switching | Not in current prototype |
+| Relinearization | Not in current prototype |
+| Serialization | Not implemented |
+| Formal proofs | Informal only |
 
 ---
 
 ## 4. Mathematical Details
 
-### 4.1 Golden Ratio
+### Golden Ratio
 
 ```
-φ = (1 + √5) / 2 = 1.6180339887498948482...
-ψ = (1 - √5) / 2 = -0.6180339887498948482...
-
-  φ · ψ = -1
-  φ + ψ = 1
-  φ² = φ + 1
-  φ^n = F(n)·φ + F(n-1)
+φ = (1 + √5) / 2
+ψ = (1 - √5) / 2
+φ · ψ = -1
 ```
 
-### 4.2 RLWE Encryption
+### RLWE Parameters
 
 ```
 Ring: Z_Q[X] / (X^1024 + 1)
-Q = 536870909
+Q = 536870909 (29-bit)
 
-Keygen:
-  s ← ternary {-1, 0, 1}
-  a ← uniform Z_Q
-  e ← sparse (1/10000)
-  pk = (-(a·s+e), a)
+Secret key: ternary {-1, 0, 1}
+Public key: (a, -(a·s + e))
+Error: sparse (1/10000)
 
-Encrypt:
-  m = bit ? Q/φ : 0
-  c0 = pk0·u + e0 + m
-  c1 = pk1·u + e1
-  c2 = 0
-
-Decrypt:
-  noise = c0 + c1·s + c2·s²
-  bit = (noise > Q/(2φ))
+Plaintext: m = bit ? Q/φ : 0
+Threshold: Q/(2φ)
 ```
 
-### 4.3 Golden Orbit iO
+### Golden Orbit Encoding
 
 ```
-Encoding:
-  value = e^(iθ)
-  TRUE  → θ ∈ (0, π)
-  FALSE → θ ∈ (π, 2π)
+value = e^(iθ)
+TRUE  → θ ∈ (0, π)
+FALSE → θ ∈ (π, 2π)
 
-Properties:
-  |value| = 1 (unit circle)
-  Zero impossible
-  KS distance = 0
-```
-
-### 4.4 Golden Angle PRNG
-
-```
-golden_angle = 2π/φ = 222.492°
-next() = (counter · golden_angle) mod 2π
-
-Properties:
-  1M/1M unique
-  Balance: 0.0002
-  Weyl equidistribution
-```
-
-### 4.5 Lucas One-Way
-
-```
-Lucas(n) = φ^n + ψ^n = integer
-Forward: O(log n) via fast doubling
-Inverse: O(n) brute force
-
-Properties:
-  0/100K collisions
-  34-bit avalanche
-  108,309 years brute force
+|value| = 1 for all θ
 ```
 
 ---
 
-## 5. Data Flow
-
-### 5.1 Encryption
-
-```
-Plaintext → Golden scaling → RLWE → Ciphertext
-                ↓              ↓         ↓
-             Q/φ          u, e0, e1   (c0,c1,c2)
-```
-
-### 5.2 Decryption
-
-```
-Ciphertext → Noise → Threshold → Plaintext
-                ↓         ↓           ↓
-           c0+c1·s+c2·s²  Q/(2φ)     bit
-```
-
-### 5.3 Full Pipeline
-
-```
-FHE Encrypt → iO Evaluate → Quantum Verify → FHE Re-encrypt
-```
-
----
-
-## 6. Performance
-
-### 6.1 Benchmarks
-
-| Operation | Throughput | Latency |
-|-----------|-----------|---------|
-| iO Evaluate | 29,298,800/s | 0.034 µs |
-| Quantum Gate | 203,566,484/s | 0.005 µs |
-| Batch Encrypt | 47,650/s | 21 µs |
-| Full Pipeline | 77/s | 12,962 µs |
-| Bootstrap | 238/s | 4,204 µs |
-
-### 6.2 Complexity
+## 5. Complexity
 
 | Operation | Time | Space |
 |-----------|------|-------|
@@ -210,65 +83,52 @@ FHE Encrypt → iO Evaluate → Quantum Verify → FHE Re-encrypt
 | Decrypt | O(N²) | O(N) |
 | NAND | O(N²) | O(N) |
 | Bootstrap | O(N²) | O(N) |
-| iO Obfuscate (truth) | O(2^n) | O(2^n) |
-| iO Obfuscate (circuit) | O(n) | O(n) |
-| iO Evaluate | O(n) | O(1) |
-| Quantum Gate | O(1) | O(1) |
+| iO truth table obfuscate | O(2^n) | O(2^n) |
+| iO circuit obfuscate | O(n) | O(n) |
+| iO evaluate | O(n) | O(1) |
+
+Note: O(N²) is due to naive polynomial multiplication. NTT would reduce this to O(N log N).
 
 ---
 
-## 7. Security Parameters
+## 6. Dependencies
 
-| Parameter | Value | Notes |
-|-----------|-------|-------|
-| N | 1024 | Ring dimension |
-| Q | 536870909 | 29-bit modulus |
-| Error rate | 1/10000 | Sparse errors |
-| Threshold | Q/(2φ) | ≈ 165,902,234 |
-| Key space | 3^1024 | ≈ 10^488 |
-| Classical security | ~128 bits | Estimated |
-| Post-quantum | ~64 bits | Conservative |
+| Library | Version |
+|---------|---------|
+| NTL | 11.0+ |
+| GMP | 6.1+ |
+| C++ Standard | C++17 |
 
 ---
 
-## 8. Dependencies
+## 7. System Requirements
 
-| Library | Version | Purpose |
-|---------|---------|---------|
-| NTL | 11.0+ | Polynomial arithmetic |
-| GMP | 6.1+ | Arbitrary precision |
-| C++ STL | C++17 | Standard library |
-
----
-
-## 9. System Requirements
-
-| Component | Minimum | Recommended |
-|-----------|---------|-------------|
-| CPU | 64-bit, 2 cores | 8+ cores |
-| RAM | 4 GB | 16 GB |
-| Storage | 100 MB | 1 GB SSD |
-| OS | Ubuntu 20.04+ | Ubuntu 22.04+ |
+| Component | Minimum |
+|-----------|---------|
+| CPU | 64-bit, 2 cores |
+| RAM | 4 GB |
+| OS | Linux (Ubuntu 20.04+) or macOS 12+ |
 
 ---
 
-## 10. Limitations
+## 8. Limitations
 
-### Current
-
-- Circuit iO: NAND-based circuits only
-- Q = 2^29: may be insufficient long-term
-- Bootstrapping: computationally expensive
-- No hardware acceleration
-
-### Future Work
-
-- Arbitrary-depth quantum circuits
-- Larger Q (2^60+)
-- GPU acceleration
-- Formal verification
-- Network protocol
+- Q = 2^29 is small; need 2^60+ for long-term security
+- Naive multiplication is slow
+- No formal security proofs
+- Not peer-reviewed
+- Small scale only (2-4 input functions tested)
 
 ---
 
-*Version 2.0 — Complete and accurate.*
+## 9. Build
+
+```bash
+g++ -std=c++17 -O3 -march=native -I/usr/include \
+    tests/test_privacy_system.cpp \
+    -o test_privacy_system -lntl -lgmp -lm
+```
+
+---
+
+*This documentation is accurate as of Version 2.0. It reflects the current small-scale prototype, not a production system.*
