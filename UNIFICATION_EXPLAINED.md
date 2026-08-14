@@ -1,20 +1,20 @@
 # Unification: How It All Comes Together
 
-**Version 1.0**
+**Version 2.0 — Full English**
 
 ---
 
 ## 1. The Problem
 
-Traditionally, FHE, iO, at Quantum ay **magkahiwalay na systems**:
+Traditionally, FHE, iO, and Quantum are **separate systems**:
 
 ```
 FHE Library (OpenFHE/TFHE/SEAL) → Encrypted computation
 iO Library (GGH13/CLT13) → Program obfuscation (broken)
-Quantum → Hardware na hindi accessible
+Quantum → Hardware not accessible
 ```
 
-Walang unified system na pinagsasama ang lahat.
+No unified system brings them all together.
 
 ---
 
@@ -23,31 +23,31 @@ Walang unified system na pinagsasama ang lahat.
 ### Step 1: Golden Ratio Foundation
 
 ```
-Obserbasyon: φ · ψ = -1
+Observation: φ · ψ = -1
 Implication: Natural multiplicative inverse
-Application: Noise damping sa FHE
+Application: Noise damping in FHE
 ```
 
 ### Step 2: Golden Orbit iO
 
 ```
-Obserbasyon: e^(iθ) ay may |value|=1
-Implication: Walang zero values
+Observation: e^(iθ) has |value| = 1
+Implication: Zero values impossible
 Application: Zeroizing-resistant iO
 ```
 
 ### Step 3: Quantum Integration
 
 ```
-Obserbasyon: Complex phases = quantum states
-Implication: Hadamard ay compatible sa Golden Orbit
+Observation: Complex phases = quantum states
+Implication: Hadamard is compatible with Golden Orbit
 Application: Quantum verification layer
 ```
 
 ### Step 4: Golden Angle PRNG
 
 ```
-Obserbasyon: 2π/φ ay aperiodic
+Observation: 2π/φ is aperiodic
 Implication: Perfect uniform randomness
 Application: Nonce generation
 ```
@@ -55,7 +55,7 @@ Application: Nonce generation
 ### Step 5: Lucas One-Way
 
 ```
-Obserbasyon: φ^n + ψ^n = integer
+Observation: φ^n + ψ^n = integer
 Implication: Natural one-way via rounding
 Application: Commitments
 ```
@@ -63,7 +63,7 @@ Application: Commitments
 ### Step 6: Equidistributed Noise
 
 ```
-Obserbasyon: φ^n mod 1 equidistributed
+Observation: φ^n mod 1 is equidistributed
 Implication: Perfect noise distribution
 Application: Encryption noise
 ```
@@ -105,13 +105,13 @@ FHE encrypts inputs → iO evaluates obfuscated function → FHE re-encrypts res
 ### iO → Quantum
 
 ```
-iO encodes sa complex phases → Quantum Hadamard operates sa same domain
+iO encodes in complex phases → Quantum Hadamard operates in the same domain
 ```
 
 ### Quantum → FHE
 
 ```
-Quantum verifies → FHE encrypts verified result
+Quantum verifies → FHE encrypts the verified result
 ```
 
 ### PRNG → FHE
@@ -123,7 +123,7 @@ Golden Angle PRNG generates nonces → FHE uses them for encryption randomness
 ### Lucas → System
 
 ```
-Lucas commitments provide one-way → System uses for tamper detection
+Lucas commitments provide one-way property → System uses for tamper detection
 ```
 
 ### Noise → FHE
@@ -138,12 +138,13 @@ Equidistributed noise → FHE encryption error distribution
 
 ### Shared Mathematical Foundation
 
-Lahat ay naka-angkla sa φ·ψ = -1:
-- FHE: Noise damping via φ·ψ
-- iO: Complex phases via e^(iθ)
-- PRNG: Golden angle 2π/φ
-- Lucas: φ^n + ψ^n
-- Noise: φ^n mod 1
+Everything is anchored in φ·ψ = -1:
+
+- **FHE**: Noise damping via φ·ψ
+- **iO**: Complex phases via e^(iθ)
+- **PRNG**: Golden angle 2π/φ
+- **Lucas**: φ^n + ψ^n
+- **Noise**: φ^n mod 1
 
 ### Shared Data Structures
 
@@ -155,11 +156,12 @@ Integer arithmetic: Lucas + PRNG
 
 ### Natural Compatibility
 
-Hindi namin "pinilit" ang unification. Ito ay **natural** dahil:
-1. Lahat ay galing sa golden ratio
-2. Complex phases ay quantum-compatible
-3. Polynomial ring ay RLWE-compatible
-4. Equidistribution ay perfect for noise
+We did not "force" the unification. It is **natural** because:
+
+1. Everything derives from the golden ratio
+2. Complex phases are quantum-compatible
+3. Polynomial rings are RLWE-compatible
+4. Equidistribution is perfect for noise
 
 ---
 
@@ -169,7 +171,7 @@ Hindi namin "pinilit" ang unification. Ito ay **natural** dahil:
 |--------|-----|-----|---------|------|---------|---------|
 | OpenFHE | Yes | No | No | No | No | No |
 | TFHE | Yes | No | No | No | No | No |
-| GGH13 | No | No(broken) | No | No | No | No |
+| GGH13 | No | No (broken) | No | No | No | No |
 | **Golden** | **Yes** | **Yes** | **Yes** | **Yes** | **Yes** | **Yes** |
 
 ---
@@ -198,19 +200,19 @@ long long commitment = gps.commit_value(secret);
 
 ## 8. Honest Assessment
 
-### Ano ang Nag-unify
+### What Unifies
 
 - Golden ratio as common foundation
 - Complex numbers as shared domain
 - Polynomial ring as shared structure
 
-### Ano ang Hindi Namin Claim
+### What We Do NOT Claim
 
-- Hindi "provably secure" (walang formal proof)
-- Hindi additional security mula sa unification
-- Hindi "beyond Turing"
+- Not "provably secure" (no formal proof yet)
+- No additional security from unification itself
+- Not "beyond Turing"
 
-### Ano ang Next
+### What Remains
 
 - Formal verification
 - Peer review
@@ -221,6 +223,6 @@ long long commitment = gps.commit_value(secret);
 
 ## 9. Conclusion
 
-Ang unification ay **hindi pinilit** — ito ay **emergent** mula sa golden ratio foundation.
+The unification was **not forced** — it is **emergent** from the golden ratio foundation.
 
 *φ · ψ = -1*
