@@ -75,6 +75,7 @@ The fundamental problem: **zero-test parameters** that can be exploited.
 | Zero-test resistance | No zero values | `src/golden_privacy_system.h:52-78` |
 | Evaluation speed | 29,298,800 ops/sec | `tests/test_full_benchmark.cpp:50-57` |
 | Correctness | 100/100 functions | `tests/test_io_stress.cpp:44-51` |
+| Circuit Obfuscation | 4-input XOR 16/16 | `tests/test_circuit_integrated_v2.cpp:18-25` |
 
 **Key innovation:** We do NOT use zero-test parameters. The Golden Orbit encoding uses complex phases on the unit circle, where every value has magnitude 1. There is nothing to zeroize.
 
@@ -119,7 +120,7 @@ The fundamental problem: **zero-test parameters** that can be exploited.
 - Zero-test resistance: `tests/test_adversarial.cpp:18-24`
 - 100/100 functions correct: `tests/test_io_stress.cpp:44-51`
 
-**Limitation:** Truth tables only. Arbitrary circuit iO remains open. See `ROADMAP.md:Phase 6`.
+**Limitation:** Circuit obfuscation supports NAND-based circuits (O(n) gates). Arbitrary-depth quantum circuits remain future work.
 
 ---
 
