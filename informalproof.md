@@ -463,8 +463,8 @@ The 1024-bit Q with N=1024 provides:
 | Q size | Ops/sec | 100K time | 1M time | Notes |
 |--------|---------|-----------|---------|-------|
 | 32-bit | 168 | 10 min | 1.7 hrs | Full 1M passed |
-| 257-bit | 57.8 | ~29 min | ~4.8 hrs | 100K ongoing, 0 errors so far |
-| 1024-bit | TBD | TBD | TBD | Post-quantum parameters |
+| **257-bit** | **62** | **27 min** | **~4.5 hrs** | **100K PASSED, 0 errors** |
+| 1024-bit | 16.5-18.8 | ~1.5 hrs | ~15 hrs | 20K passed, 0 errors so far |
 
 ### 9.2 Scaling Analysis
 
@@ -499,7 +499,7 @@ The 1024-bit Q with N=1024 provides:
 | Basic encryption | PASS | 0 | <1s |
 | NAND gates | PASS | 0 | <1s |
 | 100-depth NOT | PASS | 0 | <1s |
-| 100K NAND | ONGOING | 0 @ 10K | ~29 min est |
+| **100K NAND** | **PASS** | **0** | **26.9 min** |
 
 ### 10.3 1024-bit Q (Post-Quantum)
 | Test | Result | Errors | Time |
