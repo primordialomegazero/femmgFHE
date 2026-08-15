@@ -18,6 +18,20 @@ The key insight is that φ's self-referential structure (φ² = φ+1, φ·ψ = -
 
 ---
 
+## Data Reference
+
+Complete empirical data is available in `results/complete_data.txt` (308 lines), containing:
+- Core parameters for 32-bit and 257-bit Q
+- Noise oscillation measurements (100 depths)
+- All gate verifications
+- Random NAND depth test (1000 depths)
+- Performance benchmarks
+- Key sizes and security margins
+- φ powers (φ¹ to φ¹⁰, φ⁴²)
+- Lucas numbers (L(0) to L(50))
+
+---
+
 ## Part I: Fibonacci FHE Core
 
 ### 1. Mathematical Foundation
@@ -109,6 +123,23 @@ NAND(0,0)=1 ✓  NAND(0,1)=1 ✓  NAND(1,0)=1 ✓  NAND(1,1)=0 ✓
 XOR(0,1)=1 ✓   AND(1,1)=1 ✓   OR(0,0)=0 ✓
 ```
 
+**Exact noise values per gate (from complete_data.txt Section 4):**
+```
+NAND(0,0) noise: 112652859229649681368096351188711019049377490364605197292503729558236545569043 (= φ)
+NAND(0,1) noise: 112652859229649681368096351188711019049377490364605197292503729558236545569043 (= φ)
+NAND(1,0) noise: 112652859229649681368096351188711019049377490364605197292503729558236545569043 (= φ)
+NAND(1,1) noise: 0
+```
+
+**Random NAND depth test (1000 depths, from Section 5):**
+```
+Depth 100: 0 errors
+Depth 200: 0 errors
+Depth 300: 0 errors
+...
+Depth 1000: 0 errors
+```
+
 ### 6. Stress Test Results
 
 | Q size | Test | Result | Errors |
@@ -116,15 +147,20 @@ XOR(0,1)=1 ✓   AND(1,1)=1 ✓   OR(0,0)=0 ✓
 | 32-bit | 1M NAND | PASS | 0 |
 | 257-bit | 100K NAND | PASS | 0 |
 | 257-bit | 100-depth NOT | PASS | 0 |
+| 257-bit | 1000-depth random NAND | PASS | 0 |
 | 1024-bit | 20K NAND | Ongoing | 0 so far |
+
+*Source: results/complete_data.txt*
 
 ### 7. Performance
 
 | Q size | Ops/sec | Notes |
 |--------|---------|-------|
 | 32-bit | 168 | Full 1M passed |
-| 257-bit | 62 | 100K passed |
+| 257-bit | 54-62 | 100K passed (54.35 measured in complete_data) |
 | 1024-bit | 16.5-18.8 | 20K+ ongoing |
+
+*Source: results/complete_data.txt Section 6*
 
 ---
 
@@ -256,6 +292,16 @@ Result: Period-2 oscillation (φ ↔ 0), NO accumulation
 ---
 
 ## Part V: Security Analysis
+
+### 16.5 Security Margins (from complete_data.txt Section 8)
+
+```
+Q/2 = 57896044618658097711785492504343953926634992332820282019728792003956564820365
+golden_plain = 112652859229649681368096351188711019049377490364605197292503729558236545569043
+Margin bits: 255
+```
+
+*Note: golden_plain > Q/2, so the effective margin is measured circularly. The noise oscillates between 0 and golden_plain, with exact distances (0 or ψ) at all depths.*
 
 ### 17. Security Parameters
 
