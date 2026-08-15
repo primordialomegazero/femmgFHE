@@ -45,7 +45,8 @@ spiral_fhe_io_final.h
 .vscode/
 .idea/
 .DS_Store
-*.txt
+# *.txt files ignored EXCEPT results/*.txt
+!results/*.txt
 *.tar.gz
 *.zip
 *.bak
