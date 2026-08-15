@@ -4,7 +4,7 @@
 #include "golden_logger.h"
 
 // ============================================
-// GOLDEN ERROR HANDLING
+// GOLDEN ERROR HANDLING (no bootstrapping)
 // ============================================
 
 enum class GoldenErrorCode {
@@ -15,7 +15,6 @@ enum class GoldenErrorCode {
     ENCRYPTION_FAILED = 200,
     DECRYPTION_FAILED = 201,
     NAND_FAILED = 202,
-    BOOTSTRAP_FAILED = 203,
     OBFUSCATION_FAILED = 300,
     EVALUATION_FAILED = 301,
     CIRCUIT_FAILED = 302,
