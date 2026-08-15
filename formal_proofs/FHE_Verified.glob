@@ -1,0 +1,102 @@
+DIGEST 0f08ab3c69ec12ed7cddbfa9a101437f
+FFHE_Verified
+R216:221 Coq.ZArith.ZArith <> <> lib
+def 410:410 <> Q
+R414:414 Coq.Numbers.BinNums <> Z ind
+def 434:436 <> phi
+R440:440 Coq.Numbers.BinNums <> Z ind
+def 459:461 <> psi
+R465:465 Coq.Numbers.BinNums <> Z ind
+def 484:484 <> s
+R488:488 Coq.Numbers.BinNums <> Z ind
+constr 677:681 <> mk_ct
+rec 656:665 <> ciphertext
+proj 687:688 <> c0
+proj 697:698 <> c1
+R692:692 Coq.Numbers.BinNums <> Z ind
+R702:702 Coq.Numbers.BinNums <> Z ind
+def 719:725 <> encrypt
+R732:732 Coq.Numbers.BinNums <> Z ind
+binder 728:728 <> m:4
+R740:740 Coq.Numbers.BinNums <> Z ind
+binder 736:736 <> e:5
+R745:754 FHE_Verified <> ciphertext rec
+R761:765 FHE_Verified <> mk_ct constr
+R768:768 Coq.ZArith.BinInt <> ::Z_scope:x_'mod'_x not
+R778:783 Coq.ZArith.BinInt <> ::Z_scope:x_'mod'_x not
+R770:772 Coq.ZArith.BinInt <> ::Z_scope:x_'+'_x not
+R769:769 FHE_Verified <> m:4 var
+R774:776 Coq.ZArith.BinInt <> ::Z_scope:x_'*'_x not
+R773:773 FHE_Verified <> s def
+R777:777 FHE_Verified <> e:5 var
+R784:784 FHE_Verified <> Q def
+R787:787 FHE_Verified <> e:5 var
+def 802:808 <> decrypt
+R815:824 FHE_Verified <> ciphertext rec
+binder 811:811 <> c:6
+R829:829 Coq.Numbers.BinNums <> Z ind
+R836:836 Coq.ZArith.BinInt <> ::Z_scope:x_'mod'_x not
+R860:865 Coq.ZArith.BinInt <> ::Z_scope:x_'mod'_x not
+R837:837 Coq.ZArith.BinInt <> ::Z_scope:x_'mod'_x not
+R853:858 Coq.ZArith.BinInt <> ::Z_scope:x_'mod'_x not
+R842:844 Coq.ZArith.BinInt <> ::Z_scope:x_'-'_x not
+R838:839 FHE_Verified <> c0 proj
+R841:841 FHE_Verified <> c:6 var
+R846:848 Coq.ZArith.BinInt <> ::Z_scope:x_'*'_x not
+R845:845 FHE_Verified <> s def
+R849:850 FHE_Verified <> c1 proj
+R852:852 FHE_Verified <> c:6 var
+R859:859 FHE_Verified <> Q def
+prf 1031:1042 <> correct_zero
+R1067:1069 Coq.Init.Logic <> ::type_scope:x_'='_x not
+R1046:1052 FHE_Verified <> decrypt def
+R1055:1061 FHE_Verified <> encrypt def
+prf 1123:1133 <> correct_one
+R1158:1160 Coq.Init.Logic <> ::type_scope:x_'='_x not
+R1137:1143 FHE_Verified <> decrypt def
+R1146:1152 FHE_Verified <> encrypt def
+prf 1366:1378 <> golden_square
+R1399:1401 Coq.Init.Logic <> ::type_scope:x_'='_x not
+R1382:1382 Coq.ZArith.BinInt <> ::Z_scope:x_'mod'_x not
+R1392:1397 Coq.ZArith.BinInt <> ::Z_scope:x_'mod'_x not
+R1386:1388 Coq.ZArith.BinInt <> ::Z_scope:x_'*'_x not
+R1383:1385 FHE_Verified <> phi def
+R1389:1391 FHE_Verified <> phi def
+R1398:1398 FHE_Verified <> Q def
+R1402:1402 Coq.ZArith.BinInt <> ::Z_scope:x_'mod'_x not
+R1410:1415 Coq.ZArith.BinInt <> ::Z_scope:x_'mod'_x not
+R1406:1408 Coq.ZArith.BinInt <> ::Z_scope:x_'+'_x not
+R1403:1405 FHE_Verified <> phi def
+R1416:1416 FHE_Verified <> Q def
+prf 1469:1482 <> golden_product
+R1503:1505 Coq.Init.Logic <> ::type_scope:x_'='_x not
+R1486:1486 Coq.ZArith.BinInt <> ::Z_scope:x_'mod'_x not
+R1496:1501 Coq.ZArith.BinInt <> ::Z_scope:x_'mod'_x not
+R1490:1492 Coq.ZArith.BinInt <> ::Z_scope:x_'*'_x not
+R1487:1489 FHE_Verified <> phi def
+R1493:1495 FHE_Verified <> psi def
+R1502:1502 FHE_Verified <> Q def
+R1506:1506 Coq.ZArith.BinInt <> ::Z_scope:x_'mod'_x not
+R1509:1514 Coq.ZArith.BinInt <> ::Z_scope:x_'mod'_x not
+R1515:1515 FHE_Verified <> Q def
+prf 1568:1577 <> golden_sum
+R1598:1600 Coq.Init.Logic <> ::type_scope:x_'='_x not
+R1581:1581 Coq.ZArith.BinInt <> ::Z_scope:x_'mod'_x not
+R1591:1596 Coq.ZArith.BinInt <> ::Z_scope:x_'mod'_x not
+R1585:1587 Coq.ZArith.BinInt <> ::Z_scope:x_'+'_x not
+R1582:1584 FHE_Verified <> phi def
+R1588:1590 FHE_Verified <> psi def
+R1597:1597 FHE_Verified <> Q def
+R1602:1606 Coq.ZArith.BinInt <> ::Z_scope:x_'mod'_x not
+R1607:1607 FHE_Verified <> Q def
+prf 1848:1858 <> alpha_value
+R1871:1873 Coq.Init.Logic <> ::type_scope:x_'='_x not
+prf 1951:1960 <> beta_value
+R1966:1968 Coq.Init.Logic <> ::type_scope:x_'='_x not
+R2037:2048 FHE_Verified <> correct_zero thm
+R2057:2067 FHE_Verified <> correct_one thm
+R2076:2088 FHE_Verified <> golden_square thm
+R2097:2110 FHE_Verified <> golden_product thm
+R2119:2128 FHE_Verified <> golden_sum thm
+R2137:2147 FHE_Verified <> alpha_value thm
+R2156:2165 FHE_Verified <> beta_value thm

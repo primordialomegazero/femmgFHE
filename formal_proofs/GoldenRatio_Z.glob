@@ -1,0 +1,17 @@
+DIGEST a9005920dc5bd1ea45d13f1917b455f0
+FGoldenRatio_Z
+R216:221 Coq.ZArith.ZArith <> <> lib
+def 399:401 <> fib
+R408:410 Coq.Init.Datatypes <> nat ind
+binder 404:404 <> n:1
+R415:415 Coq.Numbers.BinNums <> Z ind
+R428:428 GoldenRatio_Z <> n:1 var
+R439:439 Coq.Init.Datatypes <> O constr
+R450:450 Coq.Init.Datatypes <> S constr
+R452:452 Coq.Init.Datatypes <> O constr
+R463:463 Coq.Init.Datatypes <> S constr
+R466:466 Coq.Init.Datatypes <> S constr
+R485:487 Coq.ZArith.BinInt <> ::Z_scope:x_'+'_x not
+R475:477 GoldenRatio_Z <> fib:2 def
+R480:480 Coq.Init.Datatypes <> S constr
+R488:490 GoldenRatio_Z <> fib:2 def
