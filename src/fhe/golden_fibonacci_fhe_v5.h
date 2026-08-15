@@ -165,7 +165,7 @@ public:
     Cipher unblind(const Cipher& ct, uint64_t r) {
         NTL::ZZ_p phi_pow = NTL::to_ZZ_p(1);
         for (uint64_t i = 0; i < r; i++) {
-            phi_pow = phi_pow * phi_zz;
+            phi_pow = phi_pow * NTL::to_ZZ_p(phi_zz);
         }
         
         NTL::ZZ_pX unblind_c0 = ct.first * phi_pow;

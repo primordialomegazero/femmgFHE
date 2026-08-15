@@ -29,6 +29,8 @@ private:
     };
     std::vector<CircuitGate> circuit;
     int wire_counter;
+    int fib_prev;  // Previous Fibonacci number for wire numbering
+    std::vector<int> output_wires;  // Explicit output wire tracking
     
     // For unlimited depth tracking
     int max_depth_used;
@@ -36,7 +38,7 @@ private:
 public:
     FibonacciIOV2(const NTL::ZZ& Q, long secret_n = 42)
         : fhe(Q, secret_n), num_inputs(0), circuit_mode(false), 
-          wire_counter(0), max_depth_used(0) {}
+          wire_counter(0), fib_prev(3), max_depth_used(0) {}
     
     // ============ TRUTH TABLE MODE (Unlimited entries) ============
     void obfuscate_truth_table(const std::function<bool(const std::vector<bool>&)>& func,
@@ -58,15 +60,24 @@ public:
     }
     
     // ============ CIRCUIT MODE (Unlimited depth) ============
+    int circuit_size() const { return circuit.size(); }
+    
+    void add_output(int wire) {
+        output_wires.push_back(wire);
+    }
+    
     void obfuscate_circuit_begin(int n_inputs) {
         num_inputs = n_inputs;
         circuit_mode = true;
         circuit.clear();
-        wire_counter = n_inputs;  // Wires 0..n-1 are inputs
+        wire_counter = n_inputs;  // Start AFTER all inputs
+        fib_prev = 0;
+        output_wires.clear();
     }
     
     int circuit_add_nand(int in1, int in2) {
-        int out_wire = wire_counter++;
+        int out_wire = wire_counter;
+        wire_counter++;  // Contiguous increment (2, 3, 4, 5, ...)
         circuit.push_back({in1, in2, 0});
         return out_wire;
     }
@@ -100,17 +111,35 @@ public:
             wire_values.push_back(result);
         }
         
-        // Fault detection: verify output is valid
-        bool result = fhe.decrypt(wire_values.back());
+        // Return first output (or last wire)
+        if (!output_wires.empty()) {
+            return fhe.decrypt(wire_values[output_wires[0]]);
+        }
+        return fhe.decrypt(wire_values.back());
+    }
+    
+    // NEW: Multi-output evaluation
+    std::vector<bool> evaluate_multi(const std::vector<bool>& input) {
+        std::vector<Cipher> wire_values;
         
-        // Verification: NOT(NOT(x)) should equal x
-        auto not_result = fhe.not_gate(wire_values.back());
-        auto not_not_result = fhe.not_gate(not_result);
-        if (fhe.verify_not(wire_values.back())) {
-            // Valid
+        // Encrypt inputs
+        for (int i = 0; i < num_inputs; i++) {
+            wire_values.push_back(fhe.encrypt(input[i], 1000 + i));
         }
         
-        return result;
+        // Evaluate all gates
+        for (auto& gate : circuit) {
+            Cipher result = fhe.nand_gate(wire_values[gate.input1], 
+                                          wire_values[gate.input2]);
+            wire_values.push_back(result);
+        }
+        
+        // Decrypt all output wires
+        std::vector<bool> outputs;
+        for (int wire : output_wires) {
+            outputs.push_back(fhe.decrypt(wire_values[wire]));
+        }
+        return outputs;
     }
     
     // ============ EMERGENT PROPERTIES ============
