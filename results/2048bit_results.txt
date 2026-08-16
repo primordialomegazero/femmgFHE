@@ -1,1 +1,32 @@
 nohup: ignoring input
+2048-BIT POST-QUANTUM 100K NAND STRESS TEST
+===========================================
+
+Q bits: 2048
+Q mod 5: 1
+Is prime: YES
+α = 599074578
+β = Q-1
+
+Verify s² = α·s + β: YES ✓
+
+Encrypt(0) → 0 ✓
+Encrypt(1) → 1 ✓
+NAND(1,1) = 0 (exp 0)
+
+=== 100K NAND OPERATIONS (10K print) ===
+  [10000/100K] errors=0 time=1428s (7.0028 ops/sec)
+  [20000/100K] errors=0 time=2674s (7.47943 ops/sec)
+  [30000/100K] errors=0 time=4037s (7.43126 ops/sec)
+  [40000/100K] errors=0 time=5233s (7.6438 ops/sec)
+  [50000/100K] errors=0 time=6610s (7.5643 ops/sec)
+  [60000/100K] errors=0 time=8096s (7.41107 ops/sec)
+  [70000/100K] errors=0 time=9546s (7.33291 ops/sec)
+  [80000/100K] errors=0 time=11033s (7.25097 ops/sec)
+  [90000/100K] errors=0 time=12333s (7.29749 ops/sec)
+  [100000/100K] errors=0 time=13672s (7.31422 ops/sec)
+
+=== PASS ✓ ===
+Total errors: 0
+Total time: 13672s
+Ops/sec: 7.31422
