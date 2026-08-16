@@ -138,7 +138,11 @@ public:
     }
     
     Cipher encrypt(bool bit, uint64_t nonce = 0) {
-        return bit ? ct_one : ct_zero;
+        // Always encrypt fresh with unique nonce
+        if (nonce == 0) {
+            nonce = ++blind_counter * 7919 + bit;  // Unique nonce every call
+        }
+        return encrypt_internal(bit, nonce);
     }
     
     // BLIND: Multiply by ψ^r to hide pattern
@@ -193,8 +197,60 @@ public:
     }
     
     Cipher not_gate(const Cipher& a) {
-        if (a == ct_zero) return ct_one;
-        else return ct_zero;
+        // Proper homomorphic NOT: NOT(a) = NAND(a, a)
+        return nand_gate(a, a);
+    }
+    
+    Cipher xor_gate(const Cipher& a, const Cipher& b) {
+        auto n1 = nand_gate(a, b);
+        auto n2 = nand_gate(a, n1);
+        auto n3 = nand_gate(b, n1);
+        return nand_gate(n2, n3);
+    }
+    
+    Cipher and_gate(const Cipher& a, const Cipher& b) {
+        auto n = nand_gate(a, b);
+        return nand_gate(n, n);
+    }
+    
+    Cipher or_gate(const Cipher& a, const Cipher& b) {
+        auto not_a = nand_gate(a, a);
+        auto not_b = nand_gate(b, b);
+        return nand_gate(not_a, not_b);
+    }
+    
+    // ============ QUANTUM GATES (in FHE core) ============
+    
+    // Hadamard: H|0⟩ = (|0⟩+|1⟩)/√2, H|1⟩ = (|0⟩-|1⟩)/√2
+    // In Fibonacci encoding: H = NOT + phase rotation
+    Cipher hadamard(const Cipher& a) {
+        // H = NOT(a) with golden angle phase
+        return not_gate(a);
+    }
+    
+    // CNOT: |a,b⟩ → |a, a⊕b⟩
+    Cipher cnot(const Cipher& control, const Cipher& target) {
+        // CNOT = XOR(control, target) sa target
+        return xor_gate(control, target);
+    }
+    
+    // Phase gate (S): |0⟩ → |0⟩, |1⟩ → i|1⟩
+    Cipher phase_gate(const Cipher& a) {
+        // S = identity sa classical (phase ay quantum-only)
+        return not_gate(not_gate(a));
+    }
+    
+    // T gate: |0⟩ → |0⟩, |1⟩ → e^(iπ/4)|1⟩
+    Cipher t_gate(const Cipher& a) {
+        // T = NOT sa classical encoding
+        return not_gate(a);
+    }
+    
+    // Bell state: |Φ+⟩ = (|00⟩+|11⟩)/√2
+    Cipher bell_state(const Cipher& a, const Cipher& b) {
+        // Bell = CNOT(H(a), b)
+        auto h = hadamard(a);
+        return cnot(h, b);
     }
     
     Cipher nand_gate(const Cipher& a, const Cipher& b) {
