@@ -46,11 +46,16 @@ public:
         
         NTL::ZZ sqrt5;
         NTL::SqrRootMod(sqrt5, NTL::to_ZZ(5), Q);
+        // I-standardize: canonical root = mas maliit sa dalawang possible roots
+        // May 2 roots: r at Q-r. Pinipili natin ang mas maliit.
+        NTL::ZZ other_root = Q - sqrt5;
+        if (sqrt5 > other_root) sqrt5 = other_root;
         NTL::ZZ inv2 = NTL::InvMod(NTL::to_ZZ(2), Q);
         phi_zz = ((NTL::to_ZZ(1) + sqrt5) * inv2) % Q;
         psi_zz = (NTL::to_ZZ(1) - phi_zz + Q) % Q;
         
-        golden_plain = ((sqrt5 - 1) * inv2) % Q;
+        // golden_plain = φ (hindi φ-1)
+        golden_plain = ((NTL::to_ZZ(1) + sqrt5) * inv2) % Q;
         if (golden_plain < 0) golden_plain += Q;
         inv_golden = NTL::InvMod(golden_plain, Q);
         
