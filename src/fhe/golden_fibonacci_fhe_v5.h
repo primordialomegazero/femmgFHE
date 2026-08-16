@@ -189,11 +189,11 @@ public:
         return dist_golden < dist_0;
     }
     
-    // FAULT DETECTION: Verify NOT(NOT(x)) == x
+    // FAULT DETECTION: Verify NOT(NOT(x)) decrypts to x
     bool verify_not(const Cipher& ct) {
         auto not1 = not_gate(ct);
         auto not2 = not_gate(not1);
-        return (not2 == ct);
+        return decrypt(not2) == decrypt(ct);
     }
     
     Cipher not_gate(const Cipher& a) {
