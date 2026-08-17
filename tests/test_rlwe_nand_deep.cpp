@@ -98,10 +98,10 @@ int main() {
     std::cout << "  ct0: " << decrypt(E_ct0) << " (exp 0)\n";
     std::cout << "  ct1: " << decrypt(E_ct1) << " (exp " << L_k << ")\n\n";
 
-    std::cout << "Deep chain (100 depths):\n";
+    std::cout << "Deep chain (1000 depths):\n";
     auto current = E_ct1;
     int errors = 0;
-    for (int i = 0; i <= 100; i++) {
+    for (int i = 0; i <= 1000; i++) {
         NTL::ZZ dec = decrypt(current);
         bool expected = (i % 2 == 0) ? true : false;
         bool actual = (dec == L_k) ? true : false;
