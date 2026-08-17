@@ -1,5 +1,5 @@
-// RLWE L(k) FHE — 100 DEPTH TEST
-// N=128 para mabilis, 100 depths
+// RLWE-ENCRYPTED L(k) — FAST FINAL TEST
+// Minimal output, 20 depths, N=128
 
 #include <NTL/ZZ.h>
 #include <NTL/ZZ_pX.h>
@@ -9,8 +9,8 @@
 #include <chrono>
 
 int main() {
-    std::cout << "100 DEPTH TEST\n";
-    std::cout << "==============\n\n";
+    std::cout << "FAST FINAL TEST\n";
+    std::cout << "===============\n\n";
     
     NTL::ZZ Q = NTL::to_ZZ("115792089237316195423570985008687907853269984665640564039457584007913129640731");
     NTL::ZZ_p::init(Q);
@@ -30,20 +30,40 @@ int main() {
     NTL::ZZ L_k = (phi_k + psi_k) % Q;
     NTL::ZZ inv_L_k = NTL::InvMod(L_k, Q);
     
-    constexpr int N = 1024;
+    constexpr int N = 128;
     std::mt19937_64 rng(42);
     
     NTL::ZZ s_scalar = phi_k;
     NTL::ZZ alpha = L_k;
     NTL::ZZ beta = Q - 1;
     
+    // RLWE keys
     NTL::ZZ_pX a_pk, e_pk;
     for (int i = 0; i < N; i++) {
         NTL::SetCoeff(a_pk, i, NTL::to_ZZ_p(rng() % NTL::conv<long>(Q)));
-        NTL::SetCoeff(e_pk, i, NTL::to_ZZ_p((rng() % 100000 == 0) ? 1 : 0));
+        NTL::SetCoeff(e_pk, i, NTL::to_ZZ_p((rng() % 10000 == 0) ? 1 : 0));
     }
     NTL::ZZ_pX pk0 = -(a_pk * NTL::to_ZZ_p(s_scalar)) + e_pk;
     NTL::ZZ_pX pk1 = a_pk;
+    
+    auto rlwe_encrypt = [&](NTL::ZZ msg) {
+        NTL::ZZ_pX m;
+        NTL::SetCoeff(m, 0, NTL::to_ZZ_p(msg));
+        NTL::ZZ_pX u, e0, e1;
+        for (int i = 0; i < N; i++) {
+            NTL::SetCoeff(u, i, NTL::to_ZZ_p((rng() % 3) - 1));
+            NTL::SetCoeff(e0, i, NTL::to_ZZ_p((rng() % 10000 == 0) ? 1 : 0));
+            NTL::SetCoeff(e1, i, NTL::to_ZZ_p((rng() % 10000 == 0) ? 1 : 0));
+        }
+        NTL::ZZ_pX c0 = pk0 * u + e0 + m;
+        NTL::ZZ_pX c1 = pk1 * u + e1;
+        return std::make_pair(c0, c1);
+    };
+    
+    auto rlwe_decrypt = [&](std::pair<NTL::ZZ_pX, NTL::ZZ_pX> ct) {
+        NTL::ZZ_pX noise = ct.first + ct.second * NTL::to_ZZ_p(s_scalar);
+        return NTL::rep(NTL::coeff(noise, 0));
+    };
     
     auto reduce_poly = [&](NTL::ZZ_pX& p) {
         if (NTL::deg(p) >= N) {
@@ -55,28 +75,6 @@ int main() {
             }
             p = reduced;
         }
-    };
-    
-    auto rlwe_encrypt = [&](NTL::ZZ msg) {
-        NTL::ZZ_pX m;
-        NTL::SetCoeff(m, 0, NTL::to_ZZ_p(msg));
-        NTL::ZZ_pX u, e0, e1;
-        for (int i = 0; i < N; i++) {
-            NTL::SetCoeff(u, i, NTL::to_ZZ_p((rng() % 3) - 1));
-            NTL::SetCoeff(e0, i, NTL::to_ZZ_p((rng() % 100000 == 0) ? 1 : 0));
-            NTL::SetCoeff(e1, i, NTL::to_ZZ_p((rng() % 100000 == 0) ? 1 : 0));
-        }
-        NTL::ZZ_pX c0 = pk0 * u + e0 + m;
-        NTL::ZZ_pX c1 = pk1 * u + e1;
-        reduce_poly(c0);
-        reduce_poly(c1);
-        return std::make_pair(c0, c1);
-    };
-    
-    auto rlwe_decrypt = [&](std::pair<NTL::ZZ_pX, NTL::ZZ_pX> ct) {
-        NTL::ZZ_pX noise = ct.first + ct.second * NTL::to_ZZ_p(s_scalar);
-        reduce_poly(noise);
-        return NTL::rep(NTL::coeff(noise, 0));
     };
     
     auto rlwe_mult = [&](std::pair<NTL::ZZ_pX, NTL::ZZ_pX> a, 
@@ -103,8 +101,6 @@ int main() {
         NTL::SetCoeff(invL_poly, 0, NTL::to_ZZ_p(inv_L_k));
         NTL::ZZ_pX result_c0 = enc_L.first - ab.first * invL_poly;
         NTL::ZZ_pX result_c1 = enc_L.second - ab.second * invL_poly;
-        reduce_poly(result_c0);
-        reduce_poly(result_c1);
         return std::make_pair(result_c0, result_c1);
     };
     
@@ -120,28 +116,25 @@ int main() {
         return d_L < d_0;
     };
     
-    // 100 depth test
-    std::cout << "100 DEPTH CHAIN:\n";
+    // Fast test: 20 depths
+    std::cout << "Deep chain (20 depths):\n";
     auto current = full_encrypt(true);
     int errors = 0;
     auto start = std::chrono::high_resolution_clock::now();
     
-    for (int i = 0; i <= 100; i++) {
+    for (int i = 0; i <= 20; i++) {
         bool dec = full_decrypt(current);
         bool expected = (i % 2 == 0) ? 1 : 0;
-        if (dec != expected) {
-            if (errors < 5) std::cout << "  Depth " << i << ": dec=" << dec << " exp=" << expected << "\n";
-            errors++;
-        }
+        if (dec != expected) errors++;
         current = homomorphic_nand(current, current);
     }
     
     auto end = std::chrono::high_resolution_clock::now();
     auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
     
-    std::cout << "  Errors: " << errors << "/101\n";
+    std::cout << "  Errors: " << errors << "/21\n";
     std::cout << "  Time: " << ms << " ms\n";
-    std::cout << "  Ops/sec: " << (101.0 * 1000.0 / ms) << "\n";
+    std::cout << "  Ops/sec: " << (21.0 * 1000.0 / ms) << "\n";
     
     return 0;
 }

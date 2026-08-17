@@ -1,16 +1,13 @@
-// RLWE L(k) FHE — 100 DEPTH TEST
-// N=128 para mabilis, 100 depths
-
+// N=1024 DEBUG — Bakit may errors?
 #include <NTL/ZZ.h>
 #include <NTL/ZZ_pX.h>
 #include <NTL/ZZ_p.h>
 #include <iostream>
 #include <random>
-#include <chrono>
 
 int main() {
-    std::cout << "100 DEPTH TEST\n";
-    std::cout << "==============\n\n";
+    std::cout << "N=1024 DEBUG\n";
+    std::cout << "============\n\n";
     
     NTL::ZZ Q = NTL::to_ZZ("115792089237316195423570985008687907853269984665640564039457584007913129640731");
     NTL::ZZ_p::init(Q);
@@ -108,40 +105,24 @@ int main() {
         return std::make_pair(result_c0, result_c1);
     };
     
-    auto full_encrypt = [&](bool bit) {
-        return rlwe_encrypt(bit ? L_k : NTL::to_ZZ(0));
-    };
+    // Trace: i-print ang raw decrypt value sa bawat depth
+    auto current = rlwe_encrypt(L_k);
     
-    auto full_decrypt = [&](std::pair<NTL::ZZ_pX, NTL::ZZ_pX> ct) {
-        NTL::ZZ val = rlwe_decrypt(ct) % Q;
+    std::cout << "Depth | Raw Value | Decrypt | Expected\n";
+    std::cout << "------|-----------|---------|---------\n";
+    
+    for (int i = 0; i <= 15; i++) {
+        NTL::ZZ val = rlwe_decrypt(current) % Q;
         if (val < 0) val += Q;
         NTL::ZZ d_L = (val > L_k) ? val - L_k : L_k - val;
         NTL::ZZ d_0 = (val < Q/2) ? val : Q - val;
-        return d_L < d_0;
-    };
-    
-    // 100 depth test
-    std::cout << "100 DEPTH CHAIN:\n";
-    auto current = full_encrypt(true);
-    int errors = 0;
-    auto start = std::chrono::high_resolution_clock::now();
-    
-    for (int i = 0; i <= 100; i++) {
-        bool dec = full_decrypt(current);
+        bool dec = d_L < d_0;
         bool expected = (i % 2 == 0) ? 1 : 0;
-        if (dec != expected) {
-            if (errors < 5) std::cout << "  Depth " << i << ": dec=" << dec << " exp=" << expected << "\n";
-            errors++;
-        }
+        
+        std::cout << i << " | " << val << " | " << dec << " | " << expected << "\n";
+        
         current = homomorphic_nand(current, current);
     }
-    
-    auto end = std::chrono::high_resolution_clock::now();
-    auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-    
-    std::cout << "  Errors: " << errors << "/101\n";
-    std::cout << "  Time: " << ms << " ms\n";
-    std::cout << "  Ops/sec: " << (101.0 * 1000.0 / ms) << "\n";
     
     return 0;
 }

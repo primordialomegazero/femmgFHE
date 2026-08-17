@@ -37,18 +37,20 @@ public:
     NTL::ZZ_p psi_p;
     
     NTL::ZZ_pX golden_poly;
-    NTL::ZZ blind_r;
-    NTL::ZZ blind_r_inv;
     Cipher ct_zero, ct_one;
     
     // CSPRNG
     std::mt19937_64 rng;
     std::uniform_int_distribution<uint64_t> dist;
     
-    FibonacciFHEV6(const NTL::ZZ& Q_, long secret_n = 42) 
-        : Q(Q_), rng(std::chrono::high_resolution_clock::now().time_since_epoch().count()),
-          dist(0, UINT64_MAX) {
+    FibonacciFHEV6(const NTL::ZZ& Q_, long secret_n = 42) : Q(Q_) {
         NTL::ZZ_p::init(Q);
+        
+        // CSPRNG seeded from random_device + chrono
+        std::random_device rd;
+        uint64_t seed = (uint64_t)rd() ^ (uint64_t)std::chrono::high_resolution_clock::now().time_since_epoch().count();
+        rng.seed(seed);
+        dist = std::uniform_int_distribution<uint64_t>(0, UINT64_MAX);
         
         // Compute φ
         NTL::ZZ sqrt5;
@@ -101,9 +103,7 @@ public:
         inv_golden_p = NTL::to_ZZ_p(inv_golden);
         psi_p = NTL::to_ZZ_p(psi_zz);
         
-        // NAND anchor: gamitin ang ψ (psi) para sa perfect collapse
-        // ψ²·ψ⁻¹ = ψ, kaya NAND(1,1) = ψ - ψ = 0
-        NTL::SetCoeff(golden_poly, 0, psi_p);
+        NTL::SetCoeff(golden_poly, 0, golden_plain_p);
         
         // KeyGen with φ-structured a_poly at zero noise
         NTL::ZZ_pX a_poly, e_poly;
@@ -172,10 +172,6 @@ public:
         NTL::ZZ_pX c1 = pk1 * u + e1;
         reduce_mod(c0);
         reduce_mod(c1);
-        
-        // NOTE: Blinding removed for correctness testing
-        // Auto key switching will be added in next iteration
-        
         return {c0, c1};
     }
     
@@ -222,46 +218,24 @@ public:
     }
 
     Cipher nand_gate(const Cipher& a, const Cipher& b) {
-        auto result = raw_nand(a, b);
-        
-        // Normalize sa canonical φ orbit para sa susunod na gate
-        NTL::ZZ_pX noise = result.first + result.second * s;
-        reduce_mod(noise);
-        NTL::ZZ v = NTL::rep(NTL::coeff(noise, 0));
-        
-        NTL::ZZ dist_0 = (v < Q/2) ? v : Q - v;
-        NTL::ZZ d_phi = (v > golden_plain) ? v - golden_plain : golden_plain - v;
-        NTL::ZZ d_psi = (v > psi_zz) ? v - psi_zz : psi_zz - v;
-        NTL::ZZ dist_phi_orbit = (d_phi < d_psi) ? d_phi : d_psi;
-        
-        if (dist_phi_orbit < dist_0) {
-            // Nasa φ orbit — i-normalize sa eksaktong φ
-            NTL::SetCoeff(result.first, 0, golden_plain_p);
-            NTL::SetCoeff(result.second, 0, NTL::to_ZZ_p(0));
-        } else {
-            // Nasa 0 orbit — i-normalize sa eksaktong 0
-            NTL::SetCoeff(result.first, 0, NTL::to_ZZ_p(0));
-            NTL::SetCoeff(result.second, 0, NTL::to_ZZ_p(0));
-        }
-        
-        return result;
+        return raw_nand(a, b);
     }
 
     Cipher not_gate(const Cipher& a) { return raw_nand(a, a); }
     Cipher xor_gate(const Cipher& a, const Cipher& b) {
-        auto n1 = nand_gate(a, b);
-        auto n2 = nand_gate(a, n1);
-        auto n3 = nand_gate(b, n1);
+        auto n1 = raw_nand(a, b);
+        auto n2 = raw_nand(a, n1);
+        auto n3 = raw_nand(b, n1);
         return nand_gate(n2, n3);
     }
     Cipher and_gate(const Cipher& a, const Cipher& b) {
-        auto n = nand_gate(a, b);
+        auto n = raw_nand(a, b);
         return nand_gate(n, n);
     }
     Cipher or_gate(const Cipher& a, const Cipher& b) {
-        auto not_a = nand_gate(a, a);
-        auto not_b = nand_gate(b, b);
-        return raw_nand(not_a, not_b);
+        auto not_a = raw_nand(a, a);
+        auto not_b = raw_nand(b, b);
+        return nand_gate(not_a, not_b);
     }
     
     Cipher hadamard(const Cipher& a) { return not_gate(a); }

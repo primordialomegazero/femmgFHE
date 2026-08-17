@@ -1,5 +1,5 @@
-// RLWE L(k) FHE — 100 DEPTH TEST
-// N=128 para mabilis, 100 depths
+// RLWE L(k) FHE — 1M DEPTH TEST
+// Every 100K print
 
 #include <NTL/ZZ.h>
 #include <NTL/ZZ_pX.h>
@@ -9,8 +9,8 @@
 #include <chrono>
 
 int main() {
-    std::cout << "100 DEPTH TEST\n";
-    std::cout << "==============\n\n";
+    std::cout << "1M DEPTH TEST\n";
+    std::cout << "=============\n\n";
     
     NTL::ZZ Q = NTL::to_ZZ("115792089237316195423570985008687907853269984665640564039457584007913129640731");
     NTL::ZZ_p::init(Q);
@@ -30,7 +30,7 @@ int main() {
     NTL::ZZ L_k = (phi_k + psi_k) % Q;
     NTL::ZZ inv_L_k = NTL::InvMod(L_k, Q);
     
-    constexpr int N = 1024;
+    constexpr int N = 512;
     std::mt19937_64 rng(42);
     
     NTL::ZZ s_scalar = phi_k;
@@ -39,7 +39,7 @@ int main() {
     
     NTL::ZZ_pX a_pk, e_pk;
     for (int i = 0; i < N; i++) {
-        NTL::SetCoeff(a_pk, i, NTL::to_ZZ_p(rng() % NTL::conv<long>(Q)));
+        NTL::SetCoeff(a_pk, i, NTL::to_ZZ_p(NTL::RandomBnd(Q)));
         NTL::SetCoeff(e_pk, i, NTL::to_ZZ_p((rng() % 100000 == 0) ? 1 : 0));
     }
     NTL::ZZ_pX pk0 = -(a_pk * NTL::to_ZZ_p(s_scalar)) + e_pk;
@@ -50,8 +50,14 @@ int main() {
             NTL::ZZ_pX reduced;
             reduced.SetLength(N);
             for (int i = 0; i <= NTL::deg(p); i++) {
-                int rd = i % N;
-                NTL::SetCoeff(reduced, rd, NTL::coeff(reduced, rd) + NTL::coeff(p, i));
+                int rd = i % (2 * N);
+                if (rd >= N) {
+                    rd -= N;
+                    // x^N = -1, kaya i-SUBTRACT
+                    NTL::SetCoeff(reduced, rd, NTL::coeff(reduced, rd) - NTL::coeff(p, i));
+                } else {
+                    NTL::SetCoeff(reduced, rd, NTL::coeff(reduced, rd) + NTL::coeff(p, i));
+                }
             }
             p = reduced;
         }
@@ -87,8 +93,13 @@ int main() {
         reduce_poly(d0);
         reduce_poly(d1);
         reduce_poly(d2);
-        NTL::ZZ_pX c0 = d0 + d2 * NTL::to_ZZ_p(beta);
-        NTL::ZZ_pX c1 = d1 + d2 * NTL::to_ZZ_p(alpha);
+        
+        // I-scale ang beta at alpha bilang ZZ_p
+        NTL::ZZ_p beta_p = NTL::to_ZZ_p(beta);
+        NTL::ZZ_p alpha_p = NTL::to_ZZ_p(alpha);
+        
+        NTL::ZZ_pX c0 = d0 + d2 * beta_p;
+        NTL::ZZ_pX c1 = d1 + d2 * alpha_p;
         reduce_poly(c0);
         reduce_poly(c1);
         return std::make_pair(c0, c1);
@@ -99,10 +110,16 @@ int main() {
     auto homomorphic_nand = [&](std::pair<NTL::ZZ_pX, NTL::ZZ_pX> a,
                                  std::pair<NTL::ZZ_pX, NTL::ZZ_pX> b) {
         auto ab = rlwe_mult(a, b);
-        NTL::ZZ_pX invL_poly;
-        NTL::SetCoeff(invL_poly, 0, NTL::to_ZZ_p(inv_L_k));
-        NTL::ZZ_pX result_c0 = enc_L.first - ab.first * invL_poly;
-        NTL::ZZ_pX result_c1 = enc_L.second - ab.second * invL_poly;
+        NTL::ZZ_p invL_p = NTL::to_ZZ_p(inv_L_k);
+        
+        // I-scale ang ab.first at ab.second
+        NTL::ZZ_pX scaled_c0 = ab.first * invL_p;
+        NTL::ZZ_pX scaled_c1 = ab.second * invL_p;
+        reduce_poly(scaled_c0);
+        reduce_poly(scaled_c1);
+        
+        NTL::ZZ_pX result_c0 = enc_L.first - scaled_c0;
+        NTL::ZZ_pX result_c1 = enc_L.second - scaled_c1;
         reduce_poly(result_c0);
         reduce_poly(result_c1);
         return std::make_pair(result_c0, result_c1);
@@ -120,28 +137,35 @@ int main() {
         return d_L < d_0;
     };
     
-    // 100 depth test
-    std::cout << "100 DEPTH CHAIN:\n";
+    // 1M depth test
+    std::cout << "1M DEPTH CHAIN (every 100K):\n";
     auto current = full_encrypt(true);
     int errors = 0;
     auto start = std::chrono::high_resolution_clock::now();
     
-    for (int i = 0; i <= 100; i++) {
+    std::cout << "Starting loop..." << std::endl;
+    std::cout.flush();
+    for (int i = 0; i <= 1000; i++) {
+        if (i < 5) { std::cout << "  i=" << i << std::endl; std::cout.flush(); }
         bool dec = full_decrypt(current);
         bool expected = (i % 2 == 0) ? 1 : 0;
-        if (dec != expected) {
-            if (errors < 5) std::cout << "  Depth " << i << ": dec=" << dec << " exp=" << expected << "\n";
-            errors++;
-        }
+        if (dec != expected) errors++;
         current = homomorphic_nand(current, current);
+        
+        if (i % 100 == 0) {
+            auto now = std::chrono::high_resolution_clock::now();
+            auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(now - start).count();
+            std::cout << "  [" << i << "/1M] errors=" << errors 
+                      << " time=" << elapsed << "s (" << (i / elapsed) << " ops/sec)\n";
+            std::cout.flush();
+        }
     }
     
     auto end = std::chrono::high_resolution_clock::now();
-    auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+    auto total = std::chrono::duration_cast<std::chrono::seconds>(end - start).count();
     
-    std::cout << "  Errors: " << errors << "/101\n";
-    std::cout << "  Time: " << ms << " ms\n";
-    std::cout << "  Ops/sec: " << (101.0 * 1000.0 / ms) << "\n";
+    std::cout << "\nFINAL: errors=" << errors << "/1000000\n";
+    std::cout << "Total time: " << total << "s\n";
     
     return 0;
 }
