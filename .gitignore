@@ -68,3 +68,6 @@ spiral_fhe_io_final.h
 /main
 /spiral_fhe_io_final.h
 /src/refresh/
+archive/
+*.log
+*.txt
