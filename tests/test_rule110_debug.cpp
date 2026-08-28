@@ -1,25 +1,22 @@
-// RULE 110 DEEP DEBUG
-// Tingnan ang bawat value sa bawat step
+// RULE 110 DEBUG — Tingnan ang Bawat Gate
+// I-debug ang NOT, AND, OR sa φ-space
 
 #include "openfhe.h"
 #include <iostream>
 #include <vector>
-#include <complex>
-#include <cmath>
 
 using namespace lbcrypto;
 
 int main() {
     std::cout << "========================================\n";
-    std::cout << "  RULE 110 DEEP DEBUG\n";
-    std::cout << "  Step-by-Step Analysis\n";
+    std::cout << "  RULE 110 DEBUG\n";
+    std::cout << "  Bawat Gate Values\n";
     std::cout << "========================================\n\n";
 
-    const double phi = 1.6180339887498948482;
-    const double phi_sq = phi * phi;
+    const double PHI = 1.6180339887498948482;
 
     CCParams<CryptoContextCKKSRNS> params;
-    params.SetMultiplicativeDepth(5);
+    params.SetMultiplicativeDepth(1);
     params.SetScalingModSize(50);
     params.SetBatchSize(256);
     params.SetFirstModSize(60);
@@ -28,79 +25,94 @@ int main() {
     cc->Enable(PKE);
     cc->Enable(KEYSWITCH);
     cc->Enable(LEVELEDSHE);
-    cc->Enable(ADVANCEDSHE);
 
     auto keys = cc->KeyGen();
     cc->EvalMultKeyGen(keys.secretKey);
-    cc->EvalAtIndexKeyGen(keys.secretKey, {1, -1});
-
     auto slots = cc->GetEncodingParams()->GetBatchSize();
 
-    auto decrypt_slot = [&](auto ct, int slot_num) {
-        Plaintext pt;
-        cc->Decrypt(keys.secretKey, ct, &pt);
-        return pt->GetCKKSPackedValue()[slot_num].real();
+    auto make_ct = [&](double val) {
+        std::vector<std::complex<double>> vec(slots, {0.0, 0.0});
+        vec[0] = {val, 0.0};
+        return cc->Encrypt(keys.publicKey, cc->MakeCKKSPackedPlaintext(vec));
     };
 
-    // Initial state: lahat 0 maliban sa slot 128 na φ²
-    std::vector<std::complex<double>> init(slots, {0.0, 0.0});
-    init[128] = {phi_sq, 0.0};
-    auto state = cc->Encrypt(keys.publicKey, cc->MakeCKKSPackedPlaintext(init));
+    auto decrypt_val = [&](auto ct) {
+        Plaintext pt;
+        cc->Decrypt(keys.secretKey, ct, &pt);
+        return pt->GetCKKSPackedValue()[0].real();
+    };
 
-    std::cout << "INITIAL STATE:\n";
-    std::cout << "  slot127=" << decrypt_slot(state, 127) << "\n";
-    std::cout << "  slot128=" << decrypt_slot(state, 128) << "\n";
-    std::cout << "  slot129=" << decrypt_slot(state, 129) << "\n\n";
+    auto ct_phi = make_ct(PHI);
+    auto ct_0 = make_ct(0.0);
 
-    std::cout << "STEP-BY-STEP DEBUG (first 10 steps):\n";
-    std::cout << "====================================\n\n";
-    std::cout << "Step | L(127) | C(128) | R(129) | Sum | After +φ² | After -3φ²\n";
-    std::cout << "-----|--------|--------|--------|-----|-----------|----------\n";
+    // NOT: x → φ - x
+    auto eval_not = [&](auto x) {
+        return cc->EvalSub(ct_phi, x);
+    };
 
-    for (int step = 0; step < 10; step++) {
-        // Step 1: Kunin ang neighbors
-        auto left = cc->EvalAtIndex(state, -1);
-        auto right = cc->EvalAtIndex(state, 1);
+    std::cout << "NOT GATE DEBUG:\n";
+    std::cout << "===============\n";
+    std::cout << "  NOT(0) = " << decrypt_val(eval_not(ct_0)) << " (dapat " << PHI << ")\n";
+    std::cout << "  NOT(φ) = " << decrypt_val(eval_not(ct_phi)) << " (dapat 0)\n\n";
 
-        double L = decrypt_slot(left, 128);
-        double C = decrypt_slot(state, 128);
-        double R = decrypt_slot(right, 128);
+    // AND via De Morgan: AND(a,b) = NOT(NOT(a) OR NOT(b))
+    // OR(a,b) = NOT(NOT(a) AND NOT(b))
+    
+    // Sa φ-space, subukan ang simpleng OR:
+    // OR(a,b) = a + b - φ * (a AND b) — pero may multiplication
+    // Mas simple: OR = NOT(AND(NOT(a), NOT(b)))
+    
+    auto eval_and_via_not_or = [&](auto a, auto b) {
+        // AND(a,b) = NOT(NOT(a) OR NOT(b))
+        auto not_a = eval_not(a);
+        auto not_b = eval_not(b);
+        // OR(not_a, not_b) = ? 
+        // Subukan natin ang iba't ibang paraan
+        // Una: OR = a + b - φ kung pareho φ
+        // Sa φ-space: 0+0=0, 0+φ=φ, φ+φ=2φ
+        // Para sa OR: kailangan φ ang result kung may φ
+        
+        // Simplest OR: a + b (addition lang!)
+        auto or_ab = cc->EvalAdd(a, b);
+        
+        // NOT(OR) = φ - (a+b)
+        return eval_not(or_ab);
+    };
 
-        // Step 2: Sum
-        auto sum = cc->EvalAdd(cc->EvalAdd(left, state), right);
-        double sum_val = decrypt_slot(sum, 128);
+    std::cout << "AND VIA NOT+OR DEBUG:\n";
+    std::cout << "=====================\n";
+    std::cout << "  AND(0,0) = " << decrypt_val(eval_and_via_not_or(ct_0, ct_0)) << " (dapat 0)\n";
+    std::cout << "  AND(0,φ) = " << decrypt_val(eval_and_via_not_or(ct_0, ct_phi)) << " (dapat 0)\n";
+    std::cout << "  AND(φ,φ) = " << decrypt_val(eval_and_via_not_or(ct_phi, ct_phi)) << " (dapat φ)\n\n";
 
-        // Step 3: Add φ²
-        auto after_add = cc->EvalAdd(sum, 
-            cc->Encrypt(keys.publicKey, cc->MakeCKKSPackedPlaintext(
-                std::vector<std::complex<double>>(slots, {phi_sq, 0.0}))));
-        double add_val = decrypt_slot(after_add, 128);
-
-        // Step 4: Subtract 3φ² if step % 4 == 2
-        double final_val = add_val;
-        if (step % 4 == 2) {
-            auto after_sub = cc->EvalSub(after_add,
-                cc->Encrypt(keys.publicKey, cc->MakeCKKSPackedPlaintext(
-                    std::vector<std::complex<double>>(slots, {3*phi_sq, 0.0}))));
-            final_val = decrypt_slot(after_sub, 128);
-            state = after_sub;
-        } else {
-            state = after_add;
-        }
-
-        std::cout << step << " | " << L << " | " << C << " | " << R 
-                  << " | " << sum_val << " | " << add_val << " | " << final_val << "\n";
-    }
-
-    std::cout << "\n";
-    std::cout << "OBSERVATION:\n";
-    std::cout << "============\n\n";
-    std::cout << "  1. Ang sum = L + C + R ay may 3 neighbors\n";
-    std::cout << "  2. Kapag ang mga neighbors ay lahat φ²,\n";
-    std::cout << "     ang sum = 3φ² (malaki)\n";
-    std::cout << "  3. Ang pag-add ng φ² ay lalong nagpapalaki\n";
-    std::cout << "  4. Ang period-4 correction ay hindi sapat\n";
-    std::cout << "     para i-contain ang 3φ² growth\n\n";
+    // Ang problema: kailangan natin ng tamang AND sa φ-space
+    // Sa φ-space, ang states ay 0 at φ
+    // AND(0,0) = 0, AND(0,φ) = 0, AND(φ,φ) = φ
+    
+    // Natural na AND: min(a,b) sa φ-space
+    // Sa φ-space: min(0,0)=0, min(0,φ)=0, min(φ,φ)=φ
+    
+    // Paano gawin ang min sa homomorphic na walang decrypt?
+    // min(a,b) = (a + b - |a - b|) / 2
+    
+    // Sa φ-space: |a-b| = φ kung magkaiba, 0 kung pareho
+    // Dahil a,b ∈ {0, φ}
+    
+    // Kaya: min(a,b) = (a + b - |a-b|) / 2
+    // |a-b| = φ kung magkaiba, 0 kung pareho
+    // Sa FHE: kailangan natin ng absolute value
+    
+    std::cout << "XOR AS DIFF DEBUG:\n";
+    std::cout << "==================\n";
+    auto diff_00 = cc->EvalSub(ct_0, ct_0);
+    auto diff_0phi = cc->EvalSub(ct_0, ct_phi);
+    auto diff_phi0 = cc->EvalSub(ct_phi, ct_0);
+    auto diff_phiphi = cc->EvalSub(ct_phi, ct_phi);
+    
+    std::cout << "  diff(0,0) = " << decrypt_val(diff_00) << "\n";
+    std::cout << "  diff(0,φ) = " << decrypt_val(diff_0phi) << "\n";
+    std::cout << "  diff(φ,0) = " << decrypt_val(diff_phi0) << "\n";
+    std::cout << "  diff(φ,φ) = " << decrypt_val(diff_phiphi) << "\n\n";
 
     return 0;
 }

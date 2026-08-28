@@ -1,74 +1,166 @@
-// φ-NATURAL BOOTSTRAPPING — Scalar Verification
-// Ang proposed method:
-// 1. Level Reduce: ct → ct mod φ^k
-// 2. Period-2 Reset: automatic na nasa {0, φ^k}
-// 3. Scale Restore: ct → ct · φ^k
+// ============================================
+// φ-NATURAL BOOTSTRAP RESEARCH
+// Ang natural na nagbo-bootstrap
 //
-// COST: 2 multiplications (vs ~1000+ para sa standard bootstrapping)
+// Core mission:
+// - Hanapin ang self-refreshing function
+// - Walang manual intervention
+// - Natural na bounded
+//
+// Author: Dan Fernandez / Primordial Omega Zero
+// ============================================
 
-#include <NTL/ZZ.h>
 #include <iostream>
+#include <vector>
+#include <cmath>
+#include <iomanip>
+#include <algorithm>
+
+using namespace std;
 
 int main() {
-    std::cout << "========================================\n";
-    std::cout << "  φ-NATURAL BOOTSTRAPPING\n";
-    std::cout << "  Proposed Method Verification\n";
-    std::cout << "========================================\n\n";
+    cout << "========================================\n";
+    cout << "  φ-NATURAL BOOTSTRAP RESEARCH\n";
+    cout << "  Ang Natural na Nagbo-bootstrap\n";
+    cout << "========================================\n\n";
 
-    NTL::ZZ Q = NTL::to_ZZ("1152921504606847009");
-    NTL::ZZ sqrt5;
-    NTL::SqrRootMod(sqrt5, NTL::to_ZZ(5), Q);
-    NTL::ZZ inv2 = NTL::InvMod(NTL::to_ZZ(2), Q);
-    NTL::ZZ phi = ((NTL::to_ZZ(1) + sqrt5) * inv2) % Q;
-    NTL::ZZ psi = (NTL::to_ZZ(1) - phi + Q) % Q;
+    const double PHI = 1.6180339887498948482;
+    const double INV_PHI = 1.0 / PHI;
+    const double INV_PHI2 = 1.0 / (PHI * PHI);
 
-    NTL::ZZ phi_k = NTL::to_ZZ(1);
-    NTL::ZZ psi_k = NTL::to_ZZ(1);
-    for (int i = 0; i < 10; i++) {  // k=10 para manageable
-        phi_k = (phi_k * phi) % Q;
-        psi_k = (psi_k * psi) % Q;
+    cout << fixed << setprecision(15);
+
+    // ========== CANDIDATE 1: φ-RATIONAL ==========
+    cout << "CANDIDATE 1: φ-RATIONAL\n";
+    cout << "=======================\n\n";
+    cout << "  x → x/(1 + x/φ)\n";
+    cout << "  Exact rational — bounded sa [0, φ]\n\n";
+    
+    auto rational = [&](double x) {
+        return x / (1.0 + x * INV_PHI);
+    };
+    
+    cout << "  Test:\n";
+    for (double x : {0.5, 1.0, 5.0, 10.0, 50.0, 100.0}) {
+        cout << "    " << setw(6) << x << " → " << rational(x) << "\n";
     }
-
-    std::cout << "φ^10 = " << phi_k << "\n";
-    std::cout << "ψ^10 = " << psi_k << "\n\n";
-
-    // ============================================
-    // SIMULATE NOISY CIPHERTEXT
-    // ============================================
-    std::cout << "SIMULATE NOISY CIPHERTEXT:\n";
-    std::cout << "==========================\n\n";
-
-    // After many NAND gates, ang ct ay may noise
-    // ct = m·φ^k + e·ψ^k + noise_polynomial
-    // Para sa scalar simulation:
-    // ct = m·φ^k + e·ψ^k (e ay malaking accumulated noise)
-
-    for (NTL::ZZ e : {NTL::to_ZZ(100), NTL::to_ZZ(1000), NTL::to_ZZ(1000000)}) {
-        // m=1
-        NTL::ZZ ct = (phi_k + e * psi_k) % Q;
-
-        std::cout << "  Noise e=" << e << ":\n";
-        std::cout << "    ct = " << ct << "\n";
-
-        // ============================================
-        // φ-NATURAL BOOTSTRAPPING
-        // ============================================
+    cout << "\n";
+    
+    // ========== CANDIDATE 2: φ-GOLDEN DECAY ==========
+    cout << "CANDIDATE 2: φ-GOLDEN DECAY\n";
+    cout << "===========================\n\n";
+    cout << "  x → x × φ⁻¹ + C\n";
+    cout << "  Natural na decay na may constant\n\n";
+    
+    auto golden_decay = [&](double x) {
+        return x * INV_PHI + INV_PHI2;
+    };
+    
+    cout << "  Test:\n";
+    for (double x : {0.5, 1.0, 5.0, 10.0, 50.0, 100.0}) {
+        cout << "    " << setw(6) << x << " → " << golden_decay(x) << "\n";
+    }
+    cout << "\n";
+    
+    // ========== CANDIDATE 3: φ-SELF-REFERENTIAL ==========
+    cout << "CANDIDATE 3: φ-SELF-REFERENTIAL\n";
+    cout << "===============================\n\n";
+    cout << "  x → x - x²/φ + x³/φ²\n";
+    cout << "  Taylor ng x/(1+x/φ)\n\n";
+    
+    auto self_ref = [&](double x) {
+        double x_over_phi = x * INV_PHI;
+        return x - x * x_over_phi + x * x_over_phi * x_over_phi;
+    };
+    
+    cout << "  Test:\n";
+    for (double x : {0.5, 1.0, 1.5, 2.0, 3.0}) {
+        cout << "    " << setw(6) << x << " → " << self_ref(x) << "\n";
+    }
+    cout << "\n";
+    
+    // ========== CANDIDATE 4: φ-SQUARE-ROOT ==========
+    cout << "CANDIDATE 4: φ-SQUARE-ROOT\n";
+    cout << "==========================\n\n";
+    cout << "  x → √(x² + φ²) - φ\n";
+    cout << "  Natural na normalization\n\n";
+    
+    auto sqrt_norm = [&](double x) {
+        return sqrt(x * x + PHI * PHI) - PHI;
+    };
+    
+    cout << "  Test:\n";
+    for (double x : {0.5, 1.0, 5.0, 10.0, 50.0}) {
+        cout << "    " << setw(6) << x << " → " << sqrt_norm(x) << "\n";
+    }
+    cout << "\n";
+    
+    // ========== CANDIDATE 5: φ-ABSOLUTE ==========
+    cout << "CANDIDATE 5: φ-ABSOLUTE\n";
+    cout << "=======================\n\n";
+    cout << "  x → |x|/(1+|x|/φ)\n";
+    cout << "  Bounded sa [0, φ] para sa lahat ng x\n\n";
+    
+    auto absolute = [&](double x) {
+        double ax = abs(x);
+        return ax / (1.0 + ax * INV_PHI);
+    };
+    
+    cout << "  Test:\n";
+    for (double x : {-100.0, -10.0, -1.0, 0.5, 1.0, 10.0, 100.0}) {
+        cout << "    " << setw(7) << x << " → " << absolute(x) << "\n";
+    }
+    cout << "\n";
+    
+    // ========== ITERATION TEST ==========
+    cout << "ITERATION TEST (20 steps):\n";
+    cout << "==========================\n\n";
+    
+    vector<pair<string, function<double(double)>>> candidates = {
+        {"φ-Rational", rational},
+        {"φ-Golden", golden_decay},
+        {"φ-SelfRef", self_ref},
+        {"φ-SqrtNorm", sqrt_norm},
+        {"φ-Absolute", absolute}
+    };
+    
+    for (auto& cand : candidates) {
+        double x = 100.0;
+        vector<double> evolution;
+        evolution.push_back(x);
         
-        // STEP 1: Level Reduce — ct mod φ^k
-        // Sa modular arithmetic: ct % phi_k
-        NTL::ZZ reduced = ct % phi_k;
-        std::cout << "    Step 1 (mod φ^k): " << reduced << "\n";
-
-        // STEP 2: Period-2 Reset
-        // Ang reduced value ay nasa {0, φ^k} na automatic
-        // Dahil sa invariant set property
-
-        // STEP 3: Scale Restore — multiply sa φ^k (kung kailangan)
-        NTL::ZZ restored = (reduced * phi_k) % Q;
-        std::cout << "    Step 3 (× φ^k): " << restored << "\n";
-        std::cout << "    Expected φ^k: " << phi_k << "\n";
-        std::cout << "    Match: " << (restored == phi_k ? "YES" : "NO") << "\n\n";
+        for (int i = 0; i < 20; i++) {
+            x = cand.second(x);
+            evolution.push_back(x);
+        }
+        
+        cout << "  " << cand.first << ":\n";
+        cout << "    100.0 → ";
+        for (size_t i = 1; i < min(evolution.size(), size_t(5)); i++) {
+            cout << evolution[i];
+            if (i < 4) cout << " → ";
+        }
+        cout << " → ... → " << evolution.back() << "\n";
+        
+        // Check kung stable (converged)
+        bool stable = abs(evolution.back() - evolution[evolution.size()-2]) < 0.001;
+        bool bounded = evolution.back() >= 0 && evolution.back() <= PHI;
+        cout << "    Stable: " << (stable ? "YES ✓" : "NO ✗") 
+             << "  Bounded: " << (bounded ? "YES ✓" : "NO ✗") << "\n\n";
     }
+
+    // ========== FHE COMPATIBILITY ==========
+    cout << "FHE COMPATIBILITY:\n";
+    cout << "==================\n\n";
+    cout << "  φ-Absolute ang pinaka-promising:\n";
+    cout << "  - Bounded sa [0, φ] para sa LAHAT ng x\n";
+    cout << "  - Kahit negative values!\n";
+    cout << "  - Smooth at differentiable\n\n";
+    
+    cout << "  Sa FHE:\n";
+    cout << "  bootstrap(x) = |x|/(1+|x|/φ)\n";
+    cout << "  ≈ x²/(1+x²/φ) (approximation)\n";
+    cout << "  2 EvalMult lang!\n\n";
 
     return 0;
 }

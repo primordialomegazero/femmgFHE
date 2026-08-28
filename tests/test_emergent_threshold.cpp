@@ -1,120 +1,118 @@
-// EMERGENT HOMOMORPHIC THRESHOLD SEARCH
-// Hanapin ang natural na threshold na walang decrypt
-// Para sa NAND at lahat ng gates
+// EMERGENT THRESHOLD — Pentagonal Natural Thresholds
+// Subukan ang natural thresholds: cos(36°), cos(72°), cos(108°), cos(144°)
+// Tingnan kung anong gate ang lumalabas sa bawat threshold
 
+#include "openfhe.h"
 #include <iostream>
 #include <vector>
+#include <complex>
 #include <cmath>
+
+using namespace lbcrypto;
 
 int main() {
     std::cout << "========================================\n";
-    std::cout << "  EMERGENT THRESHOLD SEARCH\n";
-    std::cout << "  Walang Decrypt sa Gitna\n";
+    std::cout << "  EMERGENT THRESHOLD FINDER\n";
+    std::cout << "  Pentagonal ±2π/5, Walang Shift\n";
     std::cout << "========================================\n\n";
 
-    const double phi = 1.6180339887498948482;
-    const double phi_sq = phi * phi;
-    const double two_phi_sq = 2 * phi_sq;
-    const double three_phi_sq = 3 * phi_sq;
-    const double four_phi_sq = 4 * phi_sq;
-    const double phi_mod = 0.6180339887498949;
-    const double psi_mod = -0.6180339887498949;
+    const double PI = 3.14159265358979323846;
+    const double ENC_0 = -2 * PI / 5;
+    const double ENC_1 = 2 * PI / 5;
 
-    // ============================================
-    // NAND TARGET: {0→φ², φ²→φ², 2φ²→0}
-    // ============================================
-    std::cout << "NAND TARGET:\n";
-    std::cout << "  f(0) = φ²\n";
-    std::cout << "  f(φ²) = φ²\n";
-    std::cout << "  f(2φ²) = 0\n\n";
+    // Natural thresholds mula sa pentagon
+    std::vector<double> thresholds = {
+        std::cos(PI / 5),     // cos(36°) = 0.809
+        std::cos(2 * PI / 5), // cos(72°) = 0.309
+        std::cos(3 * PI / 5), // cos(108°) = -0.309
+        std::cos(4 * PI / 5), // cos(144°) = -0.809
+        0.0,                  // Zero
+        -0.5                  // Midpoint
+    };
 
-    // ============================================
-    // IDEA 1: PERIOD-2 OSCILLATION
-    // ============================================
-    std::cout << "IDEA 1: Period-2 f(x) = K - x\n";
-    std::cout << "  f(0) = " << phi_sq << " ✓\n";
-    std::cout << "  f(φ²) = " << (phi_sq - phi_sq) << " ✗ (dapat φ²)\n";
-    std::cout << "  f(2φ²) = " << (phi_sq - two_phi_sq) << " ✗ (dapat 0)\n\n";
+    CCParams<CryptoContextCKKSRNS> params;
+    params.SetMultiplicativeDepth(20);
+    params.SetScalingModSize(50);
+    params.SetBatchSize(256);
+    params.SetFirstModSize(60);
 
-    // ============================================
-    // IDEA 2: PERIOD-4 OSCILLATION
-    // ============================================
-    std::cout << "IDEA 2: Period-4 f(x) = 2φ² - x\n";
-    std::cout << "  f(0) = " << two_phi_sq << " ✗ (dapat φ²)\n";
-    std::cout << "  f(φ²) = " << (two_phi_sq - phi_sq) << " ✓\n";
-    std::cout << "  f(2φ²) = " << (two_phi_sq - two_phi_sq) << " ✓\n\n";
+    CryptoContext<DCRTPoly> cc = GenCryptoContext(params);
+    cc->Enable(PKE);
+    cc->Enable(KEYSWITCH);
+    cc->Enable(LEVELEDSHE);
+    cc->Enable(ADVANCEDSHE);
 
-    // ============================================
-    // IDEA 3: PERIOD-4 CYCLE (with natural modulo)
-    // ============================================
-    std::cout << "IDEA 3: Period-4 cycle 0→φ²→2φ²→-φ²→0\n";
-    std::cout << "  State 0: 0 → next = φ² → output φ² ✓\n";
-    std::cout << "  State 1: φ² → next = 2φ² → output 2φ² ✗\n";
-    std::cout << "  State 2: 2φ² → next = -φ² → output -φ² ✗\n";
-    std::cout << "  State 3: -φ² → next = 0 → output 0 ✗\n\n";
+    auto keys = cc->KeyGen();
+    cc->EvalMultKeyGen(keys.secretKey);
+    auto slots = cc->GetEncodingParams()->GetBatchSize();
 
-    // ============================================
-    // IDEA 4: PERIOD-6 CYCLE (from Period-0×3)
-    // ============================================
-    std::cout << "IDEA 4: Period-6 K_i - (x + φ_mod)\n";
-    std::cout << "  States: 2, 2.618, 4.618, -2.618, 7.236, 0\n";
-    std::cout << "  May state 2.618 (φ²) at 0 — may mapping!\n\n";
+    auto make_ct = [&](double val) {
+        std::vector<std::complex<double>> vec(slots, {0.0, 0.0});
+        vec[0] = {val, 0.0};
+        return cc->Encrypt(keys.publicKey, cc->MakeCKKSPackedPlaintext(vec));
+    };
 
-    // ============================================
-    // IDEA 5: φ+ψ CANCELLATION
-    // ============================================
-    std::cout << "IDEA 5: φ+ψ = 0 (natural zero)\n";
-    std::cout << "  φ_mod + ψ_mod = " << (phi_mod + psi_mod) << "\n";
-    std::cout << "  Ito ay natural na zero — maaaring gamitin\n";
-    std::cout << "  para sa threshold na walang decrypt\n\n";
+    auto decrypt_val = [&](auto ct) {
+        Plaintext pt;
+        cc->Decrypt(keys.secretKey, ct, &pt);
+        return pt->GetCKKSPackedValue()[0].real();
+    };
 
-    // ============================================
-    // IDEA 6: BEATTY PARTITION
-    // ============================================
-    std::cout << "IDEA 6: Beatty partition (natural XOR)\n";
-    std::cout << "  Beatty(φ) at Beatty(φ²) ay partition\n";
-    std::cout << "  Ang membership ay 0-level\n\n";
+    auto ct_0 = make_ct(ENC_0);
+    auto ct_1 = make_ct(ENC_1);
 
-    // ============================================
-    // IDEA 7: GOLDEN ANGLE THRESHOLD
-    // ============================================
-    std::cout << "IDEA 7: Golden angle threshold\n";
-    std::cout << "  Golden angle = 137.5° = 2.39996 rad\n";
-    std::cout << "  Ang threshold ay nasa circle\n\n";
+    auto eval_gate = [&](auto a, auto b) {
+        auto sum = cc->EvalAdd(a, b);
+        return cc->EvalCos(sum, -4.0, 4.0, 15);
+    };
 
-    // ============================================
-    // IDEA 8: CASSINI-BASED THRESHOLD
-    // ============================================
-    std::cout << "IDEA 8: Cassini identity (natural period-2)\n";
-    std::cout << "  F(n-1)F(n+1) - F(n)² = (-1)^n\n";
-    std::cout << "  Ito ay natural na alternation\n\n";
+    auto decrypt_bit = [&](auto ct, double threshold) {
+        double cos_val = decrypt_val(ct);
+        return (cos_val > threshold) ? 1 : 0;
+    };
 
-    // ============================================
-    // IDEA 9: HYBRID PERIOD-2 + PERIOD-4
-    // ============================================
-    std::cout << "IDEA 9: Hybrid P2+P4\n";
-    std::cout << "  f(0) = φ² (mula P2)\n";
-    std::cout << "  f(φ²) = φ² (mula P4)\n";
-    std::cout << "  f(2φ²) = 0 (mula P4)\n";
-    std::cout << "  Kailangan ng natural na pag-switch\n\n";
+    // Raw cosine values
+    std::cout << "RAW COSINE VALUES (walang shift):\n";
+    std::cout << "=================================\n";
+    std::vector<std::pair<Ciphertext<DCRTPoly>, Ciphertext<DCRTPoly>>> inputs = {
+        {ct_0, ct_0}, {ct_0, ct_1}, {ct_1, ct_0}, {ct_1, ct_1}
+    };
+    std::vector<double> raw_cos;
+    for (auto& [a, b] : inputs) {
+        auto result = eval_gate(a, b);
+        double cos_val = decrypt_val(result);
+        raw_cos.push_back(cos_val);
+        std::cout << "  cos(" << (decrypt_val(a) * 180.0 / PI) << "° + "
+                  << (decrypt_val(b) * 180.0 / PI) << "°) = " << cos_val << "\n";
+    }
 
-    // ============================================
-    // IDEA 10: φ-POLYNOMIAL APPROACH
-    // ============================================
-    std::cout << "IDEA 10: φ-polynomial\n";
-    std::cout << "  f(x) = φ² - (x - φ²)² / φ²\n";
-    std::cout << "  f(0) = " << (phi_sq - (0 - phi_sq)*(0 - phi_sq)/phi_sq) << " ✗\n\n";
+    std::cout << "\nGATE PATTERNS SA BAWAT THRESHOLD:\n";
+    std::cout << "==================================\n\n";
 
-    // ============================================
-    // SUMMARY
-    // ============================================
-    std::cout << "========================================\n";
-    std::cout << "  BEST CANDIDATES:\n";
-    std::cout << "  - Period-6 cycle (may φ² at 0 states)\n";
-    std::cout << "  - φ+ψ cancellation (natural zero)\n";
-    std::cout << "  - Beatty partition (natural XOR)\n";
-    std::cout << "  - Hybrid P2+P4 (may tamang f(x))\n";
-    std::cout << "========================================\n";
+    for (double threshold : thresholds) {
+        std::vector<int> pattern;
+        for (double cos_val : raw_cos) {
+            pattern.push_back(cos_val > threshold ? 1 : 0);
+        }
+
+        std::cout << "Threshold " << threshold << ":\n";
+        std::cout << "  Pattern: (" << pattern[0] << "," << pattern[1] << ","
+                  << pattern[2] << "," << pattern[3] << ") → ";
+
+        if (pattern == std::vector<int>{0,1,1,0}) {
+            std::cout << "XOR\n";
+        } else if (pattern == std::vector<int>{1,1,1,0}) {
+            std::cout << "NAND\n";
+        } else if (pattern == std::vector<int>{1,0,0,0}) {
+            std::cout << "NOR\n";
+        } else if (pattern == std::vector<int>{0,0,0,1}) {
+            std::cout << "AND\n";
+        } else if (pattern == std::vector<int>{0,1,1,1}) {
+            std::cout << "OR\n";
+        } else {
+            std::cout << "Iba pa\n";
+        }
+    }
 
     return 0;
 }
