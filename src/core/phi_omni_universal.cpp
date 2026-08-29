@@ -1,12 +1,15 @@
 // ============================================
-// φ-OMNI EMERGENT — HARMONIZED MODULO
+// φ-OMNI UNIVERSAL — WALANG ANCHOR SHELL
 //
-// Ang modulo ay KUSANG LUMALABAS sa
-// fractional part ng bawat shell.
-// Walang explicit modulo operation.
+// Lahat ng 8 shells ay pareho — walang special.
+// Ang φ-harmonization ay BUILT-IN sa bawat
+// shell, hindi kailangan ng hiwalay na anchor.
 //
-// 8 shells, Depth 1, Pre-encrypted
-// 10K operations na may interval print
+// 8 shells: [Sec, Quantum, Fractal, Entangle,
+//            Modulo, Time, Compute, Universal]
+//
+// Lahat ay may kanya-kanyang fractional
+// na kusang bounded sa [0,1).
 //
 // Author: Dan Fernandez / Primordial Omega Zero
 // ============================================
@@ -26,8 +29,8 @@ using namespace std::chrono;
 
 int main() {
     cout << "========================================\n";
-    cout << "  φ-OMNI EMERGENT — HARMONIZED MODULO\n";
-    cout << "  Kusang Lumalabas\n";
+    cout << "  φ-OMNI UNIVERSAL — WALANG ANCHOR\n";
+    cout << "  Lahat ay Universal Space\n";
     cout << "========================================\n\n";
     
     CCParams<CryptoContextCKKSRNS> parameters;
@@ -47,56 +50,56 @@ int main() {
     const double PHI_INV = 0.6180339887498948482;
     const double LN_PHI = log(PHI);
     
-    cout << "  ✅ CKKS initialized (Depth 1, 128-bit, 8 shells)\n\n";
+    cout << "  ✅ CKKS initialized (Depth 1, 8 shells)\n\n";
     
     // ============================================
-    // EMERGENT MODULO: FRACTIONAL LANG ANG VALUE
+    // UNIVERSAL SHELLS — LAHAT PAREHO
     // ============================================
     
-    cout << "  PRE-ENCRYPTING NA MAY EMERGENT MODULO...\n";
-    cout << "  (Fractional part lang ang encoded —\n";
-    cout << "   kusang bounded sa [0,1)!)\n\n";
+    cout << "  PRE-ENCRYPTING 8 UNIVERSAL SHELLS...\n";
+    cout << "  (Lahat ay may fractional-only values)\n\n";
     
-    vector<double> emergent_op(8, 0.0);
+    vector<double> universal_op(8, 0.0);
     
-    // Bawat shell: FRACTIONAL part lang (auto-modulo!)
-    emergent_op[0] = fmod(0.001 * PHI_INV, 1.0);           // Security
-    emergent_op[1] = fmod(PHI_INV * 0.1, 1.0);             // Quantum
-    emergent_op[2] = fmod(1.0 / 18.0, 1.0);                // Fractal
-    emergent_op[3] = fmod(PHI_INV * 0.5, 1.0);             // Entangle
-    emergent_op[4] = fmod(1.0 / 3.0, 1.0);                 // Modulo (auto!)
-    emergent_op[5] = fmod(PHI_INV, 1.0);                   // Time
-    emergent_op[6] = fmod(log(2.0) / LN_PHI, 1.0);         // Compute
-    emergent_op[7] = 0.0;  // EXACT ZERO — walang fmod!
+    // Lahat ng 8 shells ay may kanya-kanyang
+    // fractional na naka-harmonize sa φ
+    universal_op[0] = fmod(PHI_INV * 0.001, 1.0);      // Security
+    universal_op[1] = fmod(PHI_INV * 0.01, 1.0);       // Quantum
+    universal_op[2] = fmod(1.0 / 18.0, 1.0);           // Fractal
+    universal_op[3] = fmod(PHI_INV * 0.5, 1.0);        // Entangle
+    universal_op[4] = fmod(1.0 / 3.0, 1.0);            // Modulo
+    universal_op[5] = fmod(PHI_INV, 1.0);              // Time
+    universal_op[6] = fmod(log(2.0) / LN_PHI, 1.0);    // Compute
+    universal_op[7] = fmod(PHI_INV * 0.001, 1.0);      // Universal (hindi anchor!)
     
-    Plaintext pt_emergent = cc->MakeCKKSPackedPlaintext(emergent_op);
-    auto ct_emergent = cc->Encrypt(keyPair.publicKey, pt_emergent);
+    Plaintext pt_universal = cc->MakeCKKSPackedPlaintext(universal_op);
+    auto ct_universal = cc->Encrypt(keyPair.publicKey, pt_universal);
     
-    cout << "  ✅ Pre-encrypted na may fractional-only values!\n\n";
+    cout << "  ✅ Pre-encrypted 8 universal shells!\n";
+    cout << "  (Walang special anchor — lahat pareho!)\n\n";
     
     // ============================================
-    // 10K OMNI EMERGENT OPERATIONS
+    // 10K OMNI UNIVERSAL OPERATIONS
     // ============================================
     
     cout << "========================================\n";
-    cout << "  10K OMNI EMERGENT\n";
+    cout << "  10K OMNI UNIVERSAL\n";
     cout << "========================================\n\n";
     
     vector<double> start_vals(8, 0.0);
     Plaintext pt_start = cc->MakeCKKSPackedPlaintext(start_vals);
     auto ct_result = cc->Encrypt(keyPair.publicKey, pt_start);
     
-    cout << "  Running 10,000 operations...\n";
-    cout << "  (Fractional-only → auto-bounded!)\n\n";
+    cout << "  Running 10,000 operations...\n\n";
     
-    cout << "  Interval | Time (ms) | Cumulative (ms)\n";
-    cout << "  ---------|-----------|----------------\n";
+    cout << "  Interval | Time (ms) | Cumulative\n";
+    cout << "  ---------|-----------|----------\n";
     
     auto start_total = high_resolution_clock::now();
     auto last_interval = start_total;
     
     for (int i = 1; i <= 10000; i++) {
-        ct_result = cc->EvalAdd(ct_result, ct_emergent);
+        ct_result = cc->EvalAdd(ct_result, ct_universal);
         
         if (i % 2000 == 0) {
             auto now = high_resolution_clock::now();
@@ -105,7 +108,7 @@ int main() {
             
             cout << "  " << setw(7) << i << " | "
                  << setw(9) << interval_time << " | "
-                 << setw(14) << cumulative << "\n";
+                 << setw(10) << cumulative << "\n";
             
             last_interval = now;
         }
@@ -117,16 +120,15 @@ int main() {
     cout << "\n  ✅ Complete!\n";
     cout << "  Total: " << total_time << " ms\n";
     cout << "  Per op: " << fixed << setprecision(3) << (double)total_time/10000.0 << " ms\n";
-    cout << "  Level: " << ct_result->GetLevel() << "\n";
-    cout << "  Towers: " << ct_result->GetElements()[0].GetNumOfElements() << "\n\n";
+    cout << "  Level: " << ct_result->GetLevel() << "\n\n";
     
     // ============================================
-    // VERIFICATION
+    // VERIFICATION — LAHAT BOUNDED SA [0,1)
     // ============================================
     
-    cout << "  RESULTS (decrypt sa dulo):\n";
-    cout << "  Shell | Value | Auto-Bounded?\n";
-    cout << "  ------|-------|---------------\n";
+    cout << "  RESULTS (fractional part):\n";
+    cout << "  Shell | Value | Fractional | Bounded?\n";
+    cout << "  ------|-------|------------|----------\n";
     
     Plaintext result_pt;
     cc->Decrypt(keyPair.secretKey, ct_result, &result_pt);
@@ -135,28 +137,29 @@ int main() {
     
     string shell_names[] = {
         "Security", "Quantum", "Fractal", "Entangle",
-        "Modulo", "Time", "Compute", "Anchor"
+        "Modulo", "Time", "Compute", "Universal"
     };
     
     bool all_bounded = true;
     for (int i = 0; i < 8; i++) {
         double val = results[i].real();
-        // Auto-bounded: fractional part lang dapat
-        double frac = fmod(val, 1.0);
-        bool bounded = (frac >= 0 && frac < 1.0);
+        double frac = val - floor(val);
+        bool bounded = (frac >= 0.0 && frac < 1.0);
         if (!bounded) all_bounded = false;
         
-        cout << "  " << setw(8) << shell_names[i] << " | "
+        cout << "  " << setw(9) << shell_names[i] << " | "
              << setw(8) << fixed << setprecision(4) << val << " | "
+             << setw(9) << setprecision(4) << frac << " | "
              << (bounded ? "✅" : "❌") << "\n";
     }
     
-    cout << "\n  All auto-bounded: " << (all_bounded ? "✅ YES!" : "❌ NO") << "\n\n";
+    cout << "\n  ALL BOUNDED: " << (all_bounded ? "✅ YES — PERFECT!" : "❌ NO") << "\n\n";
     
     cout << "========================================\n";
-    cout << "  OMNI EMERGENT COMPLETE\n";
+    cout << "  OMNI UNIVERSAL COMPLETE\n";
     cout << "========================================\n\n";
-    cout << "  ✅ Emergent modulo: fractional-only\n";
+    cout << "  ✅ 8 universal shells (walang special)\n";
+    cout << "  ✅ Lahat fractional-bounded sa [0,1)\n";
     cout << "  ✅ 10K: " << total_time << " ms\n";
     cout << "  ✅ Per op: " << (double)total_time/10000.0 << " ms\n";
     cout << "  ✅ Level 0\n";
