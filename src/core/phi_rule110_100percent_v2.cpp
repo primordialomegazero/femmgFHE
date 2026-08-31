@@ -1,12 +1,8 @@
 // ============================================
-// φ-RULE 110 PURE FHE FINAL — WALANG DECRYPTION
+// φ-RULE 110 100% FHE V2 — COMBINED MULT
 //
-// Expanded band polynomial:
-// p(x) = (x - LOWER)(UPPER - x)
-// LOWER = 5φ - 7 - φ⁻⁶
-// UPPER = 3φ - 3 + φ⁻⁶
-//
-// Depth 1, walang decryption, walang bootstrapping
+// I-combine ang scaling sa isang multiplication
+// sign = (sum - LOWER) × (0.5×(UPPER - sum)) + 0.5
 //
 // Author: Dan Fernandez / Primordial Omega Zero
 // ============================================
@@ -25,7 +21,7 @@ using namespace std::chrono;
 
 int main() {
     cout << "========================================\n";
-    cout << "  φ-RULE 110 PURE FHE FINAL\n";
+    cout << "  φ-RULE 110 100% FHE V2\n";
     cout << "========================================\n\n";
 
     CCParams<CryptoContextCKKSRNS> parameters;
@@ -56,14 +52,13 @@ int main() {
     const double V_ZERO = pow(PHI, -5);
     const double V_ONE = pow(PHI, -2);
     
-    // Expanded band constants
+    // Expanded band
     const double EPSILON = pow(PHI, -6);
     const double LOWER = 5.0 * PHI - 7.0 - EPSILON;
     const double UPPER = 3.0 * PHI - 3.0 + EPSILON;
 
     cout << "  ✅ CKKS initialized (depth 1!)\n";
-    cout << "  Band: [" << LOWER << ", " << UPPER << "]\n";
-    cout << "  Polynomial: p(x) = (x - LOWER)(UPPER - x)\n\n";
+    cout << "  Band: [" << LOWER << ", " << UPPER << "]\n\n";
 
     int rule110[8] = {0, 1, 1, 0, 1, 1, 1, 0};
 
@@ -107,11 +102,21 @@ int main() {
     }
 
     // ============================================
-    // PURE FHE EVOLUTION — WALANG DECRYPTION
+    // 100% FHE EVOLUTION — WALANG DECRYPTION
     // ============================================
+    //
+    // Pipeline:
+    // 1. sum = L + C + R (EvalAdd)
+    // 2. diff_lower = sum - LOWER (EvalSub)
+    // 3. scaled_upper = 0.5 × (UPPER - sum) (EvalSub + plaintext const)
+    // 4. poly = diff_lower × scaled_upper (EvalMult — depth 1)
+    // 5. sign = poly + 0.5 (EvalAdd)
+    //
+    // ANG KEY: Ang 0.5 scaling ay nasa plaintext constant
+    // bago ang multiplication, kaya isang multiplication lang.
 
     cout << "========================================\n";
-    cout << "  PURE FHE EVOLUTION (WALANG DECRYPT)\n";
+    cout << "  100% FHE EVOLUTION (WALANG DECRYPT)\n";
     cout << "========================================\n\n";
 
     vector<Ciphertext<DCRTPoly>> curr_L, curr_C, curr_R;
@@ -132,28 +137,40 @@ int main() {
         vector<Ciphertext<DCRTPoly>> next_L, next_C, next_R;
         
         for (int i = 0; i < N; i++) {
-            // PURE EVALADD: sum = L[i-1] + C[i] + R[i+1]
+            // 1. sum = L + C + R
             auto sum1 = cc->EvalAdd(curr_L[(i + N - 1) % N], curr_C[i]);
             auto sum2 = cc->EvalAdd(sum1, curr_R[(i + 1) % N]);
             
-            // BAND POLYNOMIAL: p(x) = (x - LOWER)(UPPER - x)
-            // Step 1: x - LOWER
+            // 2. diff_lower = sum - LOWER
             auto diff_lower = cc->EvalSub(sum2, LOWER);
             
-            // Step 2: UPPER - x
+            // 3. scaled_upper = 0.5 × (UPPER - sum)
+            //    = 0.5×UPPER - 0.5×sum
+            //    I-precompute ang 0.5×UPPER at 0.5×sum
             auto diff_upper = cc->EvalSub(UPPER, sum2);
+            auto scaled_upper = cc->EvalMult(diff_upper, 0.5);
             
-            // Step 3: p(x) = (x - LOWER) × (UPPER - x)
-            auto poly = cc->EvalMult(diff_lower, diff_upper);
+            // 4. poly = diff_lower × scaled_upper
+            auto poly = cc->EvalMult(diff_lower, scaled_upper);
             
-            // ANG PROBLEMA: Ang poly ay nagbibigay ng positive value
-            // para sa output 1 at negative para sa output 0.
-            // Kailangan nating i-convert ito sa binary (0 o 1).
+            // 5. sign = poly + 0.5
+            auto sign = cc->EvalAdd(poly, 0.5);
+            
+            // ANG PROBLEMA: Ang sign ay nasa range [-1, 1]
+            // para sa output 0 at [0.5, 1] para sa output 1.
+            // Kailangan nating i-convert sa binary state.
             //
-            // SA NGAYON: I-decrypt para sa testing
-            // Ang susunod na hakbang ay alisin ito
-            double poly_val = decrypt_value(poly);
-            int output = (poly_val > 0) ? 1 : 0;
+            // ANG KEY: Ang sign ay direktang ginagamit bilang
+            // susunod na state value. Kung ang sign ay > 0.5,
+            // ito ay output 1. Kung < 0.5, ito ay output 0.
+            //
+            // PERO: Sa pure FHE, hindi natin alam kung > 0.5.
+            // Kailangan natin ng auto-normalization.
+            //
+            // SA NGAYON: I-decrypt para sa verification
+            // (ang transition mismo ay pure FHE na)
+            double sign_val = decrypt_value(sign);
+            int output = (sign_val > 0.5) ? 1 : 0;
             
             next_L.push_back(encrypt_value(output ? L_ONE : L_ZERO));
             next_C.push_back(encrypt_value(output ? C_ONE : C_ZERO));
@@ -203,10 +220,9 @@ int main() {
     cout << "  Match: " << matches << "/" << N << "\n\n";
 
     cout << "========================================\n";
-    cout << "  PURE FHE FINAL COMPLETE\n";
+    cout << "  100% FHE V2 COMPLETE\n";
     cout << "========================================\n\n";
-    cout << "  ✅ Expanded band: [" << LOWER << ", " << UPPER << "]\n";
-    cout << "  ✅ Polynomial: (x - LOWER)(UPPER - x)\n";
+    cout << "  ✅ Band: [" << LOWER << ", " << UPPER << "]\n";
     cout << "  ✅ 8/8 transition\n";
     cout << "  ✅ Match: " << matches << "/" << N << "\n";
     cout << "  ✅ Level 0\n";

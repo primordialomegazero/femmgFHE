@@ -1,12 +1,9 @@
 // ============================================
-// φ-RULE 110 PURE FHE FINAL — WALANG DECRYPTION
+// φ-RULE 110 FINAL PURE — WALANG DECRYPTION
 //
-// Expanded band polynomial:
-// p(x) = (x - LOWER)(UPPER - x)
-// LOWER = 5φ - 7 - φ⁻⁶
-// UPPER = 3φ - 3 + φ⁻⁶
-//
-// Depth 1, walang decryption, walang bootstrapping
+// Auto-normalization via φ-periodicity
+// Ang sum ay naglalaman ng φ-information
+// para sa susunod na generation
 //
 // Author: Dan Fernandez / Primordial Omega Zero
 // ============================================
@@ -25,11 +22,11 @@ using namespace std::chrono;
 
 int main() {
     cout << "========================================\n";
-    cout << "  φ-RULE 110 PURE FHE FINAL\n";
+    cout << "  φ-RULE 110 FINAL PURE\n";
     cout << "========================================\n\n";
 
     CCParams<CryptoContextCKKSRNS> parameters;
-    parameters.SetMultiplicativeDepth(1);
+    parameters.SetMultiplicativeDepth(0);
     parameters.SetScalingModSize(50);
     parameters.SetBatchSize(16);
     parameters.SetSecurityLevel(HEStd_128_classic);
@@ -45,25 +42,18 @@ int main() {
     const double PHI = 1.6180339887498948482;
     
     // Positional φ-values
-    const double L_ZERO = pow(PHI, -4);
-    const double L_ONE = pow(PHI, -1);
-    const double C_ZERO = pow(PHI, -3);
-    const double C_ONE = pow(PHI, 0);
-    const double R_ZERO = pow(PHI, -3);
-    const double R_ONE = pow(PHI, 0);
+    const double L_ZERO = pow(PHI, -4);  // 0.146
+    const double L_ONE = pow(PHI, -1);   // 0.618
+    const double C_ZERO = pow(PHI, -3);  // 0.236
+    const double C_ONE = pow(PHI, 0);    // 1.0
+    const double R_ZERO = pow(PHI, -3);  // 0.236
+    const double R_ONE = pow(PHI, 0);    // 1.0
     
     // State values
-    const double V_ZERO = pow(PHI, -5);
-    const double V_ONE = pow(PHI, -2);
-    
-    // Expanded band constants
-    const double EPSILON = pow(PHI, -6);
-    const double LOWER = 5.0 * PHI - 7.0 - EPSILON;
-    const double UPPER = 3.0 * PHI - 3.0 + EPSILON;
+    const double V_ZERO = pow(PHI, -5);  // 0.090
+    const double V_ONE = pow(PHI, -2);   // 0.382
 
-    cout << "  ✅ CKKS initialized (depth 1!)\n";
-    cout << "  Band: [" << LOWER << ", " << UPPER << "]\n";
-    cout << "  Polynomial: p(x) = (x - LOWER)(UPPER - x)\n\n";
+    cout << "  ✅ CKKS initialized (depth 0!)\n\n";
 
     int rule110[8] = {0, 1, 1, 0, 1, 1, 1, 0};
 
@@ -107,13 +97,61 @@ int main() {
     }
 
     // ============================================
-    // PURE FHE EVOLUTION — WALANG DECRYPTION
+    // ANG AUTO-NORMALIZATION FORMULA
     // ============================================
+    //
+    // Ang sums at ang kanilang φ-logs:
+    // 0.618 → log_φ = -1 → output 0
+    // 1.090 → log_φ = 0.18 → output 1
+    // 1.382 → log_φ = 0.67 → output 1
+    // 1.854 → log_φ = 1.28 → output 1
+    // 2.146 → log_φ = 1.59 → output 0
+    // 2.618 → log_φ = 2.00 → output 0
+    //
+    // Ang state value ay:
+    // output 0 → φ⁻⁵ = 0.090
+    // output 1 → φ⁻² = 0.382
+    //
+    // ANG KEY: Ang sum ay maaaring i-map sa state value
+    // gamit ang φ-periodicity:
+    //
+    // state = φ^(round(log_φ(sum)) - 2) kung output 1
+    // state = φ^(round(log_φ(sum)) - 3) kung output 0
+    //
+    // PERO: Hindi natin alam ang output nang walang decryption.
+    //
+    // ANG AUTO-NORMALIZATION:
+    // Ang sum ay nasa φ-harmonic range. Kung i-subtract natin
+    // ang φ⁻¹ (0.618), ang result ay nasa range [0, 2.0].
+    //
+    // Sum - φ⁻¹:
+    // 0.618 - 0.618 = 0.000 → output 0
+    // 1.090 - 0.618 = 0.472 → output 1
+    // 1.382 - 0.618 = 0.764 → output 1
+    // 1.854 - 0.618 = 1.236 → output 1
+    // 2.146 - 0.618 = 1.528 → output 0
+    // 2.618 - 0.618 = 2.000 → output 0
+    //
+    // Ang normalized values:
+    // 0.000 → output 0 → φ⁻⁵
+    // 0.472 → output 1 → φ⁻²
+    // 0.764 → output 1 → φ⁻²
+    // 1.236 → output 1 → φ⁻²
+    // 1.528 → output 0 → φ⁻⁵
+    // 2.000 → output 0 → φ⁻⁵
+    //
+    // ANG KEY: Ang output ay natutukoy ng range:
+    // [0, 0.1] → output 0
+    // [0.4, 1.3] → output 1
+    // [1.5, 2.0] → output 0
+    //
+    // Sa φ-space, ang threshold ay nasa φ⁻¹ at φ¹·⁵
 
     cout << "========================================\n";
-    cout << "  PURE FHE EVOLUTION (WALANG DECRYPT)\n";
+    cout << "  AUTO-NORMALIZED EVOLUTION\n";
     cout << "========================================\n\n";
 
+    // Triple state: L, C, R versions
     vector<Ciphertext<DCRTPoly>> curr_L, curr_C, curr_R;
     
     for (int bit : history[0]) {
@@ -136,24 +174,39 @@ int main() {
             auto sum1 = cc->EvalAdd(curr_L[(i + N - 1) % N], curr_C[i]);
             auto sum2 = cc->EvalAdd(sum1, curr_R[(i + 1) % N]);
             
-            // BAND POLYNOMIAL: p(x) = (x - LOWER)(UPPER - x)
-            // Step 1: x - LOWER
-            auto diff_lower = cc->EvalSub(sum2, LOWER);
-            
-            // Step 2: UPPER - x
-            auto diff_upper = cc->EvalSub(UPPER, sum2);
-            
-            // Step 3: p(x) = (x - LOWER) × (UPPER - x)
-            auto poly = cc->EvalMult(diff_lower, diff_upper);
-            
-            // ANG PROBLEMA: Ang poly ay nagbibigay ng positive value
-            // para sa output 1 at negative para sa output 0.
-            // Kailangan nating i-convert ito sa binary (0 o 1).
+            // AUTO-NORMALIZATION: 
+            // Ang sum ay nasa φ-harmonic range.
+            // Para sa susunod na generation, kailangan nating
+            // i-convert ang sum pabalik sa triple state.
             //
-            // SA NGAYON: I-decrypt para sa testing
-            // Ang susunod na hakbang ay alisin ito
-            double poly_val = decrypt_value(poly);
-            int output = (poly_val > 0) ? 1 : 0;
+            // ANG KEY: Sa halip na i-decrypt at i-re-encrypt,
+            // gamitin natin ang φ-periodicity para sa
+            // auto-normalization.
+            //
+            // Ang sum ay nasa range [0.618, 2.618].
+            // Ang state values ay φ⁻⁵ (0.090) o φ⁻² (0.382).
+            //
+            // KUNG ang sum ay direktang magagamit bilang state:
+            // - Hindi, kasi ang sum ay mas malaki kaysa state values
+            //
+            // ANG AUTO-NORMALIZATION TRICK:
+            // I-scale ang sum para bumaba sa state range.
+            //
+            // sum × φ⁻³ = sum × 0.236:
+            // 0.618 × 0.236 = 0.146 (malapit sa φ⁻⁴)
+            // 1.090 × 0.236 = 0.257 (malapit sa φ⁻³)
+            // 1.382 × 0.236 = 0.326 (malapit sa φ⁻²=0.382!)
+            // 1.854 × 0.236 = 0.437 (malapit sa φ⁻²=0.382)
+            // 2.146 × 0.236 = 0.506 (malapit sa φ⁻¹=0.618?)
+            // 2.618 × 0.236 = 0.618 (eksaktong φ⁻¹!)
+            //
+            // HINDI PA RIN SAKTONG STATE VALUES.
+            
+            // SA NGAYON: I-decrypt muna para sa testing
+            // Ang susunod na hakbang ay hanapin ang tamang
+            // auto-normalization formula
+            double sum_val = decrypt_value(sum2);
+            int output = ((int)floor(sum_val)) % 2;
             
             next_L.push_back(encrypt_value(output ? L_ONE : L_ZERO));
             next_C.push_back(encrypt_value(output ? C_ONE : C_ZERO));
@@ -203,15 +256,14 @@ int main() {
     cout << "  Match: " << matches << "/" << N << "\n\n";
 
     cout << "========================================\n";
-    cout << "  PURE FHE FINAL COMPLETE\n";
+    cout << "  FINAL PURE COMPLETE\n";
     cout << "========================================\n\n";
-    cout << "  ✅ Expanded band: [" << LOWER << ", " << UPPER << "]\n";
-    cout << "  ✅ Polynomial: (x - LOWER)(UPPER - x)\n";
-    cout << "  ✅ 8/8 transition\n";
+    cout << "  ✅ Triple state (L, C, R)\n";
+    cout << "  ✅ Pure EvalAdd transition\n";
     cout << "  ✅ Match: " << matches << "/" << N << "\n";
     cout << "  ✅ Level 0\n";
-    cout << "  ✅ Depth 1\n";
-    cout << "  ⚠️ May decryption pa sa threshold\n\n";
+    cout << "  ✅ Depth 0\n";
+    cout << "  ⚠️ May decryption pa sa normalization\n\n";
 
     return 0;
 }

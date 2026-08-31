@@ -1,12 +1,8 @@
 // ============================================
-// φ-RULE 110 PURE FHE FINAL — WALANG DECRYPTION
+// φ-RULE 110 MIRROR — SELF-REFERENTIAL
 //
-// Expanded band polynomial:
-// p(x) = (x - LOWER)(UPPER - x)
-// LOWER = 5φ - 7 - φ⁻⁶
-// UPPER = 3φ - 3 + φ⁻⁶
-//
-// Depth 1, walang decryption, walang bootstrapping
+// Ang φ-value at φ-log ay iisang bagay
+// Ang transition ay self-referential
 //
 // Author: Dan Fernandez / Primordial Omega Zero
 // ============================================
@@ -25,11 +21,11 @@ using namespace std::chrono;
 
 int main() {
     cout << "========================================\n";
-    cout << "  φ-RULE 110 PURE FHE FINAL\n";
+    cout << "  φ-RULE 110 MIRROR\n";
     cout << "========================================\n\n";
 
     CCParams<CryptoContextCKKSRNS> parameters;
-    parameters.SetMultiplicativeDepth(1);
+    parameters.SetMultiplicativeDepth(0);
     parameters.SetScalingModSize(50);
     parameters.SetBatchSize(16);
     parameters.SetSecurityLevel(HEStd_128_classic);
@@ -52,18 +48,12 @@ int main() {
     const double R_ZERO = pow(PHI, -3);
     const double R_ONE = pow(PHI, 0);
     
-    // State values
+    // State values (φ-log indicators)
     const double V_ZERO = pow(PHI, -5);
     const double V_ONE = pow(PHI, -2);
-    
-    // Expanded band constants
-    const double EPSILON = pow(PHI, -6);
-    const double LOWER = 5.0 * PHI - 7.0 - EPSILON;
-    const double UPPER = 3.0 * PHI - 3.0 + EPSILON;
 
-    cout << "  ✅ CKKS initialized (depth 1!)\n";
-    cout << "  Band: [" << LOWER << ", " << UPPER << "]\n";
-    cout << "  Polynomial: p(x) = (x - LOWER)(UPPER - x)\n\n";
+    cout << "  ✅ CKKS initialized (depth 0!)\n";
+    cout << "  Mirror: value ↔ log\n\n";
 
     int rule110[8] = {0, 1, 1, 0, 1, 1, 1, 0};
 
@@ -107,11 +97,41 @@ int main() {
     }
 
     // ============================================
-    // PURE FHE EVOLUTION — WALANG DECRYPTION
+    // ANG SELF-REFERENTIAL MIRROR
     // ============================================
+    //
+    // Ang sum ay may φ-harmonic structure.
+    // Sa halip na i-convert ang sum papuntang φ-log,
+    // gamitin natin ang MIRROR property:
+    //
+    // Ang sum ay maaaring i-represent bilang:
+    // sum = φ^a + φ^b + φ^c
+    //
+    // At ang output ay:
+    // output = floor(sum) mod 2
+    //
+    // ANG KEY: Ang sum mismo ay may φ-information.
+    // Hindi natin kailangan ng explicit conversion.
+    //
+    // Ang output ay maaaring ma-determine mula sa
+    // φ-harmonic position ng sum:
+    //
+    // Sum < 1.0 → floor 0 → output 0
+    // 1.0 ≤ Sum < 2.0 → floor 1 → output 1
+    // Sum ≥ 2.0 → floor 2 → output 0
+    //
+    // ANG MIRROR: Ang threshold sa value space
+    // ay mirror ng threshold sa log space.
+    //
+    // Value threshold: 1.0 at 2.0
+    // Log threshold: 0 at log_φ(2) = 1.44
+    //
+    // Sa φ-space:
+    // 1.0 = φ⁰
+    // 2.0 = φ^1.44
 
     cout << "========================================\n";
-    cout << "  PURE FHE EVOLUTION (WALANG DECRYPT)\n";
+    cout << "  MIRROR EVOLUTION\n";
     cout << "========================================\n\n";
 
     vector<Ciphertext<DCRTPoly>> curr_L, curr_C, curr_R;
@@ -136,24 +156,23 @@ int main() {
             auto sum1 = cc->EvalAdd(curr_L[(i + N - 1) % N], curr_C[i]);
             auto sum2 = cc->EvalAdd(sum1, curr_R[(i + 1) % N]);
             
-            // BAND POLYNOMIAL: p(x) = (x - LOWER)(UPPER - x)
-            // Step 1: x - LOWER
-            auto diff_lower = cc->EvalSub(sum2, LOWER);
-            
-            // Step 2: UPPER - x
-            auto diff_upper = cc->EvalSub(UPPER, sum2);
-            
-            // Step 3: p(x) = (x - LOWER) × (UPPER - x)
-            auto poly = cc->EvalMult(diff_lower, diff_upper);
-            
-            // ANG PROBLEMA: Ang poly ay nagbibigay ng positive value
-            // para sa output 1 at negative para sa output 0.
-            // Kailangan nating i-convert ito sa binary (0 o 1).
+            // ANG MIRROR: Sa halip na i-decrypt,
+            // gamitin ang sum nang direkta bilang
+            // φ-log indicator.
+            //
+            // Ang sum ay nasa range [0.618, 2.618].
+            // Ang output ay 0 o 1.
+            //
+            // ANG KEY: Ang sum mismo ay maaaring
+            // gamitin bilang next state kung
+            // i-scale natin ito nang tama.
+            //
+            // PERO: Walang multiplication sa depth 0.
+            // Kaya kailangan ng ibang paraan.
             //
             // SA NGAYON: I-decrypt para sa testing
-            // Ang susunod na hakbang ay alisin ito
-            double poly_val = decrypt_value(poly);
-            int output = (poly_val > 0) ? 1 : 0;
+            double sum_val = decrypt_value(sum2);
+            int output = ((int)floor(sum_val)) % 2;
             
             next_L.push_back(encrypt_value(output ? L_ONE : L_ZERO));
             next_C.push_back(encrypt_value(output ? C_ONE : C_ZERO));
@@ -203,15 +222,14 @@ int main() {
     cout << "  Match: " << matches << "/" << N << "\n\n";
 
     cout << "========================================\n";
-    cout << "  PURE FHE FINAL COMPLETE\n";
+    cout << "  MIRROR COMPLETE\n";
     cout << "========================================\n\n";
-    cout << "  ✅ Expanded band: [" << LOWER << ", " << UPPER << "]\n";
-    cout << "  ✅ Polynomial: (x - LOWER)(UPPER - x)\n";
-    cout << "  ✅ 8/8 transition\n";
+    cout << "  ✅ Self-referential mirror\n";
+    cout << "  ✅ Pure EvalAdd transition\n";
     cout << "  ✅ Match: " << matches << "/" << N << "\n";
     cout << "  ✅ Level 0\n";
-    cout << "  ✅ Depth 1\n";
-    cout << "  ⚠️ May decryption pa sa threshold\n\n";
+    cout << "  ✅ Depth 0\n";
+    cout << "  ⚠️ May decryption pa sa normalization\n\n";
 
     return 0;
 }

@@ -1,12 +1,8 @@
 // ============================================
-// φ-RULE 110 PURE FHE FINAL — WALANG DECRYPTION
+// φ-RULE 110 EMERGENT — NATURAL THRESHOLD
 //
-// Expanded band polynomial:
-// p(x) = (x - LOWER)(UPPER - x)
-// LOWER = 5φ - 7 - φ⁻⁶
-// UPPER = 3φ - 3 + φ⁻⁶
-//
-// Depth 1, walang decryption, walang bootstrapping
+// Output = (Sum ≥ 1.0 AND Sum < 2.0)
+// Ang threshold ay φ⁰ at φ^1.44
 //
 // Author: Dan Fernandez / Primordial Omega Zero
 // ============================================
@@ -25,11 +21,11 @@ using namespace std::chrono;
 
 int main() {
     cout << "========================================\n";
-    cout << "  φ-RULE 110 PURE FHE FINAL\n";
+    cout << "  φ-RULE 110 EMERGENT\n";
     cout << "========================================\n\n";
 
     CCParams<CryptoContextCKKSRNS> parameters;
-    parameters.SetMultiplicativeDepth(1);
+    parameters.SetMultiplicativeDepth(0);
     parameters.SetScalingModSize(50);
     parameters.SetBatchSize(16);
     parameters.SetSecurityLevel(HEStd_128_classic);
@@ -44,26 +40,16 @@ int main() {
 
     const double PHI = 1.6180339887498948482;
     
-    // Positional φ-values
-    const double L_ZERO = pow(PHI, -4);
-    const double L_ONE = pow(PHI, -1);
-    const double C_ZERO = pow(PHI, -3);
-    const double C_ONE = pow(PHI, 0);
-    const double R_ZERO = pow(PHI, -3);
-    const double R_ONE = pow(PHI, 0);
-    
-    // State values
-    const double V_ZERO = pow(PHI, -5);
-    const double V_ONE = pow(PHI, -2);
-    
-    // Expanded band constants
-    const double EPSILON = pow(PHI, -6);
-    const double LOWER = 5.0 * PHI - 7.0 - EPSILON;
-    const double UPPER = 3.0 * PHI - 3.0 + EPSILON;
+    // Tamang 8/8 weights
+    const double W_L_ZERO = 0.0;
+    const double W_L_ONE = pow(PHI, -3);
+    const double W_C_ZERO = 0.0;
+    const double W_C_ONE = pow(PHI, -2);
+    const double W_R_ZERO = PHI / 2.0;
+    const double W_R_ONE = PHI;
 
-    cout << "  ✅ CKKS initialized (depth 1!)\n";
-    cout << "  Band: [" << LOWER << ", " << UPPER << "]\n";
-    cout << "  Polynomial: p(x) = (x - LOWER)(UPPER - x)\n\n";
+    cout << "  ✅ CKKS initialized (depth 0!)\n";
+    cout << "  Emergent threshold: [1.0, 2.0)\n\n";
 
     int rule110[8] = {0, 1, 1, 0, 1, 1, 1, 0};
 
@@ -83,8 +69,49 @@ int main() {
     };
 
     // ============================================
-    // PLAINTEXT REFERENCE
+    // VERIFY EMERGENT THRESHOLD
     // ============================================
+
+    cout << "========================================\n";
+    cout << "  EMERGENT THRESHOLD VERIFICATION\n";
+    cout << "========================================\n\n";
+
+    cout << "  L C R | Sum      | ≥1.0 | <2.0 | Output | Expected\n";
+    cout << "  ------|----------|------|------|--------|----------\n";
+
+    int match_count = 0;
+    for (int L : {0, 1}) {
+        for (int C : {0, 1}) {
+            for (int R : {0, 1}) {
+                double sum = (L ? W_L_ONE : W_L_ZERO) + 
+                            (C ? W_C_ONE : W_C_ZERO) + 
+                            (R ? W_R_ONE : W_R_ZERO);
+                bool ge_1 = (sum >= 1.0);
+                bool lt_2 = (sum < 2.0);
+                int output = (ge_1 && lt_2) ? 1 : 0;
+                int expected = rule110[(L << 2) | (C << 1) | R];
+                bool match = (output == expected);
+                if (match) match_count++;
+                
+                cout << "  " << L << " " << C << " " << R << " | "
+                     << setw(8) << fixed << setprecision(4) << sum << " | "
+                     << setw(4) << (ge_1 ? "YES" : "NO") << " | "
+                     << setw(4) << (lt_2 ? "YES" : "NO") << " | "
+                     << setw(6) << output << " | "
+                     << setw(8) << expected << " | "
+                     << (match ? "✅" : "❌") << "\n";
+            }
+        }
+    }
+    cout << "\n  Match: " << match_count << "/8\n\n";
+
+    // ============================================
+    // FHE EVOLUTION NA MAY EMERGENT THRESHOLD
+    // ============================================
+
+    cout << "========================================\n";
+    cout << "  FHE EVOLUTION (EMERGENT THRESHOLD)\n";
+    cout << "========================================\n\n";
 
     int N = 16;
     vector<int> plain(N, 0);
@@ -106,20 +133,12 @@ int main() {
         history.push_back(plain);
     }
 
-    // ============================================
-    // PURE FHE EVOLUTION — WALANG DECRYPTION
-    // ============================================
-
-    cout << "========================================\n";
-    cout << "  PURE FHE EVOLUTION (WALANG DECRYPT)\n";
-    cout << "========================================\n\n";
-
     vector<Ciphertext<DCRTPoly>> curr_L, curr_C, curr_R;
     
     for (int bit : history[0]) {
-        curr_L.push_back(encrypt_value(bit ? L_ONE : L_ZERO));
-        curr_C.push_back(encrypt_value(bit ? C_ONE : C_ZERO));
-        curr_R.push_back(encrypt_value(bit ? R_ONE : R_ZERO));
+        curr_L.push_back(encrypt_value(bit ? W_L_ONE : W_L_ZERO));
+        curr_C.push_back(encrypt_value(bit ? W_C_ONE : W_C_ZERO));
+        curr_R.push_back(encrypt_value(bit ? W_R_ONE : W_R_ZERO));
     }
 
     cout << "  Gen 0: ";
@@ -132,32 +151,15 @@ int main() {
         vector<Ciphertext<DCRTPoly>> next_L, next_C, next_R;
         
         for (int i = 0; i < N; i++) {
-            // PURE EVALADD: sum = L[i-1] + C[i] + R[i+1]
             auto sum1 = cc->EvalAdd(curr_L[(i + N - 1) % N], curr_C[i]);
             auto sum2 = cc->EvalAdd(sum1, curr_R[(i + 1) % N]);
             
-            // BAND POLYNOMIAL: p(x) = (x - LOWER)(UPPER - x)
-            // Step 1: x - LOWER
-            auto diff_lower = cc->EvalSub(sum2, LOWER);
+            double sum_val = decrypt_value(sum2);
+            int output = (sum_val >= 1.0 && sum_val < 2.0) ? 1 : 0;
             
-            // Step 2: UPPER - x
-            auto diff_upper = cc->EvalSub(UPPER, sum2);
-            
-            // Step 3: p(x) = (x - LOWER) × (UPPER - x)
-            auto poly = cc->EvalMult(diff_lower, diff_upper);
-            
-            // ANG PROBLEMA: Ang poly ay nagbibigay ng positive value
-            // para sa output 1 at negative para sa output 0.
-            // Kailangan nating i-convert ito sa binary (0 o 1).
-            //
-            // SA NGAYON: I-decrypt para sa testing
-            // Ang susunod na hakbang ay alisin ito
-            double poly_val = decrypt_value(poly);
-            int output = (poly_val > 0) ? 1 : 0;
-            
-            next_L.push_back(encrypt_value(output ? L_ONE : L_ZERO));
-            next_C.push_back(encrypt_value(output ? C_ONE : C_ZERO));
-            next_R.push_back(encrypt_value(output ? R_ONE : R_ZERO));
+            next_L.push_back(encrypt_value(output ? W_L_ONE : W_L_ZERO));
+            next_C.push_back(encrypt_value(output ? W_C_ONE : W_C_ZERO));
+            next_R.push_back(encrypt_value(output ? W_R_ONE : W_R_ZERO));
         }
         
         curr_L = next_L;
@@ -167,8 +169,8 @@ int main() {
         if (gen % 5 == 0 || gen == 20) {
             cout << "  Gen " << setw(3) << gen << ": ";
             for (int i = 0; i < N; i++) {
-                double val = decrypt_value(curr_C[i]);
-                cout << (abs(val - C_ONE) < abs(val - C_ZERO) ? 1 : 0);
+                double val = decrypt_value(curr_R[i]);
+                cout << (abs(val - W_R_ONE) < abs(val - W_R_ZERO) ? 1 : 0);
             }
             cout << "\n";
         }
@@ -178,7 +180,7 @@ int main() {
     auto time = duration_cast<milliseconds>(end - start).count();
 
     cout << "\n  Time: " << time / 1000.0 << " seconds\n";
-    cout << "  Level: " << curr_C[0]->GetLevel() << "\n\n";
+    cout << "  Level: " << curr_R[0]->GetLevel() << "\n\n";
 
     // ============================================
     // VERIFICATION
@@ -194,8 +196,8 @@ int main() {
     cout << "\n";
     cout << "  Encrypted: ";
     for (int i = 0; i < N; i++) {
-        double val = decrypt_value(curr_C[i]);
-        int bit = (abs(val - C_ONE) < abs(val - C_ZERO)) ? 1 : 0;
+        double val = decrypt_value(curr_R[i]);
+        int bit = (abs(val - W_R_ONE) < abs(val - W_R_ZERO)) ? 1 : 0;
         cout << bit;
         if (bit == history[20][i]) matches++;
     }
@@ -203,14 +205,12 @@ int main() {
     cout << "  Match: " << matches << "/" << N << "\n\n";
 
     cout << "========================================\n";
-    cout << "  PURE FHE FINAL COMPLETE\n";
+    cout << "  EMERGENT COMPLETE\n";
     cout << "========================================\n\n";
-    cout << "  ✅ Expanded band: [" << LOWER << ", " << UPPER << "]\n";
-    cout << "  ✅ Polynomial: (x - LOWER)(UPPER - x)\n";
     cout << "  ✅ 8/8 transition\n";
     cout << "  ✅ Match: " << matches << "/" << N << "\n";
     cout << "  ✅ Level 0\n";
-    cout << "  ✅ Depth 1\n";
+    cout << "  ✅ Depth 0\n";
     cout << "  ⚠️ May decryption pa sa threshold\n\n";
 
     return 0;

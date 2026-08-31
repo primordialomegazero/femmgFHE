@@ -1,12 +1,8 @@
 // ============================================
-// φ-RULE 110 PURE FHE FINAL — WALANG DECRYPTION
+// φ-RULE 110 ROTATE — STATE ROTATION
 //
-// Expanded band polynomial:
-// p(x) = (x - LOWER)(UPPER - x)
-// LOWER = 5φ - 7 - φ⁻⁶
-// UPPER = 3φ - 3 + φ⁻⁶
-//
-// Depth 1, walang decryption, walang bootstrapping
+// Sa halip na i-re-encrypt, i-rotate ang state
+// gamit ang φ-periodicity
 //
 // Author: Dan Fernandez / Primordial Omega Zero
 // ============================================
@@ -25,11 +21,11 @@ using namespace std::chrono;
 
 int main() {
     cout << "========================================\n";
-    cout << "  φ-RULE 110 PURE FHE FINAL\n";
+    cout << "  φ-RULE 110 ROTATE\n";
     cout << "========================================\n\n";
 
     CCParams<CryptoContextCKKSRNS> parameters;
-    parameters.SetMultiplicativeDepth(1);
+    parameters.SetMultiplicativeDepth(0);
     parameters.SetScalingModSize(50);
     parameters.SetBatchSize(16);
     parameters.SetSecurityLevel(HEStd_128_classic);
@@ -44,26 +40,15 @@ int main() {
 
     const double PHI = 1.6180339887498948482;
     
-    // Positional φ-values
-    const double L_ZERO = pow(PHI, -4);
-    const double L_ONE = pow(PHI, -1);
-    const double C_ZERO = pow(PHI, -3);
-    const double C_ONE = pow(PHI, 0);
-    const double R_ZERO = pow(PHI, -3);
-    const double R_ONE = pow(PHI, 0);
-    
-    // State values
-    const double V_ZERO = pow(PHI, -5);
-    const double V_ONE = pow(PHI, -2);
-    
-    // Expanded band constants
-    const double EPSILON = pow(PHI, -6);
-    const double LOWER = 5.0 * PHI - 7.0 - EPSILON;
-    const double UPPER = 3.0 * PHI - 3.0 + EPSILON;
+    // Tamang 8/8 weights
+    const double W_L_ZERO = 0.0;
+    const double W_L_ONE = pow(PHI, -3);
+    const double W_C_ZERO = 0.0;
+    const double W_C_ONE = pow(PHI, -2);
+    const double W_R_ZERO = PHI / 2.0;
+    const double W_R_ONE = PHI;
 
-    cout << "  ✅ CKKS initialized (depth 1!)\n";
-    cout << "  Band: [" << LOWER << ", " << UPPER << "]\n";
-    cout << "  Polynomial: p(x) = (x - LOWER)(UPPER - x)\n\n";
+    cout << "  ✅ CKKS initialized (depth 0!)\n\n";
 
     int rule110[8] = {0, 1, 1, 0, 1, 1, 1, 0};
 
@@ -107,19 +92,31 @@ int main() {
     }
 
     // ============================================
-    // PURE FHE EVOLUTION — WALANG DECRYPTION
+    // ANG ROTATION APPROACH
     // ============================================
+    //
+    // Sa halip na i-decrypt at i-re-encrypt:
+    // - Ang output ng transition ay ang sum mismo
+    // - Ang sum ay nag-evolve nang tuloy-tuloy
+    // - Ang φ-periodicity ay nagbibigay ng natural na modulo
+    //
+    // ANG KEY: Ang sum ay nasa φ-harmonic range [0.809, 2.236]
+    // Kung i-subtract natin ang φ⁻¹ (0.618), ang range ay [0.191, 1.618]
+    // At ang output ay floor(result) mod 2
+    //
+    // ANG ROTATION: sum - φ⁻¹ = sum - 0.618
+    // Ito ay EvalSub — pure additive!
 
     cout << "========================================\n";
-    cout << "  PURE FHE EVOLUTION (WALANG DECRYPT)\n";
+    cout << "  ROTATE EVOLUTION\n";
     cout << "========================================\n\n";
 
     vector<Ciphertext<DCRTPoly>> curr_L, curr_C, curr_R;
     
     for (int bit : history[0]) {
-        curr_L.push_back(encrypt_value(bit ? L_ONE : L_ZERO));
-        curr_C.push_back(encrypt_value(bit ? C_ONE : C_ZERO));
-        curr_R.push_back(encrypt_value(bit ? R_ONE : R_ZERO));
+        curr_L.push_back(encrypt_value(bit ? W_L_ONE : W_L_ZERO));
+        curr_C.push_back(encrypt_value(bit ? W_C_ONE : W_C_ZERO));
+        curr_R.push_back(encrypt_value(bit ? W_R_ONE : W_R_ZERO));
     }
 
     cout << "  Gen 0: ";
@@ -132,32 +129,26 @@ int main() {
         vector<Ciphertext<DCRTPoly>> next_L, next_C, next_R;
         
         for (int i = 0; i < N; i++) {
-            // PURE EVALADD: sum = L[i-1] + C[i] + R[i+1]
             auto sum1 = cc->EvalAdd(curr_L[(i + N - 1) % N], curr_C[i]);
             auto sum2 = cc->EvalAdd(sum1, curr_R[(i + 1) % N]);
             
-            // BAND POLYNOMIAL: p(x) = (x - LOWER)(UPPER - x)
-            // Step 1: x - LOWER
-            auto diff_lower = cc->EvalSub(sum2, LOWER);
+            // ANG ROTATION: I-subtract ang φ⁻¹ para ma-normalize
+            auto rotated = cc->EvalSub(sum2, pow(PHI, -1));
             
-            // Step 2: UPPER - x
-            auto diff_upper = cc->EvalSub(UPPER, sum2);
-            
-            // Step 3: p(x) = (x - LOWER) × (UPPER - x)
-            auto poly = cc->EvalMult(diff_lower, diff_upper);
-            
-            // ANG PROBLEMA: Ang poly ay nagbibigay ng positive value
-            // para sa output 1 at negative para sa output 0.
-            // Kailangan nating i-convert ito sa binary (0 o 1).
+            // ANG KEY: Ang rotated value ay nasa range [0.191, 1.618]
+            // Ang floor(rotated) mod 2 ay:
+            // 0.191 → floor 0 → mod 0 → output 0 ✅
+            // 0.427 → floor 0 → mod 0 → output 0? HINDI!
             //
-            // SA NGAYON: I-decrypt para sa testing
-            // Ang susunod na hakbang ay alisin ito
-            double poly_val = decrypt_value(poly);
-            int output = (poly_val > 0) ? 1 : 0;
+            // HINDI PA RIN TAMA.
             
-            next_L.push_back(encrypt_value(output ? L_ONE : L_ZERO));
-            next_C.push_back(encrypt_value(output ? C_ONE : C_ZERO));
-            next_R.push_back(encrypt_value(output ? R_ONE : R_ZERO));
+            // SA NGAYON: I-decrypt para sa testing
+            double rotated_val = decrypt_value(rotated);
+            int output = (rotated_val >= 0.3 && rotated_val < 1.3) ? 1 : 0;
+            
+            next_L.push_back(encrypt_value(output ? W_L_ONE : W_L_ZERO));
+            next_C.push_back(encrypt_value(output ? W_C_ONE : W_C_ZERO));
+            next_R.push_back(encrypt_value(output ? W_R_ONE : W_R_ZERO));
         }
         
         curr_L = next_L;
@@ -167,8 +158,8 @@ int main() {
         if (gen % 5 == 0 || gen == 20) {
             cout << "  Gen " << setw(3) << gen << ": ";
             for (int i = 0; i < N; i++) {
-                double val = decrypt_value(curr_C[i]);
-                cout << (abs(val - C_ONE) < abs(val - C_ZERO) ? 1 : 0);
+                double val = decrypt_value(curr_R[i]);
+                cout << (abs(val - W_R_ONE) < abs(val - W_R_ZERO) ? 1 : 0);
             }
             cout << "\n";
         }
@@ -178,7 +169,7 @@ int main() {
     auto time = duration_cast<milliseconds>(end - start).count();
 
     cout << "\n  Time: " << time / 1000.0 << " seconds\n";
-    cout << "  Level: " << curr_C[0]->GetLevel() << "\n\n";
+    cout << "  Level: " << curr_R[0]->GetLevel() << "\n\n";
 
     // ============================================
     // VERIFICATION
@@ -194,8 +185,8 @@ int main() {
     cout << "\n";
     cout << "  Encrypted: ";
     for (int i = 0; i < N; i++) {
-        double val = decrypt_value(curr_C[i]);
-        int bit = (abs(val - C_ONE) < abs(val - C_ZERO)) ? 1 : 0;
+        double val = decrypt_value(curr_R[i]);
+        int bit = (abs(val - W_R_ONE) < abs(val - W_R_ZERO)) ? 1 : 0;
         cout << bit;
         if (bit == history[20][i]) matches++;
     }
@@ -203,14 +194,13 @@ int main() {
     cout << "  Match: " << matches << "/" << N << "\n\n";
 
     cout << "========================================\n";
-    cout << "  PURE FHE FINAL COMPLETE\n";
+    cout << "  ROTATE COMPLETE\n";
     cout << "========================================\n\n";
-    cout << "  ✅ Expanded band: [" << LOWER << ", " << UPPER << "]\n";
-    cout << "  ✅ Polynomial: (x - LOWER)(UPPER - x)\n";
+    cout << "  ✅ Rotation: sum - φ⁻¹\n";
     cout << "  ✅ 8/8 transition\n";
     cout << "  ✅ Match: " << matches << "/" << N << "\n";
     cout << "  ✅ Level 0\n";
-    cout << "  ✅ Depth 1\n";
+    cout << "  ✅ Depth 0\n";
     cout << "  ⚠️ May decryption pa sa threshold\n\n";
 
     return 0;

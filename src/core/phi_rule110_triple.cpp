@@ -1,12 +1,11 @@
 // ============================================
-// φ-RULE 110 PURE FHE FINAL — WALANG DECRYPTION
+// φ-RULE 110 TRIPLE — TATLONG VERSIONS
 //
-// Expanded band polynomial:
-// p(x) = (x - LOWER)(UPPER - x)
-// LOWER = 5φ - 7 - φ⁻⁶
-// UPPER = 3φ - 3 + φ⁻⁶
+// Ang bawat cell ay may tatlong encrypted values:
+// L-value, C-value, R-value
 //
-// Depth 1, walang decryption, walang bootstrapping
+// Sa transition, pure EvalAdd lang:
+// sum = L_value[i-1] + C_value[i] + R_value[i+1]
 //
 // Author: Dan Fernandez / Primordial Omega Zero
 // ============================================
@@ -25,11 +24,11 @@ using namespace std::chrono;
 
 int main() {
     cout << "========================================\n";
-    cout << "  φ-RULE 110 PURE FHE FINAL\n";
+    cout << "  φ-RULE 110 TRIPLE\n";
     cout << "========================================\n\n";
 
     CCParams<CryptoContextCKKSRNS> parameters;
-    parameters.SetMultiplicativeDepth(1);
+    parameters.SetMultiplicativeDepth(0);
     parameters.SetScalingModSize(50);
     parameters.SetBatchSize(16);
     parameters.SetSecurityLevel(HEStd_128_classic);
@@ -45,25 +44,17 @@ int main() {
     const double PHI = 1.6180339887498948482;
     
     // Positional φ-values
-    const double L_ZERO = pow(PHI, -4);
-    const double L_ONE = pow(PHI, -1);
-    const double C_ZERO = pow(PHI, -3);
-    const double C_ONE = pow(PHI, 0);
-    const double R_ZERO = pow(PHI, -3);
-    const double R_ONE = pow(PHI, 0);
-    
-    // State values
-    const double V_ZERO = pow(PHI, -5);
-    const double V_ONE = pow(PHI, -2);
-    
-    // Expanded band constants
-    const double EPSILON = pow(PHI, -6);
-    const double LOWER = 5.0 * PHI - 7.0 - EPSILON;
-    const double UPPER = 3.0 * PHI - 3.0 + EPSILON;
+    const double L_ZERO = pow(PHI, -4);  // 0.146
+    const double L_ONE = pow(PHI, -1);   // 0.618
+    const double C_ZERO = pow(PHI, -3);  // 0.236
+    const double C_ONE = pow(PHI, 0);    // 1.0
+    const double R_ZERO = pow(PHI, -3);  // 0.236
+    const double R_ONE = pow(PHI, 0);    // 1.0
 
-    cout << "  ✅ CKKS initialized (depth 1!)\n";
-    cout << "  Band: [" << LOWER << ", " << UPPER << "]\n";
-    cout << "  Polynomial: p(x) = (x - LOWER)(UPPER - x)\n\n";
+    cout << "  ✅ CKKS initialized (depth 0!)\n";
+    cout << "  L: 0→" << L_ZERO << ", 1→" << L_ONE << "\n";
+    cout << "  C: 0→" << C_ZERO << ", 1→" << C_ONE << "\n";
+    cout << "  R: 0→" << R_ZERO << ", 1→" << R_ONE << "\n\n";
 
     int rule110[8] = {0, 1, 1, 0, 1, 1, 1, 0};
 
@@ -107,19 +98,30 @@ int main() {
     }
 
     // ============================================
-    // PURE FHE EVOLUTION — WALANG DECRYPTION
+    // TRIPLE STATE ENCODING
     // ============================================
+    //
+    // Ang bawat cell ay may tatlong versions:
+    // - L_version: φ-value para sa L position
+    // - C_version: φ-value para sa C position
+    // - R_version: φ-value para sa R position
+    //
+    // Sa transition:
+    // sum = L_version[i-1] + C_version[i] + R_version[i+1]
+    //
+    // PURE EVALADD! Walang multiplication, walang conversion!
 
     cout << "========================================\n";
-    cout << "  PURE FHE EVOLUTION (WALANG DECRYPT)\n";
+    cout << "  TRIPLE STATE EVOLUTION\n";
     cout << "========================================\n\n";
 
-    vector<Ciphertext<DCRTPoly>> curr_L, curr_C, curr_R;
+    // Initial state: I-encrypt bilang triple versions
+    vector<Ciphertext<DCRTPoly>> L_cells, C_cells, R_cells;
     
     for (int bit : history[0]) {
-        curr_L.push_back(encrypt_value(bit ? L_ONE : L_ZERO));
-        curr_C.push_back(encrypt_value(bit ? C_ONE : C_ZERO));
-        curr_R.push_back(encrypt_value(bit ? R_ONE : R_ZERO));
+        L_cells.push_back(encrypt_value(bit ? L_ONE : L_ZERO));
+        C_cells.push_back(encrypt_value(bit ? C_ONE : C_ZERO));
+        R_cells.push_back(encrypt_value(bit ? R_ONE : R_ZERO));
     }
 
     cout << "  Gen 0: ";
@@ -127,33 +129,29 @@ int main() {
     cout << "\n\n";
 
     auto start = high_resolution_clock::now();
+    
+    vector<Ciphertext<DCRTPoly>> curr_L = L_cells;
+    vector<Ciphertext<DCRTPoly>> curr_C = C_cells;
+    vector<Ciphertext<DCRTPoly>> curr_R = R_cells;
 
     for (int gen = 1; gen <= 20; gen++) {
         vector<Ciphertext<DCRTPoly>> next_L, next_C, next_R;
         
         for (int i = 0; i < N; i++) {
-            // PURE EVALADD: sum = L[i-1] + C[i] + R[i+1]
+            // PURE EVALADD:
+            // sum = L_version[i-1] + C_version[i] + R_version[i+1]
             auto sum1 = cc->EvalAdd(curr_L[(i + N - 1) % N], curr_C[i]);
             auto sum2 = cc->EvalAdd(sum1, curr_R[(i + 1) % N]);
             
-            // BAND POLYNOMIAL: p(x) = (x - LOWER)(UPPER - x)
-            // Step 1: x - LOWER
-            auto diff_lower = cc->EvalSub(sum2, LOWER);
-            
-            // Step 2: UPPER - x
-            auto diff_upper = cc->EvalSub(UPPER, sum2);
-            
-            // Step 3: p(x) = (x - LOWER) × (UPPER - x)
-            auto poly = cc->EvalMult(diff_lower, diff_upper);
-            
-            // ANG PROBLEMA: Ang poly ay nagbibigay ng positive value
-            // para sa output 1 at negative para sa output 0.
-            // Kailangan nating i-convert ito sa binary (0 o 1).
+            // ANG PROBLEMA: Kailangan nating i-convert ang sum
+            // pabalik sa triple versions para sa susunod na generation.
             //
-            // SA NGAYON: I-decrypt para sa testing
-            // Ang susunod na hakbang ay alisin ito
-            double poly_val = decrypt_value(poly);
-            int output = (poly_val > 0) ? 1 : 0;
+            // Ang sum ay nasa range [0.618, 2.618].
+            // Ang output ay 0 o 1 (mod 2 ng floor).
+            //
+            // Sa ngayon, i-decrypt muna para sa testing.
+            double sum_val = decrypt_value(sum2);
+            int output = ((int)floor(sum_val)) % 2;
             
             next_L.push_back(encrypt_value(output ? L_ONE : L_ZERO));
             next_C.push_back(encrypt_value(output ? C_ONE : C_ZERO));
@@ -203,15 +201,14 @@ int main() {
     cout << "  Match: " << matches << "/" << N << "\n\n";
 
     cout << "========================================\n";
-    cout << "  PURE FHE FINAL COMPLETE\n";
+    cout << "  TRIPLE COMPLETE\n";
     cout << "========================================\n\n";
-    cout << "  ✅ Expanded band: [" << LOWER << ", " << UPPER << "]\n";
-    cout << "  ✅ Polynomial: (x - LOWER)(UPPER - x)\n";
-    cout << "  ✅ 8/8 transition\n";
+    cout << "  ✅ Triple state encoding\n";
+    cout << "  ✅ Pure EvalAdd transition\n";
     cout << "  ✅ Match: " << matches << "/" << N << "\n";
     cout << "  ✅ Level 0\n";
-    cout << "  ✅ Depth 1\n";
-    cout << "  ⚠️ May decryption pa sa threshold\n\n";
+    cout << "  ✅ Depth 0\n";
+    cout << "  ⚠️ May decryption pa sa normalization\n\n";
 
     return 0;
 }
