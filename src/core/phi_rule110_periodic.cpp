@@ -1,9 +1,8 @@
 // ============================================
-// φ-RULE 110 PERIODIC — φ-PERIODIC TRANSITION
+// φ-RULE 110 PERIODIC — HANAPIN ANG PERIODICITY
 //
-// Ang transition ay φ-periodic:
-// next = (L + C + R) mod φ²
-// Para bounded at may natural na periodicity
+// Ang weights ay dapat may φ-periodicity:
+// L → C → R ay dapat φ-related
 //
 // Author: Dan Fernandez / Primordial Omega Zero
 // ============================================
@@ -11,172 +10,238 @@
 #include <iostream>
 #include <vector>
 #include <cmath>
-#include <complex>
 #include <iomanip>
-#include <chrono>
+#include <algorithm>
 
-#include "pke/openfhe.h"
-
-using namespace lbcrypto;
 using namespace std;
-using namespace std::chrono;
 
 int main() {
     cout << "========================================\n";
     cout << "  φ-RULE 110 PERIODIC\n";
     cout << "========================================\n\n";
 
-    CCParams<CryptoContextCKKSRNS> parameters;
-    parameters.SetMultiplicativeDepth(0);
-    parameters.SetScalingModSize(50);
-    parameters.SetBatchSize(16);
-    parameters.SetSecurityLevel(HEStd_128_classic);
-
-    CryptoContext<DCRTPoly> cc = GenCryptoContext(parameters);
-    cc->Enable(PKE);
-    cc->Enable(KEYSWITCH);
-    cc->Enable(LEVELEDSHE);
-
-    auto keyPair = cc->KeyGen();
-    cc->EvalMultKeyGen(keyPair.secretKey);
-
     const double PHI = 1.6180339887498948482;
-    const double PHI_SQ = PHI * PHI;
-    const double PHI_MOD = PHI_SQ;  // φ² ang period!
-
-    cout << "  ✅ CKKS initialized (depth 0!)\n";
-    cout << "  Period: φ² = " << PHI_MOD << "\n\n";
+    const double PHI_INV = 1.0 / PHI;
+    const double LN_PHI = log(PHI);
 
     int rule110[8] = {0, 1, 1, 0, 1, 1, 1, 0};
 
     // ============================================
-    // PERIODIC ENCODING
-    // ============================================
-
-    auto encrypt_cell = [&](int bit) {
-        double val = (bit == 0) ? 1.0 : PHI;
-        val = fmod(val, PHI_MOD);  // φ-periodic!
-        
-        vector<double> v(16, val);
-        Plaintext pt = cc->MakeCKKSPackedPlaintext(v);
-        return cc->Encrypt(keyPair.publicKey, pt);
-    };
-
-    auto decrypt_cell = [&](const Ciphertext<DCRTPoly>& ct) {
-        Plaintext result_pt;
-        cc->Decrypt(keyPair.secretKey, ct, &result_pt);
-        result_pt->SetLength(16);
-        
-        double sum = 0.0;
-        for (int i = 0; i < 16; i++) sum += result_pt->GetCKKSPackedValue()[i].real();
-        double avg = fmod(sum / 16.0, PHI_MOD);  // PERIODIC!
-        
-        return (avg > 1.3) ? 1 : 0;
-    };
-
-    // ============================================
-    // PLAINTEXT REFERENCE
-    // ============================================
-
-    int N = 32;
-    vector<int> plain(N, 0);
-    plain[15] = 1;
-    plain[16] = 1;
-
-    vector<vector<int>> history;
-    history.push_back(plain);
-
-    for (int gen = 0; gen < 100; gen++) {
-        vector<int> next(N, 0);
-        for (int i = 0; i < N; i++) {
-            int L = plain[(i + N - 1) % N];
-            int C = plain[i];
-            int R = plain[(i + 1) % N];
-            int pattern = (L << 2) | (C << 1) | R;
-            next[i] = rule110[pattern];
-        }
-        plain = next;
-        history.push_back(plain);
-    }
-
-    cout << "  Plaintext density:\n";
-    for (int gen : {0, 25, 50, 75, 100}) {
-        int density = 0;
-        for (int bit : history[gen]) density += bit;
-        cout << "  Gen " << setw(3) << gen << ": " << fixed << setprecision(4) << (double)density / N << "\n";
-    }
-    cout << "\n";
-
-    // ============================================
-    // ENCRYPTED EVOLUTION (PERIODIC)
+    // ANG NATAGPUANG PERFECT ENCODING
     // ============================================
 
     cout << "========================================\n";
-    cout << "  ENCRYPTED EVOLUTION (PERIODIC)\n";
+    cout << "  PERFECT ENCODING ANALYSIS\n";
     cout << "========================================\n\n";
 
-    vector<Ciphertext<DCRTPoly>> cells;
-    for (int bit : history[0]) {
-        cells.push_back(encrypt_cell(bit));
-    }
+    cout << "  Encoding:\n";
+    cout << "  L: 0→0.000, 1→0.236 (φ⁻³)\n";
+    cout << "  C: 0→0.000, 1→0.382 (φ⁻²)\n";
+    cout << "  R: 0→0.809, 1→1.618 (φ/2 at φ)\n\n";
 
-    cout << "  Gen 0: ";
-    for (int i = 0; i < 16; i++) cout << history[0][i];
-    cout << "...\n\n";
+    cout << "  Sa φ-powers:\n";
+    cout << "  L: 0→-∞, 1→-3\n";
+    cout << "  C: 0→-∞, 1→-2\n";
+    cout << "  R: 0→-0.44, 1→1\n\n";
 
-    auto start = high_resolution_clock::now();
+    cout << "  Periodicity:\n";
+    cout << "  L→C: -3 → -2 (×φ¹)\n";
+    cout << "  C→R: -2 → 1 (×φ³)\n\n";
 
-    vector<Ciphertext<DCRTPoly>> current = cells;
+    // ============================================
+    // SUBUKAN ANG PERIODIC WEIGHTS
+    // ============================================
 
-    for (int gen = 1; gen <= 100; gen++) {
-        vector<Ciphertext<DCRTPoly>> next;
-        
-        for (int i = 0; i < N; i++) {
-            auto L = current[(i + N - 1) % N];
-            auto C = current[i];
-            auto R = current[(i + 1) % N];
-            
-            // PERIODIC TRANSITION:
-            // next = (L + C + R) — natural φ-periodic
-            auto sum1 = cc->EvalAdd(L, C);
-            auto sum2 = cc->EvalAdd(sum1, R);
-            next.push_back(sum2);
-        }
-        
-        current = next;
-        
-        if (gen % 25 == 0 || gen == 100) {
-            cout << "  Gen " << setw(3) << gen << ": ";
-            try {
-                int ones = 0;
-                for (int i = 0; i < N; i++) {
-                    int bit = decrypt_cell(current[i]);
-                    ones += bit;
-                    if (i < 16) cout << bit;
+    cout << "========================================\n";
+    cout << "  PERIODIC WEIGHTS SEARCH\n";
+    cout << "========================================\n\n";
+
+    cout << "  Subukan: L→φ^a, C→φ^b, R→φ^c\n";
+    cout << "  kung saan a, b, c ay integers\n\n";
+
+    int best_match = 0;
+    double best_a = 0, best_b = 0, best_c = 0;
+
+    for (int a = -5; a <= 5; a++) {
+        for (int b = -5; b <= 5; b++) {
+            for (int c = -5; c <= 5; c++) {
+                int match = 0;
+                for (int L : {0, 1}) {
+                    for (int C : {0, 1}) {
+                        for (int R : {0, 1}) {
+                            double l_val = L ? pow(PHI, a) : 0.0;
+                            double c_val = C ? pow(PHI, b) : 0.0;
+                            double r_val = R ? pow(PHI, c) : 0.0;
+                            double sum = l_val + c_val + r_val;
+                            int floor_val = (int)floor(sum);
+                            int mod2 = floor_val % 2;
+                            int expected = rule110[(L << 2) | (C << 1) | R];
+                            if (mod2 == expected) match++;
+                        }
+                    }
                 }
-                cout << "... | Density: " << ones << "/" << N;
-            } catch (...) {
-                cout << " (decrypt error)";
+                if (match > best_match) {
+                    best_match = match;
+                    best_a = a;
+                    best_b = b;
+                    best_c = c;
+                }
             }
-            cout << "\n";
         }
     }
 
-    auto end = high_resolution_clock::now();
-    auto time = duration_cast<milliseconds>(end - start).count();
+    cout << "  Best: " << best_match << "/8\n";
+    cout << "  L→φ^" << best_a << " = " << pow(PHI, best_a) << "\n";
+    cout << "  C→φ^" << best_b << " = " << pow(PHI, best_b) << "\n";
+    cout << "  R→φ^" << best_c << " = " << pow(PHI, best_c) << "\n\n";
 
-    cout << "\n  Time: " << time / 1000.0 << " seconds\n";
-    cout << "  Level: " << current[0]->GetLevel() << "\n";
-    cout << "  Towers: " << current[0]->GetElements()[0].GetNumOfElements() << "\n\n";
+    // ============================================
+    // SUBUKAN ANG φ-OFFSET PERIODICITY
+    // ============================================
 
     cout << "========================================\n";
-    cout << "  PERIODIC RULE 110 COMPLETE\n";
+    cout << "  φ-OFFSET PERIODICITY\n";
     cout << "========================================\n\n";
-    cout << "  ✅ φ² period\n";
-    cout << "  ✅ 32 cells, 100 generations\n";
-    cout << "  ✅ Level 0\n";
-    cout << "  ✅ Depth 0\n";
-    cout << "  ✅ Pure FHE\n\n";
+
+    cout << "  Subukan: 0→φ^a, 1→φ^(a+k) na may period k\n\n";
+
+    best_match = 0;
+    double best_zero_exp = 0, best_period = 0;
+    double best_ol = 0, best_oc = 0, best_or = 0;
+
+    for (double zero_exp = -5; zero_exp <= 5; zero_exp += 0.5) {
+        for (double period = 0.5; period <= 5; period += 0.5) {
+            for (double offset_l = -2; offset_l <= 2; offset_l += 0.5) {
+                for (double offset_c = -2; offset_c <= 2; offset_c += 0.5) {
+                    for (double offset_r = -2; offset_r <= 2; offset_r += 0.5) {
+                        int match = 0;
+                        for (int L : {0, 1}) {
+                            for (int C : {0, 1}) {
+                                for (int R : {0, 1}) {
+                                    double l_val = L ? pow(PHI, zero_exp + period + offset_l) : pow(PHI, zero_exp + offset_l);
+                                    double c_val = C ? pow(PHI, zero_exp + period + offset_c) : pow(PHI, zero_exp + offset_c);
+                                    double r_val = R ? pow(PHI, zero_exp + period + offset_r) : pow(PHI, zero_exp + offset_r);
+                                    double sum = l_val + c_val + r_val;
+                                    int floor_val = (int)floor(sum);
+                                    int mod2 = floor_val % 2;
+                                    int expected = rule110[(L << 2) | (C << 1) | R];
+                                    if (mod2 == expected) match++;
+                                }
+                            }
+                        }
+                        if (match > best_match) {
+                            best_match = match;
+                            best_zero_exp = zero_exp;
+                            best_period = period;
+                            best_ol = offset_l;
+                            best_oc = offset_c;
+                            best_or = offset_r;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    cout << "  Best: " << best_match << "/8\n";
+    cout << "  Zero exponent: " << best_zero_exp << "\n";
+    cout << "  Period: " << best_period << "\n";
+    cout << "  Offsets: L=" << best_ol << ", C=" << best_oc << ", R=" << best_or << "\n\n";
+
+    if (best_match == 8) {
+        cout << "  ✅ PERFECT PERIODIC ENCODING!\n\n";
+        cout << "  0 → φ^" << best_zero_exp << " = " << pow(PHI, best_zero_exp) << "\n";
+        cout << "  1 → φ^" << best_zero_exp + best_period << " = " << pow(PHI, best_zero_exp + best_period) << "\n\n";
+        
+        cout << "  L C R | Sum      | Floor | mod 2 | Expected\n";
+        cout << "  ------|----------|-------|-------|----------\n";
+        for (int L : {0, 1}) {
+            for (int C : {0, 1}) {
+                for (int R : {0, 1}) {
+                    double l_val = L ? pow(PHI, best_zero_exp + best_period + best_ol) : pow(PHI, best_zero_exp + best_ol);
+                    double c_val = C ? pow(PHI, best_zero_exp + best_period + best_oc) : pow(PHI, best_zero_exp + best_oc);
+                    double r_val = R ? pow(PHI, best_zero_exp + best_period + best_or) : pow(PHI, best_zero_exp + best_or);
+                    double sum = l_val + c_val + r_val;
+                    int floor_val = (int)floor(sum);
+                    int mod2 = floor_val % 2;
+                    int expected = rule110[(L << 2) | (C << 1) | R];
+                    cout << "  " << L << " " << C << " " << R << " | "
+                         << setw(8) << fixed << setprecision(4) << sum << " | "
+                         << setw(5) << floor_val << " | "
+                         << setw(5) << mod2 << " | "
+                         << setw(8) << expected << " | ✅\n";
+                }
+            }
+        }
+    }
+
+    // ============================================
+    // ANG KEY: FRACTIONAL φ-POWERS
+    // ============================================
+
+    cout << "\n========================================\n";
+    cout << "  FRACTIONAL φ-POWERS\n";
+    cout << "========================================\n\n";
+
+    cout << "  Ang 0.809 = φ/2 ay may φ-log:\n";
+    cout << "  log_φ(0.809) = " << log(0.809) / LN_PHI << "\n\n";
+
+    cout << "  φ^(1/2) = " << sqrt(PHI) << "\n";
+    cout << "  φ^(3/2) = " << pow(PHI, 1.5) << "\n";
+    cout << "  φ^(1/3) = " << pow(PHI, 1.0/3.0) << "\n";
+    cout << "  φ^(2/3) = " << pow(PHI, 2.0/3.0) << "\n\n";
+
+    cout << "  Ang 0.809 = φ/2 ay hindi eksaktong φ-power\n";
+    cout << "  Pero: φ/2 = φ × 1/2 = φ × φ^(-log_φ(2))\n";
+    cout << "  log_φ(2) = " << log(2.0) / LN_PHI << "\n";
+    cout << "  Kaya: φ/2 = φ^(1 - log_φ(2)) = φ^" << 1.0 - log(2.0) / LN_PHI << "\n\n";
+
+    // ============================================
+    // ANG PERIODICITY SA TRANSITION TABLE
+    // ============================================
+
+    cout << "========================================\n";
+    cout << "  PERIODICITY SA TRANSITION TABLE\n";
+    cout << "========================================\n\n";
+
+    cout << "  Ang 8 sums (sorted):\n\n";
+
+    vector<pair<double, string>> sums;
+    for (int L : {0, 1}) {
+        for (int C : {0, 1}) {
+            for (int R : {0, 1}) {
+                double l_val = L ? 0.236 : 0.0;
+                double c_val = C ? 0.382 : 0.0;
+                double r_val = R ? 1.618 : 0.809;
+                double sum = l_val + c_val + r_val;
+                string pattern = to_string(L) + to_string(C) + to_string(R);
+                sums.push_back({sum, pattern});
+            }
+        }
+    }
+
+    sort(sums.begin(), sums.end());
+
+    for (auto& [sum, pattern] : sums) {
+        int floor_val = (int)floor(sum);
+        cout << "  " << pattern << " → " << setw(8) << fixed << setprecision(4) << sum
+             << " → floor " << floor_val << " → mod 2 = " << floor_val % 2 << "\n";
+    }
+
+    cout << "\n  Ang sums ay may φ-harmonic structure:\n";
+    cout << "  0.809, 1.045, 1.191, 1.427, 1.618, 1.854, 2.000, 2.236\n\n";
+
+    cout << "  Differences:\n";
+    cout << "  1.045 - 0.809 = 0.236 = φ⁻³\n";
+    cout << "  1.191 - 1.045 = 0.146 = φ⁻⁴\n";
+    cout << "  1.427 - 1.191 = 0.236 = φ⁻³\n";
+    cout << "  1.618 - 1.427 = 0.191 ≈ φ⁻³×φ/2\n";
+    cout << "  1.854 - 1.618 = 0.236 = φ⁻³\n";
+    cout << "  2.000 - 1.854 = 0.146 = φ⁻⁴\n";
+    cout << "  2.236 - 2.000 = 0.236 = φ⁻³\n\n";
+
+    cout << "  PERIODICITY: φ⁻³, φ⁻⁴, φ⁻³ | φ⁻³×φ/2, φ⁻³, φ⁻⁴ | φ⁻³\n";
+    cout << "  Period-3 structure!\n\n";
 
     return 0;
 }
