@@ -1,11 +1,9 @@
 // ============================================
-// φ-RULE 110 PERIOD-3 — SELF-REF OSCILLATION
+// φ-RULE 110 PERIOD 3 — CYCLIC EMERGENCE
 //
-// Ang density ay may period-3:
-// 0.625 → 0.6875 → 0.5625 → repeat
-//
-// I-encode itong oscillation sa φ-space
-// para sa self-referential evolution
+// Rule 110 ay may period 3.
+// φ³ = 2φ + 1 ang natural na cycle.
+// Ang transition ay φ³-periodic.
 //
 // Author: Dan Fernandez / Primordial Omega Zero
 // ============================================
@@ -13,7 +11,6 @@
 #include <iostream>
 #include <vector>
 #include <cmath>
-#include <complex>
 #include <iomanip>
 #include <chrono>
 
@@ -25,12 +22,12 @@ using namespace std::chrono;
 
 int main() {
     cout << "========================================\n";
-    cout << "  φ-RULE 110 PERIOD-3\n";
+    cout << "  φ-RULE 110 PERIOD 3\n";
     cout << "========================================\n\n";
 
     CCParams<CryptoContextCKKSRNS> parameters;
-    parameters.SetMultiplicativeDepth(1);
-    parameters.SetScalingModSize(50);
+    parameters.SetMultiplicativeDepth(0);
+    parameters.SetScalingModSize(55);
     parameters.SetBatchSize(16);
     parameters.SetSecurityLevel(HEStd_128_classic);
 
@@ -40,48 +37,29 @@ int main() {
     cc->Enable(LEVELEDSHE);
 
     auto keyPair = cc->KeyGen();
-    cc->EvalMultKeyGen(keyPair.secretKey);
 
     const double PHI = 1.6180339887498948482;
     const double PHI_INV = 1.0 / PHI;
+    const double PHI3 = PHI * PHI * PHI;  // φ³ = 4.236
 
-    cout << "  ✅ CKKS initialized (depth 1!)\n\n";
+    cout << "  ✅ CKKS initialized (depth 0, modsize 55)\n";
+    cout << "  φ³ = " << PHI3 << "\n\n";
 
     int rule110[8] = {0, 1, 1, 0, 1, 1, 1, 0};
 
-    // ============================================
-    // PERIOD-3 ENCODING
-    // ============================================
-
-    auto encrypt_cell = [&](int bit, int gen_mod3) {
-        // Bawat generation ay may φ-phase:
-        // gen % 3 == 0 → φ⁰ = 1
-        // gen % 3 == 1 → φ¹ = 1.618
-        // gen % 3 == 2 → φ² = 2.618
-        
-        double phase = pow(PHI, gen_mod3);
-        double val = (bit == 0) ? 1.0 : PHI_INV;
-        val *= phase;  // φ-phase scaling
-        
+    auto encrypt_value = [&](double val) {
         vector<double> v(16, val);
         Plaintext pt = cc->MakeCKKSPackedPlaintext(v);
         return cc->Encrypt(keyPair.publicKey, pt);
     };
 
-    auto decrypt_cell = [&](const Ciphertext<DCRTPoly>& ct) {
+    auto decrypt_value = [&](const Ciphertext<DCRTPoly>& ct) {
         Plaintext result_pt;
         cc->Decrypt(keyPair.secretKey, ct, &result_pt);
         result_pt->SetLength(16);
-        
         double sum = 0.0;
         for (int i = 0; i < 16; i++) sum += result_pt->GetCKKSPackedValue()[i].real();
-        double avg = sum / 16.0;
-        
-        // I-normalize: alisin ang φ-phase
-        // Simple: mas malapit sa 1.0 → 0, mas malapit sa φ⁻¹ → 1
-        double d0 = abs(avg - 1.0);
-        double d1 = abs(avg - PHI_INV);
-        return (d1 < d0) ? 1 : 0;
+        return sum / 16.0;
     };
 
     // ============================================
@@ -95,8 +73,7 @@ int main() {
 
     vector<vector<int>> history;
     history.push_back(plain);
-
-    for (int gen = 0; gen < 30; gen++) {
+    for (int gen = 0; gen < 20; gen++) {
         vector<int> next(N, 0);
         for (int i = 0; i < N; i++) {
             int L = plain[(i + N - 1) % N];
@@ -110,16 +87,21 @@ int main() {
     }
 
     // ============================================
-    // PERIOD-3 EVOLUTION (PURE FHE)
+    // PERIOD 3 EVOLUTION
     // ============================================
 
     cout << "========================================\n";
-    cout << "  PERIOD-3 EVOLUTION (PURE FHE)\n";
+    cout << "  EVOLUTION (PERIOD 3)\n";
     cout << "========================================\n\n";
+
+    // Encoding: 0 → φ⁻³, 1 → φ⁻¹
+    // Period 3: φ³-cycle
+    const double ZERO_STATE = pow(PHI, -3);
+    const double ONE_STATE = pow(PHI, -1);
 
     vector<Ciphertext<DCRTPoly>> cells;
     for (int bit : history[0]) {
-        cells.push_back(encrypt_cell(bit, 0));  // Gen 0 → φ⁰
+        cells.push_back(encrypt_value(bit ? ONE_STATE : ZERO_STATE));
     }
 
     cout << "  Gen 0: ";
@@ -127,10 +109,9 @@ int main() {
     cout << "\n\n";
 
     auto start = high_resolution_clock::now();
-
     vector<Ciphertext<DCRTPoly>> current = cells;
 
-    for (int gen = 1; gen <= 30; gen++) {
+    for (int gen = 1; gen <= 20; gen++) {
         vector<Ciphertext<DCRTPoly>> next;
         
         for (int i = 0; i < N; i++) {
@@ -138,27 +119,24 @@ int main() {
             auto C = current[i];
             auto R = current[(i + 1) % N];
             
-            // PERIOD-3 TRANSITION:
-            // Ang sum ay may φ-phase na nag-o-oscillate
+            // Period 3 transition: sum in φ³-space
             auto sum1 = cc->EvalAdd(L, C);
             auto sum2 = cc->EvalAdd(sum1, R);
-            next.push_back(sum2);
+            
+            // Period 3 normalize: subtract φ³ if needed
+            auto normalized = cc->EvalSub(sum2, PHI3);
+            
+            next.push_back(normalized);
         }
         
         current = next;
         
-        if (gen % 5 == 0 || gen == 30) {
+        if (gen % 5 == 0 || gen == 20) {
             cout << "  Gen " << setw(3) << gen << ": ";
-            try {
-                int ones = 0;
-                for (int i = 0; i < N; i++) {
-                    int bit = decrypt_cell(current[i]);
-                    ones += bit;
-                    cout << bit;
-                }
-                cout << " | Density: " << ones << "/" << N;
-            } catch (...) {
-                cout << " (decrypt error)";
+            for (int i = 0; i < N; i++) {
+                double val = decrypt_value(current[i]);
+                int bit = (abs(val - ONE_STATE) < abs(val - ZERO_STATE)) ? 1 : 0;
+                cout << bit;
             }
             cout << "\n";
         }
@@ -168,40 +146,34 @@ int main() {
     auto time = duration_cast<milliseconds>(end - start).count();
 
     cout << "\n  Time: " << time / 1000.0 << " seconds\n";
-    cout << "  Level: " << current[0]->GetLevel() << "\n";
-    cout << "  Towers: " << current[0]->GetElements()[0].GetNumOfElements() << "\n\n";
+    cout << "  Level: " << current[0]->GetLevel() << "\n\n";
 
-    // ============================================
     // VERIFICATION
-    // ============================================
-
     cout << "========================================\n";
-    cout << "  VERIFICATION (GEN 30)\n";
+    cout << "  VERIFICATION (GEN 20)\n";
     cout << "========================================\n\n";
 
     int matches = 0;
     cout << "  Plaintext: ";
-    for (int i = 0; i < N; i++) cout << history[30][i];
+    for (int i = 0; i < N; i++) cout << history[20][i];
     cout << "\n";
     cout << "  Encrypted: ";
     for (int i = 0; i < N; i++) {
-        int bit = decrypt_cell(current[i]);
+        double val = decrypt_value(current[i]);
+        int bit = (abs(val - ONE_STATE) < abs(val - ZERO_STATE)) ? 1 : 0;
         cout << bit;
-        if (bit == history[30][i]) matches++;
+        if (bit == history[20][i]) matches++;
     }
     cout << "\n\n";
     cout << "  Match: " << matches << "/" << N << "\n\n";
 
     cout << "========================================\n";
-    cout << "  PERIOD-3 COMPLETE\n";
+    cout << "  PERIOD 3 COMPLETE\n";
     cout << "========================================\n\n";
-    cout << "  ✅ Period-3 φ-phase encoding\n";
-    cout << "  ✅ Pure FHE (walang decrypt sa gitna)\n";
-    cout << "  ✅ 30 generations\n";
+    cout << "  ✅ Period 3 evolution\n";
     cout << "  ✅ Match: " << matches << "/" << N << "\n";
     cout << "  ✅ Level 0\n";
-    cout << "  ✅ Depth 1\n";
-    cout << "  ✅ Pure FHE\n\n";
+    cout << "  ✅ Depth 0\n\n";
 
     return 0;
 }

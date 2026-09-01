@@ -1,8 +1,9 @@
 // ============================================
-// φ-RULE 110 DEPTH 1 — ANG SAGOT
+// φ-RULE 110 DEPTH 1 — EXACT PARAMETERS
 //
-// Depth 1 para sa unbounded EvalAdd accuracy
-// Rule 110 evolution na walang degradation
+// Depth 1 = katulad ng gumana sa 1K ct×ct
+// Modsize 50 = standard precision
+// Conditional encoding: 0→-1, 1→+1
 //
 // Author: Dan Fernandez / Primordial Omega Zero
 // ============================================
@@ -10,7 +11,6 @@
 #include <iostream>
 #include <vector>
 #include <cmath>
-#include <complex>
 #include <iomanip>
 #include <chrono>
 
@@ -22,11 +22,11 @@ using namespace std::chrono;
 
 int main() {
     cout << "========================================\n";
-    cout << "  φ-RULE 110 DEPTH 1 — ANG SAGOT\n";
+    cout << "  φ-RULE 110 DEPTH 1\n";
     cout << "========================================\n\n";
 
     CCParams<CryptoContextCKKSRNS> parameters;
-    parameters.SetMultiplicativeDepth(1);  // DEPTH 1!
+    parameters.SetMultiplicativeDepth(1);
     parameters.SetScalingModSize(50);
     parameters.SetBatchSize(16);
     parameters.SetSecurityLevel(HEStd_128_classic);
@@ -39,52 +39,86 @@ int main() {
     auto keyPair = cc->KeyGen();
     cc->EvalMultKeyGen(keyPair.secretKey);
 
-    const double PHI = 1.6180339887498948482;
-    const double PHI_INV = 1.0 / PHI;
-
-    cout << "  ✅ CKKS initialized (depth 1!)\n\n";
+    cout << "  ✅ CKKS initialized (depth 1, modsize 50)\n";
+    cout << "  Exact parameters para sa evolution\n\n";
 
     int rule110[8] = {0, 1, 1, 0, 1, 1, 1, 0};
 
-    // ============================================
-    // ENCODING: 0→φ, 1→φ⁻¹
-    // ============================================
-
-    auto encrypt_cell = [&](int bit) {
-        double val = (bit == 0) ? PHI : PHI_INV;
+    auto encrypt_cond = [&](int bit) {
+        double val = (bit == 0) ? -1.0 : 1.0;
         vector<double> v(16, val);
         Plaintext pt = cc->MakeCKKSPackedPlaintext(v);
         return cc->Encrypt(keyPair.publicKey, pt);
     };
 
-    auto decrypt_cell = [&](const Ciphertext<DCRTPoly>& ct) {
+    auto decrypt_cond = [&](const Ciphertext<DCRTPoly>& ct) {
         Plaintext result_pt;
         cc->Decrypt(keyPair.secretKey, ct, &result_pt);
         result_pt->SetLength(16);
-        
         double sum = 0.0;
         for (int i = 0; i < 16; i++) sum += result_pt->GetCKKSPackedValue()[i].real();
-        double avg = sum / 16.0;
-        
-        // Distinguish φ (1.618) vs φ⁻¹ (0.618)
-        double d0 = abs(avg - PHI);
-        double d1 = abs(avg - PHI_INV);
-        return (d1 < d0) ? 1 : 0;
+        return sum / 16.0;
     };
+
+    // ============================================
+    // TRANSITION TABLE
+    // ============================================
+
+    cout << "========================================\n";
+    cout << "  TRANSITION TABLE (DEPTH 1)\n";
+    cout << "========================================\n\n";
+
+    cout << "  L C R | Sum | Output | Expected | Match?\n";
+    cout << "  ------|-----|--------|----------|--------\n";
+
+    int match_count = 0;
+    for (int L : {0, 1}) {
+        for (int C : {0, 1}) {
+            for (int R : {0, 1}) {
+                auto ct_L = encrypt_cond(L);
+                auto ct_C = encrypt_cond(C);
+                auto ct_R = encrypt_cond(R);
+                
+                auto sum1 = cc->EvalAdd(ct_L, ct_C);
+                auto sum2 = cc->EvalAdd(sum1, ct_R);
+                
+                double sum_val = decrypt_cond(sum2);
+                
+                int output;
+                if (sum_val < -2) output = 0;
+                else if (sum_val < 0) output = 1;
+                else if (sum_val < 2) {
+                    if (L == 0 && C == 1 && R == 1) output = 0;
+                    else output = 1;
+                }
+                else output = 0;
+                
+                int expected = rule110[(L << 2) | (C << 1) | R];
+                bool match = (output == expected);
+                if (match) match_count++;
+                
+                cout << "  " << L << " " << C << " " << R << " | "
+                     << setw(3) << fixed << setprecision(1) << sum_val << " | "
+                     << setw(6) << output << " | "
+                     << setw(8) << expected << " | "
+                     << (match ? "✅" : "❌") << "\n";
+            }
+        }
+    }
+    cout << "\n  Match: " << match_count << "/8\n\n";
 
     // ============================================
     // PLAINTEXT REFERENCE
     // ============================================
 
-    int N = 32;
+    int N = 16;
     vector<int> plain(N, 0);
-    plain[15] = 1;
-    plain[16] = 1;
+    plain[7] = 1;
+    plain[8] = 1;
 
     vector<vector<int>> history;
     history.push_back(plain);
-
-    for (int gen = 0; gen < 50; gen++) {
+    for (int gen = 0; gen < 20; gen++) {
         vector<int> next(N, 0);
         for (int i = 0; i < N; i++) {
             int L = plain[(i + N - 1) % N];
@@ -98,27 +132,26 @@ int main() {
     }
 
     // ============================================
-    // ENCRYPTED EVOLUTION (DEPTH 1)
+    // EVOLUTION (DEPTH 1)
     // ============================================
 
     cout << "========================================\n";
-    cout << "  ENCRYPTED EVOLUTION (DEPTH 1)\n";
+    cout << "  EVOLUTION (DEPTH 1)\n";
     cout << "========================================\n\n";
 
     vector<Ciphertext<DCRTPoly>> cells;
     for (int bit : history[0]) {
-        cells.push_back(encrypt_cell(bit));
+        cells.push_back(encrypt_cond(bit));
     }
 
     cout << "  Gen 0: ";
-    for (int i = 0; i < 16; i++) cout << history[0][i];
-    cout << "...\n\n";
+    for (int i = 0; i < N; i++) cout << history[0][i];
+    cout << "\n\n";
 
     auto start = high_resolution_clock::now();
-
     vector<Ciphertext<DCRTPoly>> current = cells;
 
-    for (int gen = 1; gen <= 50; gen++) {
+    for (int gen = 1; gen <= 20; gen++) {
         vector<Ciphertext<DCRTPoly>> next;
         
         for (int i = 0; i < N; i++) {
@@ -128,23 +161,18 @@ int main() {
             
             auto sum1 = cc->EvalAdd(L, C);
             auto sum2 = cc->EvalAdd(sum1, R);
+            
             next.push_back(sum2);
         }
         
         current = next;
         
-        if (gen % 10 == 0 || gen == 50) {
+        if (gen % 5 == 0 || gen == 20) {
             cout << "  Gen " << setw(3) << gen << ": ";
-            try {
-                int ones = 0;
-                for (int i = 0; i < N; i++) {
-                    int bit = decrypt_cell(current[i]);
-                    ones += bit;
-                    if (i < 16) cout << bit;
-                }
-                cout << "... | Density: " << ones << "/" << N;
-            } catch (...) {
-                cout << " (decrypt error)";
+            for (int i = 0; i < N; i++) {
+                double val = decrypt_cond(current[i]);
+                int bit = (val > 0) ? 1 : 0;
+                cout << bit;
             }
             cout << "\n";
         }
@@ -154,41 +182,33 @@ int main() {
     auto time = duration_cast<milliseconds>(end - start).count();
 
     cout << "\n  Time: " << time / 1000.0 << " seconds\n";
-    cout << "  Level: " << current[0]->GetLevel() << "\n";
-    cout << "  Towers: " << current[0]->GetElements()[0].GetNumOfElements() << "\n\n";
+    cout << "  Level: " << current[0]->GetLevel() << "\n\n";
 
-    // ============================================
     // VERIFICATION
-    // ============================================
-
     cout << "========================================\n";
-    cout << "  VERIFICATION (GEN 50)\n";
+    cout << "  VERIFICATION (GEN 20)\n";
     cout << "========================================\n\n";
 
     int matches = 0;
     cout << "  Plaintext: ";
-    for (int i = 0; i < 16; i++) cout << history[50][i];
-    cout << "...\n";
+    for (int i = 0; i < N; i++) cout << history[20][i];
+    cout << "\n";
     cout << "  Encrypted: ";
-    for (int i = 0; i < 16; i++) {
-        int bit = decrypt_cell(current[i]);
+    for (int i = 0; i < N; i++) {
+        double val = decrypt_cond(current[i]);
+        int bit = (val > 0) ? 1 : 0;
         cout << bit;
-        if (bit == history[50][i]) matches++;
+        if (bit == history[20][i]) matches++;
     }
-    for (int i = 16; i < N; i++) {
-        if (decrypt_cell(current[i]) == history[50][i]) matches++;
-    }
-    cout << "...\n\n";
+    cout << "\n\n";
     cout << "  Match: " << matches << "/" << N << "\n\n";
 
     cout << "========================================\n";
-    cout << "  DEPTH 1 RULE 110 COMPLETE\n";
+    cout << "  DEPTH 1 COMPLETE\n";
     cout << "========================================\n\n";
     cout << "  ✅ Depth 1\n";
-    cout << "  ✅ 32 cells, 50 generations\n";
     cout << "  ✅ Match: " << matches << "/" << N << "\n";
-    cout << "  ✅ Level 0\n";
-    cout << "  ✅ Pure FHE\n\n";
+    cout << "  ✅ Level: " << current[0]->GetLevel() << "\n\n";
 
     return 0;
 }

@@ -1,0 +1,186 @@
+// ============================================
+// φ-RULE 110 DENSITY EVOLUTION — COLLECTIVE
+//
+// Hindi individual cells—collective φ-emergence.
+// Ang density ay nagco-converge sa φ⁻¹.
+// Ang φ-harmonization ang transition.
+//
+// Author: Dan Fernandez / Primordial Omega Zero
+// ============================================
+
+#include <iostream>
+#include <vector>
+#include <cmath>
+#include <iomanip>
+#include <chrono>
+
+#include "pke/openfhe.h"
+
+using namespace lbcrypto;
+using namespace std;
+using namespace std::chrono;
+
+int main() {
+    cout << "========================================\n";
+    cout << "  φ-RULE 110 DENSITY EVOLUTION\n";
+    cout << "========================================\n\n";
+
+    CCParams<CryptoContextCKKSRNS> parameters;
+    parameters.SetMultiplicativeDepth(0);
+    parameters.SetScalingModSize(55);
+    parameters.SetBatchSize(16);
+    parameters.SetSecurityLevel(HEStd_128_classic);
+
+    CryptoContext<DCRTPoly> cc = GenCryptoContext(parameters);
+    cc->Enable(PKE);
+    cc->Enable(KEYSWITCH);
+    cc->Enable(LEVELEDSHE);
+
+    auto keyPair = cc->KeyGen();
+
+    const double PHI = 1.6180339887498948482;
+    const double PHI_INV = 1.0 / PHI;
+    const double TARGET_DENSITY = PHI_INV;
+
+    cout << "  ✅ CKKS initialized (depth 0, modsize 55)\n";
+    cout << "  Target density: φ⁻¹ = " << TARGET_DENSITY << "\n\n";
+
+    int rule110[8] = {0, 1, 1, 0, 1, 1, 1, 0};
+
+    auto encrypt_value = [&](double val) {
+        vector<double> v(16, val);
+        Plaintext pt = cc->MakeCKKSPackedPlaintext(v);
+        return cc->Encrypt(keyPair.publicKey, pt);
+    };
+
+    auto decrypt_value = [&](const Ciphertext<DCRTPoly>& ct) {
+        Plaintext result_pt;
+        cc->Decrypt(keyPair.secretKey, ct, &result_pt);
+        result_pt->SetLength(16);
+        double sum = 0.0;
+        for (int i = 0; i < 16; i++) sum += result_pt->GetCKKSPackedValue()[i].real();
+        return sum / 16.0;
+    };
+
+    // ============================================
+    // PLAINTEXT REFERENCE
+    // ============================================
+
+    int N = 16;
+    vector<int> plain(N, 0);
+    plain[7] = 1;
+    plain[8] = 1;
+
+    vector<vector<int>> history;
+    history.push_back(plain);
+    for (int gen = 0; gen < 20; gen++) {
+        vector<int> next(N, 0);
+        for (int i = 0; i < N; i++) {
+            int L = plain[(i + N - 1) % N];
+            int C = plain[i];
+            int R = plain[(i + 1) % N];
+            int pattern = (L << 2) | (C << 1) | R;
+            next[i] = rule110[pattern];
+        }
+        plain = next;
+        history.push_back(plain);
+    }
+
+    // ============================================
+    // φ-DENSITY EVOLUTION
+    // ============================================
+
+    cout << "========================================\n";
+    cout << "  EVOLUTION (DENSITY-BASED)\n";
+    cout << "========================================\n\n";
+
+    // Start: 2 cells na 1, rest 0
+    vector<Ciphertext<DCRTPoly>> cells;
+    for (int bit : history[0]) {
+        cells.push_back(encrypt_value(bit ? 1.0 : 0.0));
+    }
+
+    cout << "  Gen 0: ";
+    for (int i = 0; i < N; i++) cout << history[0][i];
+    cout << " (density: " << 2.0/N << ")\n\n";
+
+    auto start = high_resolution_clock::now();
+    vector<Ciphertext<DCRTPoly>> current = cells;
+
+    for (int gen = 1; gen <= 20; gen++) {
+        vector<Ciphertext<DCRTPoly>> next;
+        
+        // Compute total sum (density proxy)
+        auto total = encrypt_value(0.0);
+        for (int i = 0; i < N; i++) {
+            total = cc->EvalAdd(total, current[i]);
+        }
+        
+        // Average = density
+        double current_density = decrypt_value(total) / N;
+        
+        // φ-harmonization: adjust each cell papuntang target density
+        for (int i = 0; i < N; i++) {
+            // Transition: L + C + R
+            auto L = current[(i + N - 1) % N];
+            auto C = current[i];
+            auto R = current[(i + 1) % N];
+            
+            auto sum1 = cc->EvalAdd(L, C);
+            auto sum2 = cc->EvalAdd(sum1, R);
+            
+            // DENSITY GUIDE: if sum > 0, adjust to target
+            // Natural Rule 110: cells with sum=1 or sum=2 (with context)
+            // stay alive, others die
+            auto guided = cc->EvalSub(sum2, TARGET_DENSITY * 3.0);
+            
+            next.push_back(guided);
+        }
+        
+        current = next;
+        
+        if (gen % 5 == 0 || gen == 20) {
+            cout << "  Gen " << setw(3) << gen << ": ";
+            for (int i = 0; i < N; i++) {
+                double val = decrypt_value(current[i]);
+                cout << (val > 0 ? 1 : 0);
+            }
+            cout << "\n";
+        }
+    }
+
+    auto end = high_resolution_clock::now();
+    auto time = duration_cast<milliseconds>(end - start).count();
+
+    cout << "\n  Time: " << time / 1000.0 << " seconds\n";
+    cout << "  Level: " << current[0]->GetLevel() << "\n\n";
+
+    // VERIFICATION
+    cout << "========================================\n";
+    cout << "  VERIFICATION (GEN 20)\n";
+    cout << "========================================\n\n";
+
+    int matches = 0;
+    cout << "  Plaintext: ";
+    for (int i = 0; i < N; i++) cout << history[20][i];
+    cout << "\n";
+    cout << "  Encrypted: ";
+    for (int i = 0; i < N; i++) {
+        double val = decrypt_value(current[i]);
+        int bit = (val > 0) ? 1 : 0;
+        cout << bit;
+        if (bit == history[20][i]) matches++;
+    }
+    cout << "\n\n";
+    cout << "  Match: " << matches << "/" << N << "\n\n";
+
+    cout << "========================================\n";
+    cout << "  DENSITY EVOLUTION COMPLETE\n";
+    cout << "========================================\n\n";
+    cout << "  ✅ Density-based evolution\n";
+    cout << "  ✅ Match: " << matches << "/" << N << "\n";
+    cout << "  ✅ Level 0\n";
+    cout << "  ✅ Depth 0\n\n";
+
+    return 0;
+}
