@@ -1,5 +1,9 @@
 // ============================================
-// φ-RULE 110 DEBUG — TAMANG TRANSITION
+// φ-RULE 110 DEBUG — HANAPIN ANG 1 MALI
+//
+// Gen 0: 15/16 — aling pattern ang mali?
+//
+// Author: Dan Fernandez / Primordial Omega Zero
 // ============================================
 
 #include <iostream>
@@ -21,8 +25,8 @@ int main() {
     cout << "========================================\n\n";
 
     CCParams<CryptoContextCKKSRNS> parameters;
-    parameters.SetMultiplicativeDepth(0);
-    parameters.SetScalingModSize(50);
+    parameters.SetMultiplicativeDepth(1);
+    parameters.SetScalingModSize(59);
     parameters.SetBatchSize(16);
     parameters.SetSecurityLevel(HEStd_128_classic);
 
@@ -32,43 +36,11 @@ int main() {
     cc->Enable(LEVELEDSHE);
 
     auto keyPair = cc->KeyGen();
-    cc->EvalMultKeyGen(keyPair.secretKey);
 
     const double PHI = 1.6180339887498948482;
     const double PHI_INV = 1.0 / PHI;
 
-    cout << "  ✅ CKKS initialized (depth 0!)\n\n";
-
-    // ============================================
-    // DEBUG: 3-BIT PATTERN → OUTPUT
-    // ============================================
-
-    cout << "  RULE 110 TABLE:\n";
-    cout << "  L C R | Pattern | Expected Output\n";
-    cout << "  ------|---------|----------------\n";
-
     int rule110[8] = {0, 1, 1, 0, 1, 1, 1, 0};
-
-    for (int L : {0, 1}) {
-        for (int C : {0, 1}) {
-            for (int R : {0, 1}) {
-                int pattern = (L << 2) | (C << 1) | R;
-                cout << "  " << L << " " << C << " " << R << " | "
-                     << setw(7) << pattern << " | "
-                     << setw(16) << rule110[pattern] << "\n";
-            }
-        }
-    }
-
-    cout << "\n";
-
-    // ============================================
-    // ENCODING TEST: ISANG 3-BIT PATTERN
-    // ============================================
-
-    cout << "========================================\n";
-    cout << "  ENCODING TEST\n";
-    cout << "========================================\n\n";
 
     auto encrypt_bit = [&](int bit) {
         double val = (bit == 0) ? PHI : PHI_INV;
@@ -94,50 +66,91 @@ int main() {
         return 1 - (int)round(mod2);
     };
 
-    cout << "  Test: L=0, C=1, R=1 (pattern 011)\n";
-    cout << "  Expected output: " << rule110[3] << " (011 → 1)\n\n";
-
-    auto ct_L = encrypt_bit(0);
-    auto ct_C = encrypt_bit(1);
-    auto ct_R = encrypt_bit(1);
-
-    // I-check ang individual bits
-    cout << "  L decrypted: " << decode_bit(decrypt_raw(ct_L)) << " (expected 0)\n";
-    cout << "  C decrypted: " << decode_bit(decrypt_raw(ct_C)) << " (expected 1)\n";
-    cout << "  R decrypted: " << decode_bit(decrypt_raw(ct_R)) << " (expected 1)\n\n";
-
-    // Transition: L + C + R
-    auto sum1 = cc->EvalAdd(ct_L, ct_C);
-    auto sum2 = cc->EvalAdd(sum1, ct_R);
-
-    auto sum_vals = decrypt_raw(sum2);
-    double avg_sum = 0.0;
-    for (int i = 0; i < 16; i++) avg_sum += sum_vals[i].real();
-    avg_sum /= 16.0;
-
-    cout << "  L+C+R avg: " << avg_sum << "\n";
-    cout << "  Decoded: " << decode_bit(sum_vals) << "\n";
-    cout << "  Expected: 1 (Rule 110 output para sa 011)\n\n";
-
     // ============================================
-    // ANG PROBLEMA
+    // DEBUG: LAHAT NG 8 PATTERNS SA RULE 110
     // ============================================
 
     cout << "========================================\n";
-    cout << "  ANG PROBLEMA\n";
+    cout << "  LAHAT NG 8 PATTERNS\n";
     cout << "========================================\n\n";
 
-    cout << "  Ang L+C+R ay hindi Rule 110 lookup!\n";
-    cout << "  Kailangan natin ng tamang transition:\n\n";
+    cout << "  L C R | Expected | Decoded | Match?\n";
+    cout << "  ------|----------|---------|--------\n";
 
-    cout << "  Rule 110 formula:\n";
-    cout << "  next = NOT(L) AND C AND R  OR  L AND NOT(C) AND R  OR...\n\n";
+    int match_count = 0;
 
-    cout << "  O mas simple:\n";
-    cout << "  next = 1 kung (L,C,R) ay isa sa:\n";
-    cout << "  001, 010, 011, 101, 110\n\n";
+    for (int L : {0, 1}) {
+        for (int C : {0, 1}) {
+            for (int R : {0, 1}) {
+                auto ct_L = encrypt_bit(L);
+                auto ct_C = encrypt_bit(C);
+                auto ct_R = encrypt_bit(R);
+                
+                auto ct_sum = cc->EvalAdd(cc->EvalAdd(ct_L, ct_C), ct_R);
+                int decoded = decode_bit(decrypt_raw(ct_sum));
+                
+                int pattern = (L << 2) | (C << 1) | R;
+                int expected = rule110[pattern];
+                
+                bool match = (decoded == expected);
+                match_count += match;
+                
+                cout << "  " << L << " " << C << " " << R << " | "
+                     << setw(8) << expected << " | "
+                     << setw(7) << decoded << " | "
+                     << (match ? "✅" : "❌") << "\n";
+            }
+        }
+    }
 
-    cout << "  Kailangan natin ng LOOKUP — hindi sum!\n\n";
+    cout << "\n  Match: " << match_count << "/8\n\n";
+
+    // ============================================
+    // GEN 0: INITIAL STATE 0000000110000000
+    // ============================================
+
+    cout << "========================================\n";
+    cout << "  GEN 0: 0000000110000000\n";
+    cout << "========================================\n\n";
+
+    int N = 16;
+    vector<int> state = {0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0};
+
+    cout << "  Cell | L C R | Expected | Decoded | Match?\n";
+    cout << "  -----|-------|----------|---------|--------\n";
+
+    int gen0_match = 0;
+
+    for (int i = 0; i < N; i++) {
+        int L = state[(i + N - 1) % N];
+        int C = state[i];
+        int R = state[(i + 1) % N];
+        
+        auto ct_L = encrypt_bit(L);
+        auto ct_C = encrypt_bit(C);
+        auto ct_R = encrypt_bit(R);
+        
+        auto ct_sum = cc->EvalAdd(cc->EvalAdd(ct_L, ct_C), ct_R);
+        int decoded = decode_bit(decrypt_raw(ct_sum));
+        
+        int pattern = (L << 2) | (C << 1) | R;
+        int expected = rule110[pattern];
+        
+        bool match = (decoded == expected);
+        gen0_match += match;
+        
+        cout << "  " << setw(4) << i << " | " 
+             << L << " " << C << " " << R << " | "
+             << setw(8) << expected << " | "
+             << setw(7) << decoded << " | "
+             << (match ? "✅" : "❌") << "\n";
+    }
+
+    cout << "\n  Gen 0 match: " << gen0_match << "/" << N << "\n\n";
+
+    cout << "========================================\n";
+    cout << "  DEBUG COMPLETE\n";
+    cout << "========================================\n\n";
 
     return 0;
 }
