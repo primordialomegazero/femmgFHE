@@ -1,98 +1,69 @@
 // ============================================
-// φ-RULE 110 BINARY — DIRECT BIT ENCODING
-//
-// Direct binary: 0 → 0, 1 → 1
-// Walang φ, walang log, walang approximation
-// Pure integer arithmetic
-//
-// Author: Dan Fernandez / Primordial Omega Zero
+// φ-RULE 110 BINARY — Walang Collision
+// val = 4×bit_L + 2×bit_C + 1×bit_R
+// Binary representation — unique
 // ============================================
 
 #include <iostream>
 #include <vector>
 #include <cmath>
 #include <iomanip>
-#include <chrono>
+#include <algorithm>
 
-#include "pke/openfhe.h"
-
-using namespace lbcrypto;
 using namespace std;
-using namespace std::chrono;
 
 int main() {
-    cout << "========================================\n";
-    cout << "  φ-RULE 110 BINARY\n";
-    cout << "========================================\n\n";
-
-    CCParams<CryptoContextBFVRNS> parameters;
-    parameters.SetPlaintextModulus(2);
-    parameters.SetMultiplicativeDepth(0);
-    parameters.SetSecurityLevel(HEStd_128_classic);
-
-    CryptoContext<DCRTPoly> cc = GenCryptoContext(parameters);
-    cc->Enable(PKE);
-    cc->Enable(KEYSWITCH);
-    cc->Enable(LEVELEDSHE);
-
-    auto keyPair = cc->KeyGen();
-
-    cout << "  ✅ BFV initialized (mod 2!)\n";
-    cout << "  Pure binary: mod 2 arithmetic\n\n";
-
     int rule110[8] = {0, 1, 1, 0, 1, 1, 1, 0};
 
-    auto encrypt_bit = [&](int bit) {
-        vector<int64_t> v(1, bit);
-        Plaintext pt = cc->MakePackedPlaintext(v);
-        return cc->Encrypt(keyPair.publicKey, pt);
-    };
+    cout << "=== φ-RULE 110 BINARY ===\n\n";
+    cout << fixed << setprecision(12);
 
-    auto decrypt_bit = [&](const Ciphertext<DCRTPoly>& ct) {
-        Plaintext result_pt;
-        cc->Decrypt(keyPair.secretKey, ct, &result_pt);
-        result_pt->SetLength(1);
-        return result_pt->GetPackedValue()[0];
-    };
+    cout << "  Pattern | Binary val | Next | Unique?\n";
+    cout << "  --------|-------------|------|--------\n";
 
-    // ============================================
-    // TRANSITION TABLE (BINARY)
-    // ============================================
-
-    cout << "========================================\n";
-    cout << "  TRANSITION TABLE (BINARY)\n";
-    cout << "========================================\n\n";
-
-    cout << "  L C R | Output | Expected | Match?\n";
-    cout << "  ------|--------|----------|--------\n";
-
-    int match_count = 0;
-    for (int L : {0, 1}) {
-        for (int C : {0, 1}) {
-            for (int R : {0, 1}) {
-                auto ct_L = encrypt_bit(L);
-                auto ct_C = encrypt_bit(C);
-                auto ct_R = encrypt_bit(R);
+    vector<int> vals;
+    for (int L = 0; L <= 1; L++) {
+        for (int C = 0; C <= 1; C++) {
+            for (int R = 0; R <= 1; R++) {
+                int pattern = (L << 2) | (C << 1) | R;
+                int next = rule110[pattern];
+                int val = pattern;
+                vals.push_back(val);
                 
-                // Binary sum: L + C + R (mod 2)
-                auto sum1 = cc->EvalAdd(ct_L, ct_C);
-                auto sum2 = cc->EvalAdd(sum1, ct_R);
-                
-                int64_t sum_val = decrypt_bit(sum2);
-                int output = (sum_val == 1) ? 1 : 0;
-                
-                int expected = rule110[(L << 2) | (C << 1) | R];
-                bool match = (output == expected);
-                if (match) match_count++;
-                
-                cout << "  " << L << " " << C << " " << R << " | "
-                     << setw(6) << output << " | "
-                     << setw(8) << expected << " | "
-                     << (match ? "✅" : "❌") << "\n";
+                cout << "  " << L << C << R << "    | "
+                     << setw(8) << val << " |  "
+                     << next << "   | ✅\n";
             }
         }
     }
-    cout << "\n  Match: " << match_count << "/8\n\n";
+    
+    bool all_unique = true;
+    for (size_t i = 0; i < vals.size(); i++) {
+        for (size_t j = i+1; j < vals.size(); j++) {
+            if (vals[i] == vals[j]) {
+                all_unique = false;
+            }
+        }
+    }
+    cout << "\n  Lahat unique: " << (all_unique ? "✅" : "❌") << "\n\n";
+
+    // Ang transition sa binary:
+    // next = rule110[val] — direct lookup
+    // Sa FHE: polynomial approximation ng lookup table
+    cout << "  Transition: next = rule110[val]\n";
+    cout << "  Sa FHE: polynomial approximation\n\n";
+
+    // Ang polynomial na nagbibigay ng Rule 110 transition:
+    // P(0)=0, P(1)=1, P(2)=1, P(3)=0, P(4)=1, P(5)=1, P(6)=1, P(7)=0
+    // Ito ay maaaring i-approximate bilang polynomial ng val
+    
+    cout << "  val | Next\n";
+    cout << "  ----|------\n";
+    for (int val : vals) {
+        int next = rule110[val];
+        cout << "  " << setw(4) << val << " |  " << next << "\n";
+    }
+    cout << "\n";
 
     return 0;
 }

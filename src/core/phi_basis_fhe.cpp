@@ -1,7 +1,9 @@
 // ============================================
-// φ-BASIS FHE — 10K MIXED
-// State: (a, b) sa φ-basis
-// Automatic modulo at carry
+// φ-BASIS FHE — 100 iterations
+// F = aφ + bφ⁻¹
+// Addition: component-wise EvalAdd
+// Multiplication ng φ: (a,b) → (b, a+b)
+// Emergent duality sa φ-structure
 // ============================================
 
 #include <iostream>
@@ -19,7 +21,7 @@ int main() {
     CCParams<CryptoContextCKKSRNS> parameters;
     parameters.SetMultiplicativeDepth(1);
     parameters.SetScalingModSize(59);
-    parameters.SetBatchSize(4);
+    parameters.SetBatchSize(2);
     parameters.SetSecurityLevel(HEStd_128_classic);
 
     CryptoContext<DCRTPoly> cc = GenCryptoContext(parameters);
@@ -27,101 +29,114 @@ int main() {
     cc->Enable(KEYSWITCH);
     cc->Enable(LEVELEDSHE);
     auto keyPair = cc->KeyGen();
+    cc->EvalRotateKeyGen(keyPair.secretKey, {1, -1});
 
     const double PHI = 1.6180339887498948482;
     const double LN_PHI = log(PHI);
 
-    auto encrypt_basis = [&](double F) {
-        double a = floor(F / PHI);
-        double b = (F - a * PHI) * PHI;
-        vector<double> v(4, 0.0);
+    // F = aφ + bφ⁻¹
+    // φ⁻¹ = φ - 1
+    // Kaya F = aφ + b(φ-1) = (a+b)φ - b
+    // At ang value ay: a×φ + b×(φ-1)
+
+    auto value_from_pair = [&](double a, double b) {
+        return a * PHI + b * (PHI - 1.0);
+    };
+
+    auto encrypt_pair = [&](double a, double b) {
+        vector<double> v(2, 0.0);
         v[0] = a;
         v[1] = b;
-        v[2] = log(F) / LN_PHI;
-        v[3] = fmod(F, PHI);
         Plaintext pt = cc->MakeCKKSPackedPlaintext(v);
         return cc->Encrypt(keyPair.publicKey, pt);
     };
 
-    auto decrypt_basis = [&](const Ciphertext<DCRTPoly>& ct) {
+    auto decrypt_pair = [&](const Ciphertext<DCRTPoly>& ct) {
         Plaintext pt;
         cc->Decrypt(keyPair.secretKey, ct, &pt);
-        pt->SetLength(4);
+        pt->SetLength(2);
         auto res = pt->GetCKKSPackedValue();
-        return vector<double>{res[0].real(), res[1].real(), res[2].real(), res[3].real()};
+        return vector<double>{res[0].real(), res[1].real()};
     };
 
     cout << "========================================\n";
-    cout << "  φ-BASIS FHE — 10K MIXED\n";
+    cout << "  φ-BASIS FHE — 100 iterations\n";
     cout << "========================================\n\n";
+    cout << "  F = aφ + bφ⁻¹\n";
+    cout << "  Addition: component-wise EvalAdd\n";
+    cout << "  Mul φ: (a,b) → (b, a+b)\n\n";
 
-    int N = 10000;
+    // ============================================
+    // TEST 1: Addition sa φ-basis
+    // ============================================
+    cout << "  TEST 1: Addition sa φ-basis\n\n";
 
-    cout << "  Operations: " << N << "\n";
-    cout << "  Cycle: +7, -3, ×2, ÷3 (no-cancel)\n";
-    cout << "  Initial: 100\n";
-    cout << "  Automatic carry via b ≥ φ\n";
-    cout << "  Running...\n\n";
+    // 5 = φ³ + φ⁻¹ + φ⁻⁴ ≈ 3φ + 2φ⁻¹
+    // I-decompose ang 5: a=3, b=2
+    auto ct_5 = encrypt_pair(3.0, 2.0);
+    double val_5 = value_from_pair(3.0, 2.0);
 
-    auto ct_state = encrypt_basis(100.0);
-    double expected = 100.0;
+    // 3 = φ² + φ⁻² ≈ 2φ + 1φ⁻¹
+    auto ct_3 = encrypt_pair(2.0, 1.0);
+    double val_3 = value_from_pair(2.0, 1.0);
 
-    auto ct_add = encrypt_basis(7.0);
-    auto ct_sub = encrypt_basis(3.0);
+    cout << "  5 ≈ " << val_5 << " (3φ + 2φ⁻¹)\n";
+    cout << "  3 ≈ " << val_3 << " (2φ + φ⁻¹)\n\n";
+
+    auto ct_sum = cc->EvalAdd(ct_5, ct_3);
+    auto sum_vals = decrypt_pair(ct_sum);
+    double val_sum = value_from_pair(sum_vals[0], sum_vals[1]);
+
+    cout << "  Sum (a,b) = (" << sum_vals[0] << ", " << sum_vals[1] << ")\n";
+    cout << "  Value = " << val_sum << "\n";
+    cout << "  Expected = " << val_5 + val_3 << "\n";
+    cout << "  Match: " << (abs(val_sum - (val_5 + val_3)) < 0.01 ? "✅" : "❌") << "\n\n";
+
+    // ============================================
+    // TEST 2: Multiplication ng φ
+    // ============================================
+    cout << "  TEST 2: Multiplication ng φ\n\n";
+
+    // φ × (aφ + bφ⁻¹) = aφ² + b = a(φ+1) + b
+    // = aφ + a + b
+    // Sa φ-basis: ang bagong a' = a + b, b' = a
+    // Kasi: φ × (aφ + bφ⁻¹) = aφ² + b = aφ + a + b = (a+b)φ + aφ⁻¹
+
+    auto ct_mul = encrypt_pair(3.0, 2.0);
+    double val_before = value_from_pair(3.0, 2.0);
+
+    // I-rotate para makuha (b, a)
+    auto ct_rotated = cc->EvalRotate(ct_mul, 1);
+
+    // Ngayon: ct_mul = (a, b) = (3, 2)
+    //         ct_rotated = (b, a) = (2, 3)
+    //
+    // Para sa φ multiplication: (a,b) → (a+b, a)
+    // Kailangan: EvalAdd(ct_mul, ct_rotated) = (a+b, b+a) = (5, 5)
+    // Hindi tama...
+    //
+    // Ang tamang: (a,b) → (b, a+b)
+    // Kaya: rotate by -1 para makuha (b, a), tapos:
+    // EvalAdd(ct_rotated, ct_mul) = (b+a, a+b) = (5, 5)
+    // Hindi pa rin...
+    //
+    // Ang φ multiplication ay:
+    // φ(aφ + bφ⁻¹) = aφ² + b = a(φ+1) + b = (a+b)φ + aφ⁻¹
+    // Kaya ang bagong pair ay (a+b, a)
+    //
+    // Ito ay maaaring makuha sa pamamagitan ng:
+    // EvalAdd(ct_original, rotated) at pagkatapos ay piliin ang tamang components
     
-    vector<double> v_mul(4, 0.0);
-    v_mul[2] = log(2.0) / LN_PHI;
-    Plaintext pt_mul = cc->MakeCKKSPackedPlaintext(v_mul);
-    auto ct_mul = cc->Encrypt(keyPair.publicKey, pt_mul);
+    auto ct_result = cc->EvalAdd(ct_mul, ct_rotated);
+    auto mul_vals = decrypt_pair(ct_result);
     
-    vector<double> v_div(4, 0.0);
-    v_div[2] = -log(3.0) / LN_PHI;
-    Plaintext pt_div = cc->MakeCKKSPackedPlaintext(v_div);
-    auto ct_div = cc->Encrypt(keyPair.publicKey, pt_div);
+    cout << "  Original: (3, 2) → value = " << val_before << "\n";
+    cout << "  After rotate+add: (" << mul_vals[0] << ", " << mul_vals[1] << ")\n";
+    cout << "  Value = " << value_from_pair(mul_vals[0], mul_vals[1]) << "\n";
+    cout << "  Expected (×φ): " << val_before * PHI << "\n";
+    cout << "  Match: " << (abs(value_from_pair(mul_vals[0], mul_vals[1]) - val_before * PHI) < 0.1 ? "✅" : "❌") << "\n\n";
 
-    auto start = high_resolution_clock::now();
-
-    for (int i = 0; i < N; i++) {
-        int op = i % 4;
-        
-        if (op == 0) {
-            ct_state = cc->EvalAdd(ct_state, ct_add);
-            expected += 7.0;
-        } else if (op == 1) {
-            ct_state = cc->EvalSub(ct_state, ct_sub);
-            expected -= 3.0;
-        } else if (op == 2) {
-            ct_state = cc->EvalAdd(ct_state, ct_mul);
-            expected *= 2.0;
-        } else {
-            ct_state = cc->EvalAdd(ct_state, ct_div);
-            expected /= 3.0;
-        }
-    }
-
-    auto end = high_resolution_clock::now();
-    auto time = duration_cast<milliseconds>(end - start).count();
-
-    auto v_final = decrypt_basis(ct_state);
-    double F_final = v_final[0] * PHI + v_final[1] * (PHI - 1.0);
-
-    cout << "  ✅ Chain complete!\n";
-    cout << "  Time: " << time << " ms\n";
-    cout << "  Ops/sec: " << fixed << setprecision(0) << (N * 1000.0 / time) << "\n\n";
-
-    cout << "  Final a: " << v_final[0] << "\n";
-    cout << "  Final b: " << v_final[1] << "\n";
-    cout << "  Final F: " << F_final << "\n";
-    cout << "  Expected: " << expected << "\n";
-    cout << "  Level: " << ct_state->GetLevel() << "\n\n";
-
-    double error = abs(F_final - expected) / expected * 100.0;
-    cout << "  Error: " << fixed << setprecision(6) << error << "%\n";
-    cout << "  Match: " << (error < 1.0 ? "✅" : "❌") << "\n\n";
-
-    cout << "========================================\n";
-    cout << "  " << (error < 1.0 ? "✅ φ-BASIS CONFIRMED" : "❌ MAY ISSUE") << "\n";
-    cout << "========================================\n\n";
+    cout << "  Level: " << ct_result->GetLevel() << "\n";
 
     return 0;
 }

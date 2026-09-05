@@ -1,18 +1,6 @@
 // ============================================
-// φ-SELF-CORRECTING VALUE — EMERGENT
-//
-// Hanapin ang value na bumabalik sa sarili
-// sa multidimensional log space.
-//
-// Self-referential property ng φ:
-// φ² = φ + 1
-// φ⁻¹ = φ - 1
-// log_φ(φ) = 1
-// log_φ(φ²) = 2
-//
-// LAHAT EMERGENT — walang hardcode!
-//
-// Author: Dan Fernandez / Primordial Omega Zero
+// φ-SELF-CORRECTING — Verification
+// 1 + φ⁻¹ = φ — ang automatic na correction
 // ============================================
 
 #include <iostream>
@@ -23,221 +11,99 @@
 using namespace std;
 
 int main() {
-    cout << "========================================\n";
-    cout << "  φ-SELF-CORRECTING VALUE\n";
-    cout << "  Emergent Properties\n";
-    cout << "========================================\n\n";
-    
-    const double PHI = (1.0 + sqrt(5.0)) / 2.0;
-    const double PHI_INV = 1.0 / PHI;
-    
-    cout << fixed << setprecision(20);
-    
+    const double PHI = 1.6180339887498948482;
+    const double LN_PHI = log(PHI);
+
+    cout << "=== φ-SELF-CORRECTING ===\n\n";
+    cout << fixed << setprecision(12);
+
     // ============================================
-    // TEST 1: SELF-REFERENTIAL VALUES
+    // 1. Ang basic property
     // ============================================
-    
-    cout << "========================================\n";
-    cout << "  TEST 1: SELF-REFERENTIAL VALUES\n";
-    cout << "  (Values na bumabalik sa sarili)\n";
-    cout << "========================================\n\n";
-    
-    cout << "  Value | φ-transform | φ-inverse | Self?\n";
-    cout << "  ------|-------------|-----------|------\n";
-    
-    vector<double> self_values;
-    
-    for (double v : {0.0, PHI_INV, 1.0, PHI, 2.0, PHI*PHI, 3.0}) {
-        double transform = v * PHI_INV;  // Forward φ
-        double inverse = transform * PHI; // Reverse φ
-        bool self = abs(inverse - v) < 0.000001;
-        
-        if (self) self_values.push_back(v);
-        
-        cout << "  " << setw(5) << v << " | "
-             << setw(11) << transform << " | "
-             << setw(9) << inverse << " | "
-             << (self ? "✅" : "❌") << "\n";
-    }
-    
-    cout << "\n  Self-referential values: " << self_values.size() << "\n\n";
-    
+    cout << "--- 1. Basic property ---\n\n";
+    cout << "  1 + φ⁻¹ = " << 1.0 + 1.0/PHI << " = φ = " << PHI << "\n";
+    cout << "  Match: " << (abs(1.0 + 1.0/PHI - PHI) < 1e-12 ? "✅" : "❌") << "\n\n";
+
     // ============================================
-    // TEST 2: LOG SPACE FIXED POINTS
+    // 2. Ang correction sa log space
     // ============================================
-    
-    cout << "========================================\n";
-    cout << "  TEST 2: LOG SPACE FIXED POINTS\n";
-    cout << "  (Values na fixed sa log space)\n";
-    cout << "========================================\n\n";
-    
-    cout << "  Value | log_φ(value) | Back | Fixed?\n";
-    cout << "  ------|--------------|------|--------\n";
-    
-    int fixed_count = 0;
-    
-    for (double v : {0.1, 0.5, PHI_INV, 1.0, PHI, 2.0, PHI*PHI, 5.0, 10.0}) {
-        double log_phi = log(v) / log(PHI);
-        double back = pow(PHI, log_phi);
-        bool fixed = abs(back - v) < 0.000001;
-        
-        if (fixed) fixed_count++;
-        
-        cout << "  " << setw(5) << v << " | "
-             << setw(12) << log_phi << " | "
-             << setw(4) << back << " | "
-             << (fixed ? "✅" : "❌") << "\n";
-    }
-    
-    cout << "\n  Log space fixed points: " << fixed_count << "\n\n";
-    
+    cout << "--- 2. Correction sa log space ---\n\n";
+    cout << "  log_φ(1 + φ⁻¹) = " << log(1.0 + 1.0/PHI) / LN_PHI << "\n";
+    cout << "  Dapat: 1\n\n";
+
     // ============================================
-    // TEST 3: MULTIDIMENSIONAL SELF-CORRECTION
+    // 3. Generalization: φ^n + φ^(n-1)
     // ============================================
+    cout << "--- 3. Generalization ---\n\n";
+    cout << "  n | φ^n + φ^(n-1) | φ^(n+1) | Match\n";
+    cout << "  --|----------------|---------|-------\n";
     
-    cout << "========================================\n";
-    cout << "  TEST 3: MULTIDIMENSIONAL SELF-CORRECTION\n";
-    cout << "  (Across all log bases)\n";
-    cout << "========================================\n\n";
-    
-    cout << "  Base | log_base(φ) | Back to φ | Self?\n";
-    cout << "  -----|-------------|-----------|-------\n";
-    
-    double bases[] = {PHI, exp(1.0), 2.0, 10.0, PHI*PHI, PHI*PHI*PHI, sqrt(5.0)};
-    string base_names[] = {"φ", "e", "2", "10", "φ²", "φ³", "√5"};
-    
-    int multidim_self = 0;
-    
-    for (int i = 0; i < 7; i++) {
-        double log_val = log(PHI) / log(bases[i]);
-        double back = pow(bases[i], log_val);
-        bool self = abs(back - PHI) < 0.000001;
-        
-        if (self) multidim_self++;
-        
-        cout << "  " << setw(3) << base_names[i] << " | "
-             << setw(11) << log_val << " | "
-             << setw(9) << back << " | "
-             << (self ? "✅" : "❌") << "\n";
-    }
-    
-    cout << "\n  Multidimensional self-correction: " << multidim_self << "/7\n\n";
-    
-    // ============================================
-    // TEST 4: φ-POWERS SELF-RECOVERY
-    // ============================================
-    
-    cout << "========================================\n";
-    cout << "  TEST 4: φ-POWERS SELF-RECOVERY\n";
-    cout << "  (φ^n × φ^(-n) = 1)\n";
-    cout << "========================================\n\n";
-    
-    cout << "  n | φ^n | φ^(-n) | Product | Self?\n";
-    cout << "  --|-----|--------|---------|-------\n";
-    
-    int power_self = 0;
-    
-    for (int n = 0; n <= 20; n++) {
-        double phi_pow = pow(PHI, n);
-        double phi_neg = pow(PHI_INV, n);
-        double product = phi_pow * phi_neg;
-        bool self = abs(product - 1.0) < 0.000001;
-        
-        if (self) power_self++;
+    for (int n = 0; n <= 10; n++) {
+        double phi_n = pow(PHI, n);
+        double phi_n1 = pow(PHI, n-1);
+        double phi_np1 = pow(PHI, n+1);
         
         cout << "  " << setw(2) << n << " | "
-             << setw(5) << phi_pow << " | "
-             << setw(6) << phi_neg << " | "
-             << setw(7) << product << " | "
-             << (self ? "✅" : "❌") << "\n";
+             << setw(14) << phi_n + phi_n1 << " | "
+             << setw(14) << phi_np1 << " | "
+             << (abs(phi_n + phi_n1 - phi_np1) < 1e-10 ? "✅" : "❌") << "\n";
+    }
+    cout << "\n";
+
+    // ============================================
+    // 4. Ang correction ay CONSTANT
+    // ============================================
+    cout << "--- 4. Constant correction ---\n\n";
+    cout << "  log_φ(1 + φ⁻¹) = 1 para sa LAHAT ng n\n";
+    cout << "  Ito ay HINDI state-dependent\n\n";
+    
+    cout << "  n | log_φ(φ^n + φ^(n-1)) | n+1 | Match\n";
+    cout << "  --|------------------------|-----|-------\n";
+    
+    for (int n = 1; n <= 10; n++) {
+        double sum = pow(PHI, n) + pow(PHI, n-1);
+        double log_sum = log(sum) / LN_PHI;
+        
+        cout << "  " << setw(2) << n << " | "
+             << setw(22) << log_sum << " | "
+             << setw(3) << n+1 << " | "
+             << (abs(log_sum - (n+1)) < 1e-10 ? "✅" : "❌") << "\n";
+    }
+    cout << "\n";
+
+    // ============================================
+    // 5. Decomposition ng arbitrary addition
+    // ============================================
+    cout << "--- 5. Decomposition ng arbitrary addition ---\n\n";
+    cout << "  +5 ay maaaring i-decompose sa φ-powers:\n";
+    
+    // Hanapin ang φ-decomposition ng 5
+    double target = 5.0;
+    vector<int> powers;
+    double remaining = target;
+    
+    for (int p = 5; p >= -5; p--) {
+        double phi_p = pow(PHI, p);
+        if (remaining >= phi_p - 1e-6) {
+            powers.push_back(p);
+            remaining -= phi_p;
+        }
     }
     
-    cout << "\n  φ-powers self-recovery: " << power_self << "/21\n\n";
-    
-    // ============================================
-    // TEST 5: EMERGENT SELF-CORRECTING VALUE
-    // ============================================
-    
-    cout << "========================================\n";
-    cout << "  TEST 5: EMERGENT SELF-CORRECTING\n";
-    cout << "  (Value na natural bumabalik)\n";
-    cout << "========================================\n\n";
-    
-    cout << "  Hanapin ang value V kung saan:\n";
-    cout << "  V × φ⁻¹ × φ = V (trivially true)\n\n";
-    
-    cout << "  Pero ang non-trivial:\n";
-    cout << "  V + φ⁻¹ = V × φ (self-correcting)\n\n";
-    
-    // Solve: V + φ⁻¹ = V × φ
-    // V + φ⁻¹ = V × φ
-    // V × φ - V = φ⁻¹
-    // V × (φ - 1) = φ⁻¹
-    // V × φ⁻¹ = φ⁻¹
-    // V = 1
-    
-    double V = 1.0;
-    double left = V + PHI_INV;
-    double right = V * PHI;
-    
-    cout << "  V = " << V << "\n";
-    cout << "  V + φ⁻¹ = " << left << "\n";
-    cout << "  V × φ = " << right << "\n";
-    cout << "  Equal? " << (abs(left - right) < 0.000001 ? "✅" : "❌") << "\n\n";
-    
-    // ============================================
-    // TEST 6: SELF-SIMILAR φ-CHAIN
-    // ============================================
-    
-    cout << "========================================\n";
-    cout << "  TEST 6: SELF-SIMILAR φ-CHAIN\n";
-    cout << "  (φ = 1 + 1/φ recursively)\n";
-    cout << "========================================\n\n";
-    
-    cout << "  Iteration | φ value | Self?\n";
-    cout << "  ----------|---------|-------\n";
-    
-    double phi_iter = 1.0;
-    int converge_count = 0;
-    
-    for (int i = 0; i <= 20; i++) {
-        phi_iter = 1.0 + 1.0 / phi_iter;
-        bool self = abs(phi_iter - PHI) < 0.000001;
-        
-        if (self) converge_count++;
-        
-        cout << "  " << setw(9) << i << " | "
-             << setw(7) << phi_iter << " | "
-             << (self ? "✅" : "→") << "\n";
+    cout << "  5 ≈ ";
+    for (size_t i = 0; i < powers.size(); i++) {
+        if (i > 0) cout << " + ";
+        cout << "φ^" << powers[i];
     }
-    
-    cout << "\n  φ self-similar convergence: " << converge_count << "/21\n\n";
-    
-    // ============================================
-    // SUMMARY
-    // ============================================
-    
-    cout << "========================================\n";
-    cout << "  SELF-CORRECTING SUMMARY\n";
-    cout << "========================================\n\n";
-    cout << "  ✅ Self-referential values: " << self_values.size() << "\n";
-    cout << "  ✅ Log space fixed points: " << fixed_count << "\n";
-    cout << "  ✅ Multidimensional self: " << multidim_self << "/7\n";
-    cout << "  ✅ φ-powers self-recovery: " << power_self << "/21\n";
-    cout << "  ✅ Self-correcting V: 1.0\n";
-    cout << "  ✅ Self-similar convergence: " << converge_count << "/21\n\n";
-    
-    cout << "  KEY INSIGHT:\n";
-    cout << "  V = 1 ang natural self-correcting value\n";
-    cout << "  φ-powers: φ^n × φ^(-n) = 1 (identity)\n";
-    cout << "  φ = 1 + 1/φ (self-referential)\n";
-    cout << "  φ² = φ + 1 (self-similar)\n\n";
-    
-    cout << "  SA MULTIDIMENSIONAL LOG SPACE:\n";
-    cout << "  - Lahat ng bases nag-recover ng φ\n";
-    cout << "  - φ^n × φ^(-n) = 1 sa lahat\n";
-    cout << "  - Self-correction natural sa φ\n";
-    cout << "  - Walang hardcode!\n\n";
-    
+    cout << "\n";
+    cout << "  Exact: 5 = " << target << "\n";
+    cout << "  Approximation: ";
+    double approx = 0;
+    for (int p : powers) {
+        approx += pow(PHI, p);
+    }
+    cout << approx << "\n";
+    cout << "  Error: " << abs(approx - target) << "\n\n";
+
     return 0;
 }
