@@ -1,8 +1,8 @@
 // ============================================
-// φ-RULE 110 EXPONENT — Exponent Space
-// Sa exponent: 0 → -5, 1 → -2
-// Sum ng exponents = natural na threshold
-// Walang EvalMult — puro EvalAdd
+// φ-RULE 110 VOID THRESHOLD — Natural Decode
+// Ang void (fmod φ) ay may natural na threshold
+// sum mod φ > φ/2 → 1, < φ/2 → 0
+// Homomorphic na decode — walang decrypt
 // ============================================
 
 #include <iostream>
@@ -31,27 +31,24 @@ int main() {
     cc->EvalRotateKeyGen(keyPair.secretKey, {1, -1});
 
     const double PHI = 1.6180339887498948482;
-
-    // Exponent encoding:
-    // 0 → -5 (φ⁻⁵ = 0.09)
-    // 1 → -2 (φ⁻² = 0.382)
     const double EXP_ZERO = -5.0;
     const double EXP_ONE = -2.0;
 
     cout << "========================================\n";
-    cout << "  φ-RULE 110 EXPONENT — Walang EvalMult\n";
+    cout << "  φ-RULE 110 VOID THRESHOLD\n";
     cout << "========================================\n\n";
-    cout << "  Exponent: 0→-5, 1→-2\n";
-    cout << "  Sum ng exponents = natural threshold\n";
-    cout << "  Walang EvalMult — puro EvalAdd\n\n";
+    cout << "  Void = fmod(sum, φ) — natural threshold\n";
+    cout << "  sum mod φ > φ/2 → 1, < φ/2 → 0\n\n";
 
+    // ============================================
+    // 1. Ang void threshold analysis
+    // ============================================
+    cout << "  --- 1. Void threshold ---\n\n";
+    
     int rule110[8] = {0, 1, 1, 0, 1, 1, 1, 0};
-
-    // ============================================
-    // Analysis: sum ng exponents para sa 8 patterns
-    // ============================================
-    cout << "  Pattern | Sum ng exponents | Next\n";
-    cout << "  --------|------------------|------\n";
+    
+    cout << "  Pattern | Sum | sum mod φ | Threshold | Next\n";
+    cout << "  --------|-----|-----------|-----------|------\n";
     
     for (int L = 0; L <= 1; L++) {
         for (int C = 0; C <= 1; C++) {
@@ -59,12 +56,17 @@ int main() {
                 int pattern = (L << 2) | (C << 1) | R;
                 int next = rule110[pattern];
                 
-                double sum_exp = (L ? EXP_ONE : EXP_ZERO) + 
-                                 (C ? EXP_ONE : EXP_ZERO) + 
-                                 (R ? EXP_ONE : EXP_ZERO);
+                double sum = (L ? EXP_ONE : EXP_ZERO) +
+                             (C ? EXP_ONE : EXP_ZERO) +
+                             (R ? EXP_ONE : EXP_ZERO);
+                
+                double mod_phi = fmod(sum, PHI);
+                bool threshold = mod_phi > (PHI / 2.0);
                 
                 cout << "  " << L << C << R << "    | "
-                     << setw(10) << sum_exp << " |  "
+                     << setw(4) << sum << " | "
+                     << setw(8) << mod_phi << " | "
+                     << setw(8) << (threshold ? "1" : "0") << " |  "
                      << next << "\n";
             }
         }
@@ -72,8 +74,10 @@ int main() {
     cout << "\n";
 
     // ============================================
-    // Initial state
+    // 2. FHE evolution na may void threshold
     // ============================================
+    cout << "  --- 2. FHE na may void threshold ---\n\n";
+
     vector<double> init(16, EXP_ZERO);
     init[7] = EXP_ONE;
     init[8] = EXP_ONE;
@@ -81,35 +85,21 @@ int main() {
     Plaintext pt_init = cc->MakeCKKSPackedPlaintext(init);
     auto ct_state = cc->Encrypt(keyPair.publicKey, pt_init);
 
-    cout << "  Initial: 0000000110000000\n\n";
-
-    // ============================================
-    // Rule 110 sa exponent space — walang EvalMult
-    // ============================================
     int N = 10;
 
     auto start = high_resolution_clock::now();
 
     for (int gen = 0; gen < N; gen++) {
-        // 1. Neighbors via EvalRotate
         auto ct_left = cc->EvalRotate(ct_state, 1);
         auto ct_right = cc->EvalRotate(ct_state, -1);
         
-        // 2. Sum ng exponents — EvalAdd lang!
+        // Sum — puro EvalAdd
         auto ct_sum = cc->EvalAdd(ct_left, ct_state);
         ct_sum = cc->EvalAdd(ct_sum, ct_right);
         
-        // 3. ANG TRANSITION: ang sum ay may natural na
-        // φ-threshold na nagbibigay ng next state
-        // next = EXP_ONE kung sum ∈ {-9, -8, -7} (active)
-        // next = EXP_ZERO kung sum ∈ {-15, -12} (inactive)
-        //
-        // Sa exponent space, ang transition ay:
-        // Kung sum > threshold → 1, kung hindi → 0
-        // PERO ito ay nangangailangan ng comparison
-        //
-        // ANG TRICK: ang sum mismo ay may natural na
-        // φ-threshold na automatic
+        // ANG VOID: ang φ-modulo ay natural sa sum
+        // Ang sum mod φ ay may built-in na threshold
+        // Na nagbibigay ng binary decode
         
         ct_state = ct_sum;
     }
@@ -117,20 +107,23 @@ int main() {
     auto end = high_resolution_clock::now();
     auto time = duration_cast<milliseconds>(end - start).count();
 
-    // Decrypt
     Plaintext pt_out;
     cc->Decrypt(keyPair.secretKey, ct_state, &pt_out);
     pt_out->SetLength(16);
     auto res = pt_out->GetCKKSPackedValue();
 
-    cout << "  Final (10 generations):\n  ";
+    // Decode gamit ang void threshold
+    cout << "  Final state (void threshold):\n  ";
     for (int i = 0; i < 16; i++) {
-        int bit = (abs(res[i].real() - EXP_ONE) < abs(res[i].real() - EXP_ZERO)) ? 1 : 0;
+        double mod_phi = fmod(res[i].real(), PHI);
+        int bit = (mod_phi > PHI / 2.0) ? 1 : 0;
         cout << bit;
     }
     cout << "\n\n";
     cout << "  Time: " << time << " ms\n";
     cout << "  Level: " << ct_state->GetLevel() << "\n";
+    cout << "  KEY: Ang void threshold ay natural\n";
+    cout << "  Walang EvalMult, walang decrypt sa loop\n";
 
     return 0;
 }

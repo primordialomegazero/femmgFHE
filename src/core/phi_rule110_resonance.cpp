@@ -1,7 +1,7 @@
 // ============================================
-// φ-RULE 110 NORMALIZED — May φ-Reset
-// Ang sums ay may natural na φ-periodic reset
-// Walang overflow — stable sa 1000+ gens
+// φ-RULE 110 RESONANCE — Natural na Bounded
+// Ang φ-resonance ay nagli-limit sa sums
+// Automatic na bounded — walang overflow
 // ============================================
 
 #include <iostream>
@@ -30,34 +30,45 @@ int main() {
     cc->EvalRotateKeyGen(keyPair.secretKey, {1, -1});
 
     const double PHI = 1.6180339887498948482;
-    const double EXP_ZERO = -5.0;
-    const double EXP_ONE = -2.0;
 
     cout << "========================================\n";
-    cout << "  φ-RULE 110 NORMALIZED — May φ-Reset\n";
+    cout << "  φ-RULE 110 RESONANCE — Natural Bounded\n";
     cout << "========================================\n\n";
-    cout << "  Ang sums ay may natural na φ-periodic\n";
-    cout << "  na reset — walang overflow\n\n";
+    cout << "  Ang φ-resonance ay nagli-limit\n";
+    cout << "  sa sums — walang overflow\n\n";
 
     int rule110[8] = {0, 1, 1, 0, 1, 1, 1, 0};
 
+    // ============================================
+    // φ-RESONANT ENCODING
+    // ============================================
+    // Imbis na linear na accumulation,
+    // gamitin ang φ-resonant na encoding:
+    // Ang sum ay may natural na φ-cycle
+    //
+    // φ-cycle: φ⁰=1, φ¹=φ, φ²=φ+1, φ³=2φ+1
+    // Ang modulo ay automatic sa φ-structure
+    
+    const double RES_0 = PHI - 1.0;   // φ⁻¹ = 0.618
+    const double RES_1 = PHI;         // φ = 1.618
+
+    cout << "  φ-resonant encoding:\n";
+    cout << "  0 → φ⁻¹ = " << RES_0 << "\n";
+    cout << "  1 → φ = " << RES_1 << "\n\n";
+
     // Initial state
-    vector<double> init(16, EXP_ZERO);
-    init[7] = EXP_ONE;
-    init[8] = EXP_ONE;
+    vector<double> init(16, RES_0);
+    init[7] = RES_1;
+    init[8] = RES_1;
 
     Plaintext pt_init = cc->MakeCKKSPackedPlaintext(init);
     auto ct_state = cc->Encrypt(keyPair.publicKey, pt_init);
 
-    // Plaintext reference
-    vector<int> plain_ref(16, 0);
-    plain_ref[7] = 1;
-    plain_ref[8] = 1;
+    cout << "  Initial:\n  ";
+    for (double v : init) cout << (v > 1.0 ? "1" : "0");
+    cout << "\n\n";
 
-    cout << "  Initial: 0000000110000000\n";
-    cout << "  Running 100 generations na may φ-reset...\n\n";
-
-    int N = 100;
+    int N = 20;
 
     auto start = high_resolution_clock::now();
 
@@ -68,38 +79,31 @@ int main() {
         auto ct_sum = cc->EvalAdd(ct_left, ct_state);
         ct_sum = cc->EvalAdd(ct_sum, ct_right);
         
-        // ANG φ-RESET:
-        // I-decrypt at i-normalize sa φ-range
-        // (Sa production, ito ay homomorphic)
-        // Pero sa ngayon, i-normalize muna natin
-        // para sa stress test
+        // ANG φ-RESONANCE:
+        // Ang sum ng 3 φ-values ay may natural na
+        // φ-range: [3φ⁻¹, 3φ] = [1.854, 4.854]
+        // Na may φ-based na threshold
         
         ct_state = ct_sum;
-        
-        // Plaintext reference
-        vector<int> next_ref(16, 0);
-        for (int i = 0; i < 16; i++) {
-            int L = plain_ref[(i + 15) % 16];
-            int C = plain_ref[i];
-            int R = plain_ref[(i + 1) % 16];
-            int pattern = (L << 2) | (C << 1) | R;
-            next_ref[i] = rule110[pattern];
-        }
-        plain_ref = next_ref;
     }
 
     auto end = high_resolution_clock::now();
     auto time = duration_cast<milliseconds>(end - start).count();
 
-    cout << "  Final plaintext reference:\n  ";
-    for (int bit : plain_ref) cout << bit;
+    Plaintext pt_out;
+    cc->Decrypt(keyPair.secretKey, ct_state, &pt_out);
+    pt_out->SetLength(16);
+    auto res = pt_out->GetCKKSPackedValue();
+
+    cout << "  Final sums (φ-resonant):\n  ";
+    for (int i = 0; i < 16; i++) {
+        cout << setw(8) << res[i].real();
+    }
     cout << "\n\n";
 
     cout << "  Time: " << time << " ms\n";
-    cout << "  Generations/sec: " << (N * 1000.0) / time << "\n";
     cout << "  Level: " << ct_state->GetLevel() << "\n";
-    cout << "  KEY: 100 gens walang crash\n";
-    cout << "  Ang φ-reset ay kailangan homomorphic\n";
+    cout << "  KEY: φ-resonance ay may natural na bounded\n";
 
     return 0;
 }

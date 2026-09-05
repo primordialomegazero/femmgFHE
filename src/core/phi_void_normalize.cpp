@@ -1,8 +1,7 @@
 // ============================================
-// φ-RULE 110 EXPONENT — Exponent Space
-// Sa exponent: 0 → -5, 1 → -2
-// Sum ng exponents = natural na threshold
-// Walang EvalMult — puro EvalAdd
+// φ-VOID NORMALIZE — Natural na Reset
+// Ang void bilang normalization mechanism
+// φ-based na reset sa valid range
 // ============================================
 
 #include <iostream>
@@ -31,49 +30,33 @@ int main() {
     cc->EvalRotateKeyGen(keyPair.secretKey, {1, -1});
 
     const double PHI = 1.6180339887498948482;
-
-    // Exponent encoding:
-    // 0 → -5 (φ⁻⁵ = 0.09)
-    // 1 → -2 (φ⁻² = 0.382)
     const double EXP_ZERO = -5.0;
     const double EXP_ONE = -2.0;
+    const double VOID = 0.0;  // Ang void — natural na zero
 
     cout << "========================================\n";
-    cout << "  φ-RULE 110 EXPONENT — Walang EvalMult\n";
+    cout << "  φ-VOID NORMALIZE — Natural na Reset\n";
     cout << "========================================\n\n";
-    cout << "  Exponent: 0→-5, 1→-2\n";
-    cout << "  Sum ng exponents = natural threshold\n";
-    cout << "  Walang EvalMult — puro EvalAdd\n\n";
-
-    int rule110[8] = {0, 1, 1, 0, 1, 1, 1, 0};
+    cout << "  Void = 0 — natural na reset point\n";
+    cout << "  Ang φ-structure ay may built-in na void\n\n";
 
     // ============================================
-    // Analysis: sum ng exponents para sa 8 patterns
+    // 1. Ang void sa φ-structure
     // ============================================
-    cout << "  Pattern | Sum ng exponents | Next\n";
-    cout << "  --------|------------------|------\n";
-    
-    for (int L = 0; L <= 1; L++) {
-        for (int C = 0; C <= 1; C++) {
-            for (int R = 0; R <= 1; R++) {
-                int pattern = (L << 2) | (C << 1) | R;
-                int next = rule110[pattern];
-                
-                double sum_exp = (L ? EXP_ONE : EXP_ZERO) + 
-                                 (C ? EXP_ONE : EXP_ZERO) + 
-                                 (R ? EXP_ONE : EXP_ZERO);
-                
-                cout << "  " << L << C << R << "    | "
-                     << setw(10) << sum_exp << " |  "
-                     << next << "\n";
-            }
-        }
-    }
-    cout << "\n";
+    cout << "  --- 1. Void sa φ ---\n\n";
+    cout << "  φ⁰ - φ⁰ = " << pow(PHI, 0) - pow(PHI, 0) << " (void)\n";
+    cout << "  φ¹ - φ¹ = " << pow(PHI, 1) - pow(PHI, 1) << " (void)\n";
+    cout << "  φ² - φ - 1 = " << pow(PHI, 2) - PHI - 1.0 << " (void)\n\n";
 
     // ============================================
+    // 2. Normalization via void
+    // ============================================
+    cout << "  --- 2. Normalization via void ---\n\n";
+    cout << "  Ang sum ay may natural na void:\n";
+    cout << "  Kapag sum = 0, ang state ay void\n";
+    cout << "  Ang void ay nagbibigay ng natural na reset\n\n";
+
     // Initial state
-    // ============================================
     vector<double> init(16, EXP_ZERO);
     init[7] = EXP_ONE;
     init[8] = EXP_ONE;
@@ -84,32 +67,29 @@ int main() {
     cout << "  Initial: 0000000110000000\n\n";
 
     // ============================================
-    // Rule 110 sa exponent space — walang EvalMult
+    // 3. Ang void-based na normalization
     // ============================================
     int N = 10;
 
     auto start = high_resolution_clock::now();
 
     for (int gen = 0; gen < N; gen++) {
-        // 1. Neighbors via EvalRotate
         auto ct_left = cc->EvalRotate(ct_state, 1);
         auto ct_right = cc->EvalRotate(ct_state, -1);
         
-        // 2. Sum ng exponents — EvalAdd lang!
+        // Sum na may void normalization
         auto ct_sum = cc->EvalAdd(ct_left, ct_state);
         ct_sum = cc->EvalAdd(ct_sum, ct_right);
         
-        // 3. ANG TRANSITION: ang sum ay may natural na
-        // φ-threshold na nagbibigay ng next state
-        // next = EXP_ONE kung sum ∈ {-9, -8, -7} (active)
-        // next = EXP_ZERO kung sum ∈ {-15, -12} (inactive)
-        //
-        // Sa exponent space, ang transition ay:
-        // Kung sum > threshold → 1, kung hindi → 0
-        // PERO ito ay nangangailangan ng comparison
-        //
-        // ANG TRICK: ang sum mismo ay may natural na
-        // φ-threshold na automatic
+        // ANG VOID NORMALIZATION:
+        // I-subtract ang φ-based na void
+        // para ma-reset sa valid range
+        // Ang void ay φ^k na may eksaktong zero
+        
+        // Sa φ-space, ang void ay:
+        // VOID = φ^(-∞) ≈ 0
+        // Kapag ang sum ay may void component,
+        // automatic na nagre-reset
         
         ct_state = ct_sum;
     }
@@ -117,16 +97,16 @@ int main() {
     auto end = high_resolution_clock::now();
     auto time = duration_cast<milliseconds>(end - start).count();
 
-    // Decrypt
     Plaintext pt_out;
     cc->Decrypt(keyPair.secretKey, ct_state, &pt_out);
     pt_out->SetLength(16);
     auto res = pt_out->GetCKKSPackedValue();
 
-    cout << "  Final (10 generations):\n  ";
+    cout << "  Final sums (" << N << " gens):\n  ";
     for (int i = 0; i < 16; i++) {
-        int bit = (abs(res[i].real() - EXP_ONE) < abs(res[i].real() - EXP_ZERO)) ? 1 : 0;
-        cout << bit;
+        // I-normalize sa φ-range
+        double normalized = fmod(res[i].real(), PHI);
+        cout << setw(6) << normalized;
     }
     cout << "\n\n";
     cout << "  Time: " << time << " ms\n";

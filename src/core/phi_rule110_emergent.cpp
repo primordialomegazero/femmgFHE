@@ -1,217 +1,129 @@
 // ============================================
-// φ-RULE 110 EMERGENT — NATURAL THRESHOLD
-//
-// Output = (Sum ≥ 1.0 AND Sum < 2.0)
-// Ang threshold ay φ⁰ at φ^1.44
-//
-// Author: Dan Fernandez / Primordial Omega Zero
+// φ-RULE 110 EMERGENT — Natural na Invariant
+// Hanapin ang φ-based na invariant na
+// nagdi-distinguish ng conflicts
 // ============================================
 
 #include <iostream>
 #include <vector>
 #include <cmath>
 #include <iomanip>
-#include <chrono>
 
-#include "pke/openfhe.h"
-
-using namespace lbcrypto;
 using namespace std;
-using namespace std::chrono;
 
 int main() {
-    cout << "========================================\n";
-    cout << "  φ-RULE 110 EMERGENT\n";
-    cout << "========================================\n\n";
-
-    CCParams<CryptoContextCKKSRNS> parameters;
-    parameters.SetMultiplicativeDepth(0);
-    parameters.SetScalingModSize(50);
-    parameters.SetBatchSize(16);
-    parameters.SetSecurityLevel(HEStd_128_classic);
-
-    CryptoContext<DCRTPoly> cc = GenCryptoContext(parameters);
-    cc->Enable(PKE);
-    cc->Enable(KEYSWITCH);
-    cc->Enable(LEVELEDSHE);
-
-    auto keyPair = cc->KeyGen();
-    cc->EvalMultKeyGen(keyPair.secretKey);
-
     const double PHI = 1.6180339887498948482;
-    
-    // Tamang 8/8 weights
-    const double W_L_ZERO = 0.0;
-    const double W_L_ONE = pow(PHI, -3);
-    const double W_C_ZERO = 0.0;
-    const double W_C_ONE = pow(PHI, -2);
-    const double W_R_ZERO = PHI / 2.0;
-    const double W_R_ONE = PHI;
-
-    cout << "  ✅ CKKS initialized (depth 0!)\n";
-    cout << "  Emergent threshold: [1.0, 2.0)\n\n";
-
     int rule110[8] = {0, 1, 1, 0, 1, 1, 1, 0};
 
-    auto encrypt_value = [&](double val) {
-        vector<double> v(16, val);
-        Plaintext pt = cc->MakeCKKSPackedPlaintext(v);
-        return cc->Encrypt(keyPair.publicKey, pt);
-    };
-
-    auto decrypt_value = [&](const Ciphertext<DCRTPoly>& ct) {
-        Plaintext result_pt;
-        cc->Decrypt(keyPair.secretKey, ct, &result_pt);
-        result_pt->SetLength(16);
-        double sum = 0.0;
-        for (int i = 0; i < 16; i++) sum += result_pt->GetCKKSPackedValue()[i].real();
-        return sum / 16.0;
-    };
+    cout << "=== φ-RULE 110 EMERGENT ===\n\n";
+    cout << fixed << setprecision(12);
 
     // ============================================
-    // VERIFY EMERGENT THRESHOLD
+    // 1. Ang conflicts at ang kanilang φ-properties
     // ============================================
+    cout << "--- 1. Conflicts at φ-properties ---\n\n";
+    cout << "  Conflicting patterns:\n";
+    cout << "  011: XOR+AND=1 pero next=0\n";
+    cout << "  100: XOR+AND=0 pero next=1\n\n";
 
-    cout << "========================================\n";
-    cout << "  EMERGENT THRESHOLD VERIFICATION\n";
-    cout << "========================================\n\n";
+    // Ang φ-based na properties ng conflicts
+    cout << "  Pattern | φ^(L×4+C×2+R) | φ-mod | Special?\n";
+    cout << "  --------|----------------|-------|---------\n";
 
-    cout << "  L C R | Sum      | ≥1.0 | <2.0 | Output | Expected\n";
-    cout << "  ------|----------|------|------|--------|----------\n";
-
-    int match_count = 0;
-    for (int L : {0, 1}) {
-        for (int C : {0, 1}) {
-            for (int R : {0, 1}) {
-                double sum = (L ? W_L_ONE : W_L_ZERO) + 
-                            (C ? W_C_ONE : W_C_ZERO) + 
-                            (R ? W_R_ONE : W_R_ZERO);
-                bool ge_1 = (sum >= 1.0);
-                bool lt_2 = (sum < 2.0);
-                int output = (ge_1 && lt_2) ? 1 : 0;
-                int expected = rule110[(L << 2) | (C << 1) | R];
-                bool match = (output == expected);
-                if (match) match_count++;
+    for (int L = 0; L <= 1; L++) {
+        for (int C = 0; C <= 1; C++) {
+            for (int R = 0; R <= 1; R++) {
+                int pattern = (L << 2) | (C << 1) | R;
+                int next = rule110[pattern];
                 
-                cout << "  " << L << " " << C << " " << R << " | "
-                     << setw(8) << fixed << setprecision(4) << sum << " | "
-                     << setw(4) << (ge_1 ? "YES" : "NO") << " | "
-                     << setw(4) << (lt_2 ? "YES" : "NO") << " | "
-                     << setw(6) << output << " | "
-                     << setw(8) << expected << " | "
-                     << (match ? "✅" : "❌") << "\n";
+                double phi_power = pow(PHI, pattern);
+                double mod_phi = fmod(phi_power, PHI);
+                
+                bool is_conflict = (pattern == 3 || pattern == 4);
+                
+                cout << "  " << L << C << R << "    | "
+                     << setw(12) << phi_power << " | "
+                     << setw(6) << mod_phi << " | "
+                     << (is_conflict ? "✅ conflict" : "") << "\n";
             }
         }
     }
-    cout << "\n  Match: " << match_count << "/8\n\n";
-
-    // ============================================
-    // FHE EVOLUTION NA MAY EMERGENT THRESHOLD
-    // ============================================
-
-    cout << "========================================\n";
-    cout << "  FHE EVOLUTION (EMERGENT THRESHOLD)\n";
-    cout << "========================================\n\n";
-
-    int N = 16;
-    vector<int> plain(N, 0);
-    plain[7] = 1;
-    plain[8] = 1;
-
-    vector<vector<int>> history;
-    history.push_back(plain);
-    for (int gen = 0; gen < 20; gen++) {
-        vector<int> next(N, 0);
-        for (int i = 0; i < N; i++) {
-            int L = plain[(i + N - 1) % N];
-            int C = plain[i];
-            int R = plain[(i + 1) % N];
-            int pattern = (L << 2) | (C << 1) | R;
-            next[i] = rule110[pattern];
-        }
-        plain = next;
-        history.push_back(plain);
-    }
-
-    vector<Ciphertext<DCRTPoly>> curr_L, curr_C, curr_R;
-    
-    for (int bit : history[0]) {
-        curr_L.push_back(encrypt_value(bit ? W_L_ONE : W_L_ZERO));
-        curr_C.push_back(encrypt_value(bit ? W_C_ONE : W_C_ZERO));
-        curr_R.push_back(encrypt_value(bit ? W_R_ONE : W_R_ZERO));
-    }
-
-    cout << "  Gen 0: ";
-    for (int i = 0; i < N; i++) cout << history[0][i];
-    cout << "\n\n";
-
-    auto start = high_resolution_clock::now();
-
-    for (int gen = 1; gen <= 20; gen++) {
-        vector<Ciphertext<DCRTPoly>> next_L, next_C, next_R;
-        
-        for (int i = 0; i < N; i++) {
-            auto sum1 = cc->EvalAdd(curr_L[(i + N - 1) % N], curr_C[i]);
-            auto sum2 = cc->EvalAdd(sum1, curr_R[(i + 1) % N]);
-            
-            double sum_val = decrypt_value(sum2);
-            int output = (sum_val >= 1.0 && sum_val < 2.0) ? 1 : 0;
-            
-            next_L.push_back(encrypt_value(output ? W_L_ONE : W_L_ZERO));
-            next_C.push_back(encrypt_value(output ? W_C_ONE : W_C_ZERO));
-            next_R.push_back(encrypt_value(output ? W_R_ONE : W_R_ZERO));
-        }
-        
-        curr_L = next_L;
-        curr_C = next_C;
-        curr_R = next_R;
-        
-        if (gen % 5 == 0 || gen == 20) {
-            cout << "  Gen " << setw(3) << gen << ": ";
-            for (int i = 0; i < N; i++) {
-                double val = decrypt_value(curr_R[i]);
-                cout << (abs(val - W_R_ONE) < abs(val - W_R_ZERO) ? 1 : 0);
-            }
-            cout << "\n";
-        }
-    }
-
-    auto end = high_resolution_clock::now();
-    auto time = duration_cast<milliseconds>(end - start).count();
-
-    cout << "\n  Time: " << time / 1000.0 << " seconds\n";
-    cout << "  Level: " << curr_R[0]->GetLevel() << "\n\n";
-
-    // ============================================
-    // VERIFICATION
-    // ============================================
-
-    cout << "========================================\n";
-    cout << "  VERIFICATION (GEN 20)\n";
-    cout << "========================================\n\n";
-
-    int matches = 0;
-    cout << "  Plaintext: ";
-    for (int i = 0; i < N; i++) cout << history[20][i];
     cout << "\n";
-    cout << "  Encrypted: ";
-    for (int i = 0; i < N; i++) {
-        double val = decrypt_value(curr_R[i]);
-        int bit = (abs(val - W_R_ONE) < abs(val - W_R_ZERO)) ? 1 : 0;
-        cout << bit;
-        if (bit == history[20][i]) matches++;
-    }
-    cout << "\n\n";
-    cout << "  Match: " << matches << "/" << N << "\n\n";
 
-    cout << "========================================\n";
-    cout << "  EMERGENT COMPLETE\n";
-    cout << "========================================\n\n";
-    cout << "  ✅ 8/8 transition\n";
-    cout << "  ✅ Match: " << matches << "/" << N << "\n";
-    cout << "  ✅ Level 0\n";
-    cout << "  ✅ Depth 0\n";
-    cout << "  ⚠️ May decryption pa sa threshold\n\n";
+    // ============================================
+    // 2. Ang Fibonacci representation ng conflicts
+    // ============================================
+    cout << "--- 2. Fibonacci representation ---\n\n";
+    cout << "  Pattern | Binary | Fibonacci | Next\n";
+    cout << "  --------|--------|-----------|------\n";
+
+    for (int pattern = 0; pattern < 8; pattern++) {
+        int L = (pattern >> 2) & 1;
+        int C = (pattern >> 1) & 1;
+        int R = pattern & 1;
+        int next = rule110[pattern];
+        
+        // Fibonacci representation: F_4×L + F_3×C + F_2×R
+        double fib_rep = 3.0 * L + 2.0 * C + 1.0 * R;
+        
+        cout << "  " << L << C << R << "    | "
+             << setw(4) << pattern << " | "
+             << setw(6) << fib_rep << " |  "
+             << next << "\n";
+    }
+    cout << "\n";
+
+    // ============================================
+    // 3. Ang φ-gap ng conflicts
+    // ============================================
+    cout << "--- 3. φ-gap analysis ---\n\n";
+    cout << "  Ang conflict patterns ay may φ-gap:\n";
+    cout << "  011 = φ² + φ = φ³ - φ⁻¹\n";
+    cout << "  100 = φ³ - φ = φ² + φ⁻¹\n\n";
+
+    // ============================================
+    // 4. Ang emergent na invariant
+    // ============================================
+    cout << "--- 4. Emergent invariant ---\n\n";
+    cout << "  Hanapin ang invariant na nagdi-distinguish\n";
+    cout << "  ng 011 at 100 mula sa iba\n\n";
+
+    cout << "  Pattern | C-XOR-R | (~L)-AND-C | Special\n";
+    cout << "  --------|---------|------------|--------\n";
+    
+    for (int L = 0; L <= 1; L++) {
+        for (int C = 0; C <= 1; C++) {
+            for (int R = 0; R <= 1; R++) {
+                int pattern = (L << 2) | (C << 1) | R;
+                int next = rule110[pattern];
+                int xor_cr = C ^ R;
+                int and_nl_c = (1 - L) & C;
+                
+                bool special = (pattern == 3 || pattern == 4);
+                
+                cout << "  " << L << C << R << "    | "
+                     << setw(4) << xor_cr << " | "
+                     << setw(6) << and_nl_c << " | "
+                     << (special ? "⭐" : "") << "\n";
+            }
+        }
+    }
+    cout << "\n";
+
+    // ============================================
+    // 5. Ang simpleng formula
+    // ============================================
+    cout << "--- 5. Simpleng formula ---\n\n";
+    cout << "  next = (C XOR R) OR ((NOT L) AND C)\n";
+    cout << "  Ito ay may 2 exceptions:\n";
+    cout << "  011: 0 XOR 1 = 0, (NOT 0) AND 1 = 1 → OR = 1\n";
+    cout << "       Pero next = 0 ← exception!\n";
+    cout << "  100: 0 XOR 0 = 0, (NOT 1) AND 0 = 0 → OR = 0\n";
+    cout << "       Pero next = 1 ← exception!\n\n";
+
+    cout << "  Ang exceptions ay may φ-based na pattern:\n";
+    cout << "  011 = 3 = φ² + φ⁻²\n";
+    cout << "  100 = 4 = φ² + φ⁰ + φ⁻²\n\n";
 
     return 0;
 }

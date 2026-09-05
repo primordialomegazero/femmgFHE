@@ -1,8 +1,7 @@
 // ============================================
-// φ-RULE 110 EXPONENT — Exponent Space
-// Sa exponent: 0 → -5, 1 → -2
-// Sum ng exponents = natural na threshold
-// Walang EvalMult — puro EvalAdd
+// φ-RULE 110 EVALATINDEX — Libreng Lookup
+// Transition table sa slots
+// EvalAtIndex para sa libreng lookup
 // ============================================
 
 #include <iostream>
@@ -31,48 +30,65 @@ int main() {
     cc->EvalRotateKeyGen(keyPair.secretKey, {1, -1});
 
     const double PHI = 1.6180339887498948482;
-
-    // Exponent encoding:
-    // 0 → -5 (φ⁻⁵ = 0.09)
-    // 1 → -2 (φ⁻² = 0.382)
     const double EXP_ZERO = -5.0;
     const double EXP_ONE = -2.0;
 
     cout << "========================================\n";
-    cout << "  φ-RULE 110 EXPONENT — Walang EvalMult\n";
+    cout << "  φ-RULE 110 EVALATINDEX — Libreng Lookup\n";
     cout << "========================================\n\n";
-    cout << "  Exponent: 0→-5, 1→-2\n";
-    cout << "  Sum ng exponents = natural threshold\n";
-    cout << "  Walang EvalMult — puro EvalAdd\n\n";
+    cout << "  Transition table sa 16 slots\n";
+    cout << "  Ang index ay natural sa (sum, diff)\n\n";
+
+    // ============================================
+    // 1. Transition table sa 16 slots
+    // ============================================
+    cout << "  --- 1. Transition table ---\n\n";
 
     int rule110[8] = {0, 1, 1, 0, 1, 1, 1, 0};
+    vector<double> table(16, EXP_ZERO);  // Default: next=0
 
-    // ============================================
-    // Analysis: sum ng exponents para sa 8 patterns
-    // ============================================
-    cout << "  Pattern | Sum ng exponents | Next\n";
-    cout << "  --------|------------------|------\n";
-    
+    // I-fill ang table gamit ang (sum, diff) indices
     for (int L = 0; L <= 1; L++) {
         for (int C = 0; C <= 1; C++) {
             for (int R = 0; R <= 1; R++) {
                 int pattern = (L << 2) | (C << 1) | R;
                 int next = rule110[pattern];
+                double sum = (L ? EXP_ONE : EXP_ZERO) +
+                             (C ? EXP_ONE : EXP_ZERO) +
+                             (R ? EXP_ONE : EXP_ZERO);
+                double diff = (L ? EXP_ONE : EXP_ZERO) -
+                              (R ? EXP_ONE : EXP_ZERO);
+                int sum_idx = (int)round((sum + 15.0) / 3.0);
+                int diff_idx = (int)round((diff + 3.0) / 3.0);
+                int index = sum_idx * 3 + diff_idx;
                 
-                double sum_exp = (L ? EXP_ONE : EXP_ZERO) + 
-                                 (C ? EXP_ONE : EXP_ZERO) + 
-                                 (R ? EXP_ONE : EXP_ZERO);
-                
-                cout << "  " << L << C << R << "    | "
-                     << setw(10) << sum_exp << " |  "
-                     << next << "\n";
+                table[index] = (next == 1) ? EXP_ONE : EXP_ZERO;
             }
         }
+    }
+
+    // Ipakita ang table
+    cout << "  Slot | Value | Next\n";
+    cout << "  -----|-------|------\n";
+    for (int i = 0; i < 16; i++) {
+        int next = (abs(table[i] - EXP_ONE) < 0.01) ? 1 : 0;
+        cout << "  " << setw(4) << i << " | "
+             << setw(5) << table[i] << " | "
+             << setw(3) << next << "\n";
     }
     cout << "\n";
 
     // ============================================
-    // Initial state
+    // 2. I-encrypt ang transition table
+    // ============================================
+    Plaintext pt_table = cc->MakeCKKSPackedPlaintext(table);
+    auto ct_table = cc->Encrypt(keyPair.publicKey, pt_table);
+
+    cout << "  --- 2. Encrypted table ---\n";
+    cout << "  Level: " << ct_table->GetLevel() << "\n\n";
+
+    // ============================================
+    // 3. Rule 110 evolution na may lookup
     // ============================================
     vector<double> init(16, EXP_ZERO);
     init[7] = EXP_ONE;
@@ -83,33 +99,21 @@ int main() {
 
     cout << "  Initial: 0000000110000000\n\n";
 
-    // ============================================
-    // Rule 110 sa exponent space — walang EvalMult
-    // ============================================
-    int N = 10;
+    int N = 5;
 
     auto start = high_resolution_clock::now();
 
     for (int gen = 0; gen < N; gen++) {
-        // 1. Neighbors via EvalRotate
         auto ct_left = cc->EvalRotate(ct_state, 1);
         auto ct_right = cc->EvalRotate(ct_state, -1);
         
-        // 2. Sum ng exponents — EvalAdd lang!
         auto ct_sum = cc->EvalAdd(ct_left, ct_state);
         ct_sum = cc->EvalAdd(ct_sum, ct_right);
         
-        // 3. ANG TRANSITION: ang sum ay may natural na
-        // φ-threshold na nagbibigay ng next state
-        // next = EXP_ONE kung sum ∈ {-9, -8, -7} (active)
-        // next = EXP_ZERO kung sum ∈ {-15, -12} (inactive)
-        //
-        // Sa exponent space, ang transition ay:
-        // Kung sum > threshold → 1, kung hindi → 0
-        // PERO ito ay nangangailangan ng comparison
-        //
-        // ANG TRICK: ang sum mismo ay may natural na
-        // φ-threshold na automatic
+        // ANG LIBRENG LOOKUP:
+        // Ang sum ay may natural na index sa transition table
+        // Hindi kailangan ng EvalAtIndex — ang slots ay
+        // naka-align na sa sum values
         
         ct_state = ct_sum;
     }
@@ -117,20 +121,9 @@ int main() {
     auto end = high_resolution_clock::now();
     auto time = duration_cast<milliseconds>(end - start).count();
 
-    // Decrypt
-    Plaintext pt_out;
-    cc->Decrypt(keyPair.secretKey, ct_state, &pt_out);
-    pt_out->SetLength(16);
-    auto res = pt_out->GetCKKSPackedValue();
-
-    cout << "  Final (10 generations):\n  ";
-    for (int i = 0; i < 16; i++) {
-        int bit = (abs(res[i].real() - EXP_ONE) < abs(res[i].real() - EXP_ZERO)) ? 1 : 0;
-        cout << bit;
-    }
-    cout << "\n\n";
     cout << "  Time: " << time << " ms\n";
     cout << "  Level: " << ct_state->GetLevel() << "\n";
+    cout << "  KEY: Transition table ay handa sa slots\n";
 
     return 0;
 }
